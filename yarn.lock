@@ -2486,6 +2486,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.13.0"
     "@typescript-eslint/typescript-estree": "npm:^8.13.0"
     classnames: "npm:^2.5.1"
+    conventional-changelog-conventionalcommits: "npm:^8.0.0"
     eslint: "npm:8.57.1"
     eslint-config-mitodl: "npm:^2.1.0"
     eslint-config-prettier: "npm:^9.0.0"
@@ -6861,6 +6862,15 @@ __metadata:
   dependencies:
     compare-func: "npm:^2.0.0"
   checksum: 10/856e4652015d6ff5a192e2051efe4eb0d57534da304a3bfa6eb1e1ed06c995fe6d7c91d46e7a6de95baea52f7ccaad3ffe18260c972d40bad862f85d00c7b437
+  languageName: node
+  linkType: hard
+
+"conventional-changelog-conventionalcommits@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "conventional-changelog-conventionalcommits@npm:8.0.0"
+  dependencies:
+    compare-func: "npm:^2.0.0"
+  checksum: 10/23122a76c69ebe7490968f7c0779b0a6b73011eebbad0563ac5571c6015319acf13bb8dca178d7a5484f10b64744ae7ba35d40f71a8bdc5430e73dd7e032f45d
   languageName: node
   linkType: hard
 
