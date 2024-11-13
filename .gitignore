@@ -1,0 +1,17 @@
+node_modules
+.yarn/*
+!.yarn/releases
+
+# Typescript
+tsconfig.tsbuildinfo
+
+# VS-Code
+.vscode
+coverage
+
+# Storybook
+storybook-static/
+
+/**/.yarn/cache
+.swc
+dist
