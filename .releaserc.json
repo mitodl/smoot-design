@@ -33,6 +33,7 @@
         }
       }
     ],
+    "@semantic-release/github",
     "@semantic-release/npm"
   ],
   "repositoryUrl": "git@github.com:mitodl/smoot-design.git"
