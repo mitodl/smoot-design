@@ -17,7 +17,8 @@
     "lint-check": "eslint src/ .storybook/",
     "lint-fix": "yarn lint-check --fix",
     "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check .",
-    "fmt-fix": "prettier --ignore-path .gitignore --ignore-path .prettierignore --write ."
+    "fmt-fix": "prettier --ignore-path .gitignore --ignore-path .prettierignore --write .",
+    "prepack": "yarn build"
   },
   "exports": {
     ".": {
