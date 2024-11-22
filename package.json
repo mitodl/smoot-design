@@ -2,6 +2,9 @@
   "name": "@mitodl/smoot-design",
   "version": "0.0.0",
   "packageManager": "yarn@4.5.1",
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/mitodl/smoot-design"
@@ -17,7 +20,8 @@
     "lint-check": "eslint src/ .storybook/",
     "lint-fix": "yarn lint-check --fix",
     "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check .",
-    "fmt-fix": "prettier --ignore-path .gitignore --ignore-path .prettierignore --write ."
+    "fmt-fix": "prettier --ignore-path .gitignore --ignore-path .prettierignore --write .",
+    "prepack": "yarn build"
   },
   "exports": {
     ".": {
