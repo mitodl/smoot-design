@@ -315,11 +315,11 @@ const ButtonInner: React.FC<
 type ButtonProps = ButtonStyleProps & React.ComponentProps<"button">
 
 /**
- * Our standard button component.
+ * Our standard button component. See [Button Docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs).
  *
  * See also:
- * - ButtonLink
- * - ActionButton
+ * - [ButtonLink](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs#links)
+ * - [ActionButton](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs) for icon-only uses
  */
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => {
@@ -336,6 +336,9 @@ type ButtonLinkProps = ButtonStyleProps &
     Component?: React.ElementType
   } & LinkAdapterPropsOverrides
 
+/**
+ * See [ButtonLink docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs#links)
+ */
 const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
   ({ children, Component, ...props }: ButtonLinkProps, ref) => {
     return (
@@ -381,7 +384,11 @@ const actionStyles = (size: ButtonSize) => {
 
 /**
  * A button that should contain a remixicon icon and nothing else.
- * For a variant that functions as a link, see ActionButtonLink.
+ * See [ActionButton docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs).
+ *
+ * See also:
+ * - [ActionButtonLink](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs#links)
+ * - [Button](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs) for text buttons
  */
 const ActionButton = styled(
   React.forwardRef<HTMLButtonElement, ActionButtonProps>((props, ref) => (
@@ -401,6 +408,9 @@ type ActionButtonLinkProps = ActionButtonStyleProps &
     Component?: React.ElementType
   } & LinkAdapterPropsOverrides
 
+/**
+ * See [ActionButtonLink docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs#links)
+ */
 const ActionButtonLink = ActionButton.withComponent(
   ({ Component, ...props }: ButtonLinkProps) => {
     return <LinkStyled Component={Component} {...props} />

@@ -51,23 +51,44 @@ type Story = StoryObj<typeof ThemeProvider>
  *
  * In general, most useful theme properties are exposed on `theme.custom`. (Root
  * `theme` properties are used internally by MUI.) See typescript definitions
- * for more information.
+ * for more information about `theme.custom`.
+ *
+ * ## Further Customized Theme with `createTheme`
+ * Consuming applications can customize `smoot-design`'s default theme by creating
+ * a theme instance with `createTheme` and passing it to `ThemeProvider`:
+ *
+ * ```tsx
+ * const customTheme = createTheme({...})
+ *
+ * <ThemeProvider theme={customTheme}>
+ *   {children}
+ * </ThemeProvider>
+ * ```
+ *
  *
  * ### Custom Link Adapter
  * One particularly notable property is `theme.custom.LinkAdapter`. Some `smoot-design`
  * components render links. These links are native anchor tags by default. In
  * order to use these components with custom routing libraries (e.g. `react-router`
- * or `next/link`), you can provide a custom link adapter. Link components wills
+ * or `next/link`), you can provide a custom link adapter.
  *
- * As an example, `ButtonLink` will:
+ * Components such as `ButtonLink` will:
  *   - use `Component` on `ButtonLink` if specified (`<ButtonLink Component={Link} />`)
  *   - else, use `theme.custom.LinkAdapter` if specified,
  *   - else, use `a` tag.
  *
- * If you provide a custom `LinkAdapter` and need **aditional** props, you can
- * use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation) to add the custom props to relevant
- * components. For example, if using `next/link`
+ * For example, to use `next/link` as the default link implementation:
+ *
+ * ```tsx
+ * import Link from "next/link"
+ * const theme = createTheme({ LinkAdapter: Link })
  * ```
+ *
+ * You can use [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation)
+ * to add the custom props to relevant components. For example, to expose
+ * `next/link`'s `scroll` prop on `ButtonLink`:
+ *
+ * ```ts
  * // Add scroll prop to all components using LinkAdapter
  * declare module "@mitodl/smoot-design" {
  *   interface LinkAdapterPropsOverrides {
