@@ -9,7 +9,6 @@ import * as typography from "./typography"
 import * as buttons from "./buttons"
 import * as chips from "./chips"
 import { colors } from "./colors"
-import type { CustomTheme } from "../../types/theme"
 
 const shadow = {
   shadowOffsetX: 3,
@@ -94,10 +93,6 @@ const defaultThemeOptions: ThemeOptions = {
   },
 }
 
-type ExtendedTheme = Theme & {
-  custom: CustomTheme
-}
-
 /**
  * Create a customized Smoot Design theme for use with `ThemeProvider`.
  *
@@ -106,7 +101,7 @@ type ExtendedTheme = Theme & {
  */
 const createTheme = (options?: {
   custom: Partial<ThemeOptions["custom"]>
-}): ExtendedTheme =>
+}): Theme =>
   muiCreateTheme({
     ...defaultThemeOptions,
     custom: {

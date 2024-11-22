@@ -1,7 +1,6 @@
 import type { Theme as MuiTheme } from "@mui/material/styles"
 import "@emotion/react"
 import "@emotion/styled"
-import "./typography"
 
 export interface ColorGroup {
   main: string
@@ -9,7 +8,7 @@ export interface ColorGroup {
   contrastText: string
 }
 
-interface CustomTheme {
+export interface CustomTheme {
   transitionDuration: string
   shadow: string
   colors: {

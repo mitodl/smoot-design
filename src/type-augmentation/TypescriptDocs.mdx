@@ -1,0 +1,17 @@
+import { Meta } from "@storybook/blocks"
+
+<Meta title="Smoot-Design/Typescript" />
+
+# Type Augmentation
+
+Smoot Design uses Typescript's module augmentation to enhance types provided by `@emotion` and `@mui` packages. For example, we add custom theme properties (`theme.custom`) to the default theme and add new properties / values to some MUI components.
+
+To enable this module augmentation in a consuming application or library, either:
+
+- **Method 1:** `"@mitodl/smoot-design/type-augmentation"` to the `"types"` array in the `tsconfig.json` file, or
+- **Method 2:** add `import "@mitodl/smoot-design/type-augmentation";` to a `global.d.ts` file.
+
+For more information on this subject, see:
+
+- TS Documenation: [Declaration Merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html)
+- MUI Documentation: [Theming/Typescript](https://mui.com/material-ui/customization/theming/#typescript)
