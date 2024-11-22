@@ -41,6 +41,9 @@ const EDGES = enumValues<NonNullable<ActionButtonProps["edge"]>>({
   none: true,
 })
 
+/**
+ * A button that should contain a remixicon icon and nothing else.
+ */
 const meta: Meta<typeof ActionButton> = {
   title: "smoot-design/ActionButton",
   component: ActionButton,
@@ -166,6 +169,13 @@ export const Showcase: Story = {
   ),
 }
 
+/**
+ * `ActionButtonLink` is styled as a `ActionButton` that renders an anchor tag.
+ *
+ * To use a custom link component (E.g. `Link` from `react-router` or `next/link`),
+ * pass it as the `Component` prop. Alternatively, customize the project-wide
+ * default link adapter via [Theme's LinkAdapter](../?path=/docs/smoot-design-themeprovider--docs)
+ */
 export const Links: Story = {
   render: () => (
     <Stack direction="row" gap={2} sx={{ my: 2 }}>

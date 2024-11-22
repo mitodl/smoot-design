@@ -98,6 +98,12 @@ type ExtendedTheme = Theme & {
   custom: CustomTheme
 }
 
+/**
+ * Create a customized Smoot Design theme for use with `ThemeProvider`.
+ *
+ * See [ThemeProvider Docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-themeprovider--docs#further-customized-theme-with-createtheme)
+ * for more.
+ */
 const createTheme = (options?: {
   custom: Partial<ThemeOptions["custom"]>
 }): ExtendedTheme =>
@@ -116,6 +122,11 @@ type ThemeProviderProps = {
   theme?: Theme
 }
 
+/**
+ *
+ * @param param0
+ * @returns
+ */
 const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   theme = defaultTheme,
