@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "build": "rm -rf dist && rm -f .tsbuildinfo && npm run build:esm && npm run build:cjs",
+    "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
+    "build": "rm -rf dist && rm -f .tsbuildinfo && npm run build:esm && npm run build:cjs && npm run build:type-augmentation",
     "lint-check": "eslint src/ .storybook/",
     "lint-fix": "yarn lint-check --fix",
     "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check .",
@@ -37,6 +38,11 @@
         "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
       }
+    },
+    "./type-augmentation": {
+      "import": "./dist/type-augmentation/index.d.ts",
+      "require": "./dist/type-augmentation/index.d.ts",
+      "default": "./dist/type-augmentation/index.d.ts"
     }
   },
   "dependencies": {

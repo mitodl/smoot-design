@@ -1,6 +1,4 @@
 "use client"
-/// <reference types="./types/theme.d.ts" />
-/// <reference types="./types/typography.d.ts" />
 
 export { default as styled } from "@emotion/styled"
 export { css, Global } from "@emotion/react"
