@@ -32,7 +32,6 @@ import type { TypographyProps } from "@mui/material/Typography"
  */
 const meta: Meta<typeof Typography> = {
   title: "smoot-design/Typography",
-  tags: ["autodocs"],
   component: Typography,
 }
 
