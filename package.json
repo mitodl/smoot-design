@@ -10,7 +10,7 @@
     "url": "https://github.com/mitodl/smoot-design"
   },
   "scripts": {
-    "storybook": "storybook dev -p 6006",
+    "start": "storybook dev -p 6006 --docs",
     "build-storybook": "storybook build --docs",
     "test": "jest",
     "typecheck": "tsc --noEmit",

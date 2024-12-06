@@ -33,13 +33,7 @@ const config: StorybookConfig = {
   },
 
   typescript: {
-    /**
-     * Note: In theory react-docgen-typescript should work better with TS, but
-     * it seems not to work particularly well:
-     *  - misses many props
-     *  - doesn't get docstrings from the source component
-     */
-    // reactDocgen: "react-docgen-typescript",
+    reactDocgen: "react-docgen-typescript",
   },
 }
 

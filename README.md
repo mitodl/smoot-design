@@ -11,3 +11,17 @@ To trigger a release, run the "Release" github action. Using [semantic-release](
 1. Inspect the commit history since previous release for [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) an
 2. Determine whether the version bump should be major, minor, or patch based on commit types. Breaking changes (e.g., `feat!: remove Button variant 'outlined'`) will result in major version bumps.
 3. Publish the package to NPM and the repository's [Github Releases](https://github.com/mitodl/smoot-design/releases).
+
+## Documentation
+
+Documentation for `smoot-design` components is available at https://mitodl.github.io/smoot-design.
+
+### Storybook
+
+Components in `smoot-design` are documented using Storybook's [autodocs](https://storybook.js.org/docs/writing-docs/autodocs) feature.
+
+Autodocs _should_ infer props and comments from Typescript + JSDoc comments. However, autodocs can be a bit finnicky. Tips:
+
+- **Filename should match Component Name:** If you're documenting `Button`, it must be exported from a file called `Button.tsx`.
+- **Component `displayName`:** Some components may need an explicit `displayName`, this can be set by `Button.displayName="Button"`.
+  - _React component display names are not visible to end users; they are used in React's Dev Tools. React automatically adds display names for most components while transpiling, but autodocs uses un-transpiled code to generate documentation._

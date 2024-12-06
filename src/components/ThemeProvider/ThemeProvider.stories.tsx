@@ -18,6 +18,8 @@ const CustomLinkAdapater = React.forwardRef<
     {...props}
   />
 ))
+CustomLinkAdapater.displayName = "CustomLinkAdapter"
+
 const customTheme = createTheme({
   custom: {
     LinkAdapter: CustomLinkAdapater,

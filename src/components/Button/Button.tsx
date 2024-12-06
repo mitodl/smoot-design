@@ -24,7 +24,7 @@ type ButtonStyleProps = {
   size?: ButtonSize
   edge?: ButtonEdge
   /**
-   * Display an icon before the button text.
+   * Display an icon before the button text
    */
   startIcon?: React.ReactNode
   /**
@@ -52,7 +52,7 @@ const styleProps: Record<string, boolean> = {
   color: true,
 } satisfies Record<keyof ButtonStyleProps, boolean>
 
-const shouldForwardProp = (prop: string) => !styleProps[prop]
+const shouldForwardButtonProp = (prop: string) => !styleProps[prop]
 
 const DEFAULT_PROPS: Required<
   Omit<ButtonStyleProps, "startIcon" | "endIcon" | "color">
@@ -101,7 +101,7 @@ const sizeStyles = (
   ]
 }
 
-const buildStyles = (props: ButtonStyleProps & { theme: Theme }) => {
+const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
   const { size, variant, edge, theme, color, responsive } = {
     ...DEFAULT_PROPS,
     ...props,
@@ -248,12 +248,12 @@ const buildStyles = (props: ButtonStyleProps & { theme: Theme }) => {
   ])
 }
 
-const ButtonStyled = styled("button", { shouldForwardProp })<ButtonStyleProps>(
-  buildStyles,
-)
-const LinkStyled = styled(LinkAdapter, {
-  shouldForwardProp,
-})<ButtonStyleProps>(buildStyles)
+const ButtonRoot = styled("button", {
+  shouldForwardProp: shouldForwardButtonProp,
+})<ButtonStyleProps>(buttonStyles)
+const ButtonLinkRoot = styled(LinkAdapter, {
+  shouldForwardProp: shouldForwardButtonProp,
+})<ButtonStyleProps>(buttonStyles)
 
 const IconContainer = styled.span<{ side: "start" | "end"; size: ButtonSize }>(
   ({ size, side }) => [
@@ -324,12 +324,13 @@ type ButtonProps = ButtonStyleProps & React.ComponentProps<"button">
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, ...props }, ref) => {
     return (
-      <ButtonStyled ref={ref} type="button" {...props}>
+      <ButtonRoot ref={ref} type="button" {...props}>
         <ButtonInner {...props}>{children}</ButtonInner>
-      </ButtonStyled>
+      </ButtonRoot>
     )
   },
 )
+Button.displayName = "Button"
 
 type ButtonLinkProps = ButtonStyleProps &
   React.ComponentProps<"a"> & {
@@ -342,87 +343,22 @@ type ButtonLinkProps = ButtonStyleProps &
 const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
   ({ children, Component, ...props }: ButtonLinkProps, ref) => {
     return (
-      <LinkStyled Component={Component} ref={ref} {...props}>
+      <ButtonLinkRoot Component={Component} ref={ref} {...props}>
         <ButtonInner {...props}>{children}</ButtonInner>
-      </LinkStyled>
+      </ButtonLinkRoot>
     )
   },
 )
 
 ButtonLink.displayName = "ButtonLink"
 
-type ActionButtonStyleProps = Omit<ButtonStyleProps, "startIcon" | "endIcon">
-type ActionButtonProps = ActionButtonStyleProps & React.ComponentProps<"button">
-
-const actionStyles = (size: ButtonSize) => {
-  return {
-    minWidth: "auto",
-    padding: 0,
-    height: {
-      small: "32px",
-      medium: "40px",
-      large: "48px",
-    }[size],
-    width: {
-      small: "32px",
-      medium: "40px",
-      large: "48px",
-    }[size],
-    "& svg, & .MuiSvgIcon-root": {
-      width: "1em",
-      height: "1em",
-      fontSize: pxToRem(
-        {
-          small: 20,
-          medium: 24,
-          large: 32,
-        }[size],
-      ),
-    },
-  }
+export {
+  Button,
+  ButtonLink,
+  ButtonRoot,
+  DEFAULT_PROPS,
+  ButtonLinkRoot,
+  RESPONSIVE_SIZES,
 }
 
-/**
- * A button that should contain a remixicon icon and nothing else.
- * See [ActionButton docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs).
- *
- * See also:
- * - [ActionButtonLink](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs#links)
- * - [Button](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs) for text buttons
- */
-const ActionButton = styled(
-  React.forwardRef<HTMLButtonElement, ActionButtonProps>((props, ref) => (
-    <ButtonStyled ref={ref} type="button" {...props} />
-  )),
-)(({ size = DEFAULT_PROPS.size, responsive, theme }) => {
-  return [
-    actionStyles(size),
-    responsive && {
-      [theme.breakpoints.down("sm")]: actionStyles(RESPONSIVE_SIZES[size]),
-    },
-  ]
-})
-
-type ActionButtonLinkProps = ActionButtonStyleProps &
-  React.ComponentProps<"a"> & {
-    Component?: React.ElementType
-  } & LinkAdapterPropsOverrides
-
-/**
- * See [ActionButtonLink docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs#links)
- */
-const ActionButtonLink = ActionButton.withComponent(
-  ({ Component, ...props }: ButtonLinkProps) => {
-    return <LinkStyled Component={Component} {...props} />
-  },
-)
-ActionButtonLink.displayName = "ActionButtonLink"
-
-export { Button, ButtonLink, ActionButton, ActionButtonLink, DEFAULT_PROPS }
-
-export type {
-  ButtonProps,
-  ButtonLinkProps,
-  ActionButtonProps,
-  ActionButtonLinkProps,
-}
+export type { ButtonProps, ButtonLinkProps, ButtonStyleProps, ButtonSize }

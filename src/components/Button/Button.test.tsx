@@ -1,15 +1,18 @@
 import * as React from "react"
 import { render, screen } from "@testing-library/react"
 import { ThemeProvider, createTheme } from "../ThemeProvider/ThemeProvider"
-import { ButtonLink, ActionButtonLink } from "./Button"
+import { ButtonLink } from "./Button"
+import { ActionButtonLink } from "./ActionButton"
 
 const withLinkOverride = createTheme({
   custom: {
     LinkAdapter: React.forwardRef<HTMLAnchorElement, React.ComponentProps<"a">>(
-      (props, ref) => (
-        // eslint-disable-next-line jsx-a11y/anchor-has-content
-        <a ref={ref} data-custom="theme-default" {...props} />
-      ),
+      function LinkAdapter(props, ref) {
+        return (
+          // eslint-disable-next-line jsx-a11y/anchor-has-content
+          <a ref={ref} data-custom="theme-default" {...props} />
+        )
+      },
     ),
   },
 })

@@ -10,13 +10,16 @@ export {
   createTheme,
 } from "./components/ThemeProvider/ThemeProvider"
 
+export { Button, ButtonLink } from "./components/Button/Button"
+export type { ButtonProps, ButtonLinkProps } from "./components/Button/Button"
+
 export {
-  Button,
-  ButtonLink,
   ActionButton,
   ActionButtonLink,
-} from "./components/Button/Button"
+} from "./components/Button/ActionButton"
+export type {
+  ActionButtonProps,
+  ActionButtonLinkProps,
+} from "./components/Button/ActionButton"
 
 export type { LinkAdapterPropsOverrides } from "./components/LinkAdapter/LinkAdapter"
-
-export type { ButtonProps, ButtonLinkProps } from "./components/Button/Button"
