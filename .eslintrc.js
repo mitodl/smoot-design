@@ -23,6 +23,7 @@ module.exports = {
   },
   rules: {
     ...restrictedImports(),
+    "react/display-name": [2, {}],
     // This rule is disabled in the default a11y config, but unclear why.
     // It does catch useful errors, e.g., buttons with no text or label.
     // If it proves to be flaky, we can find other ways to check for this.
