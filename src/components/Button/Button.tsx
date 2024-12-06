@@ -24,7 +24,7 @@ type ButtonStyleProps = {
   size?: ButtonSize
   edge?: ButtonEdge
   /**
-   * Display an icon before the button text.
+   * Display an icon before the button text
    */
   startIcon?: React.ReactNode
   /**

@@ -49,9 +49,11 @@ const actionStyles = (size: ButtonSize) => {
  * - [Button](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-button--docs) for text buttons
  */
 const ActionButton = styled(
-  React.forwardRef<HTMLButtonElement, ActionButtonProps>(function (props, ref) {
-    return <ButtonRoot ref={ref} type="button" {...props} />
-  }),
+  React.forwardRef<HTMLButtonElement, ActionButtonProps>(
+    function Root(props, ref) {
+      return <ButtonRoot ref={ref} type="button" {...props} />
+    },
+  ),
 )(({ size = DEFAULT_PROPS.size, responsive, theme }) => {
   return [
     actionStyles(size),
