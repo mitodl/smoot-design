@@ -8,6 +8,8 @@ import type { TypographyProps } from "@mui/material/Typography"
  * Typography styles can be controlled via the `theme.typography` object when
  * using the `styled` helper or via the `<Tyopgraphy variant="..." />` component.
  *
+ * For the `Typography` component, see [MUI's documentation](https://mui.com/material-ui/react-typography/).
+ *
  * ```tsx
  * const MyHeading = styled(({ theme }) => ({
  *   ...theme.typography.h2,
@@ -31,6 +33,7 @@ import type { TypographyProps } from "@mui/material/Typography"
 const meta: Meta<typeof Typography> = {
   title: "smoot-design/Typography",
   tags: ["autodocs"],
+  component: Typography,
 }
 
 export default meta

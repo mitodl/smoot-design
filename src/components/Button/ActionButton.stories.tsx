@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { ActionButton, ActionButtonLink, DEFAULT_PROPS } from "./Button"
-import type { ActionButtonProps } from "./Button"
+import { ActionButton, ActionButtonLink, DEFAULT_PROPS } from "./ActionButton"
+import type { ActionButtonProps } from "./ActionButton"
 import Grid from "@mui/material/Grid2"
 import Stack from "@mui/material/Stack"
 import {
@@ -11,7 +11,7 @@ import {
 } from "@remixicon/react"
 
 import { fn } from "@storybook/test"
-import { enumValues, docsEnum } from "@/story-utils"
+import { enumValues } from "@/story-utils"
 
 const ICONS = {
   None: undefined,
@@ -41,34 +41,25 @@ const EDGES = enumValues<NonNullable<ActionButtonProps["edge"]>>({
   none: true,
 })
 
-/**
- * A button that should contain a remixicon icon and nothing else.
- */
 const meta: Meta<typeof ActionButton> = {
   title: "smoot-design/ActionButton",
   component: ActionButton,
   argTypes: {
     variant: {
-      options: VARIANTS,
       control: { type: "select" },
       table: {
-        type: { summary: docsEnum(VARIANTS) },
         defaultValue: { summary: DEFAULT_PROPS.variant },
       },
     },
     size: {
-      options: SIZES,
       control: { type: "select" },
       table: {
-        type: { summary: docsEnum(SIZES) },
         defaultValue: { summary: DEFAULT_PROPS.size },
       },
     },
     edge: {
-      options: EDGES,
       control: { type: "select" },
       table: {
-        type: { summary: docsEnum(EDGES) },
         defaultValue: { summary: DEFAULT_PROPS.edge },
       },
     },

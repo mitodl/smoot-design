@@ -39,7 +39,7 @@ const config: StorybookConfig = {
      *  - misses many props
      *  - doesn't get docstrings from the source component
      */
-    // reactDocgen: "react-docgen-typescript",
+    reactDocgen: "react-docgen-typescript",
   },
 }
 

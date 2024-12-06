@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { Button, ButtonLink, DEFAULT_PROPS } from "./Button"
+import { Button, ButtonLink } from "./Button"
 import type { ButtonProps } from "./Button"
 import Grid from "@mui/material/Grid2"
 import Stack from "@mui/material/Stack"
@@ -12,7 +12,7 @@ import {
 } from "@remixicon/react"
 
 import { fn } from "@storybook/test"
-import { docsEnum, enumValues } from "@/story-utils"
+import { enumValues } from "@/story-utils"
 
 const ICONS = {
   None: undefined,
@@ -46,30 +46,6 @@ const meta: Meta<typeof Button> = {
   title: "smoot-design/Button",
   component: Button,
   argTypes: {
-    variant: {
-      options: VARIANTS,
-      control: { type: "select" },
-      table: {
-        type: { summary: docsEnum(VARIANTS) },
-        defaultValue: { summary: DEFAULT_PROPS.variant },
-      },
-    },
-    size: {
-      options: SIZES,
-      control: { type: "select" },
-      table: {
-        type: { summary: docsEnum(SIZES) },
-        defaultValue: { summary: DEFAULT_PROPS.size },
-      },
-    },
-    edge: {
-      options: ["circular", "rounded"],
-      control: { type: "select" },
-      table: {
-        type: { summary: docsEnum(EDGES) },
-        defaultValue: { summary: DEFAULT_PROPS.edge },
-      },
-    },
     startIcon: {
       options: Object.keys(ICONS),
       mapping: ICONS,
@@ -77,11 +53,6 @@ const meta: Meta<typeof Button> = {
     endIcon: {
       options: Object.keys(ICONS),
       mapping: ICONS,
-    },
-    responsive: {
-      table: {
-        defaultValue: { summary: DEFAULT_PROPS.responsive.toString() },
-      },
     },
   },
   args: {
