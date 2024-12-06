@@ -175,8 +175,6 @@ const baseInputStyles = (theme: Theme) => ({
 
 const noForward = Object.keys({
   responsive: true,
-  startAdornment: true,
-  endAdornment: true,
 } satisfies Record<keyof CustomInputProps, boolean>)
 
 /**

@@ -6,7 +6,7 @@ import type { Theme, ThemeOptions } from "@mui/material/styles"
 import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
-} from "../internal/LinkAdapter/LinkAdapter"
+} from "../LinkAdapter/LinkAdapter"
 
 type ButtonVariant =
   | "primary"
