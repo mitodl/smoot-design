@@ -3,8 +3,8 @@
  */
 const enumValues = <T extends string | undefined>(
   obj: Record<NonNullable<T>, unknown>,
-): T[] => {
-  return Object.keys(obj) as T[]
+): NonNullable<T>[] => {
+  return Object.keys(obj) as NonNullable<T>[]
 }
 
 export { enumValues }
