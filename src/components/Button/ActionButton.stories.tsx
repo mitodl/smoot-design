@@ -20,7 +20,7 @@ const ICONS = {
   TestTubeIcon: <RiTestTubeLine />,
 }
 
-const VARIANTS = enumValues<NonNullable<ActionButtonProps["variant"]>>({
+const VARIANTS = enumValues<ActionButtonProps["variant"]>({
   primary: true,
   secondary: true,
   tertiary: true,
@@ -30,12 +30,12 @@ const VARIANTS = enumValues<NonNullable<ActionButtonProps["variant"]>>({
   unstable_success: true,
 })
 const STABLE_VARIANTS = VARIANTS.filter((v) => !v.startsWith("unstable"))
-const SIZES = enumValues<NonNullable<ActionButtonProps["size"]>>({
+const SIZES = enumValues<ActionButtonProps["size"]>({
   small: true,
   medium: true,
   large: true,
 })
-const EDGES = enumValues<NonNullable<ActionButtonProps["edge"]>>({
+const EDGES = enumValues<ActionButtonProps["edge"]>({
   circular: true,
   rounded: true,
   none: true,
