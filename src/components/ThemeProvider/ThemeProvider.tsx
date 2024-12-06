@@ -10,17 +10,7 @@ import * as buttons from "./buttons"
 import * as chips from "./chips"
 import { colors } from "./colors"
 
-const shadow = {
-  shadowOffsetX: 3,
-  shadowOffsetY: 4,
-  shadowColor: "rgb(0 0 0 / 36%)",
-  shadowBlurRadius: 12,
-}
-
-// To replace ../scss/theme.scss for #236 as we refactor it out
 const custom: ThemeOptions["custom"] = {
-  transitionDuration: "300ms",
-  shadow: `${shadow.shadowOffsetX} ${shadow.shadowOffsetY} ${shadow.shadowBlurRadius} ${shadow.shadowColor}`,
   colors,
   dimensions: {
     headerHeight: "72px",
@@ -41,13 +31,6 @@ const BREAKPOINTS = {
 const defaultThemeOptions: ThemeOptions = {
   custom: custom,
   palette: {
-    action: {
-      disabled: colors.lightGray2,
-    },
-    text: {
-      primary: "#000",
-      secondary: colors.silverGrayDark,
-    },
     primary: {
       main: colors.mitRed,
       light: colors.lightRed,

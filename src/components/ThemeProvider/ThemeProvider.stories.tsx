@@ -41,7 +41,6 @@ const meta: Meta<typeof ThemeProvider> = {
       table: { disable: true },
     },
   },
-  tags: ["autodocs"],
   id: "smoot-design/ThemeProvider",
 }
 

@@ -1,3 +1,4 @@
+import { resolve } from "node:path"
 import type { Config } from "@jest/types"
 
 const config: Config.InitialOptions = {
@@ -15,6 +16,7 @@ const config: Config.InitialOptions = {
   moduleNameMapper: {
     "\\.(svg|jpg|jpeg|png)$": "ol-test-utilities/filemocks/imagemock.js",
     "\\.(css|scss)$": "ol-test-utilities/filemocks/filemock.js",
+    "^@/(.*)$": resolve(__dirname, "src/$1"),
   },
   rootDir: "./src",
 }
