@@ -1,0 +1,20 @@
+import { Meta, Title, Primary, Controls, Stories } from "@storybook/blocks"
+
+import * as AiChat from "./AiChat.stories"
+import { gitLink } from "../../story-utils"
+
+<Meta of={AiChat} />
+
+<Title />
+
+<Primary />
+
+## Inputs
+
+The component accepts the following inputs (props):
+
+<Controls />
+
+See <a href={gitLink("src/components/AiChat/types.ts")}>AiChat/types.ts</a> for all Typescript interface definitions.
+
+<Stories includePrimary={false} />

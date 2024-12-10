@@ -1,5 +1,11 @@
 import { StorybookConfig } from "@storybook/react-webpack5"
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin"
+const exec = require("util").promisify(require("child_process").exec)
+
+const getGitSha = async (): Promise<string> => {
+  const { stdout } = await exec("git rev-parse HEAD")
+  return stdout.trim()
+}
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.tsx"],
@@ -25,6 +31,11 @@ const config: StorybookConfig = {
 
   typescript: {
     reactDocgen: "react-docgen-typescript",
+  },
+  env: async () => {
+    return {
+      STORYBOOK_GIT_SHA: await getGitSha(),
+    }
   },
 }
 
