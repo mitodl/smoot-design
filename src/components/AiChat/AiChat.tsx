@@ -9,6 +9,7 @@ import Markdown from "react-markdown"
 
 import type { AiChatProps } from "./types"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
+import classNames from "classnames"
 
 const ChatContainer = styled.div(({ theme }) => ({
   width: "100%",
@@ -108,6 +109,13 @@ const Dots = () => {
   )
 }
 
+const classes = {
+  root: "MitAiChat--root",
+  conversationStarter: "MitAiChat--conversationStarter",
+  messageRow: "MitAiChat--messageRow",
+  message: "MitAiChat--message",
+}
+
 const AiChat: React.FC<AiChatProps> = function AiChat({
   className,
   conversationStarters,
@@ -146,12 +154,16 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
     !showStarters && messages[messages.length - 1]?.role === "user"
 
   return (
-    <ChatContainer className={className}>
+    <ChatContainer className={classNames(className, classes.root)}>
       <MessagesContainer ref={messagesRef}>
         {messages.map((m) => (
-          <MessageRow key={m.id} reverse={m.role === "user"}>
+          <MessageRow
+            key={m.id}
+            reverse={m.role === "user"}
+            className={classes.messageRow}
+          >
             <Avatar />
-            <Message>
+            <Message className={classes.message}>
               <Markdown>{m.content}</Markdown>
             </Message>
           </MessageRow>
