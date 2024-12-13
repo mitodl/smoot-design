@@ -11,11 +11,11 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
       return window.fetch(url, opts)
     }
     const messages: ChatMessage[] = JSON.parse(opts?.body).messages
-    const transformMessages: RequestOpts["transformMessages"] =
-      requestOpts.transformMessages ?? identity
+    const transformBody: RequestOpts["transformBody"] =
+      requestOpts.transformBody ?? identity
     const options: RequestInit = {
       ...opts,
-      body: JSON.stringify(transformMessages(messages)),
+      body: JSON.stringify(transformBody(messages)),
       headers: {
         ...opts?.headers,
         "Content-Type": "application/json",

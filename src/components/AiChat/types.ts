@@ -12,8 +12,10 @@ type RequestOpts = {
   /**
    * Transforms array of chat messages into request body. Messages
    * are ordered oldest to newest.
+   *
+   * JSON.stringify is applied to the return value.
    */
-  transformMessages?: (messages: ChatMessage[]) => unknown
+  transformBody?: (messages: ChatMessage[]) => unknown
   /**
    * Extra options to pass to fetch.
    *

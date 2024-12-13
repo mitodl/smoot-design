@@ -112,8 +112,11 @@ const Dots = () => {
 const classes = {
   root: "MitAiChat--root",
   conversationStarter: "MitAiChat--conversationStarter",
+  messagesContainer: "MitAiChat--messagesContainer",
   messageRow: "MitAiChat--messageRow",
   message: "MitAiChat--message",
+  avatar: "MitAiChat--avatar",
+  input: "MitAiChat--input",
 }
 
 const AiChat: React.FC<AiChatProps> = function AiChat({
@@ -139,6 +142,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   } = useAiChat(requestOpts, {
     initialMessages: initialMessages,
   })
+
   const messages = React.useMemo(() => {
     const initial = initialMessages.map((m) => m.id)
     return unparsed.map((m) => {
@@ -153,13 +157,24 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   const waiting =
     !showStarters && messages[messages.length - 1]?.role === "user"
 
+  const scrollToBottom = () => {
+    messagesRef.current?.scrollBy({
+      behavior: "instant",
+      top: messagesRef.current.scrollHeight,
+    })
+  }
+
   return (
     <ChatContainer className={classNames(className, classes.root)}>
-      <MessagesContainer ref={messagesRef}>
+      <MessagesContainer
+        className={classes.messagesContainer}
+        ref={messagesRef}
+      >
         {messages.map((m) => (
           <MessageRow
             key={m.id}
             reverse={m.role === "user"}
+            data-chat-role={m.role}
             className={classes.messageRow}
           >
             <Avatar />
@@ -172,9 +187,11 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
           <StarterContainer>
             {conversationStarters?.map((m) => (
               <Starter
+                className={classes.conversationStarter}
                 key={m.content}
                 onClick={() => {
                   setShowStarters(false)
+                  scrollToBottom()
                   append({ role: "user", content: m.content })
                 }}
               >
@@ -185,7 +202,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
         ) : null}
         {waiting ? (
           <MessageRow key={"loading"}>
-            <Avatar />
+            <Avatar className={classes.avatar} />
             <Message>
               <Dots />
             </Message>
@@ -196,16 +213,23 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
         <Form
           onSubmit={(e) => {
             setShowStarters(false)
+            scrollToBottom()
             handleSubmit(e)
           }}
         >
           <Input
+            className={classes.input}
+            placeholder="Type a message..."
             name="message"
             sx={{ flex: 1 }}
             value={input}
             onChange={handleInputChange}
           />
-          <ActionButton type="submit" disabled={isLoading || !input}>
+          <ActionButton
+            aria-label="Send"
+            type="submit"
+            disabled={isLoading || !input}
+          >
             <RiSendPlaneFill />
           </ActionButton>
         </Form>
