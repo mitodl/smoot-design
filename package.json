@@ -39,6 +39,20 @@
         "default": "./dist/esm/index.js"
       }
     },
+    "./ai": {
+      "import": {
+        "types": "./dist/esm/ai.d.ts",
+        "default": "./dist/esm/ai.js"
+      },
+      "require": {
+        "types": "./dist/cjs/ai.d.ts",
+        "default": "./dist/cjs/ai.js"
+      },
+      "default": {
+        "types": "./dist/esm/ai.d.ts",
+        "default": "./dist/esm/ai.js"
+      }
+    },
     "./type-augmentation": {
       "import": "./dist/type-augmentation/index.d.ts",
       "require": "./dist/type-augmentation/index.d.ts",
