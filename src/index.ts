@@ -28,3 +28,7 @@ export { Input } from "./components/Input/Input"
 export type { InputProps } from "./components/Input/Input"
 export { TextField } from "./components/TextField/TextField"
 export type { TextFieldProps } from "./components/TextField/TextField"
+
+export { SrAnnouncer } from "./components/SrAnnouncer/SrAnnouncer"
+export type { SrAnnouncerProps } from "./components/SrAnnouncer/SrAnnouncer"
+export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
