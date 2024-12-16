@@ -23,3 +23,8 @@ export type {
 } from "./components/Button/ActionButton"
 
 export type { LinkAdapterPropsOverrides } from "./components/LinkAdapter/LinkAdapter"
+
+export { Input } from "./components/Input/Input"
+export type { InputProps } from "./components/Input/Input"
+export { TextField } from "./components/TextField/TextField"
+export type { TextFieldProps } from "./components/TextField/TextField"
