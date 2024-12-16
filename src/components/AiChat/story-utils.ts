@@ -50,7 +50,7 @@ const mockStreaming = async function mockApi() {
   const num = chunks.length
   let i = 0
 
-  await new Promise((resolve) => setTimeout(resolve, 300))
+  await new Promise((resolve) => setTimeout(resolve, 1500))
 
   const body = new ReadableStream({
     start(controller) {
@@ -62,7 +62,7 @@ const mockStreaming = async function mockApi() {
           controller.close()
           clearInterval(timerId)
         }
-      }, 75)
+      }, 250)
     },
     cancel() {
       if (timerId) {

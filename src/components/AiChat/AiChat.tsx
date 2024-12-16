@@ -10,6 +10,7 @@ import Markdown from "react-markdown"
 import type { AiChatProps } from "./types"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
+import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 
 const ChatContainer = styled.div(({ theme }) => ({
   width: "100%",
@@ -125,6 +126,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   requestOpts,
   initialMessages: initMsgs,
   parseContent,
+  srLoadingMessages,
 }) {
   const [showStarters, setShowStarters] = React.useState(true)
   const messagesRef = React.useRef<HTMLDivElement>(null)
@@ -163,6 +165,8 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
       top: messagesRef.current.scrollHeight,
     })
   }
+
+  const lastMsg = messages[messages.length - 1]
 
   return (
     <ChatContainer className={classNames(className, classes.root)}>
@@ -234,8 +238,14 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
           </ActionButton>
         </Form>
       </Controls>
+      <SrAnnouncer
+        isLoading={isLoading}
+        loadingMessages={srLoadingMessages}
+        message={lastMsg.role === "assistant" ? lastMsg.content : ""}
+      />
     </ChatContainer>
   )
 }
 
 export { AiChat }
+export type { AiChatProps }

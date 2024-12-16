@@ -34,6 +34,15 @@ type AiChatProps = {
   conversationStarters?: { content: string }[]
   requestOpts: RequestOpts
   parseContent?: (content: unknown) => string
+  /**
+   * A message to display while the component is in a loading state.
+   *
+   * Identical consecutive messages may not be read on some screen readers.
+   */
+  srLoadingMessages?: {
+    delay: number
+    text: string
+  }[]
 }
 
 export type { RequestOpts, AiChatProps, ChatMessage }

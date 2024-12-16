@@ -2,7 +2,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
-import { mockJson, mockStreaming } from "./test-utils"
+import { mockJson, mockStreaming } from "./story-utils"
 import styled from "@emotion/styled"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
@@ -27,6 +27,7 @@ const Container = styled.div({
 })
 
 const meta: Meta<typeof AiChat> = {
+  title: "smoot-design/AiChat",
   component: AiChat,
   render: (args) => <AiChat {...args} />,
   decorators: (Story) => {

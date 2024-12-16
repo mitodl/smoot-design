@@ -16,6 +16,7 @@ const Scroller = styled(ScrollSnap)({
 })
 
 const meta: Meta<typeof ScrollSnap> = {
+  title: "smoot-design/ScrollSnap",
   component: ScrollSnap,
   render: function Render(args) {
     const MAX = 3000
