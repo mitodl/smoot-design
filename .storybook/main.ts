@@ -1,7 +1,7 @@
 import { StorybookConfig } from "@storybook/react-webpack5"
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin"
 import { exec as execCb } from "child_process"
-const promisify = require("util").promisify
+import { promisify } from "util"
 
 const exec = promisify(execCb)
 const getGitSha = async (): Promise<string> => {
