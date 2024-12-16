@@ -1,7 +1,9 @@
 import { StorybookConfig } from "@storybook/react-webpack5"
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin"
-const exec = require("util").promisify(require("child_process").exec)
+import { exec as execCb } from "child_process"
+const promisify = require("util").promisify
 
+const exec = promisify(execCb)
 const getGitSha = async (): Promise<string> => {
   const { stdout } = await exec("git rev-parse HEAD")
   return stdout.trim()
