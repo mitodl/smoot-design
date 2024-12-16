@@ -73,6 +73,10 @@ type Story = StoryObj<typeof AiChat>
 
 export const StreamingResponses: Story = {}
 
+/**
+ * Here `AiChat` is used with a non-streaming JSON API. The JSON is converted
+ * to text via `parseContent`.
+ */
 export const JsonResponses: Story = {
   args: {
     requestOpts: { apiUrl: TEST_API_JSON },
