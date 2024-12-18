@@ -9,7 +9,7 @@ const config: Config.InitialOptions = {
     "jest-watch-typeahead/testname",
   ],
   setupFilesAfterEnv: ["./jest-setup.ts"],
-  testEnvironment: "jsdom",
+  testEnvironment: "<rootDir>/jsdom-extended.ts",
   transform: {
     "^.+\\.(t|j)sx?$": "@swc/jest",
   },

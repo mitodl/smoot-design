@@ -46,6 +46,7 @@ module.exports = {
           "**/*.test.tsx",
           "**/src/setupJest.ts",
           "**/jest-setup.ts",
+          "**/jsdom-extended.ts",
           "**/test-utils/**",
           "**/test-utils/**",
           "**/webpack.config.js",
