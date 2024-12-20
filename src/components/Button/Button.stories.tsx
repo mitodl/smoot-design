@@ -25,6 +25,7 @@ const VARIANTS = enumValues<ButtonProps["variant"]>({
   primary: true,
   secondary: true,
   tertiary: true,
+  bordered: true,
   text: true,
   unstable_noBorder: true,
   unstable_inverted: true,
@@ -77,6 +78,9 @@ export const VariantsAndEdge: Story = {
         <Button edge="none" variant="tertiary" {...args}>
           Tertiary
         </Button>
+        <Button edge="none" variant="bordered" {...args}>
+          Bordered
+        </Button>
         <Button edge="none" variant="text" {...args}>
           Text
         </Button>
@@ -91,6 +95,9 @@ export const VariantsAndEdge: Story = {
         <Button edge="rounded" variant="tertiary" {...args}>
           Tertiary
         </Button>
+        <Button edge="rounded" variant="bordered" {...args}>
+          Bordered
+        </Button>
         <Button edge="rounded" variant="text" {...args}>
           Text
         </Button>
@@ -104,6 +111,9 @@ export const VariantsAndEdge: Story = {
         </Button>
         <Button edge="circular" variant="tertiary" {...args}>
           Tertiary
+        </Button>
+        <Button edge="circular" variant="bordered" {...args}>
+          Bordered
         </Button>
         <Button edge="circular" variant="text" {...args}>
           Text
@@ -191,6 +201,9 @@ export const Links: Story = {
         Link
       </ButtonLink>
       <ButtonLink href="#fake" variant="tertiary">
+        Link
+      </ButtonLink>
+      <ButtonLink href="#fake" variant="bordered">
         Link
       </ButtonLink>
       <ButtonLink href="#fake" variant="text">

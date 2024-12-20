@@ -13,6 +13,7 @@ type ButtonVariant =
   | "secondary"
   | "tertiary"
   | "text"
+  | "bordered"
   | "unstable_noBorder"
   | "unstable_inverted"
   | "unstable_success"
@@ -107,7 +108,7 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
     ...props,
   }
   const { colors } = theme.custom
-  const hasBorder = variant === "secondary"
+  const hasBorder = variant === "secondary" || variant === "bordered"
   return css([
     {
       color: theme.palette.text.primary,
@@ -151,11 +152,6 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         boxShadow: "none",
       },
     },
-    hasBorder && {
-      backgroundColor: "transparent",
-      borderColor: "currentcolor",
-      borderStyle: "solid",
-    },
     variant === "unstable_success" && {
       backgroundColor: colors.darkGreen,
       color: colors.white,
@@ -172,13 +168,11 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         boxShadow: "none",
       },
     },
-    hasBorder && {
+    variant === "secondary" && {
+      color: colors.red,
       backgroundColor: "transparent",
       borderColor: "currentcolor",
       borderStyle: "solid",
-    },
-    variant === "secondary" && {
-      color: colors.red,
       ":hover:not(:disabled)": {
         // brightRed at 0.06 alpha
         backgroundColor: "rgba(255, 20, 35, 0.06)",
@@ -197,6 +191,20 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
       },
       ":disabled": {
         color: colors.silverGray,
+      },
+    },
+    variant === "bordered" && {
+      backgroundColor: colors.white,
+      color: colors.silverGrayDark,
+      border: `1px solid ${colors.silverGrayLight}`,
+      ":hover:not(:disabled)": {
+        backgroundColor: colors.lightGray1,
+        color: colors.darkGray2,
+      },
+      ":disabled": {
+        backgroundColor: colors.lightGray2,
+        border: `1px solid ${colors.lightGray2}`,
+        color: colors.silverGrayDark,
       },
     },
     variant === "unstable_noBorder" && {

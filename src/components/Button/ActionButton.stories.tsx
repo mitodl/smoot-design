@@ -24,6 +24,7 @@ const VARIANTS = enumValues<ActionButtonProps["variant"]>({
   primary: true,
   secondary: true,
   tertiary: true,
+  bordered: true,
   text: true,
   unstable_noBorder: true,
   unstable_inverted: true,
@@ -86,6 +87,9 @@ export const VariantsAndEdge: Story = {
         <ActionButton {...args} edge="none" variant="tertiary">
           {ICONS.DeleteIcon}
         </ActionButton>
+        <ActionButton {...args} edge="none" variant="bordered">
+          {ICONS.DeleteIcon}
+        </ActionButton>
         <ActionButton {...args} edge="none" variant="text">
           {ICONS.DeleteIcon}
         </ActionButton>
@@ -98,6 +102,9 @@ export const VariantsAndEdge: Story = {
           {ICONS.DeleteIcon}
         </ActionButton>
         <ActionButton {...args} edge="rounded" variant="tertiary">
+          {ICONS.DeleteIcon}
+        </ActionButton>
+        <ActionButton {...args} edge="rounded" variant="bordered">
           {ICONS.DeleteIcon}
         </ActionButton>
         <ActionButton {...args} edge="rounded" variant="text">
@@ -114,6 +121,9 @@ export const VariantsAndEdge: Story = {
         <ActionButton {...args} edge="circular" variant="tertiary">
           {ICONS.DeleteIcon}
         </ActionButton>
+        <ActionButton {...args} edge="circular" variant="bordered">
+          {ICONS.DeleteIcon}
+        </ActionButton>
         <ActionButton {...args} edge="circular" variant="text">
           {ICONS.DeleteIcon}
         </ActionButton>
@@ -121,6 +131,35 @@ export const VariantsAndEdge: Story = {
     </>
   ),
   tags: ["main"],
+}
+
+/**
+ * `ActionButtonLink` is styled as a `ActionButton` that renders an anchor tag.
+ *
+ * To use a custom link component (E.g. `Link` from `react-router` or `next/link`),
+ * pass it as the `Component` prop. Alternatively, customize the project-wide
+ * default link adapter via [Theme's LinkAdapter](../?path=/docs/smoot-design-themeprovider--docs)
+ */
+export const Links: Story = {
+  render: () => (
+    <Stack direction="row" gap={2} sx={{ my: 2 }}>
+      <ActionButtonLink href="#fake" variant="primary">
+        {ICONS.DeleteIcon}
+      </ActionButtonLink>
+      <ActionButtonLink href="#fake" variant="secondary">
+        {ICONS.DeleteIcon}
+      </ActionButtonLink>
+      <ActionButtonLink href="#fake" variant="tertiary">
+        {ICONS.DeleteIcon}
+      </ActionButtonLink>
+      <ActionButtonLink href="#fake" variant="bordered">
+        {ICONS.DeleteIcon}
+      </ActionButtonLink>
+      <ActionButtonLink href="#fake" variant="text">
+        {ICONS.DeleteIcon}
+      </ActionButtonLink>
+    </Stack>
+  ),
 }
 
 export const Showcase: Story = {
@@ -156,31 +195,5 @@ export const Showcase: Story = {
         )),
       )}
     </Grid>
-  ),
-}
-
-/**
- * `ActionButtonLink` is styled as a `ActionButton` that renders an anchor tag.
- *
- * To use a custom link component (E.g. `Link` from `react-router` or `next/link`),
- * pass it as the `Component` prop. Alternatively, customize the project-wide
- * default link adapter via [Theme's LinkAdapter](../?path=/docs/smoot-design-themeprovider--docs)
- */
-export const Links: Story = {
-  render: () => (
-    <Stack direction="row" gap={2} sx={{ my: 2 }}>
-      <ActionButtonLink href="#fake" variant="primary">
-        {ICONS.DeleteIcon}
-      </ActionButtonLink>
-      <ActionButtonLink href="#fake" variant="secondary">
-        {ICONS.DeleteIcon}
-      </ActionButtonLink>
-      <ActionButtonLink href="#fake" variant="tertiary">
-        {ICONS.DeleteIcon}
-      </ActionButtonLink>
-      <ActionButtonLink href="#fake" variant="text">
-        {ICONS.DeleteIcon}
-      </ActionButtonLink>
-    </Stack>
   ),
 }
