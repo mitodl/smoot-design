@@ -7,7 +7,7 @@ import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid"
 import { RiSearchLine, RiCalendarLine, RiCloseLine } from "@remixicon/react"
 import { fn } from "@storybook/test"
-import { enumValues } from "@/story-utils"
+import { enumValues } from "../../story-utils"
 
 const SIZES = enumValues<NonNullable<TextFieldProps["size"]>>({
   small: true,
