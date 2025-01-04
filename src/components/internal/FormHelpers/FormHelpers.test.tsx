@@ -2,7 +2,7 @@ import * as React from "react"
 import { render, screen } from "@testing-library/react"
 import { FormFieldWrapper } from "./FormHelpers"
 import type { FormFieldWrapperProps } from "./FormHelpers"
-import { ThemeProvider } from "@/components/ThemeProvider/ThemeProvider"
+import { ThemeProvider } from "../../../components/ThemeProvider/ThemeProvider"
 import { faker } from "@faker-js/faker/locale/en"
 
 const assertDescription = ({

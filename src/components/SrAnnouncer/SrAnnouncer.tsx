@@ -1,7 +1,7 @@
 import * as React from "react"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 import { useEffect } from "react"
-import { useDevCheckStable } from "@/utils/useDevCheckStable"
+import { useDevCheckStable } from "../../utils/useDevCheckStable"
 
 type SrAnnouncerProps = {
   /**
