@@ -2618,8 +2618,8 @@ __metadata:
     typescript: "npm:^5.6.3"
     zod: "npm:^3.23.8"
   peerDependencies:
-    react: "*"
-    react-dom: "*"
+    react: ^18 || ^19
+    react-dom: ^18 || ^19
   languageName: unknown
   linkType: soft
 
