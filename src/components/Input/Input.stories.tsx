@@ -6,7 +6,7 @@ import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid2"
 import { RiCalendarLine, RiCloseLine, RiSearchLine } from "@remixicon/react"
 import { fn } from "@storybook/test"
-import { enumValues } from "@/story-utils"
+import { enumValues } from "../../story-utils"
 import Typography from "@mui/material/Typography"
 
 const SIZES = enumValues<NonNullable<InputProps["size"]>>({

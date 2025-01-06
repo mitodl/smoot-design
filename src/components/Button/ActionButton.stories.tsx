@@ -11,7 +11,7 @@ import {
 } from "@remixicon/react"
 
 import { fn } from "@storybook/test"
-import { enumValues } from "@/story-utils"
+import { enumValues } from "../../story-utils"
 
 const ICONS = {
   None: undefined,
