@@ -17,6 +17,7 @@
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:static": "cp -r ./static dist/static",
+    "build:bundles": "vite build --outDir dist/bundles",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
     "lint-check": "eslint src/ .storybook/",
@@ -128,7 +129,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "type-fest": "^4.26.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite": "^6.0.7"
   },
   "peerDependencies": {
     "@emotion/react": "^11.11.1",
