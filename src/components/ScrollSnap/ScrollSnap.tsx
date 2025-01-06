@@ -52,13 +52,15 @@ const ScrollSnap = React.forwardRef<HTMLDivElement, ScrollSnapProps>(
      * 3. Then scroll to bottom (if needed)
      *
      * In this way, we can measure the scroll position before the new content is set.
+     *
+     * In React 19, this started requiring useLayoutEffect.
      */
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       if (!el.current) return
       wasAtBottom.current = distanceFromBottom(el.current) < threshold
       setContent(children)
     }, [children, threshold])
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       if (!el.current) return
       const atBottom = distanceFromBottom(el.current) < threshold
       if (wasAtBottom.current && !atBottom) {
