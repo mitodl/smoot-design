@@ -10,6 +10,7 @@ class JSDOMEnvironmentExtended extends TestEnvironment {
     this.global.ReadableStream = ReadableStream
     this.global.Response = Response
     this.global.TextDecoderStream = TextDecoderStream
+    this.global.TextDecoder = TextDecoder
   }
 }
 

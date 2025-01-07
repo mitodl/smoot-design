@@ -4,7 +4,7 @@ import Skeleton from "@mui/material/Skeleton"
 import { Input } from "../Input/Input"
 import { ActionButton } from "../Button/ActionButton"
 import { RiSendPlaneFill } from "@remixicon/react"
-import { useAiChat } from "./utils"
+import { useHttpChat } from "./utils"
 import Markdown from "react-markdown"
 
 import type { AiChatProps } from "./types"
@@ -141,7 +141,8 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
     handleSubmit,
     append,
     isLoading,
-  } = useAiChat(requestOpts, {
+    isResponding,
+  } = useHttpChat(requestOpts, {
     initialMessages: initialMessages,
   })
 
@@ -155,9 +156,6 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
       return m
     })
   }, [parseContent, unparsed, initialMessages])
-
-  const waiting =
-    !showStarters && messages[messages.length - 1]?.role === "user"
 
   const scrollToBottom = () => {
     messagesRef.current?.scrollBy({
@@ -204,7 +202,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
             ))}
           </StarterContainer>
         ) : null}
-        {waiting ? (
+        {isLoading && !isResponding ? (
           <MessageRow key={"loading"}>
             <Avatar className={classes.avatar} />
             <Message>

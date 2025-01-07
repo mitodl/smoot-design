@@ -1,39 +1,93 @@
-import { useChat, UseChatOptions } from "ai/react"
-import type { RequestOpts, ChatMessage } from "./types"
-import { useMemo } from "react"
+import type { RequestOpts, ChatMessage, CreateMessage } from "./types"
+import { useId, useState } from "react"
+import invariant from "tiny-invariant"
 
 const identity = <T>(x: T): T => x
 
-const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
-  (requestOpts: RequestOpts) => async (url, opts) => {
-    if (typeof opts?.body !== "string") {
-      console.error("Unexpected body type.")
-      return window.fetch(url, opts)
+const useHttpChat = (
+  requestOpts: RequestOpts,
+  opts: {
+    initialMessages: ChatMessage[]
+  } = {
+    initialMessages: [],
+  },
+) => {
+  const prefix = useId()
+  const [messages, setMessages] = useState<ChatMessage[]>(opts.initialMessages)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isResponding, setIsResponding] = useState<boolean>(false)
+  const [input, setInput] = useState<string>("")
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    setInput(e.target.value)
+  }
+
+  const transformBody = requestOpts.transformBody ?? identity
+  const getResponse = async (message: ChatMessage | CreateMessage) => {
+    if (isLoading || isResponding) return
+    setIsLoading(true)
+    const fullMessage: ChatMessage = {
+      id: `${prefix}-${messages.length}`,
+      ...message,
     }
-    const messages: ChatMessage[] = JSON.parse(opts?.body).messages
-    const transformBody: RequestOpts["transformBody"] =
-      requestOpts.transformBody ?? identity
-    const options: RequestInit = {
-      ...opts,
-      body: JSON.stringify(transformBody(messages)),
+    const allMessages: ChatMessage[] = [...messages, fullMessage]
+    setMessages(allMessages)
+
+    await fetch(requestOpts.apiUrl, {
+      method: "POST",
       headers: {
-        ...opts?.headers,
         "Content-Type": "application/json",
         ...requestOpts.headersOpts,
       },
+      body: JSON.stringify(transformBody(allMessages)),
       ...requestOpts.fetchOpts,
-    }
-    return fetch(url, options)
+    }).then(async (response) => {
+      const reader = response.body?.getReader()
+      invariant(reader, "Expected response body to be readable.")
+      const textDecoder = new TextDecoder()
+
+      setIsResponding(true)
+      const respnseMsg: ChatMessage = {
+        id: `${prefix}-${allMessages.length}`,
+        content: "",
+        role: "assistant",
+      }
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) {
+          setIsResponding(false)
+          setIsLoading(false)
+          break
+        }
+
+        const chunk = textDecoder.decode(value)
+
+        if (chunk) {
+          respnseMsg.content += chunk
+          setMessages([
+            ...allMessages,
+            { ...respnseMsg, content: respnseMsg.content },
+          ])
+        }
+      }
+    })
   }
 
-const useAiChat = (requestOpts: RequestOpts, opts: UseChatOptions) => {
-  const fetcher = useMemo(() => getFetcher(requestOpts), [requestOpts])
-  return useChat({
-    api: requestOpts.apiUrl,
-    streamProtocol: "text",
-    fetch: fetcher,
-    ...opts,
-  })
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault()
+    setInput("")
+    getResponse({ content: input, role: "user" })
+  }
+
+  return {
+    messages,
+    isLoading,
+    isResponding,
+    input,
+    handleInputChange,
+    handleSubmit,
+    append: getResponse,
+  }
 }
 
-export { useAiChat }
+export { useHttpChat }

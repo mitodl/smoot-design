@@ -1,11 +1,10 @@
-// Some of these are based on (compatible, but simplfied / restricted) versions of ai/react types.
-
 type Role = "assistant" | "user"
 type ChatMessage = {
   id: string
   content: string
   role: Role
 }
+type CreateMessage = Omit<ChatMessage, "id">
 
 type RequestOpts = {
   apiUrl: string
@@ -45,4 +44,4 @@ type AiChatProps = {
   }[]
 }
 
-export type { RequestOpts, AiChatProps, ChatMessage }
+export type { RequestOpts, AiChatProps, ChatMessage, CreateMessage }
