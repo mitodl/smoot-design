@@ -1,11 +1,11 @@
 import * as React from "react"
 import { AiChatDisplay } from "./AiChatDisplay"
-import { AiChatHttpProvider } from "./ChatContextHttp"
+import { AiChatWsProvider } from "./ChatContextWs"
 import type { AiChatProps } from "./types"
 
-const AiChat: React.FC<AiChatProps> = (props) => {
+const AiChatWs: React.FC<AiChatProps> = (props) => {
   return (
-    <AiChatHttpProvider
+    <AiChatWsProvider
       initialMessages={props.initialMessages}
       requestOpts={props.requestOpts}
       parseContent={props.parseContent}
@@ -15,9 +15,8 @@ const AiChat: React.FC<AiChatProps> = (props) => {
         conversationStarters={props.conversationStarters}
         className={props.className}
       />
-    </AiChatHttpProvider>
+    </AiChatWsProvider>
   )
 }
 
-export { AiChat }
-export type { AiChatProps }
+export { AiChatWs }

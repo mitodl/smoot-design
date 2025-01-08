@@ -1,12 +1,12 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { AiChat } from "./AiChat"
+import { AiChatWs } from "./AiChatWs"
 import type { AiChatProps } from "./types"
-import { mockJson, mockStreaming } from "./story-utils"
 import styled from "@emotion/styled"
+import { MockWebSocket } from "./story-utils"
 
-const TEST_API_STREAMING = "http://localhost:4567/streaming"
-const TEST_API_JSON = "http://localhost:4567/json"
+const TEST_API_STREAMING =
+  "ws://ai.open.odl.local:8002/ws/recommendation_agent/"
 
 const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
   {
@@ -26,10 +26,10 @@ const Container = styled.div({
   height: "350px",
 })
 
-const meta: Meta<typeof AiChat> = {
-  title: "smoot-design/ai/AiChat",
-  component: AiChat,
-  render: (args) => <AiChat {...args} />,
+const meta: Meta<typeof AiChatWs> = {
+  title: "smoot-design/ai/AiChatWS",
+  component: AiChatWs,
+  render: (args) => <AiChatWs {...args} />,
   decorators: (Story) => {
     return (
       <Container>
@@ -39,7 +39,14 @@ const meta: Meta<typeof AiChat> = {
   },
   args: {
     initialMessages: INITIAL_MESSAGES,
-    requestOpts: { apiUrl: TEST_API_STREAMING },
+    requestOpts: {
+      apiUrl: TEST_API_STREAMING,
+      transformBody: (messages) => {
+        return {
+          message: messages[messages.length - 1].content,
+        }
+      },
+    },
     conversationStarters: STARTERS,
   },
   argTypes: {
@@ -55,33 +62,19 @@ const meta: Meta<typeof AiChat> = {
     },
   },
   beforeEach: () => {
-    const originalFetch = window.fetch
-    window.fetch = (url, opts) => {
-      if (url === TEST_API_STREAMING) {
-        return mockStreaming()
-      } else if (url === TEST_API_JSON) {
-        return mockJson()
-      }
-      return originalFetch(url, opts)
-    }
+    // @ts-expect-error This should only affect the story iframe
+    window.WebSocket = MockWebSocket
+    console.warn(
+      `Alert! Global WebSocket replaced with Mock on frame: ${window.location.href}`,
+    )
   },
 }
 
 export default meta
 
-type Story = StoryObj<typeof AiChat>
+/**
+ * A websocket version of the AiChat component.
+ */
+type Story = StoryObj<typeof AiChatWs>
 
 export const StreamingResponses: Story = {}
-
-/**
- * Here `AiChat` is used with a non-streaming JSON API. The JSON is converted
- * to text via `parseContent`.
- */
-export const JsonResponses: Story = {
-  args: {
-    requestOpts: { apiUrl: TEST_API_JSON },
-    parseContent: (content: unknown) => {
-      return JSON.parse(content as string).message
-    },
-  },
-}

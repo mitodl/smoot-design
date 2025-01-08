@@ -32,8 +32,7 @@ const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const mockStreaming = async function mockApi() {
-  let timerId: NodeJS.Timeout
+const getMessageChunks = () => {
   const response = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
   const chunks: string[] = response.split(" ").reduce((acc, word) => {
     const last = acc[acc.length - 1]
@@ -46,23 +45,47 @@ const mockStreaming = async function mockApi() {
     }
     return acc
   }, [] as string[])
-
-  const num = chunks.length
+  return chunks
+}
+const processChunks = (
+  chunks: string[],
+  {
+    onChunk,
+    onDone,
+  }: {
+    onChunk: (chunk: string) => void
+    onDone?: () => void
+  },
+) => {
   let i = 0
+  const num = chunks.length
+  const timerId = setInterval(() => {
+    onChunk(chunks[i])
+    i++
+    if (i === num) {
+      onDone?.()
+      clearInterval(timerId)
+    }
+  }, 250)
+}
+
+const mockStreaming = async function mockApi() {
+  let timerId: NodeJS.Timeout
+  const chunks = getMessageChunks()
 
   await new Promise((resolve) => setTimeout(resolve, 1500))
 
   const body = new ReadableStream({
     start(controller) {
-      timerId = setInterval(() => {
-        const msg = new TextEncoder().encode(chunks[i])
-        controller.enqueue(msg)
-        i++
-        if (i === num) {
+      const encoder = new TextEncoder()
+      processChunks(chunks, {
+        onChunk: (chunk) => {
+          encoder.encode(chunk)
+        },
+        onDone: () => {
           controller.close()
-          clearInterval(timerId)
-        }
-      }, 250)
+        },
+      })
     },
     cancel() {
       if (timerId) {
@@ -92,4 +115,36 @@ const mockJson = async () => {
   )
 }
 
-export { mockStreaming, mockJson }
+class MockWebSocket extends EventTarget {
+  readyState: WebSocket["readyState"] = WebSocket.CONNECTING
+
+  constructor(public readonly url: string) {
+    super()
+    this.url = url
+
+    setTimeout(() => {
+      this.readyState = WebSocket.OPEN
+      this.dispatchEvent(new Event("open"))
+    }, 300)
+  }
+
+  async send(_data: string) {
+    const chunks = getMessageChunks()
+    await new Promise((res) => setTimeout(res, 400))
+    processChunks(chunks, {
+      onChunk: (chunk) => {
+        const event = new Event("message")
+        // @ts-expect-error Should be passed to constructor, but the event isn't trusted.
+        event.data = chunk
+        this.dispatchEvent(event)
+      },
+      onDone: () => {
+        const event = new Event("message")
+        // @ts-expect-error Should be passed to constructor, but the event isn't trusted.
+        event.data = "!endResponse"
+      },
+    })
+  }
+}
+
+export { mockStreaming, mockJson, MockWebSocket }
