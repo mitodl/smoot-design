@@ -55,7 +55,7 @@ module.exports = {
           "**/*.stories.ts",
           "**/*.stories.tsx",
           "**/*.mdx",
-          "vite.config.ts",
+          "vite.config.mts",
           ".storybook/**",
         ],
       },

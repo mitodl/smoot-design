@@ -11,6 +11,7 @@
   },
   "scripts": {
     "start": "storybook dev -p 6006 --docs",
+    "bundle-preview": "yarn build && cp -r dist/bundles bundle-preview/static/smoot-design && npx serve bundle-preview",
     "build-storybook": "storybook build --docs",
     "test": "jest",
     "typecheck": "tsc --noEmit",
