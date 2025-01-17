@@ -62,10 +62,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@mui/base": "5.0.0-beta.68",
-    "@mui/lab": "6.0.0-beta.22",
     "@mui/material": "^6.1.6",
-    "@mui/material-nextjs": "^6.1.6",
     "@mui/system": "^6.1.6",
     "@remixicon/react": "^4.2.0",
     "@types/jest": "^29.5.14",
