@@ -68,21 +68,25 @@ const defaultThemeOptions: ThemeOptions = {
   },
 }
 
+type ThemeOptionsInit =
+  | Pick<ThemeOptions, "custom">
+  | ((defaults: ThemeOptions) => ThemeOptions)
 /**
  * Create a customized Smoot Design theme for use with `ThemeProvider`.
  *
  * See [ThemeProvider Docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-themeprovider--docs#further-customized-theme-with-createtheme)
  * for more.
  */
-const createTheme = (options: ThemeOptions = {}): Theme =>
-  muiCreateTheme({
-    ...defaultThemeOptions,
-    ...options,
-    custom: {
-      ...defaultThemeOptions.custom,
-      ...options?.custom,
-    },
-  })
+const createTheme = (options?: ThemeOptionsInit): Theme => {
+  const opts =
+    typeof options === "function"
+      ? options(defaultThemeOptions)
+      : {
+          ...defaultThemeOptions,
+          custom: { ...defaultThemeOptions.custom, ...options?.custom },
+        }
+  return muiCreateTheme(opts)
+}
 
 const defaultTheme = createTheme()
 
