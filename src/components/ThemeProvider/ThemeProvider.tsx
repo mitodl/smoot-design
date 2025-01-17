@@ -74,7 +74,7 @@ const defaultThemeOptions: ThemeOptions = {
  * See [ThemeProvider Docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-themeprovider--docs#further-customized-theme-with-createtheme)
  * for more.
  */
-const createTheme = (options: Partial<ThemeOptions> = {}): Theme =>
+const createTheme = (options: ThemeOptions = {}): Theme =>
   muiCreateTheme({
     ...defaultThemeOptions,
     ...options,
