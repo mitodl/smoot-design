@@ -13,7 +13,6 @@ const BREAKPOINT_VALUES: ThemeOptions["breakpoints"] = {
 
 const { breakpoints } = createTheme({
   breakpoints: BREAKPOINT_VALUES,
-  // @ts-expect-error only using breakpoints
   custom: {},
 })
 

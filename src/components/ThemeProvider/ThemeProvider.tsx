@@ -4,11 +4,11 @@ import {
   ThemeProvider as MuiThemeProvider,
 } from "@mui/material/styles"
 import type { ThemeOptions, Theme } from "@mui/material/styles"
-import type {} from "@mui/lab/themeAugmentation"
 import * as typography from "./typography"
 import * as buttons from "./buttons"
 import * as chips from "./chips"
 import { colors } from "./colors"
+import deepmerge from "@mui/utils/deepmerge"
 
 const custom: ThemeOptions["custom"] = {
   colors,
@@ -53,13 +53,6 @@ const defaultThemeOptions: ThemeOptions = {
   components: {
     MuiButtonBase: buttons.buttonBaseComponent,
     MuiTypography: typography.component,
-    MuiTabPanel: {
-      styleOverrides: {
-        root: {
-          padding: "0px",
-        },
-      },
-    },
     MuiMenu: {
       styleOverrides: { paper: { borderRadius: "4px" } },
     },
@@ -82,16 +75,9 @@ const defaultThemeOptions: ThemeOptions = {
  * See [ThemeProvider Docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-themeprovider--docs#further-customized-theme-with-createtheme)
  * for more.
  */
-const createTheme = (options?: {
-  custom: Partial<ThemeOptions["custom"]>
-}): Theme =>
-  muiCreateTheme({
-    ...defaultThemeOptions,
-    custom: {
-      ...defaultThemeOptions.custom,
-      ...options?.custom,
-    },
-  })
+const createTheme = (options?: ThemeOptions): Theme => {
+  return muiCreateTheme(deepmerge(defaultThemeOptions, options))
+}
 
 const defaultTheme = createTheme()
 
