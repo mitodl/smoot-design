@@ -26,9 +26,6 @@ const VARIANTS = enumValues<ActionButtonProps["variant"]>({
   tertiary: true,
   bordered: true,
   text: true,
-  unstable_noBorder: true,
-  unstable_inverted: true,
-  unstable_success: true,
 })
 const STABLE_VARIANTS = VARIANTS.filter((v) => !v.startsWith("unstable"))
 const SIZES = enumValues<ActionButtonProps["size"]>({
