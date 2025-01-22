@@ -29,6 +29,7 @@ type RequestOpts = {
 }
 
 type AiChatProps = {
+  chatId?: string
   className?: string
   initialMessages: Omit<ChatMessage, "id">[]
   conversationStarters?: { content: string }[]

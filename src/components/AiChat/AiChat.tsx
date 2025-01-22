@@ -121,6 +121,7 @@ const classes = {
 }
 
 const AiChat: React.FC<AiChatProps> = function AiChat({
+  chatId,
   className,
   conversationStarters,
   requestOpts,
@@ -143,6 +144,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
     isLoading,
   } = useAiChat(requestOpts, {
     initialMessages: initialMessages,
+    id: chatId,
   })
 
   const messages = React.useMemo(() => {
