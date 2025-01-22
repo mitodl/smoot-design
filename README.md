@@ -12,6 +12,10 @@ To trigger a release, run the "Release" github action. Using [semantic-release](
 2. Determine whether the version bump should be major, minor, or patch based on commit types. Breaking changes (e.g., `feat!: remove Button variant 'outlined'`) will result in major version bumps.
 3. Publish the package to NPM and the repository's [Github Releases](https://github.com/mitodl/smoot-design/releases).
 
+## Installation
+
+Ensure `peerDependencies` are installed as well. See [`package.json`](./package.json).
+
 ## Documentation
 
 Documentation for `smoot-design` components is available at https://mitodl.github.io/smoot-design.

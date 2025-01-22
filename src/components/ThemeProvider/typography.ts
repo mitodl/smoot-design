@@ -167,7 +167,6 @@ const component: NonNullable<ThemeOptions["components"]>["MuiTypography"] = {
 
 const { typography } = createTheme({
   typography: globalSettings,
-  // @ts-expect-error: we only care about typography from this theme
   custom: {},
 })
 

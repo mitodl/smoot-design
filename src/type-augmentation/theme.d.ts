@@ -54,7 +54,7 @@ declare module "@mui/material/styles" {
   }
 
   interface ThemeOptions {
-    custom: CustomTheme
+    custom?: Partial<CustomTheme>
   }
 
   interface PaletteColor {
