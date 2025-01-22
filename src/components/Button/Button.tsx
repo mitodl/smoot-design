@@ -8,15 +8,7 @@ import {
   LinkAdapterPropsOverrides,
 } from "../LinkAdapter/LinkAdapter"
 
-type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "tertiary"
-  | "text"
-  | "bordered"
-  | "unstable_noBorder"
-  | "unstable_inverted"
-  | "unstable_success"
+type ButtonVariant = "primary" | "secondary" | "tertiary" | "text" | "bordered"
 type ButtonSize = "small" | "medium" | "large"
 type ButtonEdge = "circular" | "rounded" | "none"
 
@@ -152,22 +144,6 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         boxShadow: "none",
       },
     },
-    variant === "unstable_success" && {
-      backgroundColor: colors.darkGreen,
-      color: colors.white,
-      border: "none",
-      /* Shadow/04dp */
-      boxShadow:
-        "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
-      ":hover:not(:disabled)": {
-        backgroundColor: colors.darkGreen,
-        boxShadow: "none",
-      },
-      ":disabled": {
-        backgroundColor: colors.silverGray,
-        boxShadow: "none",
-      },
-    },
     variant === "secondary" && {
       color: colors.red,
       backgroundColor: "transparent",
@@ -207,18 +183,6 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         color: colors.silverGrayDark,
       },
     },
-    variant === "unstable_noBorder" && {
-      backgroundColor: colors.white,
-      color: colors.darkGray2,
-      border: "none",
-      ":hover:not(:disabled)": {
-        // darkGray1 at 6% alpha
-        backgroundColor: "rgba(64, 70, 76, 0.06)",
-      },
-      ":disabled": {
-        color: colors.silverGray,
-      },
-    },
     variant === "tertiary" && {
       color: colors.darkGray2,
       border: "none",
@@ -230,12 +194,6 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: colors.lightGray2,
         color: colors.silverGrayLight,
       },
-    },
-    variant === "unstable_inverted" && {
-      backgroundColor: colors.white,
-      color: colors.mitRed,
-      borderColor: colors.mitRed,
-      borderStyle: "solid",
     },
     // edge
     edge === "rounded" && {
