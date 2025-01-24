@@ -15,6 +15,9 @@ import { ChatTitle } from "./ChatTitle"
 // @ts-expect-error TODO make this better
 import mascot from "../../../static/images/mit_mascot_tim.png"
 
+console.log("Hello from AiChat.tsx")
+console.log("mascot is", mascot)
+
 const classes = {
   root: "MitAiChat--root",
   conversationStarter: "MitAiChat--conversationStarter",
@@ -154,6 +157,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   srLoadingMessages,
   title,
   onClose,
+  ImgComponent,
 }) {
   const [showStarters, setShowStarters] = React.useState(true)
   const messagesRef = React.useRef<HTMLDivElement>(null)
@@ -212,7 +216,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
               [classes.messageRowAssistant]: m.role === "assistant",
             })}
           >
-            <Avatar>
+            <Avatar as={ImgComponent}>
               <img src={mascot} alt="" />
             </Avatar>
             <Message className={classes.message}>

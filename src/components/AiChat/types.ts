@@ -46,6 +46,7 @@ type AiChatProps = {
     delay: number
     text: string
   }[]
+  ImgComponent?: React.ElementType
 }
 
 export type { RequestOpts, AiChatProps, ChatMessage }
