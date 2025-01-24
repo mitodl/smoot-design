@@ -216,8 +216,12 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
               [classes.messageRowAssistant]: m.role === "assistant",
             })}
           >
-            <Avatar as={ImgComponent}>
-              <img src={mascot} alt="" />
+            <Avatar>
+              {ImgComponent ? (
+                <ImgComponent src={mascot} alt="" />
+              ) : (
+                <img src={mascot} alt="" />
+              )}
             </Avatar>
             <Message className={classes.message}>
               <Markdown>{m.content}</Markdown>
