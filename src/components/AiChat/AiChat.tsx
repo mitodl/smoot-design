@@ -11,6 +11,21 @@ import type { AiChatProps } from "./types"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
+import { ChatTitle } from "./ChatTitle"
+// @ts-expect-error TODO make this better
+import mascot from "./mit_mascot_tim.png"
+
+const classes = {
+  root: "MitAiChat--root",
+  conversationStarter: "MitAiChat--conversationStarter",
+  messagesContainer: "MitAiChat--messagesContainer",
+  messageRow: "MitAiChat--messageRow",
+  messageRowUser: "MitAiChat--messageRowUser",
+  messageRowAssistant: "MitAiChat--messageRowAssistant",
+  message: "MitAiChat--message",
+  avatar: "MitAiChat--avatar",
+  input: "MitAiChat--input",
+}
 
 const ChatContainer = styled.div(({ theme }) => ({
   width: "100%",
@@ -31,20 +46,32 @@ const MessagesContainer = styled(ScrollSnap)({
 })
 const MessageRow = styled.div<{
   reverse?: boolean
-}>(({ reverse }) => [
-  {
-    margin: "8px 0",
-    display: "flex",
-    width: "100%",
-    flexDirection: reverse ? "row-reverse" : "row",
+}>({
+  margin: "8px 0",
+  display: "flex",
+  width: "100%",
+  gap: "10px",
+  [`&.${classes.messageRowUser}`]: {
+    flexDirection: "row-reverse",
   },
-])
-const Avatar = styled.div({})
+})
+const Avatar = styled.div(({ theme }) => ({
+  width: "40px",
+  height: "40px",
+  borderRadius: "50%",
+  backgroundColor: theme.custom.colors.white,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  img: {
+    width: "75%",
+    height: "75%",
+  },
+}))
 const Message = styled.div(({ theme }) => ({
   border: `1px solid ${theme.custom.colors.silverGrayLight}`,
   backgroundColor: theme.custom.colors.white,
-  borderRadius: "24px",
-  padding: "4px 16px",
+  padding: "12px",
   ...theme.typography.body2,
   "p:first-of-type": {
     marginTop: 0,
@@ -60,6 +87,13 @@ const Message = styled.div(({ theme }) => ({
     color: theme.custom.colors.red,
     textDecoration: "underline",
   },
+  borderRadius: "12px",
+  [`.${classes.messageRowAssistant} &`]: {
+    borderRadius: "0 12px 12px 12px",
+  },
+  [`.${classes.messageRowUser} &`]: {
+    borderRadius: "12px 0 12px 12px",
+  },
 }))
 
 const StarterContainer = styled.div({
@@ -71,13 +105,13 @@ const StarterContainer = styled.div({
 const Starter = styled.button(({ theme }) => ({
   border: `1px solid ${theme.custom.colors.silverGrayLight}`,
   backgroundColor: theme.custom.colors.white,
-  borderRadius: "24px",
-  padding: "4px 16px",
-  ...theme.typography.body2,
+  padding: "8px 16px",
+  ...theme.typography.subtitle3,
   cursor: "pointer",
   "&:hover": {
     backgroundColor: theme.custom.colors.lightGray1,
   },
+  borderRadius: "12px",
 }))
 
 const Controls = styled.div(({ theme }) => ({
@@ -110,16 +144,6 @@ const Dots = () => {
   )
 }
 
-const classes = {
-  root: "MitAiChat--root",
-  conversationStarter: "MitAiChat--conversationStarter",
-  messagesContainer: "MitAiChat--messagesContainer",
-  messageRow: "MitAiChat--messageRow",
-  message: "MitAiChat--message",
-  avatar: "MitAiChat--avatar",
-  input: "MitAiChat--input",
-}
-
 const AiChat: React.FC<AiChatProps> = function AiChat({
   chatId,
   className,
@@ -128,6 +152,8 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   initialMessages: initMsgs,
   parseContent,
   srLoadingMessages,
+  title,
+  onClose,
 }) {
   const [showStarters, setShowStarters] = React.useState(true)
   const messagesRef = React.useRef<HTMLDivElement>(null)
@@ -172,6 +198,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
 
   return (
     <ChatContainer className={classNames(className, classes.root)}>
+      {title ? <ChatTitle title={title} onClose={onClose} /> : null}
       <MessagesContainer
         className={classes.messagesContainer}
         ref={messagesRef}
@@ -179,11 +206,15 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
         {messages.map((m) => (
           <MessageRow
             key={m.id}
-            reverse={m.role === "user"}
             data-chat-role={m.role}
-            className={classes.messageRow}
+            className={classNames(classes.messageRow, {
+              [classes.messageRowUser]: m.role === "user",
+              [classes.messageRowAssistant]: m.role === "assistant",
+            })}
           >
-            <Avatar />
+            <Avatar>
+              <img src={mascot} alt="" />
+            </Avatar>
             <Message className={classes.message}>
               <Markdown>{m.content}</Markdown>
             </Message>
@@ -207,7 +238,13 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
           </StarterContainer>
         ) : null}
         {waiting ? (
-          <MessageRow key={"loading"}>
+          <MessageRow
+            className={classNames(
+              classes.messageRow,
+              classes.messageRowAssistant,
+            )}
+            key={"loading"}
+          >
             <Avatar className={classes.avatar} />
             <Message>
               <Dots />

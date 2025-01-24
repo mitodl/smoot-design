@@ -41,6 +41,7 @@ const meta: Meta<typeof AiChat> = {
     initialMessages: INITIAL_MESSAGES,
     requestOpts: { apiUrl: TEST_API_STREAMING },
     conversationStarters: STARTERS,
+    title: "Chat with AI",
   },
   argTypes: {
     conversationStarters: {
