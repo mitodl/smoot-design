@@ -93,7 +93,7 @@
     "@swc/jest": "^0.2.37",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "14.6.0",
+    "@testing-library/user-event": "14.6.1",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
     "@types/react-dom": "^19.0.0",
