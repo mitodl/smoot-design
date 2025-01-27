@@ -15,6 +15,7 @@ import { ChatTitle } from "./ChatTitle"
 
 import mascot from "../../../static/images/mit_mascot_tim.png"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
+import { ImageAdapter } from "../ImageAdapter/ImageAdapter"
 
 const classes = {
   root: "MitAiChat--root",
@@ -214,13 +215,11 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
               [classes.messageRowAssistant]: m.role === "assistant",
             })}
           >
-            <Avatar>
-              {ImgComponent ? (
-                <ImgComponent src={mascot} alt="" />
-              ) : (
-                <img src={mascot} alt="" />
-              )}
-            </Avatar>
+            {m.role === "assistant" ? (
+              <Avatar className={classes.avatar}>
+                <ImageAdapter src={mascot} alt="" Component={ImgComponent} />
+              </Avatar>
+            ) : null}
             <Message className={classes.message}>
               <VisuallyHidden>
                 {m.role === "user" ? "You said:" : "Assistant said:"}
@@ -254,7 +253,9 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
             )}
             key={"loading"}
           >
-            <Avatar className={classes.avatar} />
+            <Avatar className={classes.avatar}>
+              <ImageAdapter src={mascot} alt="" Component={ImgComponent} />
+            </Avatar>
             <Message>
               <Dots />
             </Message>
