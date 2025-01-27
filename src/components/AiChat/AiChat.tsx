@@ -162,7 +162,6 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   onClose,
   ImgComponent,
 }) {
-  const [showStarters, setShowStarters] = React.useState(true)
   const messagesRef = React.useRef<HTMLDivElement>(null)
   const initialMessages = React.useMemo(() => {
     const prefix = Math.random().toString().slice(2)
@@ -190,6 +189,8 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
       return m
     })
   }, [parseContent, unparsed, initialMessages])
+
+  const showStarters = messages.length === initialMessages.length
 
   const waiting =
     !showStarters && messages[messages.length - 1]?.role === "user"
@@ -226,7 +227,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
             ) : null}
             <Message className={classes.message}>
               <VisuallyHidden>
-                {m.role === "user" ? "You said:" : "Assistant said:"}
+                {m.role === "user" ? "You said: " : "Assistant said: "}
               </VisuallyHidden>
               <Markdown skipHtml>{m.content}</Markdown>
             </Message>
@@ -239,7 +240,6 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
                 className={classes.conversationStarter}
                 key={m.content}
                 onClick={() => {
-                  setShowStarters(false)
                   scrollToBottom()
                   append({ role: "user", content: m.content })
                 }}
@@ -269,7 +269,6 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
       <Controls>
         <Form
           onSubmit={(e) => {
-            setShowStarters(false)
             scrollToBottom()
             handleSubmit(e)
           }}

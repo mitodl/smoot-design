@@ -30,6 +30,11 @@ jest.mock("react-markdown", () => {
   }
 })
 
+const msg = {
+  ai: (text: string) => `Assistant said: ${text}`,
+  you: (text: string) => `You said: ${text}`,
+}
+
 const getMessages = (): HTMLElement[] => {
   return Array.from(document.querySelectorAll(".MitAiChat--message"))
 }
@@ -55,7 +60,7 @@ describe("AiChat", () => {
       { content: faker.lorem.sentence() },
       { content: faker.lorem.sentence() },
     ]
-    render(
+    const view = render(
       <AiChat
         initialMessages={initialMessages}
         conversationStarters={conversationStarters}
@@ -65,7 +70,18 @@ describe("AiChat", () => {
       { wrapper: ThemeProvider },
     )
 
-    return { initialMessages, conversationStarters }
+    const rerender = (newProps: Partial<AiChatProps>) => {
+      view.rerender(
+        <AiChat
+          initialMessages={initialMessages}
+          conversationStarters={conversationStarters}
+          requestOpts={{ apiUrl: "http://localhost:4567/test" }}
+          {...newProps}
+        />,
+      )
+    }
+
+    return { initialMessages, conversationStarters, rerender }
   }
 
   test("Clicking conversation starters and sending chats", async () => {
@@ -104,6 +120,25 @@ describe("AiChat", () => {
     const afterSending = await whenCount(getMessages, 5)
     expect(afterSending[3]).toHaveTextContent("User message")
     expect(afterSending[4]).toHaveTextContent("AI Response 1")
+  })
+
+  test("Messages persist if chat has same chatId", async () => {
+    const { rerender } = setup({ chatId: "test-123" })
+    const starterEls = getConversationStarters()
+    const chosen = faker.helpers.arrayElement([0, 1])
+
+    await user.click(starterEls[chosen])
+    await whenCount(getMessages, 3)
+
+    // New chat ... starters should be shown
+    rerender({ chatId: "test-345" })
+    expect(getConversationStarters().length).toBeGreaterThan(0)
+    await whenCount(getMessages, 1)
+
+    // existing chat ... starters should not be shown, messages should be restored
+    rerender({ chatId: "test-123" })
+    expect(getConversationStarters().length).toBe(0)
+    await whenCount(getMessages, 3)
   })
 
   test("transformBody is called before sending requests", async () => {
@@ -151,12 +186,13 @@ describe("AiChat", () => {
     await whenCount(getMessages, initialMessages.length + 4)
 
     const messagesTexts = getMessages().map((el) => el.textContent)
+
     expect(messagesTexts).toEqual([
-      initialMessages[0].content,
-      conversationStarters[0].content,
-      "Parsed: AI Response 0",
-      "User message",
-      "Parsed: AI Response 1",
+      msg.ai(initialMessages[0].content),
+      msg.you(conversationStarters[0].content),
+      msg.ai("Parsed: AI Response 0"),
+      msg.you("User message"),
+      msg.ai("Parsed: AI Response 1"),
     ])
   })
 })
