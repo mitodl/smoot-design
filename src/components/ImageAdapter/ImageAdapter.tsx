@@ -21,9 +21,9 @@ type ImageAdapterProps = React.ComponentProps<"img"> & {
  * - else, renders as `img` tag
  */
 const ImageAdapter = React.forwardRef<HTMLImageElement, ImageAdapterProps>(
-  function ImageAdapter({ Component = "img", ...props }, ref) {
+  function ImageAdapter({ Component, ...props }, ref) {
     const theme = useTheme()
-    const ImgComponent = Component ?? theme.custom.LinkAdapter
+    const ImgComponent = Component ?? theme.custom.ImgAdapter ?? "img"
     return <ImgComponent ref={ref} {...props} />
   },
 )
