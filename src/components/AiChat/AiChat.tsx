@@ -14,9 +14,7 @@ import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { ChatTitle } from "./ChatTitle"
 // @ts-expect-error TODO make this better
 import mascot from "../../../static/images/mit_mascot_tim.png"
-
-console.log("Hello from AiChat.tsx")
-console.log("mascot is", mascot)
+import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 
 const classes = {
   root: "MitAiChat--root",
@@ -224,6 +222,9 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
               )}
             </Avatar>
             <Message className={classes.message}>
+              <VisuallyHidden>
+                {m.role === "user" ? "You said:" : "Assistant said:"}
+              </VisuallyHidden>
               <Markdown>{m.content}</Markdown>
             </Message>
           </MessageRow>
