@@ -56,8 +56,12 @@ const MessageRow = styled.div<{
   [`&.${classes.messageRowUser}`]: {
     flexDirection: "row-reverse",
   },
+  "> *": {
+    minWidth: 0,
+  },
 })
 const Avatar = styled.div(({ theme }) => ({
+  flexShrink: 0,
   width: "40px",
   height: "40px",
   borderRadius: "50%",
@@ -113,7 +117,7 @@ const Starter = styled.button(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.custom.colors.lightGray1,
   },
-  borderRadius: "12px",
+  borderRadius: "100vh",
 }))
 
 const Controls = styled.div(({ theme }) => ({
