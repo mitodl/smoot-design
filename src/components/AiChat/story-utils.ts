@@ -4,6 +4,7 @@ const SAMPLE_RESPONSES = [
 1. **[Machine Learning, Modeling, and Simulation Principles](https://xpro.mit.edu/courses/course-v1:xPRO+MLx1/)**: Offered by MIT xPRO, this course is part of the program "Machine Learning, Modeling, and Simulation: Engineering Problem-Solving in the Age of AI." It focuses on the principles of machine learning and how they can be applied to solve engineering problems, which is highly relevant for business applications of AI.
 
 This course is not free, but it provides a certification upon completion, which can be valuable for professionals looking to apply AI in business contexts. It covers essential concepts that can help you understand how AI can be leveraged to improve business processes and decision-making.
+<!-- Comment! -->
 `,
   `
 To understand global warming, I recommend the following resources from MIT:
@@ -13,6 +14,7 @@ To understand global warming, I recommend the following resources from MIT:
 2. **[Global Warming Science](https://openlearninglibrary.mit.edu/courses/course-v1:MITx+12.340x+1T2020/about)**: Another offering of the same course by MITx, available through the Open Learning Library. It provides the same in-depth exploration of the earth's climate system.
 
 These courses are free and provide a solid foundation in understanding the scientific aspects of global warming. They are suitable for anyone interested in the topic, regardless of prior knowledge.
+<!-- Comment! -->
 `,
   `
 Here are some courses on linear algebra that you can explore:
@@ -24,6 +26,7 @@ Here are some courses on linear algebra that you can explore:
 3. **[Quantum Information Science I, Part 1 (MITx)](https://openlearninglibrary.mit.edu/courses/course-v1:MITx+8.370.1x+1T2018/about)**: While primarily focused on quantum information science, this course requires some knowledge of linear algebra and is suitable for those interested in quantum mechanics. It is free and available through MITx.
 
 These courses provide a comprehensive introduction to linear algebra and its applications across various fields.
+<!-- Comment! -->
 `,
 ]
 
@@ -50,7 +53,7 @@ const mockStreaming = async function mockApi() {
   const num = chunks.length
   let i = 0
 
-  await new Promise((resolve) => setTimeout(resolve, 1500))
+  await new Promise((resolve) => setTimeout(resolve, 800))
 
   const body = new ReadableStream({
     start(controller) {
@@ -62,7 +65,7 @@ const mockStreaming = async function mockApi() {
           controller.close()
           clearInterval(timerId)
         }
-      }, 250)
+      }, 100)
     },
     cancel() {
       if (timerId) {
@@ -82,7 +85,7 @@ const mockStreaming = async function mockApi() {
 
 const mockJson = async () => {
   const message = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
-  await new Promise((res) => setTimeout(res, 2000))
+  await new Promise((res) => setTimeout(res, 1000))
   return Promise.resolve(
     new Response(JSON.stringify({ message }), {
       headers: {

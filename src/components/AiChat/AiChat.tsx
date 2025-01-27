@@ -224,7 +224,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
               <VisuallyHidden>
                 {m.role === "user" ? "You said:" : "Assistant said:"}
               </VisuallyHidden>
-              <Markdown>{m.content}</Markdown>
+              <Markdown skipHtml>{m.content}</Markdown>
             </Message>
           </MessageRow>
         ))}
