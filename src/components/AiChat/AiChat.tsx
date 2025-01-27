@@ -12,7 +12,7 @@ import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { ChatTitle } from "./ChatTitle"
-// @ts-expect-error TODO make this better
+
 import mascot from "../../../static/images/mit_mascot_tim.png"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 

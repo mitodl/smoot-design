@@ -30,7 +30,13 @@ type RequestOpts = {
 
 type AiChatProps = {
   chatId?: string
+  /**
+   * If provided, renders a title bar.
+   */
   title?: string
+  /**
+   * Fired when "Close" button within title bar is clicked.
+   */
   onClose?: () => void
   className?: string
   initialMessages: Omit<ChatMessage, "id">[]
@@ -46,6 +52,10 @@ type AiChatProps = {
     delay: number
     text: string
   }[]
+  /**
+   * If provided, element to use for rendering avatar images.
+   * By default, the theme's ImageAdater is used.
+   */
   ImgComponent?: React.ElementType
 }
 

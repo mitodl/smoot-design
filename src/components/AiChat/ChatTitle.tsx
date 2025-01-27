@@ -6,6 +6,7 @@ import { ActionButton } from "../Button/ActionButton"
 
 const CloseButton = styled(ActionButton)(({ theme }) => ({
   color: "inherit",
+  backgroundColor: theme.custom.colors.red,
   "&:hover:not(:disabled)": {
     backgroundColor: theme.custom.colors.mitRed,
   },
@@ -28,7 +29,7 @@ const ChatTitle = styled(({ title, onClose, className }: ChatTitleProps) => {
         {title}
       </Typography>
       {onClose ? (
-        <CloseButton onClick={onClose} aria-label="Close chat">
+        <CloseButton variant="text" onClick={onClose} aria-label="Close chat">
           <RiCloseLine />
         </CloseButton>
       ) : null}

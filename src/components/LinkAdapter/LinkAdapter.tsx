@@ -35,4 +35,4 @@ const LinkAdapter = React.forwardRef<HTMLAnchorElement, LinkAdapterProps>(
 )
 
 export { LinkAdapter }
-export type { LinkAdapterPropsOverrides }
+export type { LinkAdapterPropsOverrides, LinkAdapterProps }

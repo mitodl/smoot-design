@@ -4,6 +4,7 @@ import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
 import { mockJson, mockStreaming } from "./story-utils"
 import styled from "@emotion/styled"
+import { fn } from "@storybook/test"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
@@ -27,7 +28,7 @@ const Container = styled.div({
 })
 
 const meta: Meta<typeof AiChat> = {
-  title: "smoot-design/AiChat",
+  title: "smoot-design/ai/AiChat",
   component: AiChat,
   render: (args) => <AiChat {...args} />,
   decorators: (Story) => {
@@ -42,6 +43,7 @@ const meta: Meta<typeof AiChat> = {
     requestOpts: { apiUrl: TEST_API_STREAMING },
     conversationStarters: STARTERS,
     title: "Chat with AI",
+    onClose: fn(),
   },
   argTypes: {
     conversationStarters: {

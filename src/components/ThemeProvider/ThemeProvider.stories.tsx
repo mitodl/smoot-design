@@ -96,6 +96,12 @@ type Story = StoryObj<typeof ThemeProvider>
  *     scroll?: boolean
  *   }
  * }
+ *
+ * ### Custom Image Adapter
+ * Similarly, `theme.custom.ImageAdapter` can be used to customize the image
+ * component used by `smoot-design`. By default, `ImageAdapter` uses a simple `img`
+ * tag. Interface `ImageAdapterPropsOverrides` is similarly available for
+ * augmentation.
  * ```
  */
 export const LinkAdapterOverride: Story = {

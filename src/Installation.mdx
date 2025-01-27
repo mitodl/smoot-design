@@ -1,0 +1,15 @@
+import { Meta } from "@storybook/blocks"
+
+<Meta title="Smoot-Design/Installation/Installation" />
+
+# Installation
+
+## ThemeProvider
+
+All components must be descendants of a `ThemeProvider` component. This component provides the theme to all styled components in the tree. See [https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-themeprovider--docs] for more.
+
+## Image Imports
+
+Some components import images in their source code. Your bundler must be configured to handle these imports.
+
+- **NextJS:** If using NextJS, provide `ImgAdapter: Image` to the theme and specify `transpilePackages: ["@mitodl/smoot-design/ai"],` in the `next.config.js` file.
