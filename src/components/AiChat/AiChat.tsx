@@ -45,11 +45,11 @@ const MessagesContainer = styled(ScrollSnap)({
   padding: "24px",
   paddingBottom: "0px",
   overflow: "auto",
+  gap: "24px",
 })
 const MessageRow = styled.div<{
   reverse?: boolean
 }>({
-  margin: "8px 0",
   display: "flex",
   width: "100%",
   gap: "10px",
@@ -104,9 +104,10 @@ const Message = styled.div(({ theme }) => ({
 
 const StarterContainer = styled.div({
   alignSelf: "flex-end",
+  alignItems: "end",
   display: "flex",
   flexDirection: "column",
-  gap: "4px",
+  gap: "12px",
 })
 const Starter = styled.button(({ theme }) => ({
   border: `1px solid ${theme.custom.colors.silverGrayLight}`,
@@ -120,17 +121,17 @@ const Starter = styled.button(({ theme }) => ({
   borderRadius: "100vh",
 }))
 
-const Controls = styled.div(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-around",
-  padding: "12px 24px",
-  backgroundColor: theme.custom.colors.white,
-}))
-const Form = styled.form(() => ({
-  display: "flex",
-  width: "80%",
-  gap: "12px",
-  alignItems: "center",
+const InputStyled = styled(Input)({
+  borderRadius: 0,
+})
+const ActionButtonStyled = styled(ActionButton)(({ theme }) => ({
+  backgroundColor: theme.custom.colors.red,
+  flexShrink: 0,
+  marginRight: "24px",
+  marginLeft: "12px",
+  "&:hover:not(:disabled)": {
+    backgroundColor: theme.custom.colors.mitRed,
+  },
 }))
 
 const DotsContainer = styled.span(({ theme }) => ({
@@ -161,6 +162,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
   title,
   onClose,
   ImgComponent,
+  placeholder = "Type a message...",
 }) {
   const messagesRef = React.useRef<HTMLDivElement>(null)
   const initialMessages = React.useMemo(() => {
@@ -206,7 +208,7 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
 
   return (
     <ChatContainer className={classNames(className, classes.root)}>
-      {title ? <ChatTitle title={title} onClose={onClose} /> : null}
+      {<ChatTitle title={title} onClose={onClose} />}
       <MessagesContainer
         className={classes.messagesContainer}
         ref={messagesRef}
@@ -266,30 +268,33 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
           </MessageRow>
         ) : null}
       </MessagesContainer>
-      <Controls>
-        <Form
-          onSubmit={(e) => {
-            scrollToBottom()
-            handleSubmit(e)
-          }}
-        >
-          <Input
-            className={classes.input}
-            placeholder="Type a message..."
-            name="message"
-            sx={{ flex: 1 }}
-            value={input}
-            onChange={handleInputChange}
-          />
-          <ActionButton
-            aria-label="Send"
-            type="submit"
-            disabled={isLoading || !input}
-          >
-            <RiSendPlaneFill />
-          </ActionButton>
-        </Form>
-      </Controls>
+      <form
+        onSubmit={(e) => {
+          scrollToBottom()
+          handleSubmit(e)
+        }}
+      >
+        <InputStyled
+          fullWidth
+          size="hero"
+          className={classes.input}
+          placeholder={placeholder}
+          name="message"
+          sx={{ flex: 1 }}
+          value={input}
+          onChange={handleInputChange}
+          endAdornment={
+            <ActionButtonStyled
+              size="large"
+              aria-label="Send"
+              type="submit"
+              disabled={isLoading || !input}
+            >
+              <RiSendPlaneFill />
+            </ActionButtonStyled>
+          }
+        />
+      </form>
       <SrAnnouncer
         isLoading={isLoading}
         loadingMessages={srLoadingMessages}

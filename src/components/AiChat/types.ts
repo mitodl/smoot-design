@@ -36,6 +36,10 @@ type AiChatProps = {
    */
   title?: string
   /**
+   * Plaeholder message for chat input
+   */
+  placeholder?: string
+  /**
    * Fired when "Close" button within title bar is clicked.
    */
   onClose?: () => void

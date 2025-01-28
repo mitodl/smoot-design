@@ -17,7 +17,7 @@ const RobotIcon = styled(RiRobot2Line)({
 })
 
 type ChatTitleProps = {
-  title: string
+  title?: string
   onClose?: () => void
   className?: string
 }
