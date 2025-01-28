@@ -44,6 +44,7 @@ const MessagesContainer = styled(ScrollSnap)(({ theme }) => ({
   paddingBottom: "0px",
   overflow: "auto",
   gap: "24px",
+  backgroundColor: theme.custom.colors.lightGray1,
   borderColor: theme.custom.colors.silverGrayLight,
   borderStyle: "solid",
   borderWidth: "0 1px",
