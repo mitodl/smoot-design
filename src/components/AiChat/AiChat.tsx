@@ -3,7 +3,7 @@ import styled from "@emotion/styled"
 import Skeleton from "@mui/material/Skeleton"
 import { Input } from "../Input/Input"
 import { ActionButton } from "../Button/ActionButton"
-import { RiSendPlaneFill } from "@remixicon/react"
+import { RiCloseLine, RiRobot2Line, RiSendPlaneFill } from "@remixicon/react"
 import { useAiChat } from "./utils"
 import Markdown from "react-markdown"
 
@@ -11,11 +11,11 @@ import type { AiChatProps } from "./types"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
-import { ChatTitle } from "./ChatTitle"
 
 import mascot from "../../../static/images/mit_mascot_tim.png"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 import { ImageAdapter } from "../ImageAdapter/ImageAdapter"
+import Typography from "@mui/material/Typography"
 
 const classes = {
   root: "MitAiChat--root",
@@ -29,16 +29,14 @@ const classes = {
   input: "MitAiChat--input",
 }
 
-const ChatContainer = styled.div(({ theme }) => ({
+const ChatContainer = styled.div({
   width: "100%",
   height: "100%",
-  border: `1px solid ${theme.custom.colors.silverGrayLight}`,
-  backgroundColor: theme.custom.colors.lightGray1,
   display: "flex",
   flexDirection: "column",
-}))
+})
 
-const MessagesContainer = styled(ScrollSnap)({
+const MessagesContainer = styled(ScrollSnap)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   flex: 1,
@@ -46,7 +44,10 @@ const MessagesContainer = styled(ScrollSnap)({
   paddingBottom: "0px",
   overflow: "auto",
   gap: "24px",
-})
+  borderColor: theme.custom.colors.silverGrayLight,
+  borderStyle: "solid",
+  borderWidth: "0 1px",
+}))
 const MessageRow = styled.div<{
   reverse?: boolean
 }>({
@@ -122,7 +123,7 @@ const Starter = styled.button(({ theme }) => ({
 }))
 
 const InputStyled = styled(Input)({
-  borderRadius: 0,
+  borderRadius: "0 0 8px 8px",
 })
 const ActionButtonStyled = styled(ActionButton)(({ theme }) => ({
   backgroundColor: theme.custom.colors.red,
@@ -150,6 +151,48 @@ const Dots = () => {
     </DotsContainer>
   )
 }
+
+const CloseButton = styled(ActionButton)(({ theme }) => ({
+  color: "inherit",
+  backgroundColor: theme.custom.colors.red,
+  "&:hover:not(:disabled)": {
+    backgroundColor: theme.custom.colors.mitRed,
+  },
+}))
+const RobotIcon = styled(RiRobot2Line)({
+  width: "40px",
+  height: "40px",
+})
+
+type ChatTitleProps = {
+  title?: string
+  onClose?: () => void
+  className?: string
+}
+const ChatTitle = styled(({ title, onClose, className }: ChatTitleProps) => {
+  return (
+    <div className={className}>
+      <RobotIcon />
+      <Typography flex={1} variant="h5">
+        {title}
+      </Typography>
+      {onClose ? (
+        <CloseButton variant="text" onClick={onClose} aria-label="Close chat">
+          <RiCloseLine />
+        </CloseButton>
+      ) : null}
+    </div>
+  )
+})<ChatTitleProps>(({ theme }) => ({
+  backgroundColor: theme.custom.colors.red,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "12px 24px",
+  gap: "16px",
+  color: theme.custom.colors.white,
+  borderRadius: "8px 8px 0 0",
+}))
 
 const AiChat: React.FC<AiChatProps> = function AiChat({
   chatId,
