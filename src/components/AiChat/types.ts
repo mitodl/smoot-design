@@ -26,6 +26,7 @@ type RequestOpts = {
    * Extra headers to pass to fetch.
    */
   headersOpts?: HeadersInit
+  onFinish?: (message: ChatMessage) => void
 }
 
 type AiChatProps = {

@@ -32,6 +32,14 @@ const useAiChat = (requestOpts: RequestOpts, opts: UseChatOptions) => {
     api: requestOpts.apiUrl,
     streamProtocol: "text",
     fetch: fetcher,
+    onFinish: (message) => {
+      if (!requestOpts.onFinish) return
+      if (message.role === "assistant" || message.role === "user") {
+        requestOpts.onFinish?.(message as ChatMessage)
+      } else {
+        console.info("Unexpected message role.", message)
+      }
+    },
     ...opts,
   })
 }
