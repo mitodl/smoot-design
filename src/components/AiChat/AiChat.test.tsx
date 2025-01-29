@@ -62,6 +62,7 @@ describe("AiChat", () => {
     ]
     const view = render(
       <AiChat
+        data-testid="ai-chat"
         initialMessages={initialMessages}
         conversationStarters={conversationStarters}
         requestOpts={{ apiUrl: "http://localhost:4567/test" }}
@@ -73,6 +74,7 @@ describe("AiChat", () => {
     const rerender = (newProps: Partial<AiChatProps>) => {
       view.rerender(
         <AiChat
+          data-testid="ai-chat"
           initialMessages={initialMessages}
           conversationStarters={conversationStarters}
           requestOpts={{ apiUrl: "http://localhost:4567/test" }}
@@ -194,5 +196,16 @@ describe("AiChat", () => {
       msg.you("User message"),
       msg.ai("Parsed: AI Response 1"),
     ])
+  })
+
+  test("Passes extra attributes to root", () => {
+    const fakeBody = { message: faker.lorem.sentence() }
+    const apiUrl = faker.internet.url()
+    const transformBody = jest.fn(() => fakeBody)
+    setup({
+      requestOpts: { apiUrl, transformBody },
+      parseContent: jest.fn((content) => `Parsed: ${content}`),
+    })
+    expect(screen.getByTestId("ai-chat")).toBeInTheDocument()
   })
 })

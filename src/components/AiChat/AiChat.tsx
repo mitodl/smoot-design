@@ -207,6 +207,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   onClose,
   ImgComponent,
   placeholder = "Type a message...",
+  ...others // Could contain data attributes
 }) {
   const messagesRef = React.useRef<HTMLDivElement>(null)
   const initialMessages = React.useMemo(() => {
@@ -251,7 +252,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   const lastMsg = messages[messages.length - 1]
 
   return (
-    <ChatContainer className={classNames(className, classes.root)}>
+    <ChatContainer className={classNames(className, classes.root)} {...others}>
       {<ChatTitle title={title} onClose={onClose} />}
       <MessagesContainer
         className={classes.messagesContainer}
