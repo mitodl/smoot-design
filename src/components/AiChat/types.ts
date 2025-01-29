@@ -24,6 +24,10 @@ type RequestOpts = {
 }
 
 type AiChatProps = {
+  /**
+   * Changing the `chatId` will reset the chat. Changing the `chatId` to a
+   * previously used value will restore the session state.
+   */
   chatId?: string
   /**
    * If provided, renders a title bar.
@@ -40,6 +44,9 @@ type AiChatProps = {
   className?: string
   initialMessages: Omit<ChatMessage, "id">[]
   conversationStarters?: { content: string }[]
+  /**
+   * Options for making requests to the AI service.
+   */
   requestOpts: RequestOpts
   parseContent?: (content: unknown) => string
   /**
