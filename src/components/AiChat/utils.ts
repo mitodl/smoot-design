@@ -16,12 +16,12 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
     const options: RequestInit = {
       ...opts,
       body: JSON.stringify(transformBody(messages)),
+      ...requestOpts.fetchOpts,
       headers: {
         ...opts?.headers,
         "Content-Type": "application/json",
-        ...requestOpts.headersOpts,
+        ...requestOpts.fetchOpts?.headers,
       },
-      ...requestOpts.fetchOpts,
     }
     return fetch(url, options)
   }

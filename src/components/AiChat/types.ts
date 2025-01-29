@@ -18,14 +18,8 @@ type RequestOpts = {
   transformBody?: (messages: ChatMessage[]) => unknown
   /**
    * Extra options to pass to fetch.
-   *
-   * If headers are specified, they will override the headersOpts.
    */
   fetchOpts?: RequestInit
-  /**
-   * Extra headers to pass to fetch.
-   */
-  headersOpts?: HeadersInit
   onFinish?: (message: ChatMessage) => void
 }
 
