@@ -195,7 +195,7 @@ const ChatTitle = styled(({ title, onClose, className }: ChatTitleProps) => {
   borderRadius: "8px 8px 0 0",
 }))
 
-const AiChat: React.FC<AiChatProps> = function AiChat({
+const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   chatId,
   className,
   conversationStarters,
@@ -347,6 +347,18 @@ const AiChat: React.FC<AiChatProps> = function AiChat({
     </ChatContainer>
   )
 }
+
+const AiChat: React.FC<AiChatProps> = (props) => (
+  /**
+   * Changing the `useChat` chatId seems to persist some state between
+   * hook calls. This can cause strange effects like loading API responses
+   * for previous chatId into new chatId.
+   *
+   * To avoid this, let's chnge the key, this will force React to make a new component
+   * not sharing any of the old state.
+   */
+  <AiChatInternal key={props.chatId} {...props} />
+)
 
 export { AiChat }
 export type { AiChatProps }
