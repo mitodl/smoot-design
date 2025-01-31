@@ -16,12 +16,12 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
     const options: RequestInit = {
       ...opts,
       body: JSON.stringify(transformBody(messages)),
+      ...requestOpts.fetchOpts,
       headers: {
         ...opts?.headers,
         "Content-Type": "application/json",
-        ...requestOpts.headersOpts,
+        ...requestOpts.fetchOpts?.headers,
       },
-      ...requestOpts.fetchOpts,
     }
     return fetch(url, options)
   }
@@ -32,6 +32,14 @@ const useAiChat = (requestOpts: RequestOpts, opts: UseChatOptions) => {
     api: requestOpts.apiUrl,
     streamProtocol: "text",
     fetch: fetcher,
+    onFinish: (message) => {
+      if (!requestOpts.onFinish) return
+      if (message.role === "assistant" || message.role === "user") {
+        requestOpts.onFinish?.(message as ChatMessage)
+      } else {
+        console.info("Unexpected message role.", message)
+      }
+    },
     ...opts,
   })
 }

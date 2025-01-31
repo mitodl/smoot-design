@@ -18,20 +18,35 @@ type RequestOpts = {
   transformBody?: (messages: ChatMessage[]) => unknown
   /**
    * Extra options to pass to fetch.
-   *
-   * If headers are specified, they will override the headersOpts.
    */
   fetchOpts?: RequestInit
-  /**
-   * Extra headers to pass to fetch.
-   */
-  headersOpts?: HeadersInit
+  onFinish?: (message: ChatMessage) => void
 }
 
 type AiChatProps = {
+  /**
+   * Changing the `chatId` will reset the chat. Changing the `chatId` to a
+   * previously used value will restore the session state.
+   */
+  chatId?: string
+  /**
+   * If provided, renders a title bar.
+   */
+  title?: string
+  /**
+   * Plaeholder message for chat input
+   */
+  placeholder?: string
+  /**
+   * Fired when "Close" button within title bar is clicked.
+   */
+  onClose?: () => void
   className?: string
   initialMessages: Omit<ChatMessage, "id">[]
   conversationStarters?: { content: string }[]
+  /**
+   * Options for making requests to the AI service.
+   */
   requestOpts: RequestOpts
   parseContent?: (content: unknown) => string
   /**
@@ -43,6 +58,11 @@ type AiChatProps = {
     delay: number
     text: string
   }[]
+  /**
+   * If provided, element to use for rendering avatar images.
+   * By default, the theme's ImageAdater is used.
+   */
+  ImgComponent?: React.ElementType
 }
 
 export type { RequestOpts, AiChatProps, ChatMessage }

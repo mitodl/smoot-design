@@ -45,6 +45,7 @@ export interface CustomTheme {
     headerHeightSm: string
   }
   LinkAdapter?: React.ElementType
+  ImgAdapter?: React.ElementType
 }
 
 /* https://mui.com/material-ui/customization/theming/#typescript */

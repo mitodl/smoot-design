@@ -66,7 +66,6 @@ type Story = StoryObj<typeof ThemeProvider>
  * </ThemeProvider>
  * ```
  *
- *
  * ### Custom Link Adapter
  * One particularly notable property is `theme.custom.LinkAdapter`. Some `smoot-design`
  * components render links. These links are native anchor tags by default. In
@@ -97,6 +96,12 @@ type Story = StoryObj<typeof ThemeProvider>
  *   }
  * }
  * ```
+ *
+ * ### ImageAdapter
+ * Similarly, `theme.custom.ImageAdapter` can be used to customize the image
+ * component used by `smoot-design`. By default, `ImageAdapter` uses a simple `img`
+ * tag. Interface `ImageAdapterPropsOverrides` is similarly available for
+ * augmentation.
  */
 export const LinkAdapterOverride: Story = {
   args: {
