@@ -1,6 +1,7 @@
 import * as React from "react"
-import styled from "@emotion/styled"
-import { css } from "@emotion/react"
+import { styled } from "@mui/system"
+// import styled from "@emotion/styled"
+import { css, CSSObject } from "@emotion/react"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
 import {
@@ -68,194 +69,290 @@ const RESPONSIVE_SIZES: Record<ButtonSize, ButtonSize> = {
   large: "medium",
 }
 
-const sizeStyles = (
-  size: ButtonSize,
-  hasBorder: boolean,
-  theme: Theme,
-): Partial<ThemeOptions["typography"]>[] => {
-  const paddingAdjust = hasBorder ? BORDER_WIDTHS[size] : 0
-  return [
-    {
-      boxSizing: "border-box",
-      borderWidth: BORDER_WIDTHS[size],
-    },
-    size === "large" && {
-      padding: `${14 - paddingAdjust}px 24px`,
-      ...theme.typography.buttonLarge,
-    },
-    size === "medium" && {
-      padding: `${11 - paddingAdjust}px 16px`,
-      ...theme.typography.button,
-    },
-    size === "small" && {
-      padding: `${8 - paddingAdjust}px 12px`,
-      ...theme.typography.buttonSmall,
-    },
-  ]
-}
+const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
+  color: theme.custom.colors.darkGray2,
+  textAlign: "center",
+  // display
+  display: "inline-flex",
+  justifyContent: "center",
+  alignItems: "center",
+  // transitions
+  transition: `background ${theme.transitions.duration.short}ms`,
+  // cursor
+  cursor: "pointer",
+  ":disabled": {
+    cursor: "default",
+  },
+  minWidth: "100px",
 
-const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
-  const { size, variant, edge, theme, color, responsive } = {
-    ...DEFAULT_PROPS,
-    ...props,
-  }
-  const { colors } = theme.custom
-  const hasBorder = variant === "secondary" || variant === "bordered"
-  return css([
+  boxSizing: "border-box",
+  borderWidth: BORDER_WIDTHS["medium"],
+  padding: "11px 16px",
+  ...theme.typography.button,
+
+  variants: [
     {
-      color: theme.palette.text.primary,
-      textAlign: "center",
-      // display
-      display: "inline-flex",
-      justifyContent: "center",
-      alignItems: "center",
-      // transitions
-      transition: `background ${theme.transitions.duration.short}ms`,
-      // cursor
-      cursor: "pointer",
-      ":disabled": {
-        cursor: "default",
-      },
-      minWidth: "100px",
+      props: { size: "large" },
+      style: theme.typography.buttonLarge,
     },
-    ...sizeStyles(size, hasBorder, theme),
-    // responsive
-    responsive && {
-      [theme.breakpoints.down("sm")]: sizeStyles(
-        RESPONSIVE_SIZES[size],
-        hasBorder,
-        theme,
-      ),
-    },
-    // variant
-    variant === "primary" && {
-      backgroundColor: colors.mitRed,
-      color: colors.white,
-      border: "none",
-      /* Shadow/04dp */
-      boxShadow:
-        "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
-      ":hover:not(:disabled)": {
-        backgroundColor: colors.red,
-        boxShadow: "none",
-      },
-      ":disabled": {
-        backgroundColor: colors.silverGray,
-        boxShadow: "none",
+    {
+      props: { size: "large" },
+      style: {
+        padding: "14px 24px",
       },
     },
-    variant === "secondary" && {
-      color: colors.red,
-      backgroundColor: "transparent",
-      borderColor: "currentcolor",
-      borderStyle: "solid",
-      ":hover:not(:disabled)": {
-        // brightRed at 0.06 alpha
-        backgroundColor: "rgba(255, 20, 35, 0.06)",
-      },
-      ":disabled": {
-        color: colors.silverGray,
+    {
+      props: { size: "large", hasBorder: true },
+      style: {
+        padding: `${14 - BORDER_WIDTHS["large"]}px 24px`,
       },
     },
-    variant === "text" && {
-      backgroundColor: "transparent",
-      borderStyle: "none",
-      color: colors.darkGray2,
-      ":hover:not(:disabled)": {
-        // darkGray1 at 6% alpha
-        backgroundColor: "rgba(64, 70, 76, 0.06)",
-      },
-      ":disabled": {
-        color: colors.silverGray,
+    {
+      props: ({ size, hasBorder }: { size: ButtonSize; hasBorder: boolean }) =>
+        (!size || size === "medium") && hasBorder,
+      style: {
+        padding: `${11 - BORDER_WIDTHS["medium"]}px 16px`,
       },
     },
-    variant === "bordered" && {
-      backgroundColor: colors.white,
-      color: colors.silverGrayDark,
-      border: `1px solid ${colors.silverGrayLight}`,
-      ":hover:not(:disabled)": {
-        backgroundColor: colors.lightGray1,
-        color: colors.darkGray2,
-      },
-      ":disabled": {
-        backgroundColor: colors.lightGray2,
-        border: `1px solid ${colors.lightGray2}`,
-        color: colors.silverGrayDark,
+    {
+      props: { size: "small" },
+      style: {
+        padding: "8px 12px",
       },
     },
-    variant === "tertiary" && {
-      color: colors.darkGray2,
-      border: "none",
-      backgroundColor: colors.lightGray2,
-      ":hover:not(:disabled)": {
-        backgroundColor: colors.white,
-      },
-      ":disabled": {
-        backgroundColor: colors.lightGray2,
-        color: colors.silverGrayLight,
+    {
+      props: { size: "small", hasBorder: true },
+      style: {
+        padding: `${8 - BORDER_WIDTHS["small"]}px 12px`,
       },
     },
-    // edge
-    edge === "rounded" && {
-      borderRadius: "4px",
+    // {
+    //   props: { size: "medium" },
+    //   style: theme.typography.button,
+    // },
+    {
+      props: { size: "small" },
+      style: theme.typography.buttonSmall,
     },
-    edge === "circular" && {
-      // Pill-shaped buttons... Overlapping border radius get clipped to pill.
-      borderRadius: "100vh",
-    },
-    // color
-    color === "secondary" && {
-      color: theme.custom.colors.silverGray,
-      borderColor: theme.custom.colors.silverGray,
-      ":hover:not(:disabled)": {
-        backgroundColor: theme.custom.colors.lightGray1,
+    {
+      props: { responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: theme.typography.button,
       },
     },
-  ])
-}
+    {
+      props: { size: "large", responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: theme.typography.buttonLarge,
+      },
+    },
+    {
+      props: { size: "small", responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: theme.typography.buttonSmall,
+      },
+    },
+    {
+      props: { variant: "primary" },
+      style: {
+        backgroundColor: theme.custom.colors.mitRed,
+        color: theme.custom.colors.white,
+        border: "none",
+        /* Shadow/04dp */
+        boxShadow:
+          "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
+        ":hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.red,
+          boxShadow: "none",
+        },
+        ":disabled": {
+          backgroundColor: theme.custom.colors.silverGray,
+          boxShadow: "none",
+        },
+      },
+    },
+    {
+      props: { variant: "success" },
+      style: {
+        backgroundColor: theme.custom.colors.darkGreen,
+        color: theme.custom.colors.white,
+        border: "none",
+        /* Shadow/04dp */
+        boxShadow:
+          "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
+        ":hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.darkGreen,
+          boxShadow: "none",
+        },
+        ":disabled": {
+          backgroundColor: theme.custom.colors.silverGray,
+          boxShadow: "none",
+        },
+      },
+    },
+    {
+      props: { variant: "secondary" },
+      style: {
+        color: theme.custom.colors.red,
+        backgroundColor: "transparent",
+        borderColor: "currentcolor",
+        borderStyle: "solid",
+        ":hover:not(:disabled)": {
+          // TODO
+          // backgroundColor: tinycolor(theme.custom.colors.brightRed)
+          //   .setAlpha(0.06)
+          //   .toString(),
+        },
+        ":disabled": {
+          color: theme.custom.colors.silverGray,
+        },
+      },
+    },
+    {
+      props: { variant: "text" },
+      style: {
+        backgroundColor: "transparent",
+        borderStyle: "none",
+        color: theme.custom.colors.darkGray2,
+        ":hover:not(:disabled)": {
+          // TODO
+          // backgroundColor: tinycolor(theme.custom.colors.darkGray1)
+          //   .setAlpha(0.06)
+          //   .toString(),
+        },
+        ":disabled": {
+          color: theme.custom.colors.silverGray,
+        },
+      },
+    },
+    {
+      props: { variant: "bordered" },
+      style: {
+        backgroundColor: theme.custom.colors.white,
+        color: theme.custom.colors.silverGrayDark,
+        border: `1px solid ${theme.custom.colors.silverGrayLight}`,
+        ":hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.lightGray1,
+          color: theme.custom.colors.darkGray2,
+        },
+        ":disabled": {
+          backgroundColor: theme.custom.colors.lightGray2,
+          border: `1px solid ${theme.custom.colors.lightGray2}`,
+          color: theme.custom.colors.silverGrayDark,
+        },
+      },
+    },
+    {
+      props: { variant: "noBorder" },
+      style: {
+        backgroundColor: theme.custom.colors.white,
+        color: theme.custom.colors.darkGray2,
+        border: "none",
+        ":hover:not(:disabled)": {
+          // TODO
+          // backgroundColor: tinycolor(theme.custom.colors.darkGray1)
+          //   .setAlpha(0.06)
+          //   .toString(),
+        },
+        ":disabled": {
+          color: theme.custom.colors.silverGray,
+        },
+      },
+    },
+    {
+      props: { variant: "tertiary" },
+      style: {
+        color: theme.custom.colors.darkGray2,
+        border: "none",
+        backgroundColor: theme.custom.colors.lightGray2,
+        ":hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.white,
+        },
+        ":disabled": {
+          backgroundColor: theme.custom.colors.lightGray2,
+          color: theme.custom.colors.silverGrayLight,
+        },
+      },
+    },
+    {
+      props: { variant: "inverted" },
+      style: {
+        backgroundColor: theme.custom.colors.white,
+        color: theme.custom.colors.mitRed,
+        borderColor: theme.custom.colors.mitRed,
+        borderStyle: "solid",
+      },
+    },
+    {
+      props: { edge: "rounded" },
+      style: {
+        borderRadius: "4px",
+      },
+    },
+    {
+      props: { edge: "circular" },
+      style: {
+        // Pill-shaped buttons... Overlapping border radius get clipped to pill.
+        borderRadius: "100vh",
+      },
+    },
+    {
+      props: { color: "secondary" },
+      style: {
+        color: theme.custom.colors.silverGray,
+        borderColor: theme.custom.colors.silverGray,
+        ":hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.lightGray1,
+        },
+      },
+    },
+  ],
+})
 
 const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
+
 const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
 
-const IconContainer = styled.span<{ side: "start" | "end"; size: ButtonSize }>(
-  ({ size, side }) => [
-    {
+const IconContainer = styled("span")<{
+  side: "start" | "end"
+  size: ButtonSize
+}>(({ size, side }) => [
+  {
+    height: "1em",
+    display: "flex",
+    alignItems: "center",
+  },
+  side === "start" && {
+    /**
+     * The negative margin is to counteract the padding on the button itself.
+     * Without icons, the left space is 24/16/12 px.
+     * With icons, the left space is 20/12/8 px.
+     */
+    marginLeft: "-4px",
+    marginRight: "8px",
+  },
+  side === "end" && {
+    marginLeft: "8px",
+    marginRight: "-4px",
+  },
+  {
+    "& svg, & .MuiSvgIcon-root": {
+      width: "1em",
       height: "1em",
-      display: "flex",
-      alignItems: "center",
+      fontSize: pxToRem(
+        {
+          small: 16,
+          medium: 20,
+          large: 24,
+        }[size],
+      ),
     },
-    side === "start" && {
-      /**
-       * The negative margin is to counteract the padding on the button itself.
-       * Without icons, the left space is 24/16/12 px.
-       * With icons, the left space is 20/12/8 px.
-       */
-      marginLeft: "-4px",
-      marginRight: "8px",
-    },
-    side === "end" && {
-      marginLeft: "8px",
-      marginRight: "-4px",
-    },
-    {
-      "& svg, & .MuiSvgIcon-root": {
-        width: "1em",
-        height: "1em",
-        fontSize: pxToRem(
-          {
-            small: 16,
-            medium: 20,
-            large: 24,
-          }[size],
-        ),
-      },
-    },
-  ],
-)
+  },
+])
 
 const ButtonInner: React.FC<
   ButtonStyleProps & { children?: React.ReactNode }
