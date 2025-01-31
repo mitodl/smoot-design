@@ -14,7 +14,7 @@ storybook-static/
 
 # bundle preview
 bundle-preview/static
-!bundle-preview/static/smoot-design/.gitkeep
+!bundle-preview/static/.gitkeep
 
 /**/.yarn/cache
 .swc
