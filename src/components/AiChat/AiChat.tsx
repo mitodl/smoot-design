@@ -61,11 +61,10 @@ const MessageRow = styled.div<{
   "> *": {
     minWidth: 0,
   },
+  position: "relative",
 })
 const Avatar = styled.div(({ theme }) => ({
   flexShrink: 0,
-  width: "40px",
-  height: "40px",
   borderRadius: "50%",
   backgroundColor: theme.custom.colors.white,
   display: "flex",
@@ -74,6 +73,16 @@ const Avatar = styled.div(({ theme }) => ({
   img: {
     width: "75%",
     height: "75%",
+  },
+  width: "32px",
+  height: "32px",
+  position: "absolute",
+  top: "-16px",
+  [`.${classes.messageRowAssistant} &`]: {
+    left: "-10px",
+  },
+  [`.${classes.messageRowUser} &`]: {
+    right: "16px",
   },
 }))
 const Message = styled.div(({ theme }) => ({
