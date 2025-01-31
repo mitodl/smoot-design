@@ -72,6 +72,10 @@ const Avatar = styled.div(({ theme }) => ({
   justifyContent: "center",
   img: {
     width: "66%",
+    // This is the default, but NextJS adds a height attribute to images
+    // The attr is useful for aspect ratio, but we want the actual CSS size to
+    // be auto.
+    height: "auto",
   },
   width: "32px",
   height: "32px",
