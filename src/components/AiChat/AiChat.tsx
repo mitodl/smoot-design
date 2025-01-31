@@ -71,8 +71,7 @@ const Avatar = styled.div(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   img: {
-    width: "75%",
-    height: "75%",
+    width: "66%",
   },
   width: "32px",
   height: "32px",
