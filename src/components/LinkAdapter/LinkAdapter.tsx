@@ -1,6 +1,5 @@
 import * as React from "react"
-import { useTheme } from "@mui/material/styles"
-import { styled } from "@mui/material/styles"
+import { styled, useTheme } from "@mui/material/styles"
 
 const PlainLink = styled("a")({
   color: "inherit",

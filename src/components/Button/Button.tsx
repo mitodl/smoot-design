@@ -67,6 +67,7 @@ const RESPONSIVE_SIZES: Record<ButtonSize, ButtonSize> = {
   large: "medium",
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
   color: theme.custom.colors.darkGray2,
   textAlign: "center",

@@ -1,5 +1,3 @@
-import type { Theme as MuiTheme } from "@mui/material/styles"
-
 export interface ColorGroup {
   main: string
   highlight: string
@@ -100,9 +98,3 @@ declare module "@mui/system" {
     theme: CustomTheme
   }
 }
-// import { Theme } from "@mui/material"
-// declare module "@mui/material/styles" {
-//   interface Typography {
-//     button: React.CSSProperties
-//   }
-// }
