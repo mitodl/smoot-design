@@ -12,6 +12,10 @@ coverage
 # Storybook
 storybook-static/
 
+# bundle preview
+bundle-preview/static
+!bundle-preview/static/.gitkeep
+
 /**/.yarn/cache
 .swc
 dist
