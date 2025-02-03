@@ -84,7 +84,7 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
   minWidth: "100px",
   boxSizing: "border-box",
   borderWidth: BORDER_WIDTHS["medium"],
-  padding: "11px 16px",
+  padding: "10px 16px",
   borderRadius: "4px",
   ...theme.typography.button,
 
@@ -276,6 +276,12 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
       style: {
         // Pill-shaped buttons... Overlapping border radius get clipped to pill.
         borderRadius: "100vh",
+      },
+    },
+    {
+      props: { edge: "none" },
+      style: {
+        borderRadius: 0,
       },
     },
     {
