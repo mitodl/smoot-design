@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { ScrollSnap } from "./ScrollSnap"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 import { faker } from "@faker-js/faker/locale/en"
 import { useInterval } from "../../utils/useInterval"
 import Slider from "@mui/material/Slider"

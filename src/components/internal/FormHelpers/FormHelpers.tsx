@@ -1,48 +1,53 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 import { RiErrorWarningLine } from "@remixicon/react"
 import Typography from "@mui/material/Typography"
 
-const Required = styled.span(({ theme }) => ({
+const Required = styled("span")(({ theme }) => ({
   color: theme.custom.colors.lightRed,
   marginLeft: "4px",
 }))
 
-const Description = styled.div<{ error?: boolean }>(({ theme, error }) => [
-  {
-    ...theme.typography.body2,
-    color: error
-      ? theme.custom.colors.lightRed
-      : theme.custom.colors.silverGrayDark,
-  },
-  error && {
-    textIndent: "-24px",
-    paddingLeft: "24px",
+const Description = styled("div")<{ error?: boolean }>(({ theme }) => ({
+  ...theme.typography.body2,
+  color: theme.custom.colors.silverGrayDark,
+  variants: [
+    {
+      props: { error: true },
+      style: {
+        color: theme.custom.colors.lightRed,
+        textIndent: "-24px",
+        paddingLeft: "24px",
 
-    "> svg:first-of-type": {
-      marginRight: "4px",
-      transform: "translateY(2px)",
-      width: "18px",
-      height: "18px",
-      position: "relative",
-      top: "2px",
+        "> svg:first-of-type": {
+          marginRight: "4px",
+          transform: "translateY(2px)",
+          width: "18px",
+          height: "18px",
+          position: "relative",
+          top: "2px",
+        },
+      },
     },
-  },
-])
+  ],
+}))
 
-const Container = styled.div<{ fullWidth?: boolean }>(({ fullWidth }) => [
-  {
-    display: "inline-flex",
-    flexDirection: "column",
-    alignItems: "start",
-    "> *:not(:last-child)": {
-      marginBottom: "4px",
+const Container = styled("div")<{ fullWidth?: boolean }>({
+  display: "inline-flex",
+  flexDirection: "column",
+  alignItems: "start",
+  "> *:not(:last-child)": {
+    marginBottom: "4px",
+  },
+  variants: [
+    {
+      props: { fullWidth: true },
+      style: {
+        width: "100%",
+      },
     },
-  },
-  fullWidth && {
-    width: "100%",
-  },
-])
+  ],
+})
 
 type ControlLabelProps = {
   htmlFor: string

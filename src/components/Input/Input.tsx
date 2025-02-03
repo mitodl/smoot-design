@@ -1,6 +1,5 @@
 import * as React from "react"
-import styled from "@emotion/styled"
-import { css } from "@emotion/react"
+import { styled } from "@mui/material/styles"
 import InputBase from "@mui/material/InputBase"
 import type { InputBaseProps } from "@mui/material/InputBase"
 import type { Theme } from "@mui/material/styles"
@@ -33,11 +32,6 @@ type InputProps = CustomInputProps &
   MuiDocOverride &
   Omit<InputBaseProps, "color" | keyof MuiDocOverride>
 
-const defaultProps = {
-  size: "medium",
-  multiline: false,
-} as const
-
 const responsiveSize: Record<Size, Size> = {
   small: "small",
   medium: "small",
@@ -46,17 +40,18 @@ const responsiveSize: Record<Size, Size> = {
 }
 
 type SizeStyleProps = {
-  size: Size
   theme: Theme
+  size: Size
   multiline?: boolean
 }
-const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
-  css([
+const sizeStyles = ({ theme, size, multiline }: SizeStyleProps) => {
+  return Object.assign(
+    {},
     (size === "small" || size === "medium") && {
       ...theme.typography.body2,
     },
     (size === "large" || size === "hero") && {
-      ".remixicon": {
+      "&& .remixicon": {
         width: "24px",
         height: "24px",
       },
@@ -114,7 +109,8 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
         width: "72px",
       },
     },
-  ])
+  )
+}
 
 /**
  * Base styles for Input and Select components. Includes border, color, hover effects.
@@ -188,21 +184,121 @@ const noForward = Object.keys({
  * - [Smoot Design Input Documentation](https://mitodl.github.io/smoot-design/https://mitodl.github.io/smoot-design/)
  * - [InputBase Documentation](https://mui.com/api/input-base/)
  */
-const Input: React.FC<InputProps> = styled(InputBase, {
-  shouldForwardProp: (prop) => !noForward.includes(prop),
-})<InputProps>(({ theme, size = defaultProps.size, multiline, responsive }) => [
-  baseInputStyles(theme),
-  sizeStyles({ size, theme, multiline }),
-  responsive && {
-    [theme.breakpoints.down("sm")]: sizeStyles({
-      size: responsiveSize[size],
-      theme,
-      multiline,
-    }),
-  },
-])
+const Input = styled(InputBase, {
+  shouldForwardProp: (prop: string) => !noForward.includes(prop),
+})<InputProps>(({ theme }) => ({
+  ...baseInputStyles(theme),
+  ...sizeStyles({ theme, size: "medium" }),
+  variants: [
+    {
+      props: { size: "small" },
+      style: sizeStyles({ theme, size: "small" }),
+    },
+    {
+      props: { size: "large" },
+      style: sizeStyles({ theme, size: "large" }),
+    },
+    {
+      props: { size: "hero" },
+      style: sizeStyles({ theme, size: "hero" }),
+    },
+    {
+      props: { size: "small", multiline: true },
+      style: sizeStyles({ theme, size: "small", multiline: true }),
+    },
+    {
+      props: { size: "medium", multiline: true },
+      style: sizeStyles({ theme, size: "medium", multiline: true }),
+    },
+    {
+      props: { size: "large", multiline: true },
+      style: sizeStyles({ theme, size: "large", multiline: true }),
+    },
+    {
+      props: { size: "hero", multiline: true },
+      style: sizeStyles({ theme, size: "hero", multiline: true }),
+    },
+    {
+      props: { size: "small", responsive: true },
+      style: {
+        // TODO breakpoints in here are not working
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["small"],
+        }),
+      },
+    },
+    {
+      props: { size: "medium", responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["medium"],
+        }),
+      },
+    },
+    {
+      props: { size: "large", responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["large"],
+        }),
+      },
+    },
+    {
+      props: { size: "hero", responsive: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["hero"],
+        }),
+      },
+    },
+    {
+      props: { size: "small", responsive: true, multiline: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["small"],
+          multiline: true,
+        }),
+      },
+    },
+    {
+      props: { size: "medium", responsive: true, multiline: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["medium"],
+          multiline: true,
+        }),
+      },
+    },
+    {
+      props: { size: "large", responsive: true, multiline: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["large"],
+          multiline: true,
+        }),
+      },
+    },
+    {
+      props: { size: "hero", responsive: true, multiline: true },
+      style: {
+        [theme.breakpoints.down("sm")]: sizeStyles({
+          theme,
+          size: responsiveSize["hero"],
+          multiline: true,
+        }),
+      },
+    },
+  ],
+}))
 
-const AdornmentButtonStyled = styled.button(({ theme }) => ({
+const AdornmentButtonStyled = styled("button")(({ theme }) => ({
   // font
   ...theme.typography.button,
   // display

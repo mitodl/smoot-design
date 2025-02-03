@@ -1,4 +1,4 @@
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 
 /**
  * VisuallyHidden is a utility component that hides its children from sighted
@@ -19,7 +19,7 @@ import styled from "@emotion/styled"
  *
  * The CSS here is based on https://inclusive-components.design/tooltips-toggletips/
  */
-const VisuallyHidden = styled.span({
+const VisuallyHidden = styled("span")({
   clipPath: "inset(100%)",
   clip: "rect(1px, 1px, 1px, 1px)",
   height: "1px",

@@ -1,8 +1,7 @@
 import * as React from "react"
-import { useTheme } from "@emotion/react"
-import styled from "@emotion/styled"
+import { styled, useTheme } from "@mui/material/styles"
 
-const PlainLink = styled.a({
+const PlainLink = styled("a")({
   color: "inherit",
   textDecoration: "none",
 })

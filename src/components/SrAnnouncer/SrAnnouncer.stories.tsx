@@ -1,21 +1,23 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { SrAnnouncer } from "./SrAnnouncer"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 
-const Container = styled.div<{ forceVisible?: boolean }>(({ forceVisible }) => [
-  forceVisible && {
-    width: "100% !important",
-    height: "100px !important",
-    "& > *:first-of-type": {
-      width: "unset !important",
-      height: "unset !important",
-      clipPath: "none !important",
-      clip: "unset !important",
-      position: "unset !important" as "unset",
+const Container = styled("div")<{ forceVisible?: boolean }>(
+  ({ forceVisible }) => [
+    forceVisible && {
+      width: "100% !important",
+      height: "100px !important",
+      "& > *:first-of-type": {
+        width: "unset !important",
+        height: "unset !important",
+        clipPath: "none !important",
+        clip: "unset !important",
+        position: "unset !important" as "unset",
+      },
     },
-  },
-])
+  ],
+)
 
 const meta: Meta<typeof SrAnnouncer> = {
   title: "smoot-design/ScreenreaderAnnouncer",

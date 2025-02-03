@@ -49,6 +49,16 @@ const meta: Meta<typeof Input> = {
   title: "smoot-design/Input",
   component: Input,
   argTypes: {
+    size: {
+      options: SIZES,
+      mapping: SIZES,
+      control: { type: "radio" },
+    },
+    responsive: {
+      options: [true, false],
+      mapping: [true, false],
+      control: { type: "boolean" },
+    },
     startAdornment: {
       options: Object.keys(ADORNMENTS),
       mapping: ADORNMENTS,
@@ -64,6 +74,7 @@ const meta: Meta<typeof Input> = {
     onChange: fn(),
     value: "some value",
     placeholder: "placeholder",
+    size: "medium",
   },
 }
 export default meta

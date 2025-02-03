@@ -1,5 +1,5 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 import Skeleton from "@mui/material/Skeleton"
 import { Input } from "../Input/Input"
 import { ActionButton } from "../Button/ActionButton"
@@ -29,7 +29,7 @@ const classes = {
   input: "MitAiChat--input",
 }
 
-const ChatContainer = styled.div({
+const ChatContainer = styled("div")({
   width: "100%",
   height: "100%",
   display: "flex",
@@ -49,7 +49,7 @@ const MessagesContainer = styled(ScrollSnap)(({ theme }) => ({
   borderStyle: "solid",
   borderWidth: "0 1px",
 }))
-const MessageRow = styled.div<{
+const MessageRow = styled("div")<{
   reverse?: boolean
 }>({
   display: "flex",
@@ -63,7 +63,7 @@ const MessageRow = styled.div<{
   },
   position: "relative",
 })
-const Avatar = styled.div(({ theme }) => ({
+const Avatar = styled("div")(({ theme }) => ({
   flexShrink: 0,
   borderRadius: "50%",
   backgroundColor: theme.custom.colors.white,
@@ -88,7 +88,7 @@ const Avatar = styled.div(({ theme }) => ({
     right: "16px",
   },
 }))
-const Message = styled.div(({ theme }) => ({
+const Message = styled("div")(({ theme }) => ({
   border: `1px solid ${theme.custom.colors.silverGrayLight}`,
   backgroundColor: theme.custom.colors.white,
   padding: "12px",
@@ -116,14 +116,14 @@ const Message = styled.div(({ theme }) => ({
   },
 }))
 
-const StarterContainer = styled.div({
+const StarterContainer = styled("div")({
   alignSelf: "flex-end",
   alignItems: "end",
   display: "flex",
   flexDirection: "column",
   gap: "12px",
 })
-const Starter = styled.button(({ theme }) => ({
+const Starter = styled("button")(({ theme }) => ({
   border: `1px solid ${theme.custom.colors.silverGrayLight}`,
   backgroundColor: theme.custom.colors.white,
   padding: "8px 16px",
@@ -148,7 +148,7 @@ const ActionButtonStyled = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
-const DotsContainer = styled.span(({ theme }) => ({
+const DotsContainer = styled("span")(({ theme }) => ({
   display: "inline-flex",
   gap: "4px",
   ".MuiSkeleton-root": {
