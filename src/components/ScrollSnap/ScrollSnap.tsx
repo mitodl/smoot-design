@@ -1,6 +1,6 @@
-import { composeRefs } from "../../utils/composeRefs"
-import styled from "@emotion/styled"
 import * as React from "react"
+import { composeRefs } from "../../utils/composeRefs"
+import { styled } from "@mui/material/styles"
 
 /**
  * Returns the distance between visible content and the bottom of the element.
@@ -16,7 +16,7 @@ const scrollToBottom = (el: HTMLElement) => {
   el.scrollTop = el.scrollHeight
 }
 
-const Scroller = styled.div({
+const Scroller = styled("div")({
   overflow: "auto",
 })
 
@@ -38,7 +38,7 @@ type ScrollSnapProps = {
  */
 const ScrollSnap = React.forwardRef<HTMLDivElement, ScrollSnapProps>(
   function ScrollSnap({ children, threshold = 2, className }, ref) {
-    const el = React.useRef<HTMLDivElement>()
+    const el = React.useRef<HTMLDivElement>(null)
 
     // `content` a delayed version of children to allow measuring scroll position
     // using the old children.

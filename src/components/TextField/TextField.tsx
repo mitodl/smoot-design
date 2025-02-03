@@ -13,6 +13,7 @@ type TextFieldProps = Omit<FormFieldWrapperProps, "children"> & {
   onChange?: React.ChangeEventHandler<HTMLInputElement>
   onBlur?: React.FocusEventHandler<HTMLInputElement>
   fullWidth?: boolean
+
   /**
    * Props forwarded to root of `<Input />`
    */

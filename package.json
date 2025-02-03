@@ -63,6 +63,8 @@
     }
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@mui/utils": "^6.1.6",
     "ai": "^4.0.13",
     "classnames": "^2.5.1",
@@ -73,12 +75,10 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.0.0",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
     "@faker-js/faker": "^9.0.0",
     "@jest/environment": "^29.7.0",
-    "@mui/material": "^6.1.6",
-    "@mui/system": "^6.1.6",
+    "@mui/material": "^6.4.2",
+    "@mui/system": "^6.4.2",
     "@remixicon/react": "^4.2.0",
     "@storybook/addon-actions": "^8.4.7",
     "@storybook/addon-essentials": "^8.4.7",
@@ -99,6 +99,7 @@
     "@testing-library/user-event": "14.6.1",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
+    "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^8.13.0",
     "@typescript-eslint/typescript-estree": "^8.13.0",
@@ -134,10 +135,6 @@
     "vite": "^6.0.7"
   },
   "peerDependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@mui/material": "^6.1.6",
-    "@mui/system": "^6.1.6",
     "@remixicon/react": "^4.2.0",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"

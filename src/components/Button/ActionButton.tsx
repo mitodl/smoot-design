@@ -1,5 +1,5 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 import { pxToRem } from "../ThemeProvider/typography"
 import {
   ButtonRoot,
@@ -13,33 +13,32 @@ import type { LinkAdapterPropsOverrides } from "../LinkAdapter/LinkAdapter"
 type ActionButtonStyleProps = Omit<ButtonStyleProps, "startIcon" | "endIcon">
 type ActionButtonProps = ActionButtonStyleProps & React.ComponentProps<"button">
 
-const actionStyles = (size: ButtonSize) => {
-  return {
-    minWidth: "auto",
-    padding: 0,
-    height: {
-      small: "32px",
-      medium: "40px",
-      large: "48px",
-    }[size],
-    width: {
-      small: "32px",
-      medium: "40px",
-      large: "48px",
-    }[size],
-    "& svg, & .MuiSvgIcon-root": {
-      width: "1em",
-      height: "1em",
-      fontSize: pxToRem(
-        {
-          small: 20,
-          medium: 24,
-          large: 32,
-        }[size],
-      ),
-    },
-  }
-}
+const actionStyles = (size: ButtonSize) => ({
+  minWidth: "auto",
+  padding: 0,
+  height: {
+    small: "32px",
+    medium: "40px",
+    large: "48px",
+  }[size],
+  width: {
+    small: "32px",
+    medium: "40px",
+    large: "48px",
+  }[size],
+  "& svg, & .MuiSvgIcon-root": {
+    width: "1em",
+    height: "1em",
+    fontSize: pxToRem(
+      {
+        small: 20,
+        medium: 24,
+        large: 32,
+      }[size],
+    ),
+  },
+})
+
 /**
  * A button that should contain a remixicon icon and nothing else.
  * See [ActionButton docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs).
@@ -58,7 +57,9 @@ const ActionButton = styled(
   return [
     actionStyles(size),
     responsive && {
-      [theme.breakpoints.down("sm")]: actionStyles(RESPONSIVE_SIZES[size]),
+      [theme.breakpoints.down("sm")]: actionStyles(
+        RESPONSIVE_SIZES[size as ButtonSize],
+      ),
     },
   ]
 })

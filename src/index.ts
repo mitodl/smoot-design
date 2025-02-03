@@ -1,8 +1,5 @@
 "use client"
 
-export { default as styled } from "@emotion/styled"
-export { css, Global } from "@emotion/react"
-
 export {
   ThemeProvider,
   createTheme,

@@ -1,6 +1,4 @@
 import type { Theme as MuiTheme } from "@mui/material/styles"
-import "@emotion/react"
-import "@emotion/styled"
 
 export interface ColorGroup {
   main: string
@@ -97,8 +95,14 @@ declare module "@mui/material/Chip" {
   }
 }
 
-declare module "@emotion/react" {
-  export interface Theme extends MuiTheme {
-    custom: CustomTheme
+declare module "@mui/system" {
+  export interface styled {
+    theme: CustomTheme
   }
 }
+// import { Theme } from "@mui/material"
+// declare module "@mui/material/styles" {
+//   interface Typography {
+//     button: React.CSSProperties
+//   }
+// }

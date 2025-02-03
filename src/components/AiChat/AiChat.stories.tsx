@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
 import { mockJson, mockStreaming } from "./story-utils"
-import styled from "@emotion/styled"
+import { styled } from "@mui/material/styles"
 import { fn } from "@storybook/test"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
@@ -22,7 +22,7 @@ const STARTERS = [
   { content: "I am curious about AI applications for business" },
 ]
 
-const Container = styled.div({
+const Container = styled("div")({
   width: "100%",
   height: "500px",
 })

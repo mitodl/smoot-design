@@ -1,9 +1,7 @@
 import * as React from "react"
-import { styled } from "@mui/system"
-// import styled from "@emotion/styled"
-import { css, CSSObject } from "@emotion/react"
+import { styled } from "@mui/material/styles"
 import { pxToRem } from "../ThemeProvider/typography"
-import type { Theme, ThemeOptions } from "@mui/material/styles"
+import type { Theme } from "@mui/material/styles"
 import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
@@ -84,20 +82,17 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
     cursor: "default",
   },
   minWidth: "100px",
-
   boxSizing: "border-box",
   borderWidth: BORDER_WIDTHS["medium"],
   padding: "11px 16px",
+  borderRadius: "4px",
   ...theme.typography.button,
 
   variants: [
     {
       props: { size: "large" },
-      style: theme.typography.buttonLarge,
-    },
-    {
-      props: { size: "large" },
       style: {
+        ...theme.typography.buttonLarge,
         padding: "14px 24px",
       },
     },
@@ -117,6 +112,7 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
     {
       props: { size: "small" },
       style: {
+        ...theme.typography.buttonSmall,
         padding: "8px 12px",
       },
     },
@@ -125,14 +121,6 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
       style: {
         padding: `${8 - BORDER_WIDTHS["small"]}px 12px`,
       },
-    },
-    // {
-    //   props: { size: "medium" },
-    //   style: theme.typography.button,
-    // },
-    {
-      props: { size: "small" },
-      style: theme.typography.buttonSmall,
     },
     {
       props: { responsive: true },
@@ -281,12 +269,6 @@ const buttonStyles: any = ({ theme }: { theme: Theme }) => ({
         color: theme.custom.colors.mitRed,
         borderColor: theme.custom.colors.mitRed,
         borderStyle: "solid",
-      },
-    },
-    {
-      props: { edge: "rounded" },
-      style: {
-        borderRadius: "4px",
       },
     },
     {
