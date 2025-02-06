@@ -13,6 +13,7 @@ const SIZES = enumValues<NonNullable<TextFieldProps["size"]>>({
   small: true,
   medium: true,
   large: true,
+  chat: true,
   hero: true,
 })
 const ADORNMENTS = {

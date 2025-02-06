@@ -55,6 +55,7 @@ const MessagesContainer = styled(ScrollSnap)({
   display: "flex",
   flexDirection: "column",
   flex: 1,
+  paddingTop: "14px",
   paddingBottom: "24px",
   overflow: "auto",
   gap: "24px",
