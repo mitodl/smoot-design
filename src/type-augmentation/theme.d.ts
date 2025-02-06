@@ -76,6 +76,7 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/InputBase" {
   interface InputBasePropsSizeOverrides {
     hero: true
+    chat: true
     large: true
   }
 }

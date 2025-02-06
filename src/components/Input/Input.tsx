@@ -6,7 +6,7 @@ import type { InputBaseProps } from "@mui/material/InputBase"
 import type { Theme } from "@mui/material/styles"
 import classnames from "classnames"
 
-type Size = "small" | "medium" | "large" | "hero"
+type Size = "small" | "medium" | "large" | "chat" | "hero"
 type CustomInputProps = {
   /**
    * If true, the input will display one size smaller at mobile breakpoint.
@@ -42,6 +42,7 @@ const responsiveSize: Record<Size, Size> = {
   small: "small",
   medium: "small",
   large: "medium",
+  chat: "medium",
   hero: "large",
 }
 
@@ -55,7 +56,7 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     (size === "small" || size === "medium") && {
       ...theme.typography.body2,
     },
-    (size === "large" || size === "hero") && {
+    (size === "large" || size === "chat" || size === "hero") && {
       ".remixicon": {
         width: "24px",
         height: "24px",
@@ -77,6 +78,10 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     size === "large" &&
       !multiline && {
         height: "48px",
+      },
+    size === "chat" &&
+      !multiline && {
+        height: "56px",
       },
     size === "hero" &&
       !multiline && {
@@ -106,6 +111,20 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
       padding: "0 16px",
       ".Mit-AdornmentButton": {
         width: "48px",
+      },
+    },
+    size === "chat" && {
+      padding: "0 16px",
+      borderRadius: "8px",
+      "&:hover:not(.Mui-disabled):not(.Mui-focused)": {
+        borderColor: theme.custom.colors.silverGrayLight,
+      },
+      "&.Mui-focused": {
+        borderColor: theme.custom.colors.silverGrayLight,
+        outline: "none",
+      },
+      ".Mit-AdornmentButton": {
+        padding: "0 16px",
       },
     },
     size === "hero" && {
