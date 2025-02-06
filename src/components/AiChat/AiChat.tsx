@@ -2,7 +2,12 @@ import * as React from "react"
 import styled from "@emotion/styled"
 import { Input, AdornmentButton } from "../Input/Input"
 import { ActionButton } from "../Button/ActionButton"
-import { RiCloseLine, RiRobot2Line, RiSendPlaneFill } from "@remixicon/react"
+import {
+  RiCloseLine,
+  RiRobot2Line,
+  RiSendPlaneFill,
+  RiStopFill,
+} from "@remixicon/react"
 import { useAiChat } from "./utils"
 import Markdown from "react-markdown"
 import type { AiChatProps } from "./types"
@@ -141,23 +146,27 @@ const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
+const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
+  fill: theme.custom.colors.red,
+}))
+
 type ChatTitleProps = {
   title?: string
-  askTimToText?: string
+  askTimTitle?: string
   onClose?: () => void
   className?: string
 }
 
 const ChatTitle = styled(
-  ({ title, askTimToText, onClose, className }: ChatTitleProps) => {
+  ({ title, askTimTitle, onClose, className }: ChatTitleProps) => {
     return (
       <div className={className}>
-        {askTimToText ? (
+        {askTimTitle ? (
           <AskTimTitle>
             <ImageAdapter src={askTimIcon} alt="" />
             <Typography variant="body1">
               Ask<strong>TIM</strong>&nbsp;
-              {askTimToText}
+              {askTimTitle}
             </Typography>
           </AskTimTitle>
         ) : null}
@@ -199,9 +208,10 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   requestOpts,
   initialMessages: initMsgs,
   parseContent,
+  initialPrompt,
   srLoadingMessages,
   title,
-  askTimToText,
+  askTimTitle,
   onClose,
   ImgComponent,
   placeholder = "",
@@ -212,6 +222,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     const prefix = Math.random().toString().slice(2)
     return initMsgs.map((m, i) => ({ ...m, id: `initial-${prefix}-${i}` }))
   }, [initMsgs])
+
   const {
     messages: unparsed,
     input,
@@ -219,10 +230,20 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     handleSubmit,
     append,
     isLoading,
+    stop,
   } = useAiChat(requestOpts, {
     initialMessages: initialMessages,
     id: chatId,
   })
+
+  React.useEffect(() => {
+    // https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat#initial-input sets the initial input, but does not send
+    if (initialPrompt) {
+      append({ role: "user", content: initialPrompt })
+    }
+    // append cannot be added to the dependency array - infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt])
 
   const messages = React.useMemo(() => {
     const initial = initialMessages.map((m) => m.id)
@@ -253,7 +274,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     <ChatContainer className={classNames(className, classes.root)} {...others}>
       <ChatTitle
         title={title}
-        askTimToText={askTimToText}
+        askTimTitle={askTimTitle}
         onClose={onClose}
         className={classNames(className, classes.title)}
       />
@@ -324,17 +345,23 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           value={input}
           onChange={handleInputChange}
           endAdornment={
-            <AdornmentButton
-              aria-label="Send"
-              type="submit"
-              disabled={isLoading || !input}
-              onClick={(e) => {
-                scrollToBottom()
-                handleSubmit(e)
-              }}
-            >
-              <StyledSendButton />
-            </AdornmentButton>
+            isLoading ? (
+              <AdornmentButton aria-label="Stop" onClick={stop}>
+                <StyledStopButton />
+              </AdornmentButton>
+            ) : (
+              <AdornmentButton
+                aria-label="Send"
+                type="submit"
+                disabled={!input}
+                onClick={(e) => {
+                  scrollToBottom()
+                  handleSubmit(e)
+                }}
+              >
+                <StyledSendButton />
+              </AdornmentButton>
+            )
           }
         />
       </form>

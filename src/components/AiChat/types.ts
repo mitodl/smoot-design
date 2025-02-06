@@ -34,11 +34,19 @@ type AiChatProps = {
    */
   title?: string
   /**
-   * Plaeholder message for chat input
+   * If provided, renders the "AskTIM" title motif followed by the text.
+   */
+  askTimTitle?: string
+  /**
+   * Placeholder message for chat input
    */
   placeholder?: string
   /**
-   * Fired when "Close" button within title bar is clicked.
+   * Sends an initial user prompt on first load
+   */
+  initialPrompt?: string
+  /**
+   * Show a close button within the title bar and fire when clicked.
    */
   onClose?: () => void
   className?: string

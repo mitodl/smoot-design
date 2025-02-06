@@ -221,7 +221,7 @@ const Input: React.FC<InputProps> = styled(InputBase, {
   },
 ])
 
-const AdornmentButtonStyled = styled.button(({ theme }) => ({
+const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
   // font
   ...theme.typography.button,
   // display
@@ -234,12 +234,12 @@ const AdornmentButtonStyled = styled.button(({ theme }) => ({
   background: "transparent",
   transition: `background ${theme.transitions.duration.short}ms`,
   // cursor
-  cursor: "pointer",
+  cursor: disabled ? "default" : "pointer",
   ":disabled": {
     cursor: "default",
   },
   ":hover": {
-    background: "rgba(0, 0, 0, 0.06)",
+    background: disabled ? "inherit" : "rgba(0, 0, 0, 0.06)",
   },
   color: theme.custom.colors.silverGray,
   ".MuiInputBase-root:hover &": {
