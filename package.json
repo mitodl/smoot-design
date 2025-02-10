@@ -17,7 +17,6 @@
     "typecheck": "tsc --noEmit",
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
-    "build:static": "cp -r ./static dist/static",
     "build:bundles": "vite build --outDir dist/bundles",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
