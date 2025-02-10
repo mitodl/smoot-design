@@ -99,7 +99,7 @@ const Message = styled.div(({ theme }) => ({
   [`.${classes.messageRowUser} &`]: {
     borderRadius: "8px 0px 8px 8px",
     color: theme.custom.colors.white,
-    backgroundColor: theme.custom.colors.darkGray1,
+    backgroundColor: theme.custom.colors.silverGrayDark,
   },
 }))
 
@@ -120,7 +120,7 @@ const Starter = styled.button(({ theme }) => ({
   boxSizing: "border-box",
   "&:hover": {
     color: theme.custom.colors.white,
-    backgroundColor: theme.custom.colors.darkGray1,
+    backgroundColor: theme.custom.colors.silverGrayDark,
     borderColor: "transparent",
   },
   borderRadius: "8px",
