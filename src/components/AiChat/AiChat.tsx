@@ -7,6 +7,8 @@ import {
   RiRobot2Line,
   RiSendPlaneFill,
   RiStopFill,
+  RiSparkling2Line,
+  RiMoreFill,
 } from "@remixicon/react"
 import { useAiChat } from "./utils"
 import Markdown from "react-markdown"
@@ -15,10 +17,7 @@ import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
-import { ImageAdapter } from "../ImageAdapter/ImageAdapter"
 import Typography from "@mui/material/Typography"
-import askTimIcon from "../../../static/images/ask-tim.svg"
-import waitingDotsIcon from "../../../static/images/waiting-dots-icon.svg"
 
 const classes = {
   root: "MitAiChat--root",
@@ -29,7 +28,6 @@ const classes = {
   messageRowUser: "MitAiChat--messageRowUser",
   messageRowAssistant: "MitAiChat--messageRowAssistant",
   message: "MitAiChat--message",
-  avatar: "MitAiChat--avatar",
   input: "MitAiChat--input",
 }
 
@@ -46,6 +44,11 @@ const AskTimTitle = styled.div(({ theme }) => ({
   gap: "8px",
   color: theme.custom.colors.darkGray2,
   img: {
+    width: "24px",
+    height: "24px",
+  },
+  svg: {
+    fill: theme.custom.colors.red,
     width: "24px",
     height: "24px",
   },
@@ -95,6 +98,10 @@ const Message = styled.div(({ theme }) => ({
     border: `1px solid ${theme.custom.colors.lightGray2}`,
     color: theme.custom.colors.darkGray2,
     borderRadius: "0px 8px 8px 8px",
+    svg: {
+      fill: theme.custom.colors.silverGrayDark,
+      display: "block",
+    },
   },
   [`.${classes.messageRowUser} &`]: {
     borderRadius: "8px 0px 8px 8px",
@@ -125,12 +132,6 @@ const Starter = styled.button(({ theme }) => ({
   },
   borderRadius: "8px",
 }))
-
-const Dots = styled(ImageAdapter)({
-  width: "24px",
-  height: "24px",
-  display: "block",
-})
 
 const RobotIcon = styled(RiRobot2Line)({
   width: "40px",
@@ -164,7 +165,7 @@ const ChatTitle = styled(
       <div className={className}>
         {askTimTitle ? (
           <AskTimTitle>
-            <ImageAdapter src={askTimIcon} alt="" />
+            <RiSparkling2Line />
             <Typography variant="body1">
               Ask<strong>TIM</strong>&nbsp;
               {askTimTitle}
@@ -325,15 +326,20 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
             key={"loading"}
           >
             <Message>
-              <Dots src={waitingDotsIcon} alt="" />
+              <RiMoreFill />
             </Message>
           </MessageRow>
         ) : null}
       </MessagesContainer>
       <form
         onSubmit={(e) => {
-          scrollToBottom()
-          handleSubmit(e)
+          e.preventDefault()
+          if (isLoading) {
+            stop()
+          } else {
+            scrollToBottom()
+            handleSubmit(e)
+          }
         }}
       >
         <StyledInput

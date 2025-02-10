@@ -145,6 +145,7 @@ const baseInputStyles = (theme: Theme) => ({
   borderWidth: "1px",
   borderStyle: "solid",
   borderRadius: "4px",
+  overflow: "hidden",
   "&.Mui-disabled": {
     backgroundColor: theme.custom.colors.lightGray1,
   },
