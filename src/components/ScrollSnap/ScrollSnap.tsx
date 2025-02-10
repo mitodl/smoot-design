@@ -38,7 +38,7 @@ type ScrollSnapProps = {
  */
 const ScrollSnap = React.forwardRef<HTMLDivElement, ScrollSnapProps>(
   function ScrollSnap({ children, threshold = 2, className }, ref) {
-    const el = React.useRef<HTMLDivElement>()
+    const el = React.useRef<HTMLDivElement>(null)
 
     // `content` a delayed version of children to allow measuring scroll position
     // using the old children.
