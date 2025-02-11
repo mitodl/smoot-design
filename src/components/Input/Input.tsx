@@ -238,6 +238,9 @@ const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
   cursor: disabled ? "default" : "pointer",
   ":disabled": {
     cursor: "default",
+    svg: {
+      fill: theme.custom.colors.silverGray,
+    },
   },
   ":hover": {
     background: disabled ? "inherit" : "rgba(0, 0, 0, 0.06)",

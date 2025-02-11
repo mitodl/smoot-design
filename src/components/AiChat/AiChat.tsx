@@ -262,6 +262,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
 
   const waiting =
     !showStarters && messages[messages.length - 1]?.role === "user"
+  const stoppable = isLoading && messages[messages.length - 1]?.role !== "user"
 
   const scrollToBottom = () => {
     messagesRef.current?.scrollBy({
@@ -334,7 +335,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          if (isLoading) {
+          if (isLoading && stoppable) {
             stop()
           } else {
             scrollToBottom()
@@ -353,7 +354,11 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           onChange={handleInputChange}
           endAdornment={
             isLoading ? (
-              <AdornmentButton aria-label="Stop" onClick={stop}>
+              <AdornmentButton
+                aria-label="Stop"
+                onClick={stop}
+                disabled={!stoppable}
+              >
                 <StyledStopButton />
               </AdornmentButton>
             ) : (
