@@ -210,13 +210,13 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   requestOpts,
   initialMessages: initMsgs,
   parseContent,
-  initialPrompt,
   srLoadingMessages,
   title,
   askTimTitle,
   onClose,
   ImgComponent,
   placeholder = "",
+  ref,
   ...others // Could contain data attributes
 }) {
   const messagesRef = React.useRef<HTMLDivElement>(null)
@@ -238,14 +238,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     id: chatId,
   })
 
-  React.useEffect(() => {
-    // https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat#initial-input sets the initial input, but does not send
-    if (initialPrompt) {
-      append({ role: "user", content: initialPrompt })
-    }
-    // append cannot be added to the dependency array - infinite loop
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPrompt])
+  React.useImperativeHandle(ref, () => ({ append }), [append])
 
   const messages = React.useMemo(() => {
     const initial = initialMessages.map((m) => m.id)

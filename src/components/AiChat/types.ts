@@ -44,10 +44,7 @@ type AiChatProps = {
   /**
    * Sends an initial user prompt on first load
    */
-  initialPrompt?: string
-  /**
-   * Show a close button within the title bar and fire when clicked.
-   */
+
   onClose?: () => void
   className?: string
   initialMessages: Omit<ChatMessage, "id">[]
@@ -71,6 +68,12 @@ type AiChatProps = {
    * By default, the theme's ImageAdater is used.
    */
   ImgComponent?: React.ElementType
-}
 
+  /**
+   * Provide a ref to the chat component to access the `append` method.
+   */
+  ref?: React.Ref<{
+    append: (message: ChatMessage) => void
+  }>
+}
 export type { RequestOpts, AiChatProps, ChatMessage }
