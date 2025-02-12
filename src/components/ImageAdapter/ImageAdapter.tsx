@@ -15,7 +15,7 @@ type ImageAdapterProps = React.ComponentProps<"img"> & {
   Component?: React.ElementType
 } & ImageAdapterPropsOverrides
 /**
- * Overrideable Image component.
+ * Overridable Image component.
  * - If `Component` is provided, renders as `Component`
  * - else, if `theme.custom.ImageAdapter` is provided, renders as `theme.custom.ImageAdapter`
  * - else, renders as `img` tag

@@ -1,5 +1,5 @@
 import { useChat, UseChatOptions } from "ai/react"
-import type { RequestOpts, ChatMessage } from "./types"
+import type { RequestOpts, AiChatMessage } from "./types"
 import { useMemo } from "react"
 
 const identity = <T>(x: T): T => x
@@ -10,7 +10,7 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
       console.error("Unexpected body type.")
       return window.fetch(url, opts)
     }
-    const messages: ChatMessage[] = JSON.parse(opts?.body).messages
+    const messages: AiChatMessage[] = JSON.parse(opts?.body).messages
     const transformBody: RequestOpts["transformBody"] =
       requestOpts.transformBody ?? identity
     const options: RequestInit = {
@@ -35,7 +35,7 @@ const useAiChat = (requestOpts: RequestOpts, opts: UseChatOptions) => {
     onFinish: (message) => {
       if (!requestOpts.onFinish) return
       if (message.role === "assistant" || message.role === "user") {
-        requestOpts.onFinish?.(message as ChatMessage)
+        requestOpts.onFinish?.(message as AiChatMessage)
       } else {
         console.info("Unexpected message role.", message)
       }

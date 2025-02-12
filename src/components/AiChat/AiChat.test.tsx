@@ -66,6 +66,7 @@ describe("AiChat", () => {
         initialMessages={initialMessages}
         conversationStarters={conversationStarters}
         requestOpts={{ apiUrl: "http://localhost:4567/test" }}
+        placeholder="Type a message..."
         {...props}
       />,
       { wrapper: ThemeProvider },

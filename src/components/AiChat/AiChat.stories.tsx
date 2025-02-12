@@ -14,6 +14,15 @@ const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
     content: "Hi! What are you interested in learning about?",
     role: "assistant",
   },
+  {
+    content: "I need to brush up on my Calculus",
+    role: "user",
+  },
+  {
+    content:
+      "Great! Do you want to start with the basics, like limits and derivatives, or jump into more advanced topics like integrals and series? Let me know how I can help!",
+    role: "assistant",
+  },
 ]
 
 const STARTERS = [
@@ -24,7 +33,7 @@ const STARTERS = [
 
 const Container = styled.div({
   width: "100%",
-  height: "500px",
+  height: "800px",
 })
 
 const meta: Meta<typeof AiChat> = {
@@ -42,7 +51,7 @@ const meta: Meta<typeof AiChat> = {
     initialMessages: INITIAL_MESSAGES,
     requestOpts: { apiUrl: TEST_API_STREAMING },
     conversationStarters: STARTERS,
-    title: "Chat with AI",
+    askTimTitle: "to recommend a course",
     onClose: fn(),
   },
   argTypes: {
@@ -82,6 +91,7 @@ export const StreamingResponses: Story = {}
  */
 export const JsonResponses: Story = {
   args: {
+    title: "Chat with AI",
     requestOpts: { apiUrl: TEST_API_JSON },
     parseContent: (content: unknown) => {
       return JSON.parse(content as string).message

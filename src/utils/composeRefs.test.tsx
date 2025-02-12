@@ -4,8 +4,8 @@ import { render, screen } from "@testing-library/react"
 
 describe("composeRefs", () => {
   test("Composing object + fn ref", () => {
-    const objRef1: React.RefObject<HTMLDivElement> = { current: null }
-    const objRef2: React.RefObject<HTMLDivElement> = { current: null }
+    const objRef1 = React.createRef<HTMLDivElement>()
+    const objRef2 = React.createRef<HTMLDivElement>()
     const fnRef1 = jest.fn()
     const fnRef2 = jest.fn()
 

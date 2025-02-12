@@ -1,7 +1,7 @@
 // Some of these are based on (compatible, but simplfied / restricted) versions of ai/react types.
 
 type Role = "assistant" | "user"
-type ChatMessage = {
+type AiChatMessage = {
   id: string
   content: string
   role: Role
@@ -15,12 +15,12 @@ type RequestOpts = {
    *
    * JSON.stringify is applied to the return value.
    */
-  transformBody?: (messages: ChatMessage[]) => unknown
+  transformBody?: (messages: AiChatMessage[]) => unknown
   /**
    * Extra options to pass to fetch.
    */
   fetchOpts?: RequestInit
-  onFinish?: (message: ChatMessage) => void
+  onFinish?: (message: AiChatMessage) => void
 }
 
 type AiChatProps = {
@@ -34,15 +34,20 @@ type AiChatProps = {
    */
   title?: string
   /**
-   * Plaeholder message for chat input
+   * If provided, renders the "AskTIM" title motif followed by the text.
+   */
+  askTimTitle?: string
+  /**
+   * Placeholder message for chat input
    */
   placeholder?: string
   /**
-   * Fired when "Close" button within title bar is clicked.
+   * Sends an initial user prompt on first load
    */
+
   onClose?: () => void
   className?: string
-  initialMessages: Omit<ChatMessage, "id">[]
+  initialMessages: Omit<AiChatMessage, "id">[]
   conversationStarters?: { content: string }[]
   /**
    * Options for making requests to the AI service.
@@ -63,6 +68,12 @@ type AiChatProps = {
    * By default, the theme's ImageAdater is used.
    */
   ImgComponent?: React.ElementType
-}
 
-export type { RequestOpts, AiChatProps, ChatMessage }
+  /**
+   * Provide a ref to the chat component to access the `append` method.
+   */
+  ref?: React.Ref<{
+    append: (message: Omit<AiChatMessage, "id">) => void
+  }>
+}
+export type { RequestOpts, AiChatProps, AiChatMessage }

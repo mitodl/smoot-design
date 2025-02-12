@@ -1,31 +1,33 @@
 import * as React from "react"
 import styled from "@emotion/styled"
-import Skeleton from "@mui/material/Skeleton"
-import { Input } from "../Input/Input"
+import { Input, AdornmentButton } from "../Input/Input"
 import { ActionButton } from "../Button/ActionButton"
-import { RiCloseLine, RiRobot2Line, RiSendPlaneFill } from "@remixicon/react"
+import {
+  RiCloseLine,
+  RiRobot2Line,
+  RiSendPlaneFill,
+  RiStopFill,
+  RiSparkling2Line,
+  RiMoreFill,
+} from "@remixicon/react"
 import { useAiChat } from "./utils"
 import Markdown from "react-markdown"
-
 import type { AiChatProps } from "./types"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
-
-import mascot from "../../../static/images/mit_mascot_tim.png"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
-import { ImageAdapter } from "../ImageAdapter/ImageAdapter"
 import Typography from "@mui/material/Typography"
 
 const classes = {
   root: "MitAiChat--root",
+  title: "MitAiChat--title",
   conversationStarter: "MitAiChat--conversationStarter",
   messagesContainer: "MitAiChat--messagesContainer",
   messageRow: "MitAiChat--messageRow",
   messageRowUser: "MitAiChat--messageRowUser",
   messageRowAssistant: "MitAiChat--messageRowAssistant",
   message: "MitAiChat--message",
-  avatar: "MitAiChat--avatar",
   input: "MitAiChat--input",
 }
 
@@ -36,19 +38,32 @@ const ChatContainer = styled.div({
   flexDirection: "column",
 })
 
-const MessagesContainer = styled(ScrollSnap)(({ theme }) => ({
+const AskTimTitle = styled.div(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  color: theme.custom.colors.darkGray2,
+  img: {
+    width: "24px",
+    height: "24px",
+  },
+  svg: {
+    fill: theme.custom.colors.red,
+    width: "24px",
+    height: "24px",
+  },
+}))
+
+const MessagesContainer = styled(ScrollSnap)({
   display: "flex",
   flexDirection: "column",
   flex: 1,
-  padding: "24px",
-  paddingBottom: "12px",
+  paddingTop: "14px",
+  paddingBottom: "24px",
   overflow: "auto",
   gap: "24px",
-  backgroundColor: theme.custom.colors.lightGray1,
-  borderColor: theme.custom.colors.silverGrayLight,
-  borderStyle: "solid",
-  borderWidth: "0 1px",
-}))
+})
+
 const MessageRow = styled.div<{
   reverse?: boolean
 }>({
@@ -63,35 +78,10 @@ const MessageRow = styled.div<{
   },
   position: "relative",
 })
-const Avatar = styled.div(({ theme }) => ({
-  flexShrink: 0,
-  borderRadius: "50%",
-  backgroundColor: theme.custom.colors.white,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  img: {
-    width: "66%",
-    // This is the default, but NextJS adds a height attribute to images
-    // The attr is useful for aspect ratio, but we want the actual CSS size to
-    // be auto.
-    height: "auto",
-  },
-  width: "32px",
-  height: "32px",
-  position: "absolute",
-  top: "-16px",
-  [`.${classes.messageRowAssistant} &`]: {
-    left: "-10px",
-  },
-  [`.${classes.messageRowUser} &`]: {
-    right: "16px",
-  },
-}))
+
 const Message = styled.div(({ theme }) => ({
-  border: `1px solid ${theme.custom.colors.silverGrayLight}`,
   backgroundColor: theme.custom.colors.white,
-  padding: "12px",
+  padding: "12px 16px",
   ...theme.typography.body2,
   "p:first-of-type": {
     marginTop: 0,
@@ -100,19 +90,23 @@ const Message = styled.div(({ theme }) => ({
     marginBottom: 0,
   },
   a: {
-    color: theme.custom.colors.mitRed,
-    textDecoration: "none",
-  },
-  "a:hover": {
     color: theme.custom.colors.red,
-    textDecoration: "underline",
+    fontWeight: "normal",
   },
   borderRadius: "12px",
   [`.${classes.messageRowAssistant} &`]: {
-    borderRadius: "0 12px 12px 12px",
+    border: `1px solid ${theme.custom.colors.lightGray2}`,
+    color: theme.custom.colors.darkGray2,
+    borderRadius: "0px 8px 8px 8px",
+    svg: {
+      fill: theme.custom.colors.silverGrayDark,
+      display: "block",
+    },
   },
   [`.${classes.messageRowUser} &`]: {
-    borderRadius: "12px 0 12px 12px",
+    borderRadius: "8px 0px 8px 8px",
+    color: theme.custom.colors.white,
+    backgroundColor: theme.custom.colors.silverGrayDark,
   },
 }))
 
@@ -123,85 +117,87 @@ const StarterContainer = styled.div({
   flexDirection: "column",
   gap: "12px",
 })
+
 const Starter = styled.button(({ theme }) => ({
-  border: `1px solid ${theme.custom.colors.silverGrayLight}`,
+  border: `1px solid ${theme.custom.colors.lightGray2}`,
   backgroundColor: theme.custom.colors.white,
   padding: "8px 16px",
-  ...theme.typography.subtitle3,
+  ...theme.typography.body3,
   cursor: "pointer",
+  boxSizing: "border-box",
   "&:hover": {
-    backgroundColor: theme.custom.colors.lightGray1,
+    color: theme.custom.colors.white,
+    backgroundColor: theme.custom.colors.silverGrayDark,
+    borderColor: "transparent",
   },
-  borderRadius: "100vh",
+  borderRadius: "8px",
 }))
 
-const InputStyled = styled(Input)({
-  borderRadius: "0 0 8px 8px",
-})
-const ActionButtonStyled = styled(ActionButton)(({ theme }) => ({
-  backgroundColor: theme.custom.colors.red,
-  flexShrink: 0,
-  marginRight: "24px",
-  marginLeft: "12px",
-  "&:hover:not(:disabled)": {
-    backgroundColor: theme.custom.colors.mitRed,
-  },
-}))
-
-const DotsContainer = styled.span(({ theme }) => ({
-  display: "inline-flex",
-  gap: "4px",
-  ".MuiSkeleton-root": {
-    backgroundColor: theme.custom.colors.silverGray,
-  },
-}))
-const Dots = () => {
-  return (
-    <DotsContainer>
-      <Skeleton variant="circular" width="8px" height="8px" />
-      <Skeleton variant="circular" width="8px" height="8px" />
-      <Skeleton variant="circular" width="8px" height="8px" />
-    </DotsContainer>
-  )
-}
-
-const CloseButton = styled(ActionButton)(({ theme }) => ({
-  color: "inherit",
-  backgroundColor: theme.custom.colors.red,
-  "&:hover:not(:disabled)": {
-    backgroundColor: theme.custom.colors.mitRed,
-  },
-}))
 const RobotIcon = styled(RiRobot2Line)({
   width: "40px",
   height: "40px",
 })
 
+const StyledInput = styled(Input)(({ theme }) => ({
+  backgroundColor: theme.custom.colors.lightGray1,
+  borderRadius: "8px",
+  border: `1px solid ${theme.custom.colors.lightGray2}`,
+}))
+
+const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
+  fill: theme.custom.colors.red,
+}))
+
+const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
+  fill: theme.custom.colors.red,
+}))
+
 type ChatTitleProps = {
   title?: string
+  askTimTitle?: string
   onClose?: () => void
   className?: string
 }
-const ChatTitle = styled(({ title, onClose, className }: ChatTitleProps) => {
-  return (
-    <div className={className}>
-      <RobotIcon />
-      <Typography flex={1} variant="h5">
-        {title}
-      </Typography>
-      {onClose ? (
-        <CloseButton variant="text" onClick={onClose} aria-label="Close chat">
-          <RiCloseLine />
-        </CloseButton>
-      ) : null}
-    </div>
-  )
-})<ChatTitleProps>(({ theme }) => ({
-  backgroundColor: theme.custom.colors.red,
+
+const ChatTitle = styled(
+  ({ title, askTimTitle, onClose, className }: ChatTitleProps) => {
+    return (
+      <div className={className}>
+        {askTimTitle ? (
+          <AskTimTitle>
+            <RiSparkling2Line />
+            <Typography variant="body1">
+              Ask<strong>TIM</strong>&nbsp;
+              {askTimTitle}
+            </Typography>
+          </AskTimTitle>
+        ) : null}
+        {title ? (
+          <>
+            <RobotIcon />
+            <Typography flex={1} variant="h5">
+              {title}
+            </Typography>
+          </>
+        ) : null}
+        {onClose ? (
+          <ActionButton
+            variant="text"
+            edge="none"
+            onClick={onClose}
+            aria-label="Close chat"
+          >
+            <RiCloseLine />
+          </ActionButton>
+        ) : null}
+      </div>
+    )
+  },
+)<ChatTitleProps>(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  padding: "12px 24px",
+  padding: "12px 0",
   gap: "16px",
   color: theme.custom.colors.white,
   borderRadius: "8px 8px 0 0",
@@ -216,9 +212,11 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   parseContent,
   srLoadingMessages,
   title,
+  askTimTitle,
   onClose,
   ImgComponent,
-  placeholder = "Type a message...",
+  placeholder = "",
+  ref,
   ...others // Could contain data attributes
 }) {
   const messagesRef = React.useRef<HTMLDivElement>(null)
@@ -226,6 +224,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     const prefix = Math.random().toString().slice(2)
     return initMsgs.map((m, i) => ({ ...m, id: `initial-${prefix}-${i}` }))
   }, [initMsgs])
+
   const {
     messages: unparsed,
     input,
@@ -233,10 +232,13 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     handleSubmit,
     append,
     isLoading,
+    stop,
   } = useAiChat(requestOpts, {
     initialMessages: initialMessages,
     id: chatId,
   })
+
+  React.useImperativeHandle(ref, () => ({ append }), [append])
 
   const messages = React.useMemo(() => {
     const initial = initialMessages.map((m) => m.id)
@@ -253,6 +255,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
 
   const waiting =
     !showStarters && messages[messages.length - 1]?.role === "user"
+  const stoppable = isLoading && messages[messages.length - 1]?.role !== "user"
 
   const scrollToBottom = () => {
     messagesRef.current?.scrollBy({
@@ -265,7 +268,12 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
 
   return (
     <ChatContainer className={classNames(className, classes.root)} {...others}>
-      {<ChatTitle title={title} onClose={onClose} />}
+      <ChatTitle
+        title={title}
+        askTimTitle={askTimTitle}
+        onClose={onClose}
+        className={classNames(className, classes.title)}
+      />
       <MessagesContainer
         className={classes.messagesContainer}
         ref={messagesRef}
@@ -279,11 +287,6 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
               [classes.messageRowAssistant]: m.role === "assistant",
             })}
           >
-            {m.role === "assistant" ? (
-              <Avatar className={classes.avatar}>
-                <ImageAdapter src={mascot} alt="" Component={ImgComponent} />
-              </Avatar>
-            ) : null}
             <Message className={classes.message}>
               <VisuallyHidden>
                 {m.role === "user" ? "You said: " : "Assistant said: "}
@@ -316,24 +319,26 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
             )}
             key={"loading"}
           >
-            <Avatar className={classes.avatar}>
-              <ImageAdapter src={mascot} alt="" Component={ImgComponent} />
-            </Avatar>
             <Message>
-              <Dots />
+              <RiMoreFill />
             </Message>
           </MessageRow>
         ) : null}
       </MessagesContainer>
       <form
         onSubmit={(e) => {
-          scrollToBottom()
-          handleSubmit(e)
+          e.preventDefault()
+          if (isLoading && stoppable) {
+            stop()
+          } else {
+            scrollToBottom()
+            handleSubmit(e)
+          }
         }}
       >
-        <InputStyled
+        <StyledInput
           fullWidth
-          size="hero"
+          size="chat"
           className={classes.input}
           placeholder={placeholder}
           name="message"
@@ -341,14 +346,27 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           value={input}
           onChange={handleInputChange}
           endAdornment={
-            <ActionButtonStyled
-              size="large"
-              aria-label="Send"
-              type="submit"
-              disabled={isLoading || !input}
-            >
-              <RiSendPlaneFill />
-            </ActionButtonStyled>
+            isLoading ? (
+              <AdornmentButton
+                aria-label="Stop"
+                onClick={stop}
+                disabled={!stoppable}
+              >
+                <StyledStopButton />
+              </AdornmentButton>
+            ) : (
+              <AdornmentButton
+                aria-label="Send"
+                type="submit"
+                disabled={!input}
+                onClick={(e) => {
+                  scrollToBottom()
+                  handleSubmit(e)
+                }}
+              >
+                <StyledSendButton />
+              </AdornmentButton>
+            )
           }
         />
       </form>
@@ -367,7 +385,7 @@ const AiChat: React.FC<AiChatProps> = (props) => (
    * hook calls. This can cause strange effects like loading API responses
    * for previous chatId into new chatId.
    *
-   * To avoid this, let's chnge the key, this will force React to make a new component
+   * To avoid this, let's change the key, this will force React to make a new component
    * not sharing any of the old state.
    */
   <AiChatInternal key={props.chatId} {...props} />

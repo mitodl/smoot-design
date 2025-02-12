@@ -6,7 +6,7 @@ import type { InputBaseProps } from "@mui/material/InputBase"
 import type { Theme } from "@mui/material/styles"
 import classnames from "classnames"
 
-type Size = "small" | "medium" | "large" | "hero"
+type Size = "small" | "medium" | "large" | "chat" | "hero"
 type CustomInputProps = {
   /**
    * If true, the input will display one size smaller at mobile breakpoint.
@@ -42,6 +42,7 @@ const responsiveSize: Record<Size, Size> = {
   small: "small",
   medium: "small",
   large: "medium",
+  chat: "medium",
   hero: "large",
 }
 
@@ -55,7 +56,7 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     (size === "small" || size === "medium") && {
       ...theme.typography.body2,
     },
-    (size === "large" || size === "hero") && {
+    (size === "large" || size === "chat" || size === "hero") && {
       ".remixicon": {
         width: "24px",
         height: "24px",
@@ -77,6 +78,10 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     size === "large" &&
       !multiline && {
         height: "48px",
+      },
+    size === "chat" &&
+      !multiline && {
+        height: "56px",
       },
     size === "hero" &&
       !multiline && {
@@ -108,6 +113,20 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
         width: "48px",
       },
     },
+    size === "chat" && {
+      padding: "0 16px",
+      borderRadius: "8px",
+      "&:hover:not(.Mui-disabled):not(.Mui-focused)": {
+        borderColor: theme.custom.colors.silverGrayLight,
+      },
+      "&.Mui-focused": {
+        borderColor: theme.custom.colors.silverGrayLight,
+        outline: "none",
+      },
+      ".Mit-AdornmentButton": {
+        padding: "0 16px",
+      },
+    },
     size === "hero" && {
       padding: "0 24px",
       ".Mit-AdornmentButton": {
@@ -126,6 +145,7 @@ const baseInputStyles = (theme: Theme) => ({
   borderWidth: "1px",
   borderStyle: "solid",
   borderRadius: "4px",
+  overflow: "hidden",
   "&.Mui-disabled": {
     backgroundColor: theme.custom.colors.lightGray1,
   },
@@ -202,7 +222,7 @@ const Input: React.FC<InputProps> = styled(InputBase, {
   },
 ])
 
-const AdornmentButtonStyled = styled.button(({ theme }) => ({
+const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
   // font
   ...theme.typography.button,
   // display
@@ -215,12 +235,15 @@ const AdornmentButtonStyled = styled.button(({ theme }) => ({
   background: "transparent",
   transition: `background ${theme.transitions.duration.short}ms`,
   // cursor
-  cursor: "pointer",
+  cursor: disabled ? "default" : "pointer",
   ":disabled": {
     cursor: "default",
+    svg: {
+      fill: theme.custom.colors.silverGray,
+    },
   },
   ":hover": {
-    background: "rgba(0, 0, 0, 0.06)",
+    background: disabled ? "inherit" : "rgba(0, 0, 0, 0.06)",
   },
   color: theme.custom.colors.silverGray,
   ".MuiInputBase-root:hover &": {
