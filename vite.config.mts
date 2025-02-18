@@ -6,8 +6,8 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist/bundled/",
     lib: {
       entry: [path.resolve(__dirname, "src/bundles/edxAiChatDrawer.tsx")],
-      name: "aiChat",
-      fileName: (format) => `aiChat.${format}.js`,
+      name: "edxAiChatDrawer",
+      fileName: (format) => `edxAiChatDrawer.${format}.js`,
     },
   },
   define: {
