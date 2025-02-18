@@ -1,0 +1,36 @@
+import { Meta, Title, Primary, Controls, Stories } from "@storybook/blocks"
+
+import * as EdxAiChatDrawer from "./EdxAiChatDrawer.stories"
+import { gitLink } from "../../story-utils"
+
+<Meta of={EdxAiChatDrawer} />
+
+<Title />
+
+The EdxAiChatDrawer is an AiChat Drawer intended for use in the EdX `learning` MFE and controlled via problems, videos, and other XBlock content. Because the Xblock content is rendered inside an iframe, the drawer is controlled via `window.parent.postMessage` events.
+
+- The drawer is rendered in the `learning` MFE ([(https://github.com/openedx/frontend-app-learning)](https://github.com/openedx/frontend-app-learning))
+- The chat drawer via a child iframe that renders XBlock content. The iframe should use `window.parent.postMessage` to communicate with the drawer.
+
+<Primary />
+
+## Inputs
+
+While most inputs are controlled via message events from the iframe, the drawer accepts a few props directly:
+
+<Controls />
+
+The message events emitted from iframe should have shape:
+
+```typescript
+type ChatInitMessage = {
+  type: "smoot-design::chat-open"
+  payload: {
+    /** config data */
+  }
+}
+```
+
+See <a href={gitLink("src/bundles/EdxAiChatDrawer/EdxAiChatDrawer.tsx")}>AiChat/types.ts</a> for deatils of the `payload`.
+
+<Stories includePrimary={false} />
