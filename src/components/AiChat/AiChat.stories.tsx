@@ -2,9 +2,9 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
-import { mockJson, mockStreaming } from "./story-utils"
 import styled from "@emotion/styled"
 import { fn } from "@storybook/test"
+import { handlers } from "./test-utils/api"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
@@ -66,17 +66,22 @@ const meta: Meta<typeof AiChat> = {
       table: { readonly: true }, // See above
     },
   },
-  beforeEach: () => {
-    const originalFetch = window.fetch
-    window.fetch = (url, opts) => {
-      if (url === TEST_API_STREAMING) {
-        return mockStreaming()
-      } else if (url === TEST_API_JSON) {
-        return mockJson()
-      }
-      return originalFetch(url, opts)
-    }
+  parameters: {
+    msw: {
+      handlers,
+    },
   },
+  // beforeEach: () => {
+  //   const originalFetch = window.fetch
+  //   window.fetch = (url, opts) => {
+  //     if (url === TEST_API_STREAMING) {
+  //       return mockStreaming()
+  //     } else if (url === TEST_API_JSON) {
+  //       return mockJson()
+  //     }
+  //     return originalFetch(url, opts)
+  //   }
+  // },
 }
 
 export default meta

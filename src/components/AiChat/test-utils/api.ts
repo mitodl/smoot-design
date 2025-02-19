@@ -1,3 +1,5 @@
+import { http, HttpResponse, delay } from "msw"
+
 const SAMPLE_RESPONSES = [
   `For exploring AI applications in business, I recommend the following course from MIT:
 
@@ -35,7 +37,7 @@ const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const mockStreaming = async function mockApi() {
+const getReadableStream = () => {
   let timerId: NodeJS.Timeout
   const response = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
   const chunks: string[] = response.split(" ").reduce((acc, word) => {
@@ -53,9 +55,7 @@ const mockStreaming = async function mockApi() {
   const num = chunks.length
   let i = 0
 
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  const body = new ReadableStream({
+  return new ReadableStream({
     start(controller) {
       timerId = setInterval(() => {
         const msg = new TextEncoder().encode(chunks[i])
@@ -73,26 +73,23 @@ const mockStreaming = async function mockApi() {
       }
     },
   })
-
-  return Promise.resolve(
-    new Response(body, {
-      headers: {
-        "Content-Type": "text/event-stream",
-      },
-    }),
-  )
 }
 
-const mockJson = async () => {
-  const message = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
-  await new Promise((res) => setTimeout(res, 1000))
-  return Promise.resolve(
-    new Response(JSON.stringify({ message }), {
+const handlers = [
+  http.post("http://localhost:4567/streaming", async () => {
+    await delay(600)
+    const body = getReadableStream()
+    return new HttpResponse(body, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "text/plain",
       },
-    }),
-  )
-}
+    })
+  }),
+  http.post("http://localhost:4567/json", async () => {
+    const message = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
+    await delay(800)
+    return HttpResponse.json({ message })
+  }),
+]
 
-export { mockStreaming, mockJson }
+export { handlers }

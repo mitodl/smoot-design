@@ -118,7 +118,10 @@
     "jest-environment-jsdom": "^29.5.0",
     "jest-extended": "^4.0.2",
     "jest-fail-on-console": "^3.3.1",
+    "jest-fixed-jsdom": "^0.0.9",
     "jest-watch-typeahead": "^2.2.2",
+    "msw": "^2.7.0",
+    "msw-storybook-addon": "^2.0.4",
     "next": "^15.0.2",
     "prettier": "^3.3.3",
     "react": "19.0.0",
@@ -141,5 +144,10 @@
     "@remixicon/react": "^4.2.0",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"
+  },
+  "msw": {
+    "workerDirectory": [
+      "storybook-public"
+    ]
   }
 }
