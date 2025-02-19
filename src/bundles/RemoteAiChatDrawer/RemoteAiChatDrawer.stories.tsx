@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { AiChatDrawer, ChatInitMessage } from "./EdxAiChatDrawer"
+import { AiChatDrawer, ChatInitMessage } from "./RemoteAiChatDrawer"
 import invariant from "tiny-invariant"
 
 type ChatInitPayload = ChatInitMessage["payload"]
@@ -22,7 +22,7 @@ const STARTERS = [
 ]
 
 const meta: Meta<typeof AiChatDrawer> = {
-  title: "smoot-design/ai/EdxAiChatDrawer",
+  title: "smoot-design/ai/RemoteAiChatDrawer",
   component: AiChatDrawer,
   render: () => {
     return (

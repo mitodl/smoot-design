@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <title>Home</title>
-    <script src="./static/bundles/edxAiChatDrawer.umd.js"></script>
+    <script src="./static/bundles/remoteAiChatDrawer.umd.js"></script>
     <style>
       #app-root {
         width: 450px;
@@ -21,7 +21,7 @@
      * Accepts all options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-aichat--docs,\
      * plus root element
      */
-    edxAiChatDrawer.init({
+    remoteAiChatDrawer.init({
       messageOrigin: "http://localhost:3000",
       transformBody: (messages) => ({
         message: messages[messages.length - 1].content,

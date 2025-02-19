@@ -1,7 +1,7 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { AiChatDrawer } from "./EdxAiChatDrawer/EdxAiChatDrawer"
-import type { AiChatDrawerProps } from "./EdxAiChatDrawer/EdxAiChatDrawer"
+import { AiChatDrawer } from "./RemoteAiChatDrawer/RemoteAiChatDrawer"
+import type { AiChatDrawerProps } from "./RemoteAiChatDrawer/RemoteAiChatDrawer"
 import { ThemeProvider } from "../components/ThemeProvider/ThemeProvider"
 
 const init = (opts: AiChatDrawerProps) => {
