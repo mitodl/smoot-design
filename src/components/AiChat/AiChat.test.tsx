@@ -19,7 +19,9 @@ const server = setupServer(
     return HttpResponse.text(`AI Response ${count}`)
   }),
 )
-server.listen()
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
 
 jest.mock("react-markdown", () => {
   return {
@@ -204,5 +206,19 @@ describe("AiChat", () => {
       parseContent: jest.fn((content) => `Parsed: ${content}`),
     })
     expect(screen.getByTestId("ai-chat")).toBeInTheDocument()
+  })
+
+  test("If the API returns an error, an alert is shown", async () => {
+    setup()
+    server.use(
+      http.post(API_URL, async () => {
+        return new HttpResponse(null, { status: 500 })
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("An unexpected error has occurred")
   })
 })
