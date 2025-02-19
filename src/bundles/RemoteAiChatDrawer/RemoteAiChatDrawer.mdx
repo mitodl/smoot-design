@@ -1,0 +1,38 @@
+import { Meta, Title, Primary, Controls, Stories } from "@storybook/blocks"
+
+import * as RemoteAiChatDrawer from "./RemoteAiChatDrawer.stories"
+import { gitLink } from "../../story-utils"
+
+<Meta of={RemoteAiChatDrawer} />
+
+<Title />
+
+The RemoteAiChatDrawer is an AiChat Drawer controlled "remotely" via messages from iframes. An example use case is within Open edx courses:
+
+- The RemoteAiChatDrawer is rendered in the learning MFE
+- it is controlled via messages from XBlock content; the XBlock content is rendered in an iframe within the learning MFE.
+
+To control the drawer, the iframe sends messages via `window.parent.postMessage`. Most configuration is handled via such messages.
+
+<Primary />
+
+## Inputs
+
+While most inputs are controlled via message events from the iframe, the drawer accepts a few props directly:
+
+<Controls />
+
+The message events emitted from iframe should have shape:
+
+```typescript
+type ChatInitMessage = {
+  type: "smoot-design::chat-open"
+  payload: {
+    /** config data */
+  }
+}
+```
+
+See <a href={gitLink("src/bundles/RemoteAiChatDrawer/RemoteAiChatDrawer.tsx")}>RemoteAiChatDrawer.ts</a> for deatils of the `payload`.
+
+<Stories includePrimary={false} />
