@@ -39,6 +39,9 @@ const Container = styled.div({
 const meta: Meta<typeof AiChat> = {
   title: "smoot-design/AI/AiChat",
   component: AiChat,
+  parameters: {
+    msw: { handlers },
+  },
   render: (args) => <AiChat {...args} />,
   decorators: (Story) => {
     return (
@@ -66,22 +69,6 @@ const meta: Meta<typeof AiChat> = {
       table: { readonly: true }, // See above
     },
   },
-  parameters: {
-    msw: {
-      handlers,
-    },
-  },
-  // beforeEach: () => {
-  //   const originalFetch = window.fetch
-  //   window.fetch = (url, opts) => {
-  //     if (url === TEST_API_STREAMING) {
-  //       return mockStreaming()
-  //     } else if (url === TEST_API_JSON) {
-  //       return mockJson()
-  //     }
-  //     return originalFetch(url, opts)
-  //   }
-  // },
 }
 
 export default meta
