@@ -37,7 +37,7 @@ const Container = styled.div({
 })
 
 const meta: Meta<typeof AiChat> = {
-  title: "smoot-design/ai/AiChat",
+  title: "smoot-design/AI/AiChat",
   component: AiChat,
   render: (args) => <AiChat {...args} />,
   decorators: (Story) => {

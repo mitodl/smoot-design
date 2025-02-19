@@ -38,6 +38,13 @@ const ChatContainer = styled.div({
   flexDirection: "column",
 })
 
+const CloseButton = styled(ActionButton)(({ theme }) => ({
+  "&&:hover": {
+    backgroundColor: theme.custom.colors.red,
+    color: theme.custom.colors.white,
+  },
+}))
+
 const AskTimTitle = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -80,6 +87,7 @@ const MessageRow = styled.div<{
 })
 
 const Message = styled.div(({ theme }) => ({
+  color: theme.custom.colors.darkGray2,
   backgroundColor: theme.custom.colors.white,
   padding: "12px 16px",
   ...theme.typography.body2,
@@ -96,7 +104,6 @@ const Message = styled.div(({ theme }) => ({
   borderRadius: "12px",
   [`.${classes.messageRowAssistant} &`]: {
     border: `1px solid ${theme.custom.colors.lightGray2}`,
-    color: theme.custom.colors.darkGray2,
     borderRadius: "0px 8px 8px 8px",
     svg: {
       fill: theme.custom.colors.silverGrayDark,
@@ -105,8 +112,7 @@ const Message = styled.div(({ theme }) => ({
   },
   [`.${classes.messageRowUser} &`]: {
     borderRadius: "8px 0px 8px 8px",
-    color: theme.custom.colors.white,
-    backgroundColor: theme.custom.colors.silverGrayDark,
+    backgroundColor: theme.custom.colors.lightGray1,
   },
 }))
 
@@ -152,6 +158,12 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
+const Disclaimer = styled(Typography)(({ theme }) => ({
+  color: theme.custom.colors.silverGrayDark,
+  marginTop: "16px",
+  textAlign: "center",
+}))
+
 type ChatTitleProps = {
   title?: string
   askTimTitle?: string
@@ -181,14 +193,14 @@ const ChatTitle = styled(
           </>
         ) : null}
         {onClose ? (
-          <ActionButton
-            variant="text"
-            edge="none"
+          <CloseButton
+            variant="tertiary"
+            edge="rounded"
             onClick={onClose}
             aria-label="Close chat"
           >
             <RiCloseLine />
-          </ActionButton>
+          </CloseButton>
         ) : null}
       </div>
     )
@@ -370,6 +382,9 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           }
         />
       </form>
+      <Disclaimer variant="body3">
+        AI-generated content may be incorrect.
+      </Disclaimer>
       <SrAnnouncer
         isLoading={isLoading}
         loadingMessages={srLoadingMessages}
