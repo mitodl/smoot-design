@@ -3,6 +3,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { AiChatDrawer, ChatInitMessage } from "./RemoteAiChatDrawer"
 import invariant from "tiny-invariant"
+import { handlers } from "../../components/AiChat/test-utils/api"
 
 type ChatInitPayload = ChatInitMessage["payload"]
 
@@ -71,6 +72,11 @@ const meta: Meta<typeof AiChatDrawer> = {
         <AiChatDrawer messageOrigin="http://localhost:6006" />
       </>
     )
+  },
+  parameters: {
+    msw: {
+      handlers,
+    },
   },
 }
 

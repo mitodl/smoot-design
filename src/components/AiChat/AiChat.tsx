@@ -18,6 +18,7 @@ import classNames from "classnames"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 import Typography from "@mui/material/Typography"
+import { Alert } from "../Alert/Alert"
 
 const classes = {
   root: "MitAiChat--root",
@@ -245,6 +246,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     append,
     isLoading,
     stop,
+    error,
   } = useAiChat(requestOpts, {
     initialMessages: initialMessages,
     id: chatId,
@@ -266,7 +268,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   const showStarters = messages.length === initialMessages.length
 
   const waiting =
-    !showStarters && messages[messages.length - 1]?.role === "user"
+    !showStarters && !error && messages[messages.length - 1]?.role === "user"
   const stoppable = isLoading && messages[messages.length - 1]?.role !== "user"
 
   const scrollToBottom = () => {
@@ -335,6 +337,11 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
               <RiMoreFill />
             </Message>
           </MessageRow>
+        ) : null}
+        {error ? (
+          <Alert severity="error" closable>
+            An unexpected error has occurred.
+          </Alert>
         ) : null}
       </MessagesContainer>
       <form
