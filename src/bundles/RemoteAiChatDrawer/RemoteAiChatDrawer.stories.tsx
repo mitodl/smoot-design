@@ -63,7 +63,7 @@ const meta: Meta<typeof AiChatDrawer> = {
             }
             textarea.value = JSON.stringify(message, null, 2)
             button.addEventListener("click", () => {
-              parent.postMessage(message)
+              parent.postMessage(JSON.parse(textarea.value))
             })
           }}
           title="button frame"
