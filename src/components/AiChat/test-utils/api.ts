@@ -76,9 +76,21 @@ const getReadableStream = () => {
 }
 
 const handlers = [
-  http.post("http://localhost:4567/streaming", async () => {
+  http.post("http://localhost:4567/streaming", async ({ request }) => {
     await delay(600)
     const body = getReadableStream()
+
+    const requestBody = await request.json()
+    if (Array.isArray(requestBody)) {
+      const last = requestBody[requestBody.length - 1]
+      const { content } = last
+      if (content === "error") {
+        return new HttpResponse("Internal Server Error", {
+          status: 500,
+        })
+      }
+    }
+
     return new HttpResponse(body, {
       headers: {
         "Content-Type": "text/plain",
