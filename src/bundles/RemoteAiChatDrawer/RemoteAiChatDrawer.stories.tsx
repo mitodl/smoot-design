@@ -22,7 +22,7 @@ const STARTERS = [
 ]
 
 const meta: Meta<typeof AiChatDrawer> = {
-  title: "smoot-design/ai/RemoteAiChatDrawer",
+  title: "smoot-design/AI/RemoteAiChatDrawer",
   component: AiChatDrawer,
   render: () => {
     return (
