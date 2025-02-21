@@ -7,22 +7,22 @@ import { ThemeProvider } from "../ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { AiChatProps } from "./types"
 import { faker } from "@faker-js/faker/locale/en"
+import { http, HttpResponse } from "msw"
+import { setupServer } from "msw/node"
 
 const counter = jest.fn() // use jest.fn as counter because it resets on each test
-const mockFetch = jest.mocked(
-  jest.fn(() => {
+const API_URL = "http://localhost:4567/test"
+const server = setupServer(
+  http.post(API_URL, async () => {
     const count = counter.mock.calls.length
     counter()
-    return Promise.resolve(
-      new Response(`AI Response ${count}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }),
-    )
-  }) as typeof fetch,
+    return HttpResponse.text(`AI Response ${count}`)
+  }),
 )
-window.fetch = mockFetch
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+
 jest.mock("react-markdown", () => {
   return {
     __esModule: true,
@@ -65,7 +65,7 @@ describe("AiChat", () => {
         data-testid="ai-chat"
         initialMessages={initialMessages}
         conversationStarters={conversationStarters}
-        requestOpts={{ apiUrl: "http://localhost:4567/test" }}
+        requestOpts={{ apiUrl: API_URL }}
         placeholder="Type a message..."
         {...props}
       />,
@@ -78,7 +78,7 @@ describe("AiChat", () => {
           data-testid="ai-chat"
           initialMessages={initialMessages}
           conversationStarters={conversationStarters}
-          requestOpts={{ apiUrl: "http://localhost:4567/test" }}
+          requestOpts={{ apiUrl: API_URL }}
           {...newProps}
         />,
       )
@@ -145,11 +145,11 @@ describe("AiChat", () => {
   })
 
   test("transformBody is called before sending requests", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
     const fakeBody = { message: faker.lorem.sentence() }
-    const apiUrl = faker.internet.url()
     const transformBody = jest.fn(() => fakeBody)
     const { initialMessages } = setup({
-      requestOpts: { apiUrl, transformBody },
+      requestOpts: { apiUrl: API_URL, transformBody },
     })
 
     await user.click(screen.getByPlaceholderText("Type a message..."))
@@ -162,7 +162,7 @@ describe("AiChat", () => {
     ])
     expect(mockFetch).toHaveBeenCalledTimes(1)
     expect(mockFetch).toHaveBeenCalledWith(
-      apiUrl,
+      API_URL,
       expect.objectContaining({
         body: JSON.stringify(fakeBody),
       }),
@@ -171,10 +171,9 @@ describe("AiChat", () => {
 
   test("parseContent is called on the API-received message content", async () => {
     const fakeBody = { message: faker.lorem.sentence() }
-    const apiUrl = faker.internet.url()
     const transformBody = jest.fn(() => fakeBody)
     const { initialMessages, conversationStarters } = setup({
-      requestOpts: { apiUrl, transformBody },
+      requestOpts: { apiUrl: API_URL, transformBody },
       parseContent: jest.fn((content) => `Parsed: ${content}`),
     })
 
@@ -201,12 +200,25 @@ describe("AiChat", () => {
 
   test("Passes extra attributes to root", () => {
     const fakeBody = { message: faker.lorem.sentence() }
-    const apiUrl = faker.internet.url()
     const transformBody = jest.fn(() => fakeBody)
     setup({
-      requestOpts: { apiUrl, transformBody },
+      requestOpts: { apiUrl: API_URL, transformBody },
       parseContent: jest.fn((content) => `Parsed: ${content}`),
     })
     expect(screen.getByTestId("ai-chat")).toBeInTheDocument()
+  })
+
+  test("If the API returns an error, an alert is shown", async () => {
+    setup()
+    server.use(
+      http.post(API_URL, async () => {
+        return new HttpResponse(null, { status: 500 })
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("An unexpected error has occurred")
   })
 })

@@ -2,9 +2,9 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
-import { mockJson, mockStreaming } from "./story-utils"
 import styled from "@emotion/styled"
 import { fn } from "@storybook/test"
+import { handlers } from "./test-utils/api"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
@@ -39,6 +39,9 @@ const Container = styled.div({
 const meta: Meta<typeof AiChat> = {
   title: "smoot-design/AI/AiChat",
   component: AiChat,
+  parameters: {
+    msw: { handlers },
+  },
   render: (args) => <AiChat {...args} />,
   decorators: (Story) => {
     return (
@@ -65,17 +68,6 @@ const meta: Meta<typeof AiChat> = {
       control: { type: "object", disable: true },
       table: { readonly: true }, // See above
     },
-  },
-  beforeEach: () => {
-    const originalFetch = window.fetch
-    window.fetch = (url, opts) => {
-      if (url === TEST_API_STREAMING) {
-        return mockStreaming()
-      } else if (url === TEST_API_JSON) {
-        return mockJson()
-      }
-      return originalFetch(url, opts)
-    }
   },
 }
 

@@ -1,3 +1,5 @@
+import { http, HttpResponse, delay } from "msw"
+
 const SAMPLE_RESPONSES = [
   `For exploring AI applications in business, I recommend the following course from MIT:
 
@@ -35,7 +37,7 @@ const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const mockStreaming = async function mockApi() {
+const getReadableStream = () => {
   let timerId: NodeJS.Timeout
   const response = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
   const chunks: string[] = response.split(" ").reduce((acc, word) => {
@@ -53,9 +55,7 @@ const mockStreaming = async function mockApi() {
   const num = chunks.length
   let i = 0
 
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  const body = new ReadableStream({
+  return new ReadableStream({
     start(controller) {
       timerId = setInterval(() => {
         const msg = new TextEncoder().encode(chunks[i])
@@ -73,26 +73,35 @@ const mockStreaming = async function mockApi() {
       }
     },
   })
-
-  return Promise.resolve(
-    new Response(body, {
-      headers: {
-        "Content-Type": "text/event-stream",
-      },
-    }),
-  )
 }
 
-const mockJson = async () => {
-  const message = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
-  await new Promise((res) => setTimeout(res, 1000))
-  return Promise.resolve(
-    new Response(JSON.stringify({ message }), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }),
-  )
-}
+const handlers = [
+  http.post("http://localhost:4567/streaming", async ({ request }) => {
+    await delay(600)
+    const body = getReadableStream()
 
-export { mockStreaming, mockJson }
+    const requestBody = await request.json()
+    if (Array.isArray(requestBody)) {
+      const last = requestBody[requestBody.length - 1]
+      const { content } = last
+      if (content === "error") {
+        return new HttpResponse("Internal Server Error", {
+          status: 500,
+        })
+      }
+    }
+
+    return new HttpResponse(body, {
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
+  }),
+  http.post("http://localhost:4567/json", async () => {
+    const message = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
+    await delay(800)
+    return HttpResponse.json({ message })
+  }),
+]
+
+export { handlers }
