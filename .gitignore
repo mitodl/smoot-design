@@ -12,6 +12,10 @@ coverage
 # Storybook
 storybook-static/
 
+# MSW
+# This should be installed via `yarn install`.
+storybook-public/mockServiceWorker.js
+
 # bundle preview
 bundle-preview/static
 !bundle-preview/static/.gitkeep
