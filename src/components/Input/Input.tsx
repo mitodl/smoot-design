@@ -42,7 +42,7 @@ const responsiveSize: Record<Size, Size> = {
   small: "small",
   medium: "small",
   large: "medium",
-  chat: "medium",
+  chat: "chat",
   hero: "large",
 }
 

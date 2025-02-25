@@ -69,7 +69,7 @@ const MessagesContainer = styled(ScrollSnap)({
   paddingTop: "14px",
   paddingBottom: "24px",
   overflow: "auto",
-  gap: "24px",
+  gap: "16px",
 })
 
 const MessageRow = styled.div<{
@@ -97,6 +97,13 @@ const Message = styled.div(({ theme }) => ({
   },
   "p:last-of-type": {
     marginBottom: 0,
+  },
+  ol: {
+    paddingInlineStart: "32px",
+  },
+  ul: {
+    paddingInlineStart: "32px",
+    marginInlineStart: "-16px",
   },
   a: {
     color: theme.custom.colors.red,
