@@ -155,14 +155,8 @@ const RobotIcon = styled(RiRobot2Line)({
 })
 
 const StyledInput = styled(Input)(({ theme }) => ({
-  backgroundColor: theme.custom.colors.lightGray1,
   borderRadius: "8px",
   border: `1px solid ${theme.custom.colors.lightGray2}`,
-  ":hover, :focus-within": {
-    svg: {
-      fill: theme.custom.colors.lightRed,
-    },
-  },
 }))
 
 const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
