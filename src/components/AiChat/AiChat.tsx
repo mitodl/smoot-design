@@ -113,12 +113,7 @@ const Message = styled.div(({ theme }) => ({
   },
   borderRadius: "12px",
   [`.${classes.messageRowAssistant} &`]: {
-    border: `1px solid ${theme.custom.colors.lightGray2}`,
-    borderRadius: "0px 8px 8px 8px",
-    svg: {
-      fill: theme.custom.colors.silverGrayDark,
-      display: "block",
-    },
+    padding: "12px 16px 12px 0",
   },
   [`.${classes.messageRowUser} &`]: {
     borderRadius: "8px 0px 8px 8px",
