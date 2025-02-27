@@ -30,6 +30,19 @@ Here are some courses on linear algebra that you can explore:
 These courses provide a comprehensive introduction to linear algebra and its applications across various fields.
 <!-- Comment! -->
 `,
+  `Here are some courses on quantum computing that offer certificates:
+
+1. [Introduction to Quantum Computing](https://xpro.mit.edu/courses/course-v1:xPRO+QCFx1/)
+   - **Description**: This is the first course in the Quantum Computing Fundamentals professional certificate program. You can earn a Professional Certificate and CEUs by completing both courses in the program. Alternatively, you can take this course individually for a certificate of completion and CEUs.
+   - **Offered by**: MIT xPRO
+   - **Instructors**: Isaac Chuang, William Oliver, Peter Shor, Aram Harrow
+
+2. [Practical Realities of Quantum Computation and Quantum Communication](https://xpro.mit.edu/courses/course-v1:xPRO+QCRx1/)
+   - **Description**: This course is part of the Quantum Computing Realities professional certificate program. Completing both courses in the program will earn you a Professional Certificate and CEUs. You can also take this course individually for a certificate of completion and CEUs.
+   - **Offered by**: MIT xPRO
+   - **Instructors**: Isaac Chuang, William Oliver, Peter Shor, Aram Harrow
+
+These courses are part of professional certificate programs, and you can choose to complete the entire program or take individual courses for certification.`,
 ]
 
 const rand = (min: number, max: number) => {
