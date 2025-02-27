@@ -30,6 +30,7 @@ const classes = {
   messageRowAssistant: "MitAiChat--messageRowAssistant",
   message: "MitAiChat--message",
   input: "MitAiChat--input",
+  bottomSection: "MitAiChat--bottomSection",
 }
 
 const ChatContainer = styled.div({
@@ -66,8 +67,7 @@ const MessagesContainer = styled(ScrollSnap)({
   display: "flex",
   flexDirection: "column",
   flex: 1,
-  paddingTop: "14px",
-  paddingBottom: "24px",
+  padding: "14px 0",
   overflow: "auto",
   gap: "16px",
 })
@@ -98,11 +98,13 @@ const Message = styled.div(({ theme }) => ({
   "p:last-of-type": {
     marginBottom: 0,
   },
-  ol: {
+  "ol, ul": {
     paddingInlineStart: "32px",
+    li: {
+      margin: "16px 0",
+    },
   },
   ul: {
-    paddingInlineStart: "32px",
     marginInlineStart: "-16px",
   },
   a: {
@@ -156,6 +158,11 @@ const StyledInput = styled(Input)(({ theme }) => ({
   backgroundColor: theme.custom.colors.lightGray1,
   borderRadius: "8px",
   border: `1px solid ${theme.custom.colors.lightGray2}`,
+  ":hover, :focus-within": {
+    svg: {
+      fill: theme.custom.colors.lightRed,
+    },
+  },
 }))
 
 const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
@@ -166,9 +173,13 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
+const BottomSection = styled.div({
+  paddingTop: "12px",
+})
+
 const Disclaimer = styled(Typography)(({ theme }) => ({
   color: theme.custom.colors.silverGrayDark,
-  marginTop: "16px",
+  marginTop: "14px",
   textAlign: "center",
 }))
 
@@ -351,54 +362,55 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           </Alert>
         ) : null}
       </MessagesContainer>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (isLoading && stoppable) {
-            stop()
-          } else {
-            scrollToBottom()
-            handleSubmit(e)
-          }
-        }}
-      >
-        <StyledInput
-          fullWidth
-          size="chat"
-          className={classes.input}
-          placeholder={placeholder}
-          name="message"
-          sx={{ flex: 1 }}
-          value={input}
-          onChange={handleInputChange}
-          endAdornment={
-            isLoading ? (
-              <AdornmentButton
-                aria-label="Stop"
-                onClick={stop}
-                disabled={!stoppable}
-              >
-                <StyledStopButton />
-              </AdornmentButton>
-            ) : (
-              <AdornmentButton
-                aria-label="Send"
-                type="submit"
-                disabled={!input}
-                onClick={(e) => {
-                  scrollToBottom()
-                  handleSubmit(e)
-                }}
-              >
-                <StyledSendButton />
-              </AdornmentButton>
-            )
-          }
-        />
-      </form>
-      <Disclaimer variant="body3">
-        AI-generated content may be incorrect.
-      </Disclaimer>
+      <BottomSection className={classes.bottomSection}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (isLoading && stoppable) {
+              stop()
+            } else {
+              scrollToBottom()
+              handleSubmit(e)
+            }
+          }}
+        >
+          <StyledInput
+            fullWidth
+            size="chat"
+            className={classes.input}
+            placeholder={placeholder}
+            name="message"
+            sx={{ flex: 1 }}
+            value={input}
+            onChange={handleInputChange}
+            endAdornment={
+              isLoading ? (
+                <AdornmentButton
+                  aria-label="Stop"
+                  onClick={stop}
+                  disabled={!stoppable}
+                >
+                  <StyledStopButton />
+                </AdornmentButton>
+              ) : (
+                <AdornmentButton
+                  aria-label="Send"
+                  type="submit"
+                  onClick={(e) => {
+                    scrollToBottom()
+                    handleSubmit(e)
+                  }}
+                >
+                  <StyledSendButton />
+                </AdornmentButton>
+              )
+            }
+          />
+        </form>
+        <Disclaimer variant="body3">
+          AI-generated content may be incorrect.
+        </Disclaimer>
+      </BottomSection>
       <SrAnnouncer
         isLoading={isLoading}
         loadingMessages={srLoadingMessages}
