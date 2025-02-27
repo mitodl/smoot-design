@@ -154,11 +154,6 @@ const RobotIcon = styled(RiRobot2Line)({
   height: "40px",
 })
 
-const StyledInput = styled(Input)(({ theme }) => ({
-  borderRadius: "8px",
-  border: `1px solid ${theme.custom.colors.lightGray2}`,
-}))
-
 const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
@@ -368,7 +363,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
             }
           }}
         >
-          <StyledInput
+          <Input
             fullWidth
             size="chat"
             className={classes.input}

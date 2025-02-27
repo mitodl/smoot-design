@@ -116,6 +116,7 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     size === "chat" && {
       padding: "0 16px",
       borderRadius: "8px",
+      borderColor: theme.custom.colors.silverGrayLight,
       "&:hover:not(.Mui-disabled), &.Mui-focused, :hover:not(.Mui-disabled):not(.Mui-focused)":
         {
           boxShadow: "0px 8px 20px 0px rgba(120, 147, 172, 0.10)",
