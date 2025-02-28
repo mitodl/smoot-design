@@ -90,3 +90,40 @@ export const JsonResponses: Story = {
     },
   },
 }
+
+const DEMO_MARKDOWN = `This shows default markdown styling. Here's a list:
+- Item 1 lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+- Item 2
+- Item 3
+    - Item 3.1
+    - Item 3.2
+- Item 4
+    1. Item 4.1
+    2. Item 4.2
+    3. Item 4.3
+
+Here is a longer paragraph and **bold text** and *italic text*. Lorem ipsum dolor sit amet, consectetur adipiscing elit
+sed do eiusmod tempor [incididunt](https://mit.edu) ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+
+And some inline code, \`\`<inline></inline>\`\` and code block:
+\`\`\`
+def f(x):
+    print(x)
+\`\`\`
+`
+
+/**
+ * This story shows the component's builtin markdown styling.
+ */
+export const MarkdownStyling: Story = {
+  args: {
+    title: "Markdown Styles",
+    requestOpts: { apiUrl: TEST_API_STREAMING },
+    initialMessages: [
+      {
+        role: "assistant",
+        content: DEMO_MARKDOWN,
+      },
+    ],
+  },
+}

@@ -30,6 +30,7 @@ const classes = {
   messageRowAssistant: "MitAiChat--messageRowAssistant",
   message: "MitAiChat--message",
   input: "MitAiChat--input",
+  bottomSection: "MitAiChat--bottomSection",
 }
 
 const ChatContainer = styled.div({
@@ -66,10 +67,9 @@ const MessagesContainer = styled(ScrollSnap)({
   display: "flex",
   flexDirection: "column",
   flex: 1,
-  paddingTop: "14px",
-  paddingBottom: "24px",
+  padding: "14px 0",
   overflow: "auto",
-  gap: "24px",
+  gap: "16px",
 })
 
 const MessageRow = styled.div<{
@@ -98,18 +98,22 @@ const Message = styled.div(({ theme }) => ({
   "p:last-of-type": {
     marginBottom: 0,
   },
+  "ol, ul": {
+    paddingInlineStart: "32px",
+    li: {
+      margin: "16px 0",
+    },
+  },
+  ul: {
+    marginInlineStart: "-16px",
+  },
   a: {
     color: theme.custom.colors.red,
     fontWeight: "normal",
   },
   borderRadius: "12px",
   [`.${classes.messageRowAssistant} &`]: {
-    border: `1px solid ${theme.custom.colors.lightGray2}`,
-    borderRadius: "0px 8px 8px 8px",
-    svg: {
-      fill: theme.custom.colors.silverGrayDark,
-      display: "block",
-    },
+    padding: "12px 16px 12px 0",
   },
   [`.${classes.messageRowUser} &`]: {
     borderRadius: "8px 0px 8px 8px",
@@ -145,12 +149,6 @@ const RobotIcon = styled(RiRobot2Line)({
   height: "40px",
 })
 
-const StyledInput = styled(Input)(({ theme }) => ({
-  backgroundColor: theme.custom.colors.lightGray1,
-  borderRadius: "8px",
-  border: `1px solid ${theme.custom.colors.lightGray2}`,
-}))
-
 const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
@@ -159,9 +157,13 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
+const BottomSection = styled.div({
+  paddingTop: "12px",
+})
+
 const Disclaimer = styled(Typography)(({ theme }) => ({
   color: theme.custom.colors.silverGrayDark,
-  marginTop: "16px",
+  marginTop: "14px",
   textAlign: "center",
 }))
 
@@ -344,54 +346,55 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
           </Alert>
         ) : null}
       </MessagesContainer>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (isLoading && stoppable) {
-            stop()
-          } else {
-            scrollToBottom()
-            handleSubmit(e)
-          }
-        }}
-      >
-        <StyledInput
-          fullWidth
-          size="chat"
-          className={classes.input}
-          placeholder={placeholder}
-          name="message"
-          sx={{ flex: 1 }}
-          value={input}
-          onChange={handleInputChange}
-          endAdornment={
-            isLoading ? (
-              <AdornmentButton
-                aria-label="Stop"
-                onClick={stop}
-                disabled={!stoppable}
-              >
-                <StyledStopButton />
-              </AdornmentButton>
-            ) : (
-              <AdornmentButton
-                aria-label="Send"
-                type="submit"
-                disabled={!input}
-                onClick={(e) => {
-                  scrollToBottom()
-                  handleSubmit(e)
-                }}
-              >
-                <StyledSendButton />
-              </AdornmentButton>
-            )
-          }
-        />
-      </form>
-      <Disclaimer variant="body3">
-        AI-generated content may be incorrect.
-      </Disclaimer>
+      <BottomSection className={classes.bottomSection}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (isLoading && stoppable) {
+              stop()
+            } else {
+              scrollToBottom()
+              handleSubmit(e)
+            }
+          }}
+        >
+          <Input
+            fullWidth
+            size="chat"
+            className={classes.input}
+            placeholder={placeholder}
+            name="message"
+            sx={{ flex: 1 }}
+            value={input}
+            onChange={handleInputChange}
+            endAdornment={
+              isLoading ? (
+                <AdornmentButton
+                  aria-label="Stop"
+                  onClick={stop}
+                  disabled={!stoppable}
+                >
+                  <StyledStopButton />
+                </AdornmentButton>
+              ) : (
+                <AdornmentButton
+                  aria-label="Send"
+                  type="submit"
+                  onClick={(e) => {
+                    scrollToBottom()
+                    handleSubmit(e)
+                  }}
+                >
+                  <StyledSendButton />
+                </AdornmentButton>
+              )
+            }
+          />
+        </form>
+        <Disclaimer variant="body3">
+          AI-generated content may be incorrect.
+        </Disclaimer>
+      </BottomSection>
       <SrAnnouncer
         isLoading={isLoading}
         loadingMessages={srLoadingMessages}
