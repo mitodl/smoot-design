@@ -70,7 +70,7 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
       className={className}
       PaperProps={{
         sx: {
-          width: "600px",
+          width: "900px",
           maxWidth: "100%",
           boxSizing: "border-box",
           padding: "24px 40px",
