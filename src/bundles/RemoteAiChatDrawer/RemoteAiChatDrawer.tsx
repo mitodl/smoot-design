@@ -27,7 +27,8 @@ type AiChatDrawerProps = {
   messageOrigin: string
   /**
    * Transform the body of the request before sending it to the server.
-   * Its result will be merged with the per-message requestBody opt.
+   * Its result will be merged with the per-message requestBody opt, with
+   * transformBody taking precedence.
    *
    * *This cannot be supplied via message events since the function is not serializable.*
    *
@@ -59,7 +60,6 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
         setChatSettings(event.data.payload)
       }
     }
-    console.log("Attaching listener")
     window.addEventListener("message", cb)
     return () => {
       window.removeEventListener("message", cb)
@@ -89,8 +89,8 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
           requestOpts={{
             transformBody: (messages) => {
               return {
-                ...transformBody?.(messages),
                 ...chatSettings.requestBody,
+                ...transformBody?.(messages),
               }
             },
             apiUrl: chatSettings?.apiUrl,
