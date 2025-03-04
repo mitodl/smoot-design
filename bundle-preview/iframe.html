@@ -3,16 +3,41 @@
   <head>
     <meta charset="utf-8" />
     <title>Iframe</title>
+    <style>
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .form-field {
+        display: block;
+      }
+
+      .form-field > textarea,
+      .form-field > input {
+        width: 100%;
+        display: block;
+      }
+    </style>
   </head>
 
   <body>
-    <button id="#chat-trigger">Open Drawer</button>
-    <div>
-      <label>
+    <form class="form" id="chat-form">
+      <button>Open Drawer</button>
+      <label class="form-field">
         Extra data sent to drawer:
-        <input type="text" id="extra" placeholder="Extra" />
+        <input type="text" name="extra" id="extra" placeholder="Extra" />
       </label>
-    </div>
+
+      <label class="form-field">
+        API URL
+        <textarea id="api-url" name="apiUrl" rows="3">
+https://api-learn-ai-qa.ol.mit.edu/http/recommendation_agent/
+      </textarea
+        >
+      </label>
+    </form>
   </body>
   <script>
     const INITIAL_MESSAGES = [
@@ -28,28 +53,23 @@
       { content: "I am curious about AI applications for business" },
     ]
 
-    const REQUEST_OPTS = {
-      apiUrl: "http://ai.open.odl.local:8002/http/recommendation_agent/",
-      transformBody(messages) {
-        const message = messages[messages.length - 1].content
-        return { message }
-      },
-    }
-
-    const button = document.getElementById("#chat-trigger")
-    button.addEventListener("click", () => {
+    const form = document.getElementById("chat-form")
+    form.addEventListener("submit", (e) => {
+      e.preventDefault()
+      const formData = new FormData(form)
+      const data = Object.fromEntries(formData.entries())
       window.parent.postMessage({
         type: "smoot-design::chat-open",
         payload: {
           askTimTitle: `for help with problems!`,
-          apiUrl:
-            // Note: This will work locally, but same-site cookies used for
-            // thread identification may not work
-            "https://api-learn-ai-qa.ol.mit.edu/http/recommendation_agent/",
+          // Get this from user input to allow
+          //  - default: https://api-learn-ai-qa.ol.mit.edu/http/recommendation_agent/
+          //  - other (e.g., local): http://ai.open.odl.local:8005/http/recommendation_agent
+          apiUrl: data.apiUrl.trim(),
           initialMessages: INITIAL_MESSAGES,
           conversationStarters: STARTERS,
           requestBody: {
-            extra: document.getElementById("extra").value,
+            extra: data.extra,
           },
         },
       })
