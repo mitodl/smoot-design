@@ -1,5 +1,6 @@
 import * as React from "react"
 import { AiChat } from "../../components/AiChat/AiChat"
+import { AiChatMessage } from "../../components/AiChat/types"
 import type { AiChatProps } from "../../components/AiChat/AiChat"
 import Drawer from "@mui/material/Drawer"
 
@@ -11,8 +12,11 @@ type ChatInitMessage = {
     conversationStarters?: AiChatProps["conversationStarters"]
     initialMessages: AiChatProps["initialMessages"]
     apiUrl: AiChatProps["requestOpts"]["apiUrl"]
+    requestBody?: Record<string, unknown>
   }
 }
+
+const identity = <T,>(x: T): T => x
 
 type AiChatDrawerProps = {
   className?: string
@@ -23,14 +27,18 @@ type AiChatDrawerProps = {
   messageOrigin: string
   /**
    * Transform the body of the request before sending it to the server.
+   * Its result will be merged with the per-message requestBody opt, with
+   * transformBody taking precedence.
+   *
    * *This cannot be supplied via message events since the function is not serializable.*
+   *
    */
-  transformBody?: AiChatProps["requestOpts"]["transformBody"]
+  transformBody?: (messages: AiChatMessage[]) => Iterable<unknown>
 }
 
 const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
   messageOrigin,
-  transformBody,
+  transformBody = identity,
   className,
 }: AiChatDrawerProps) => {
   const [open, setOpen] = React.useState(false)
@@ -52,7 +60,6 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
         setChatSettings(event.data.payload)
       }
     }
-    console.log("Attaching listener")
     window.addEventListener("message", cb)
     return () => {
       window.removeEventListener("message", cb)
@@ -80,7 +87,12 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
         <AiChat
           {...chatSettings}
           requestOpts={{
-            transformBody,
+            transformBody: (messages) => {
+              return {
+                ...chatSettings.requestBody,
+                ...transformBody?.(messages),
+              }
+            },
             apiUrl: chatSettings?.apiUrl,
           }}
           onClose={() => setOpen(false)}

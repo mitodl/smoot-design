@@ -7,6 +7,12 @@
 
   <body>
     <button id="#chat-trigger">Open Drawer</button>
+    <div>
+      <label>
+        Extra data sent to drawer:
+        <input type="text" id="extra" placeholder="Extra" />
+      </label>
+    </div>
   </body>
   <script>
     const INITIAL_MESSAGES = [
@@ -36,9 +42,15 @@
         type: "smoot-design::chat-open",
         payload: {
           askTimTitle: `for help with problems!`,
-          apiUrl: "http://ai.open.odl.local:8002/http/recommendation_agent/",
+          apiUrl:
+            // Note: This will work locally, but same-site cookies used for
+            // thread identification may not work
+            "https://api-learn-ai-qa.ol.mit.edu/http/recommendation_agent/",
           initialMessages: INITIAL_MESSAGES,
           conversationStarters: STARTERS,
+          requestBody: {
+            extra: document.getElementById("extra").value,
+          },
         },
       })
     })
