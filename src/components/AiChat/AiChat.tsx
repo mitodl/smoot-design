@@ -231,6 +231,7 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   onClose,
   ImgComponent,
   placeholder = "",
+  scrollContainer,
   ref,
   ...others // Could contain data attributes
 }) {
@@ -274,9 +275,10 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
   const stoppable = isLoading && messages[messages.length - 1]?.role !== "user"
 
   const scrollToBottom = () => {
-    messagesRef.current?.scrollBy({
+    const element = scrollContainer || messagesRef.current
+    element?.scrollBy({
       behavior: "instant",
-      top: messagesRef.current.scrollHeight,
+      top: element?.scrollHeight,
     })
   }
 
