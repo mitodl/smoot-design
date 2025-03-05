@@ -2818,7 +2818,7 @@ __metadata:
     prettier: "npm:^3.3.3"
     react: "npm:19.0.0"
     react-dom: "npm:^19.0.0"
-    react-markdown: "npm:^9.0.1"
+    react-markdown: "npm:^10.0.0"
     react-router: "npm:^6.22.2"
     react-router-dom: "npm:^6.22.2"
     semantic-release: "npm:^24.2.0"
@@ -14910,11 +14910,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-markdown@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "react-markdown@npm:9.0.1"
+"react-markdown@npm:^10.0.0":
+  version: 10.0.1
+  resolution: "react-markdown@npm:10.0.1"
   dependencies:
     "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
     devlop: "npm:^1.0.0"
     hast-util-to-jsx-runtime: "npm:^2.0.0"
     html-url-attributes: "npm:^3.0.0"
@@ -14927,7 +14928,7 @@ __metadata:
   peerDependencies:
     "@types/react": ">=18"
     react: ">=18"
-  checksum: 10/71ce31f200982f641d363888a26e8fb52a199a589124f20295e9be870fa3aed26fcfa14d1dc766d83df666a15cb82359291bfda207bd55d5728ff376d217e079
+  checksum: 10/a5f6ac169c7034231c01e3e31abeed2c8ca714c4d4fd38faf6ff7bea7d868d42aadb904031f3cc0d7c16bf5e6377b689ab93bbf6e39c35224502003b76696a4d
   languageName: node
   linkType: hard
 
