@@ -34,12 +34,24 @@ type AiChatDrawerProps = {
    *
    */
   transformBody?: (messages: AiChatMessage[]) => Iterable<unknown>
+  /**
+   * Fetch options to be passed to the fetch call.
+   *
+   * NOTE: By default, the credentials are set to "include" to enable thread-
+   * identifying cookies.
+   */
+  fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
+}
+
+const DEFAULT_FETCH_OPTS: AiChatDrawerProps["fetchOpts"] = {
+  credentials: "include",
 }
 
 const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
   messageOrigin,
   transformBody = identity,
   className,
+  fetchOpts,
 }: AiChatDrawerProps) => {
   const [open, setOpen] = React.useState(false)
   const [chatSettings, setChatSettings] = React.useState<
@@ -94,6 +106,7 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
               }
             },
             apiUrl: chatSettings?.apiUrl,
+            fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
           }}
           onClose={() => setOpen(false)}
         />

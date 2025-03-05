@@ -5,22 +5,23 @@
     <title>Home</title>
     <script src="./static/bundles/remoteAiChatDrawer.umd.js"></script>
     <style>
-      #app-root {
-        width: 450px;
-        height: 600px;
+      .app-frame {
+        width: 600px;
+        max-width: 50vw;
+        height: 400px;
       }
     </style>
   </head>
 
   <body>
-    <iframe src="./iframe.html"></iframe>
+    <iframe class="app-frame" src="./iframe.html"></iframe>
   </body>
   <script>
     /**
      * Accepts options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-ai-remoteaichatdrawer--docs
      */
     remoteAiChatDrawer.init({
-      messageOrigin: "http://localhost:3000",
+      messageOrigin: window.location.origin, // iframe is served in same origin for this demo,
       transformBody: (messages) => ({
         message: messages[messages.length - 1].content,
       }),
