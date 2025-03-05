@@ -62,6 +62,7 @@
     }
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
     "@mui/utils": "^6.1.6",
     "ai": "^4.0.13",
     "classnames": "^2.5.1",
