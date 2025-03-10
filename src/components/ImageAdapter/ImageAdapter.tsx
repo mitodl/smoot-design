@@ -20,13 +20,15 @@ type ImageAdapterProps = React.ComponentProps<"img"> & {
  * - else, if `theme.custom.ImageAdapter` is provided, renders as `theme.custom.ImageAdapter`
  * - else, renders as `img` tag
  */
-const ImageAdapter = React.forwardRef<HTMLImageElement, ImageAdapterProps>(
-  function ImageAdapter({ Component, ...props }, ref) {
-    const theme = useTheme()
-    const ImgComponent = Component ?? theme.custom.ImgAdapter ?? "img"
-    return <ImgComponent ref={ref} {...props} />
-  },
-)
+const ImageAdapter: React.FC<ImageAdapterProps> = ({
+  Component,
+  ref,
+  ...props
+}) => {
+  const theme = useTheme()
+  const ImgComponent = Component ?? theme.custom.ImgAdapter ?? "img"
+  return <ImgComponent ref={ref} {...props} />
+}
 
 export { ImageAdapter }
 export type { ImageAdapterPropsOverrides, ImageAdapterProps }
