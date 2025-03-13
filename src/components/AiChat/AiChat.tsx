@@ -43,7 +43,6 @@ const ChatScreen = styled.div<{ noScroll: boolean }>(({ noScroll, theme }) => ({
   background: "white",
   position: "absolute",
   bottom: 0,
-  // top,
   top: 0,
   left: 0,
   right: 0,
@@ -62,18 +61,6 @@ const ChatContainer = styled.div<{ noScroll: boolean }>(({ noScroll }) => ({
   display: "flex",
   flexDirection: "column",
 }))
-
-// const StyledAiChat = styled(AiChatInternal)(({ theme }) => ({
-//   ".MitAiChat--messagesContainer": {
-//     overflow: "visible",
-//   },
-//   ".MitAiChat--bottomSection": {
-//     position: "sticky",
-//     background: theme.custom.colors.white,
-//     bottom: 0,
-//     paddingBottom: "14px",
-//   },
-// }))
 
 const MessagesContainer = styled(ScrollSnap)<{ noScroll: boolean }>(
   ({ noScroll }) => ({
@@ -166,7 +153,7 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
 
 const BottomSection = styled.div<{ noScroll: boolean }>(
   ({ noScroll, theme }) => ({
-    padding: "12px 0",
+    padding: "12px 0 16px",
     ...(noScroll && {
       position: "sticky",
       bottom: 0,
@@ -177,24 +164,9 @@ const BottomSection = styled.div<{ noScroll: boolean }>(
 
 const Disclaimer = styled(Typography)(({ theme }) => ({
   color: theme.custom.colors.silverGrayDark,
-  marginTop: "14px",
+  marginTop: "16px",
   textAlign: "center",
 }))
-
-// type AiChaProps = {
-//   entryTitle: string
-//   starters: AiChatProps["conversationStarters"]
-//   initialMessages: AiChatProps["initialMessages"]
-//   askTimTitle?: string
-//   requestOpts: AiChatProps["requestOpts"]
-//   onClose?: () => void
-//   className?: string
-//   chatScreenClassName?: string
-//   scrollElement?: HTMLElement | null
-//   topPosition?: number
-//   ref?: Ref<HTMLDivElement>
-//   chatId?: string
-// }
 
 const AiChat: FC<AiChatProps> = ({
   entryScreenTitle,

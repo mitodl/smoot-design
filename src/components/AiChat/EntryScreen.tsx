@@ -20,7 +20,6 @@ const Container = styled.div(({ theme }) => ({
   zIndex: 1,
   background: "white",
   bottom: 0,
-  // top:,
   top: 0,
   left: 0,
   right: 0,
@@ -96,7 +95,6 @@ const Starter = styled.button(({ theme }) => ({
 }))
 
 type EntryScreenProps = {
-  // topPosition: number
   title?: string
   conversationStarters?: { content: string }[]
   onPromptSubmit: (prompt: string) => void
@@ -104,7 +102,6 @@ type EntryScreenProps = {
 }
 
 const EntryScreen = ({
-  // topPosition,
   title,
   conversationStarters,
   className,
@@ -118,22 +115,11 @@ const EntryScreen = ({
 
   const onPromptKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key !== "Enter") return
-    // setShowEntryScreen(false)
     setPrompt(prompt)
   }
 
-  // const onStarterClick = (content: string) => {
-  //   // setPrompt(content)
-  //   // setShowEntryScreen(false)
-  //   onPromptSubmit(content)
-  // }
-
   return (
-    <Container
-      // top={topPosition}
-      className={className}
-      data-testid="ai-chat-entry-screen"
-    >
+    <Container className={className} data-testid="ai-chat-entry-screen">
       <TimLogoBox>
         <RiSparkling2Line />
         <StyledTimLogo />
