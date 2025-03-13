@@ -1,6 +1,6 @@
 {
   "name": "@mitodl/smoot-design",
-  "version": "0.0.0-preview-2025-03-13-0",
+  "version": "0.0.0-preview-2025-03-13-1",
   "packageManager": "yarn@4.6.0",
   "files": [
     "dist"

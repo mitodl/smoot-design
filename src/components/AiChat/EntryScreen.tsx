@@ -3,8 +3,7 @@ import { RiSparkling2Line, RiSendPlaneFill } from "@remixicon/react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import { AdornmentButton, Input } from "../Input/Input"
-import { ImageAdapter } from "../ImageAdapter/ImageAdapter"
-import timLogo from "./tim.svg"
+import TimLogo from "./TimLogo"
 import { useState } from "react"
 
 const Container = styled.div(({ theme }) => ({
@@ -32,7 +31,7 @@ const TimLogoBox = styled.div(({ theme }) => ({
   padding: "16px",
   border: `1px solid ${theme.custom.colors.lightGray2}`,
   borderRadius: "8px",
-  svg: {
+  "svg:first-child": {
     fill: theme.custom.colors.red,
     position: "absolute",
     top: "-10px",
@@ -40,7 +39,9 @@ const TimLogoBox = styled.div(({ theme }) => ({
   },
 }))
 
-const TimLogo = styled(ImageAdapter)({
+const StyledTimLogo = styled(TimLogo)({
+  width: "40px",
+  height: "40px",
   display: "block",
 })
 
@@ -135,7 +136,7 @@ const EntryScreen = ({
     >
       <TimLogoBox>
         <RiSparkling2Line />
-        <TimLogo src={timLogo} alt="" width={40} height={40} />
+        <StyledTimLogo />
       </TimLogoBox>
       {title ? <Title variant="h4">{title}</Title> : null}
       <StyledInput
