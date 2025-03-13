@@ -1,6 +1,9 @@
-// Some of these are based on (compatible, but simplfied / restricted) versions of ai/react types.
+// Some of these are based on (compatible, but simplified / restricted) versions of ai/react types.
+
+import { RefAttributes } from "react"
 
 type Role = "assistant" | "user"
+
 type AiChatMessage = {
   id: string
   content: string
@@ -29,31 +32,47 @@ type AiChatProps = {
    * previously used value will restore the session state.
    */
   chatId?: string
-  /**
-   * If provided, renders a title bar.
-   */
-  title?: string
+
   /**
    * If provided, renders the "AskTIM" title motif followed by the text.
    */
   askTimTitle?: string
+
   /**
-   * Placeholder message for chat input
+   * Placeholder message for chat input.
    */
   placeholder?: string
-  /**
-   * Sends an initial user prompt on first load
-   */
 
-  onClose?: () => void
   className?: string
-  initialMessages: Omit<AiChatMessage, "id">[]
+
+  /**
+   * Set to false to disable the entry screen and load the chat immediately.
+   * Defaults to true.
+   */
+  entryScreenEnabled?: boolean
+
+  /**
+   * Title to display on the entry screen, also the initial assistant message if not overridden by `initialMessages`.
+   */
+  entryScreenTitle?: string
+
+  /**
+   * Initial messages to display on the chat. If not provided, the entry screen title will be used as the initial message.
+   */
+  initialMessages?: Omit<AiChatMessage, "id">[]
+
+  /**
+   * Prompt suggestions for the user, clickable on the entry screen or in the chat if the entry screen is not enabled.
+   */
   conversationStarters?: { content: string }[]
+
   /**
    * Options for making requests to the AI service.
    */
   requestOpts: RequestOpts
+
   parseContent?: (content: unknown) => string
+
   /**
    * A message to display while the component is in a loading state.
    *
@@ -63,6 +82,7 @@ type AiChatProps = {
     delay: number
     text: string
   }[]
+
   /**
    * If provided, element to use for rendering avatar images.
    * By default, the theme's ImageAdater is used.
@@ -73,13 +93,7 @@ type AiChatProps = {
    * Where the scroll container is provided by the component,
    * the AiChat will scroll to the bottom when a prompt is submitted.
    */
-  scrollContainer?: HTMLElement
+  scrollElement?: HTMLElement | null
+} & RefAttributes<HTMLDivElement>
 
-  /**
-   * Provide a ref to the chat component to access the `append` method.
-   */
-  ref?: React.Ref<{
-    append: (message: Omit<AiChatMessage, "id">) => void
-  }>
-}
 export type { RequestOpts, AiChatProps, AiChatMessage }
