@@ -93,6 +93,11 @@ type AiChatProps = {
    * Where the scroll container is provided by the component,
    * the AiChat will scroll to the bottom as chat messages are added.
    */
+  scrollContainer?: HTMLElement
+
+  /**
+   * Provide a ref to the chat component to access the `append` method.
+   */
   scrollElement?: HTMLElement | null
 } & RefAttributes<HTMLDivElement>
 
