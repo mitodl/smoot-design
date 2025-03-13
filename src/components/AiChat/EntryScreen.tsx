@@ -16,6 +16,7 @@ const Container = styled.div(({ theme }) => ({
     padding: "114px 16px 24px",
     width: "100%",
   },
+  boxSizing: "border-box",
   position: "absolute",
   zIndex: 1,
   background: "white",

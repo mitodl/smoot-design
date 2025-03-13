@@ -38,8 +38,8 @@ const ChatScreen = styled.div<{ noScroll: boolean }>(({ noScroll, theme }) => ({
   padding: "16px 28px 0",
   [theme.breakpoints.down("md")]: {
     padding: "16px 16px 0",
-    width: "100%",
   },
+  boxSizing: "border-box",
   background: "white",
   position: "absolute",
   bottom: 0,

@@ -142,9 +142,8 @@ const ScrollComponent: FC<AiChatProps> = (args) => {
   return (
     <div
       style={{
-        width: "100%",
         height: "800px",
-        overflow: "scroll",
+        overflowY: "scroll",
         border: "2px solid #e0e6ea",
         position: "relative",
       }}

@@ -91,7 +91,7 @@ type AiChatProps = {
 
   /**
    * Where the scroll container is provided by the component,
-   * the AiChat will scroll to the bottom when a prompt is submitted.
+   * the AiChat will scroll to the bottom as chat messages are added.
    */
   scrollElement?: HTMLElement | null
 } & RefAttributes<HTMLDivElement>
