@@ -8,7 +8,7 @@ type ChatInitMessage = {
   type: "smoot-design::chat-open"
   payload: {
     chatId?: AiChatProps["chatId"]
-    askTimTitle?: AiChatProps["title"]
+    askTimTitle?: AiChatProps["askTimTitle"]
     conversationStarters?: AiChatProps["conversationStarters"]
     initialMessages: AiChatProps["initialMessages"]
     apiUrl: AiChatProps["requestOpts"]["apiUrl"]
@@ -108,7 +108,6 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
             apiUrl: chatSettings?.apiUrl,
             fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
           }}
-          onClose={() => setOpen(false)}
         />
       ) : null}
     </Drawer>
