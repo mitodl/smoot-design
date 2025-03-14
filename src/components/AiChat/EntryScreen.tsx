@@ -115,8 +115,11 @@ const EntryScreen = ({
   }
 
   const onPromptKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key !== "Enter") return
-    setPrompt(prompt)
+    if (e.key === "Enter" && prompt) {
+      onPromptSubmit(prompt)
+    } else {
+      setPrompt(prompt)
+    }
   }
 
   return (

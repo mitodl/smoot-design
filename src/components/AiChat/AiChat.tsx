@@ -268,12 +268,10 @@ const AiChat: FC<AiChatProps> = ({
       {showEntryScreen ? (
         <EntryScreen
           className={classes.entryScreenContainer}
-          // topPosition={topPosition}
           title={entryScreenTitle}
           conversationStarters={conversationStarters}
           onPromptSubmit={(prompt) => {
             setShowEntryScreen(false)
-
             if (entryScreenTitle && !initialMessages) {
               setInitialMessages([
                 {
@@ -291,7 +289,6 @@ const AiChat: FC<AiChatProps> = ({
         <ChatScreen
           className={classes.chatScreenContainer}
           data-testid="ai-chat-screen"
-          // top={topPosition}
           noScroll={noScroll}
           ref={chatScreenRef}
         >
