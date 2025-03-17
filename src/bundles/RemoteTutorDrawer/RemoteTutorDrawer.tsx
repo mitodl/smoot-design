@@ -18,7 +18,7 @@ type ChatInitMessage = {
 
 const identity = <T,>(x: T): T => x
 
-type AiChatDrawerProps = {
+type RemoteTutorDrawerProps = {
   className?: string
   /**
    * The origin of the messages that will be received to open the chat.
@@ -43,16 +43,16 @@ type AiChatDrawerProps = {
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 }
 
-const DEFAULT_FETCH_OPTS: AiChatDrawerProps["fetchOpts"] = {
+const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
-const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
+const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
   messageOrigin,
   transformBody = identity,
   className,
   fetchOpts,
-}: AiChatDrawerProps) => {
+}: RemoteTutorDrawerProps) => {
   const [open, setOpen] = React.useState(false)
   const [chatSettings, setChatSettings] = React.useState<
     ChatInitMessage["payload"] | null
@@ -62,7 +62,7 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
       if (event.origin !== messageOrigin) {
         if (process.env.NODE_ENV === "development") {
           console.warn(
-            `AiChatDrawer: received message from unexpected origin: ${event.origin}`,
+            `RemoteTutorDrawer: received message from unexpected origin: ${event.origin}`,
           )
         }
         return
@@ -115,5 +115,5 @@ const AiChatDrawer: React.FC<AiChatDrawerProps> = ({
   )
 }
 
-export { AiChatDrawer }
-export type { AiChatDrawerProps, ChatInitMessage }
+export { RemoteTutorDrawer }
+export type { RemoteTutorDrawerProps, ChatInitMessage }

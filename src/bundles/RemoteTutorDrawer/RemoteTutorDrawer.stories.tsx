@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { AiChatDrawer, ChatInitMessage } from "./RemoteAiChatDrawer"
+import { RemoteTutorDrawer, ChatInitMessage } from "./RemoteTutorDrawer"
 import invariant from "tiny-invariant"
 import { handlers } from "../../components/AiChat/test-utils/api"
 
@@ -22,9 +22,9 @@ const STARTERS = [
   { content: "I am curious about AI applications for business" },
 ]
 
-const meta: Meta<typeof AiChatDrawer> = {
-  title: "smoot-design/AI/RemoteAiChatDrawer",
-  component: AiChatDrawer,
+const meta: Meta<typeof RemoteTutorDrawer> = {
+  title: "smoot-design/AI/RemoteTutorDrawer",
+  component: RemoteTutorDrawer,
   render: () => {
     return (
       <>
@@ -69,7 +69,7 @@ const meta: Meta<typeof AiChatDrawer> = {
           }}
           title="button frame"
         />
-        <AiChatDrawer messageOrigin="http://localhost:6006" />
+        <RemoteTutorDrawer messageOrigin="http://localhost:6006" />
       </>
     )
   },
@@ -82,6 +82,6 @@ const meta: Meta<typeof AiChatDrawer> = {
 
 export default meta
 
-type Story = StoryObj<typeof AiChatDrawer>
+type Story = StoryObj<typeof RemoteTutorDrawer>
 
 export const StreamingResponses: Story = {}
