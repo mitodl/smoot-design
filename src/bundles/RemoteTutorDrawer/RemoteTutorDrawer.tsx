@@ -3,6 +3,14 @@ import { AiChat } from "../../components/AiChat/AiChat"
 import { AiChatMessage } from "../../components/AiChat/types"
 import type { AiChatProps } from "../../components/AiChat/AiChat"
 import Drawer from "@mui/material/Drawer"
+import {
+  TabButtonList,
+  TabButton,
+} from "../../components/TabButtons/TabButtonList"
+import Typography from "@mui/material/Typography"
+import Stack from "@mui/material/Stack"
+import TabContext from "@mui/lab/TabContext"
+import TabPanel from "@mui/lab/TabPanel"
 
 type ChatInitMessage = {
   type: "smoot-design::chat-open"
@@ -19,6 +27,8 @@ type ChatInitMessage = {
 const identity = <T,>(x: T): T => x
 
 type RemoteTutorDrawerProps = {
+  blockType?: "problem" | "video"
+
   className?: string
   /**
    * The origin of the messages that will be received to open the chat.
@@ -41,6 +51,11 @@ type RemoteTutorDrawerProps = {
    * identifying cookies.
    */
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
+
+  /**
+   * Pass to target a specific drawer instance where multiple are on the page.
+   */
+  target?: string
 }
 
 const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
@@ -48,15 +63,19 @@ const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
 }
 
 const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
+  blockType = "problem",
   messageOrigin,
   transformBody = identity,
   className,
   fetchOpts,
+  target,
 }: RemoteTutorDrawerProps) => {
   const [open, setOpen] = React.useState(false)
   const [chatSettings, setChatSettings] = React.useState<
     ChatInitMessage["payload"] | null
   >(null)
+  const [tab, setTab] = React.useState("chat")
+
   React.useEffect(() => {
     const cb = (event: MessageEvent) => {
       if (event.origin !== messageOrigin) {
@@ -67,7 +86,12 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
         }
         return
       }
-      if (event.data.type === "smoot-design::chat-open") {
+      console.log("event", event.data)
+      console.log("target", target)
+      if (
+        event.data.type === "smoot-design::chat-open" &&
+        event.data.payload.target === target
+      ) {
         setOpen(true)
         setChatSettings(event.data.payload)
       }
@@ -76,7 +100,8 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
     return () => {
       window.removeEventListener("message", cb)
     }
-  }, [messageOrigin])
+  }, [messageOrigin, target])
+
   return (
     <Drawer
       className={className}
@@ -95,7 +120,7 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
       open={open}
       onClose={() => setOpen(false)}
     >
-      {chatSettings ? (
+      {blockType === "problem" && chatSettings ? (
         <AiChat
           {...chatSettings}
           requestOpts={{
@@ -110,6 +135,37 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
           }}
           onClose={() => setOpen(false)}
         />
+      ) : null}
+      {blockType === "video" ? (
+        <TabContext value={tab}>
+          <Stack direction="row">
+            <TabButtonList
+              styleVariant="chat"
+              onChange={(_event, val) => setTab(val)}
+            >
+              <TabButton
+                // key={`tab-${i}`}
+                value="chat"
+                label="Chat"
+              />
+              <TabButton
+                // key={`tab-${i}`}
+                value="summary"
+                label="Summary"
+              />
+            </TabButtonList>
+          </Stack>
+          <TabPanel value="chat">
+            <Typography variant="h4" component="h4">
+              Chat
+            </Typography>
+          </TabPanel>
+          <TabPanel value="summary">
+            <Typography variant="h4" component="h4">
+              Summary
+            </Typography>
+          </TabPanel>
+        </TabContext>
       ) : null}
     </Drawer>
   )
