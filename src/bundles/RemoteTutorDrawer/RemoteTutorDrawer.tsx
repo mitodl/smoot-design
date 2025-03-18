@@ -1,4 +1,8 @@
 import * as React from "react"
+import { FC, useEffect, useRef, useState } from "react"
+import styled from "@emotion/styled"
+import Markdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
 import { AiChat } from "../../components/AiChat/AiChat"
 import { AiChatMessage } from "../../components/AiChat/types"
 import type { AiChatProps } from "../../components/AiChat/AiChat"
@@ -8,21 +12,67 @@ import {
   TabButton,
 } from "../../components/TabButtons/TabButtonList"
 import Typography from "@mui/material/Typography"
-import Stack from "@mui/material/Stack"
 import TabContext from "@mui/lab/TabContext"
 import TabPanel from "@mui/lab/TabPanel"
 
-type ChatInitMessage = {
-  type: "smoot-design::chat-open"
+type RemoteTutorDrawerInitMessage = {
+  type: "smoot-design::tutor-drawer-open"
   payload: {
-    chatId?: AiChatProps["chatId"]
-    askTimTitle?: AiChatProps["title"]
-    conversationStarters?: AiChatProps["conversationStarters"]
-    initialMessages: AiChatProps["initialMessages"]
-    apiUrl: AiChatProps["requestOpts"]["apiUrl"]
-    requestBody?: Record<string, unknown>
+    blockType?: "problem" | "video"
+    target?: string
+    chat: {
+      chatId?: AiChatProps["chatId"]
+      askTimTitle?: AiChatProps["title"]
+      conversationStarters?: AiChatProps["conversationStarters"]
+      initialMessages: AiChatProps["initialMessages"]
+      apiUrl: AiChatProps["requestOpts"]["apiUrl"]
+      requestBody?: Record<string, unknown>
+    }
+    summary?: {
+      contentUrl: string
+    }
   }
 }
+
+const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
+  padding: "24px 0 16px",
+  backgroundColor: theme.custom.colors.white,
+  position: "sticky",
+  top: 0,
+  zIndex: 1,
+  overflow: "visible",
+}))
+
+const StyledTabPanel = styled(TabPanel)({
+  padding: "0",
+  height: "calc(100% - 66px)",
+})
+
+const StyledHTML = styled.div(({ theme }) => ({
+  color: theme.custom.colors.darkGray2,
+  backgroundColor: theme.custom.colors.white,
+  padding: "12px 0 100px",
+  ...theme.typography.body2,
+  "p:first-of-type": {
+    marginTop: 0,
+  },
+  "p:last-of-type": {
+    marginBottom: 0,
+  },
+  "ol, ul": {
+    paddingInlineStart: "32px",
+    li: {
+      margin: "16px 0",
+    },
+  },
+  ul: {
+    marginInlineStart: "-16px",
+  },
+  a: {
+    color: theme.custom.colors.red,
+    fontWeight: "normal",
+  },
+}))
 
 const identity = <T,>(x: T): T => x
 
@@ -62,21 +112,96 @@ const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
-const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
-  blockType = "problem",
+const parseContent = (contentString: string) => {
+  try {
+    const parsed = JSON.parse(contentString)
+    const content = parsed[0]?.content
+    const unescaped = content
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+      .replace(/\\'/g, "'")
+
+    return unescaped
+  } catch (e) {
+    console.error("Failed to parse content:", e)
+    return ""
+  }
+}
+
+const useContentFetch = (contentUrl: string | undefined) => {
+  const [summary, setSummary] = useState<string | null>(null)
+  const [error, setError] = useState<Error | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!contentUrl) return
+
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(contentUrl)
+        const result = await response.json()
+        const parsedContent = parseContent(result.content)
+        setSummary(parsedContent)
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to fetch"))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [contentUrl])
+
+  return { summary, error, loading }
+}
+
+const ChatComponent = ({
+  payload,
+  transformBody,
+  fetchOpts,
+}: {
+  payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
+  transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
+  fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
+}) => {
+  if (!payload) return null
+
+  return (
+    <AiChat
+      chatId={payload.chatId}
+      askTimTitle={payload.askTimTitle}
+      conversationStarters={payload.conversationStarters}
+      initialMessages={payload.initialMessages}
+      requestOpts={{
+        transformBody: (messages) => ({
+          ...payload.requestBody,
+          ...transformBody?.(messages),
+        }),
+        apiUrl: payload.apiUrl,
+        fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
+      }}
+    />
+  )
+}
+
+const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   messageOrigin,
   transformBody = identity,
   className,
   fetchOpts,
   target,
 }: RemoteTutorDrawerProps) => {
-  const [open, setOpen] = React.useState(false)
-  const [chatSettings, setChatSettings] = React.useState<
-    ChatInitMessage["payload"] | null
+  const [open, setOpen] = useState(false)
+  const [payload, setPayload] = useState<
+    RemoteTutorDrawerInitMessage["payload"] | null
   >(null)
-  const [tab, setTab] = React.useState("chat")
 
-  React.useEffect(() => {
+  const [tab, setTab] = useState("chat")
+  const paperRef = useRef<HTMLDivElement>(null)
+  const { summary } = useContentFetch(payload?.summary?.contentUrl)
+
+  useEffect(() => {
     const cb = (event: MessageEvent) => {
       if (event.origin !== messageOrigin) {
         if (process.env.NODE_ENV === "development") {
@@ -86,14 +211,13 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
         }
         return
       }
-      console.log("event", event.data)
-      console.log("target", target)
+
       if (
-        event.data.type === "smoot-design::chat-open" &&
+        event.data.type === "smoot-design::tutor-drawer-open" &&
         event.data.payload.target === target
       ) {
         setOpen(true)
-        setChatSettings(event.data.payload)
+        setPayload(event.data.payload)
       }
     }
     window.addEventListener("message", cb)
@@ -102,15 +226,23 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
     }
   }, [messageOrigin, target])
 
+  if (!payload) {
+    return null
+  }
+
+  const { blockType, chat } = payload
+  const hasTabs = blockType === "video"
+
   return (
     <Drawer
       className={className}
       PaperProps={{
+        ref: paperRef,
         sx: {
           width: "900px",
           maxWidth: "100%",
           boxSizing: "border-box",
-          padding: "24px 40px",
+          padding: hasTabs ? "0 40px 24px" : "24px 40px",
           ".MitAiChat--title": {
             paddingTop: "0px",
           },
@@ -120,51 +252,35 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
       open={open}
       onClose={() => setOpen(false)}
     >
-      {blockType === "problem" && chatSettings ? (
-        <AiChat
-          {...chatSettings}
-          requestOpts={{
-            transformBody: (messages) => {
-              return {
-                ...chatSettings.requestBody,
-                ...transformBody?.(messages),
-              }
-            },
-            apiUrl: chatSettings?.apiUrl,
-            fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
-          }}
-          onClose={() => setOpen(false)}
+      {blockType === "problem" ? (
+        <ChatComponent
+          payload={chat}
+          transformBody={transformBody}
+          fetchOpts={fetchOpts}
         />
       ) : null}
       {blockType === "video" ? (
         <TabContext value={tab}>
-          <Stack direction="row">
-            <TabButtonList
-              styleVariant="chat"
-              onChange={(_event, val) => setTab(val)}
-            >
-              <TabButton
-                // key={`tab-${i}`}
-                value="chat"
-                label="Chat"
-              />
-              <TabButton
-                // key={`tab-${i}`}
-                value="summary"
-                label="Summary"
-              />
-            </TabButtonList>
-          </Stack>
-          <TabPanel value="chat">
-            <Typography variant="h4" component="h4">
-              Chat
-            </Typography>
-          </TabPanel>
-          <TabPanel value="summary">
-            <Typography variant="h4" component="h4">
-              Summary
-            </Typography>
-          </TabPanel>
+          <StyledTabButtonList
+            styleVariant="chat"
+            onChange={(_event, val) => setTab(val)}
+          >
+            <TabButton value="chat" label="Chat" />
+            <TabButton value="summary" label="Summary" />
+          </StyledTabButtonList>
+          <StyledTabPanel value="chat">
+            <ChatComponent
+              payload={chat}
+              transformBody={transformBody}
+              fetchOpts={fetchOpts}
+            />
+          </StyledTabPanel>
+          <StyledTabPanel value="summary">
+            <Typography variant="h4" component="h4"></Typography>
+            <StyledHTML>
+              <Markdown rehypePlugins={[rehypeRaw]}>{summary}</Markdown>
+            </StyledHTML>
+          </StyledTabPanel>
         </TabContext>
       ) : null}
     </Drawer>
@@ -172,4 +288,4 @@ const RemoteTutorDrawer: React.FC<RemoteTutorDrawerProps> = ({
 }
 
 export { RemoteTutorDrawer }
-export type { RemoteTutorDrawerProps, ChatInitMessage }
+export type { RemoteTutorDrawerProps, RemoteTutorDrawerInitMessage }
