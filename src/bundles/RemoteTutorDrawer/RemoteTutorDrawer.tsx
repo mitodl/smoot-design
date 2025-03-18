@@ -3,9 +3,7 @@ import { FC, useEffect, useRef, useState } from "react"
 import styled from "@emotion/styled"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
-import { AiChat } from "../../components/AiChat/AiChat"
-import { AiChatMessage } from "../../components/AiChat/types"
-import type { AiChatProps } from "../../components/AiChat/AiChat"
+import { RiCloseLine } from "@remixicon/react"
 import Drawer from "@mui/material/Drawer"
 import {
   TabButtonList,
@@ -14,6 +12,10 @@ import {
 import Typography from "@mui/material/Typography"
 import TabContext from "@mui/lab/TabContext"
 import TabPanel from "@mui/lab/TabPanel"
+import { AiChat } from "../../components/AiChat/AiChat"
+import { AiChatMessage } from "../../components/AiChat/types"
+import type { AiChatProps } from "../../components/AiChat/AiChat"
+import { ActionButton } from "../../components/Button/ActionButton"
 
 type RemoteTutorDrawerInitMessage = {
   type: "smoot-design::tutor-drawer-open"
@@ -34,8 +36,20 @@ type RemoteTutorDrawerInitMessage = {
   }
 }
 
+const CloseButton = styled(ActionButton)(({ theme }) => ({
+  position: "fixed",
+  top: "24px",
+  right: "40px",
+  backgroundColor: theme.custom.colors.lightGray2,
+  "&&:hover": {
+    backgroundColor: theme.custom.colors.red,
+    color: theme.custom.colors.white,
+  },
+  zIndex: 2,
+}))
+
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
-  padding: "24px 0 16px",
+  padding: "80px 0 16px",
   backgroundColor: theme.custom.colors.white,
   position: "sticky",
   top: 0,
@@ -45,7 +59,13 @@ const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
 
 const StyledTabPanel = styled(TabPanel)({
   padding: "0",
-  height: "calc(100% - 66px)",
+  height: "calc(100% - 138px)",
+})
+
+const StyledAiChat = styled(AiChat)({
+  ".MitAiChat--title": {
+    paddingTop: "8px",
+  },
 })
 
 const StyledHTML = styled.div(({ theme }) => ({
@@ -168,7 +188,7 @@ const ChatComponent = ({
   if (!payload) return null
 
   return (
-    <AiChat
+    <StyledAiChat
       chatId={payload.chatId}
       askTimTitle={payload.askTimTitle}
       conversationStarters={payload.conversationStarters}
@@ -242,7 +262,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           width: "900px",
           maxWidth: "100%",
           boxSizing: "border-box",
-          padding: hasTabs ? "0 40px 24px" : "24px 40px",
+          scrollbarGutter: "stable",
+          padding: hasTabs ? "0 25px 24px 40px" : "24px 25px 24px 40px",
           ".MitAiChat--title": {
             paddingTop: "0px",
           },
@@ -252,6 +273,14 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
       open={open}
       onClose={() => setOpen(false)}
     >
+      <CloseButton
+        variant="text"
+        size="medium"
+        onClick={() => setOpen(false)}
+        aria-label="Close"
+      >
+        <RiCloseLine />
+      </CloseButton>
       {blockType === "problem" ? (
         <ChatComponent
           payload={chat}
