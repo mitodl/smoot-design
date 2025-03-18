@@ -43,10 +43,10 @@ const meta: Meta<typeof AiChat> = {
     msw: { handlers },
   },
   render: (args) => <AiChat {...args} />,
-  decorators: (Story) => {
+  decorators: (Story, context) => {
     return (
       <Container>
-        <Story />
+        <Story key={String(context.args.entryScreenEnabled)} />
       </Container>
     )
   },
