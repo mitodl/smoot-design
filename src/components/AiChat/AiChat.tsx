@@ -271,6 +271,9 @@ const AiChat: FC<AiChatProps> = ({
           title={entryScreenTitle}
           conversationStarters={conversationStarters}
           onPromptSubmit={(prompt) => {
+            if (prompt.trim() === "") {
+              return
+            }
             setShowEntryScreen(false)
             if (entryScreenTitle && !initialMessages) {
               setInitialMessages([
@@ -397,6 +400,10 @@ const AiChat: FC<AiChatProps> = ({
                         aria-label="Send"
                         type="submit"
                         onClick={(e) => {
+                          if (input.trim() === "") {
+                            e.preventDefault()
+                            return
+                          }
                           scrollToBottom()
                           handleSubmit(e)
                         }}

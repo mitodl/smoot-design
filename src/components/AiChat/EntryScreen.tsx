@@ -50,12 +50,11 @@ const Title = styled(Typography)({
   padding: "0 40px",
 })
 
-const StyledInput = styled(Input)(({ theme }) => ({
-  backgroundColor: theme.custom.colors.lightGray1,
+const StyledInput = styled(Input)({
   borderRadius: "8px",
   margin: "8px 0 24px 0",
   flexShrink: 0,
-}))
+})
 
 const SendIcon = styled(RiSendPlaneFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
