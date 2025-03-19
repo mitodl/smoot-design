@@ -143,8 +143,8 @@ const parseContent = (contentString: string) => {
 
     return unescaped
   } catch (e) {
-    console.error("Failed to parse content:", e)
-    return ""
+    console.warn("Could not parse content:", e)
+    return contentString
   }
 }
 
