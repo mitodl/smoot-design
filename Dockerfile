@@ -12,4 +12,4 @@ RUN yarn install
 
 EXPOSE 6006
 
-CMD ["yarn", "storybook", "dev", "-p", "6006", "--no-open", "--docs"]
+CMD ["yarn", "start", "--no-open"]
