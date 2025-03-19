@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  smoot-design:
+    build: .
+    ports:
+      - "6006:6006"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
