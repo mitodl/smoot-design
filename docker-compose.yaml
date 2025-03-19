@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   smoot-design:
     build: .
