@@ -1,7 +1,7 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { AiChatDrawer } from "./RemoteAiChatDrawer/RemoteAiChatDrawer"
-import type { AiChatDrawerProps } from "./RemoteAiChatDrawer/RemoteAiChatDrawer"
+import { RemoteTutorDrawer } from "./RemoteTutorDrawer/RemoteTutorDrawer"
+import type { RemoteTutorDrawerProps } from "./RemoteTutorDrawer/RemoteTutorDrawer"
 import {
   ThemeProvider,
   createTheme,
@@ -10,10 +10,10 @@ import { CacheProvider } from "@emotion/react"
 import createCache from "@emotion/cache"
 
 /**
- * Renders the AiChatDrawer in an shadow DOM in order to isolate the drawer
+ * Renders the RemoteTutorDrawer in an shadow DOM in order to isolate the drawer
  * styles from external stylesheets.
  */
-const init = (opts: AiChatDrawerProps) => {
+const init = (opts: RemoteTutorDrawerProps) => {
   const container = document.createElement("div")
   document.body.appendChild(container)
   const shadowContainer = container.attachShadow({ mode: "open" })
@@ -38,7 +38,7 @@ const init = (opts: AiChatDrawerProps) => {
   createRoot(shadowRootEl).render(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
-        <AiChatDrawer {...opts} />
+        <RemoteTutorDrawer {...opts} />
       </ThemeProvider>
     </CacheProvider>,
   )

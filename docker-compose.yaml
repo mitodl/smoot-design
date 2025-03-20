@@ -1,0 +1,9 @@
+services:
+  smoot-design:
+    build: .
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
