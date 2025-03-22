@@ -23,3 +23,5 @@ bundle-preview/static
 /**/.yarn/cache
 .swc
 dist
+
+.DS_Store

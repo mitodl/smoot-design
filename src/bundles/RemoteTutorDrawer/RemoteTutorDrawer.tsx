@@ -1,5 +1,5 @@
 import * as React from "react"
-import { FC, useEffect, useRef, useState } from "react"
+import { FC, useEffect, useState } from "react"
 import styled from "@emotion/styled"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
@@ -24,7 +24,7 @@ type RemoteTutorDrawerInitMessage = {
     target?: string
     chat: {
       chatId?: AiChatProps["chatId"]
-      askTimTitle?: AiChatProps["title"]
+      askTimTitle?: AiChatProps["askTimTitle"]
       conversationStarters?: AiChatProps["conversationStarters"]
       initialMessages: AiChatProps["initialMessages"]
       apiUrl: AiChatProps["requestOpts"]["apiUrl"]
@@ -45,7 +45,7 @@ const CloseButton = styled(ActionButton)(({ theme }) => ({
     backgroundColor: theme.custom.colors.red,
     color: theme.custom.colors.white,
   },
-  zIndex: 2,
+  zIndex: 3,
 }))
 
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
@@ -53,20 +53,27 @@ const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   backgroundColor: theme.custom.colors.white,
   position: "sticky",
   top: 0,
-  zIndex: 1,
+  zIndex: 2,
   overflow: "visible",
 }))
 
 const StyledTabPanel = styled(TabPanel)({
   padding: "0",
   height: "calc(100% - 138px)",
+  position: "relative",
 })
 
-const StyledAiChat = styled(AiChat)({
-  ".MitAiChat--title": {
-    paddingTop: "8px",
+const StyledAiChat = styled(AiChat)(({ hasTabs }: { hasTabs: boolean }) => ({
+  ".MitAiChat--root": {
+    minHeight: "100%",
   },
-})
+  ".MitAiChat--chatScreenContainer": {
+    padding: hasTabs ? 0 : "0 25px 0 40px",
+  },
+  ".MitAiChat--title": {
+    paddingTop: "32px",
+  },
+}))
 
 const StyledHTML = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
@@ -180,10 +187,14 @@ const ChatComponent = ({
   payload,
   transformBody,
   fetchOpts,
+  scrollElement,
+  hasTabs,
 }: {
   payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
+  scrollElement?: AiChatProps["scrollElement"]
+  hasTabs: boolean
 }) => {
   if (!payload) return null
 
@@ -193,6 +204,8 @@ const ChatComponent = ({
       askTimTitle={payload.askTimTitle}
       conversationStarters={payload.conversationStarters}
       initialMessages={payload.initialMessages}
+      entryScreenEnabled={false}
+      scrollElement={scrollElement}
       requestOpts={{
         transformBody: (messages) => ({
           ...payload.requestBody,
@@ -201,6 +214,7 @@ const ChatComponent = ({
         apiUrl: payload.apiUrl,
         fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
       }}
+      hasTabs={hasTabs}
     />
   )
 }
@@ -218,8 +232,15 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   >(null)
 
   const [tab, setTab] = useState("chat")
-  const paperRef = useRef<HTMLDivElement>(null)
   const { summary } = useContentFetch(payload?.summary?.contentUrl)
+
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
+
+  const paperRefCallback = (node: HTMLDivElement | null) => {
+    if (node) {
+      setScrollElement(node)
+    }
+  }
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -257,16 +278,13 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     <Drawer
       className={className}
       PaperProps={{
-        ref: paperRef,
+        ref: paperRefCallback,
         sx: {
           width: "900px",
           maxWidth: "100%",
           boxSizing: "border-box",
           scrollbarGutter: "stable",
-          padding: hasTabs ? "0 25px 24px 40px" : "24px 25px 24px 40px",
-          ".MitAiChat--title": {
-            paddingTop: "0px",
-          },
+          padding: "0 25px 0 40px",
         },
       }}
       anchor="right"
@@ -286,6 +304,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           payload={chat}
           transformBody={transformBody}
           fetchOpts={fetchOpts}
+          scrollElement={scrollElement}
+          hasTabs={hasTabs}
         />
       ) : null}
       {blockType === "video" ? (
@@ -302,6 +322,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               payload={chat}
               transformBody={transformBody}
               fetchOpts={fetchOpts}
+              scrollElement={scrollElement}
+              hasTabs={hasTabs}
             />
           </StyledTabPanel>
           <StyledTabPanel value="summary">
