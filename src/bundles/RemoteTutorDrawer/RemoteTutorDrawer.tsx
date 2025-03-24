@@ -16,6 +16,8 @@ import { AiChat } from "../../components/AiChat/AiChat"
 import { AiChatMessage } from "../../components/AiChat/types"
 import type { AiChatProps } from "../../components/AiChat/AiChat"
 import { ActionButton } from "../../components/Button/ActionButton"
+import { FlashcardsScreen } from "./FlashcardsScreen"
+import type { Flashcard } from "./FlashcardsScreen"
 
 type RemoteTutorDrawerInitMessage = {
   type: "smoot-design::tutor-drawer-open"
@@ -149,7 +151,10 @@ const parseContent = (contentString: string) => {
 }
 
 const useContentFetch = (contentUrl: string | undefined) => {
-  const [summary, setSummary] = useState<string | null>(null)
+  const [response, setResponse] = useState<{
+    summary: string | null
+    flashcards: Flashcard[]
+  } | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -161,8 +166,8 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
-        const parsedContent = parseContent(result.content)
-        setSummary(parsedContent)
+        const parsedContent = parseContent(result)
+        setResponse(parsedContent)
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Failed to fetch"))
       } finally {
@@ -173,7 +178,7 @@ const useContentFetch = (contentUrl: string | undefined) => {
     fetchData()
   }, [contentUrl])
 
-  return { summary, error, loading }
+  return { response, error, loading }
 }
 
 const ChatComponent = ({
@@ -219,7 +224,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   const [tab, setTab] = useState("chat")
   const paperRef = useRef<HTMLDivElement>(null)
-  const { summary } = useContentFetch(payload?.summary?.contentUrl)
+  const { response } = useContentFetch(payload?.summary?.contentUrl)
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -295,6 +300,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             onChange={(_event, val) => setTab(val)}
           >
             <TabButton value="chat" label="Chat" />
+            <TabButton value="flashcards" label="Flashcards" />
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
           <StyledTabPanel value="chat">
@@ -304,10 +310,15 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               fetchOpts={fetchOpts}
             />
           </StyledTabPanel>
+          <StyledTabPanel value="flashcards">
+            <FlashcardsScreen flashcards={response?.flashcards} />
+          </StyledTabPanel>
           <StyledTabPanel value="summary">
             <Typography variant="h4" component="h4"></Typography>
             <StyledHTML>
-              <Markdown rehypePlugins={[rehypeRaw]}>{summary}</Markdown>
+              <Markdown rehypePlugins={[rehypeRaw]}>
+                {response?.summary}
+              </Markdown>
             </StyledHTML>
           </StyledTabPanel>
         </TabContext>
