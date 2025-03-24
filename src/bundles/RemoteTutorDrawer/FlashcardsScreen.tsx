@@ -1,7 +1,7 @@
 import { ActionButton } from "../../components/Button/ActionButton"
 import Typography from "@mui/material/Typography"
 import * as React from "react"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
 import { RiArrowRightLine, RiArrowLeftLine } from "@remixicon/react"
 
@@ -9,6 +9,8 @@ export type Flashcard = {
   question: string
   answer: string
 }
+
+const Container = styled.div``
 
 const FlashcardContainer = styled.div(({ theme }) => ({
   display: "flex",
@@ -38,28 +40,67 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const Flashcard = ({ content }: { content: Flashcard }) => {
-  const [screen, setScreen] = useState(0)
-  return (
-    <FlashcardContainer onClick={() => setScreen(screen === 0 ? 1 : 0)}>
-      <Typography variant="h5">
-        {screen === 0 ? `Q: ${content.question}` : `A: ${content.answer}`}
-      </Typography>
-    </FlashcardContainer>
-  )
-}
+const StyledTypography = styled(Typography)<{ isAnswer: boolean }>(
+  ({ theme, isAnswer }) => ({
+    fontWeight: isAnswer
+      ? theme.typography.fontWeightLight
+      : theme.typography.fontWeightMedium,
+  }),
+)
+
+const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
+  ({ content }, ref) => {
+    const [screen, setScreen] = useState<0 | 1>(0)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+      containerRef.current?.focus()
+    }, [])
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        setScreen(screen === 0 ? 1 : 0)
+      }
+    }
+
+    return (
+      <FlashcardContainer
+        ref={ref}
+        onClick={() => setScreen(screen === 0 ? 1 : 0)}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+      >
+        <StyledTypography variant="h5" isAnswer={screen === 1}>
+          {screen === 0 ? `Q: ${content.question}` : `A: ${content.answer}`}
+        </StyledTypography>
+      </FlashcardContainer>
+    )
+  },
+)
+
+Flashcard.displayName = "Flashcard"
 
 export const FlashcardsScreen = ({
   flashcards,
+  wasKeyboardFocus,
 }: {
   flashcards?: Flashcard[]
+  wasKeyboardFocus: boolean
 }) => {
   const [cardIndex, setCardIndex] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const flashcardRef = useRef<HTMLDivElement>(null)
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!flashcards) return
-
+      if (
+        !containerRef.current?.contains(document.activeElement) &&
+        wasKeyboardFocus
+      ) {
+        return
+      }
       if (e.key === "ArrowRight") {
         setCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length)
       } else if (e.key === "ArrowLeft") {
@@ -69,8 +110,11 @@ export const FlashcardsScreen = ({
         )
       }
     },
-    [flashcards],
+    [flashcards, wasKeyboardFocus],
   )
+  useEffect(() => {
+    flashcardRef.current?.focus()
+  }, [cardIndex])
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown)
@@ -82,8 +126,12 @@ export const FlashcardsScreen = ({
   }
 
   return (
-    <>
-      <Flashcard key={cardIndex} content={flashcards[cardIndex]} />
+    <Container ref={containerRef}>
+      <Flashcard
+        ref={flashcardRef}
+        content={flashcards[cardIndex]}
+        aria-label={`Flashcard ${cardIndex + 1} of ${flashcards.length}`}
+      />
       <Navigation>
         <ActionButton
           onClick={() => setCardIndex(cardIndex - 1)}
@@ -107,6 +155,6 @@ export const FlashcardsScreen = ({
           <RiArrowRightLine aria-hidden />
         </ActionButton>
       </Navigation>
-    </>
+    </Container>
   )
 }

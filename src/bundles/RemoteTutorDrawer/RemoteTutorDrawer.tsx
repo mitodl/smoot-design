@@ -229,6 +229,20 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   const paperRef = useRef<HTMLDivElement>(null)
   const { response } = useContentFetch(payload?.summary?.contentUrl)
 
+  const [_wasKeyboardFocus, setWasKeyboardFocus] = useState(false)
+  const mouseInteracted = useRef(false)
+
+  const handleMouseDown = () => {
+    mouseInteracted.current = true
+  }
+
+  const handleFocus = () => {
+    if (!mouseInteracted.current) {
+      setWasKeyboardFocus(true)
+    }
+    mouseInteracted.current = false
+  }
+
   useEffect(() => {
     const cb = (event: MessageEvent) => {
       if (event.origin !== messageOrigin) {
@@ -303,7 +317,12 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             onChange={(_event, val) => setTab(val)}
           >
             <TabButton value="chat" label="Chat" />
-            <TabButton value="flashcards" label="Flashcards" />
+            <TabButton
+              value="flashcards"
+              label="Flashcards"
+              onMouseDown={handleMouseDown}
+              onFocus={handleFocus}
+            />
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
           <StyledTabPanel value="chat">
@@ -314,7 +333,10 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             />
           </StyledTabPanel>
           <StyledTabPanel value="flashcards">
-            <FlashcardsScreen flashcards={response?.flashcards} />
+            <FlashcardsScreen
+              flashcards={response?.flashcards}
+              wasKeyboardFocus={_wasKeyboardFocus}
+            />
           </StyledTabPanel>
           <StyledTabPanel value="summary">
             <Typography variant="h4" component="h4"></Typography>
