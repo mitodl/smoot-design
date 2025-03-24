@@ -166,8 +166,11 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
-        const parsedContent = parseContent(result)
-        setResponse(parsedContent)
+        const parsedContent = parseContent(result.content)
+        setResponse({
+          summary: parsedContent,
+          flashcards: result.flashcards,
+        })
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Failed to fetch"))
       } finally {

@@ -38,23 +38,12 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-enum Screen {
-  Question = "question",
-  Answer = "answer",
-}
-
 const Flashcard = ({ content }: { content: Flashcard }) => {
-  const [screen, setScreen] = useState<Screen>(Screen.Question)
+  const [screen, setScreen] = useState(0)
   return (
-    <FlashcardContainer
-      onClick={() =>
-        setScreen(screen === Screen.Question ? Screen.Answer : Screen.Question)
-      }
-    >
+    <FlashcardContainer onClick={() => setScreen(screen === 0 ? 1 : 0)}>
       <Typography variant="h5">
-        {screen === Screen.Question
-          ? `Q: ${content.question}`
-          : `A: ${content.answer}`}
+        {screen === 0 ? `Q: ${content.question}` : `A: ${content.answer}`}
       </Typography>
     </FlashcardContainer>
   )
