@@ -40,14 +40,6 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const StyledTypography = styled(Typography)<{ isAnswer: boolean }>(
-  ({ theme, isAnswer }) => ({
-    fontWeight: isAnswer
-      ? theme.typography.fontWeightLight
-      : theme.typography.fontWeightMedium,
-  }),
-)
-
 const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
   ({ content }, ref) => {
     const [screen, setScreen] = useState<0 | 1>(0)
@@ -71,9 +63,11 @@ const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
         onKeyDown={handleKeyDown}
         tabIndex={0}
       >
-        <StyledTypography variant="h5" isAnswer={screen === 1}>
-          {screen === 0 ? `Q: ${content.question}` : `A: ${content.answer}`}
-        </StyledTypography>
+        <Typography variant="h5">
+          {screen === 0
+            ? `Q: ${content.question}`
+            : `Answer: ${content.answer}`}
+        </Typography>
       </FlashcardContainer>
     )
   },
