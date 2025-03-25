@@ -45,6 +45,8 @@ const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
     const [screen, setScreen] = useState<0 | 1>(0)
     const containerRef = useRef<HTMLDivElement>(null)
 
+    useEffect(() => setScreen(0), [content])
+
     useEffect(() => {
       containerRef.current?.focus()
     }, [])
