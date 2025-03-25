@@ -91,16 +91,23 @@ export const JsonResponses: Story = {
   },
 }
 
-const DEMO_MARKDOWN = `This shows default markdown styling. Here's a list:
-- Item 1 lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
-- Item 2
-- Item 3
-    - Item 3.1
-    - Item 3.2
-- Item 4
-    1. Item 4.1
-    2. Item 4.2
-    3. Item 4.3
+const DEMO_MARKDOWN = `This shows default markdown styling. Here's are some lists:
+- Item 1
+- Item 2 - an unordered list (bullets)
+    - Point A
+    - Point B
+- Item 3 - an ordered list (numbers)
+    1. Item 3.1
+    2. Item 3.2
+    3. Item 3.3
+
+Sometimes, unordered lists are nested within ordered lists:
+1. Item 1
+    - Item 1.1
+    - Item 1.2
+2. Item 2
+    - Item 2.1
+    - Item 2.2
 
 Here is a longer paragraph and **bold text** and *italic text*. Lorem ipsum dolor sit amet, consectetur adipiscing elit
 sed do eiusmod tempor [incididunt](https://mit.edu) ut labore et dolore magna aliqua. Ut enim ad minim veniam.
@@ -155,8 +162,9 @@ const ScrollComponent: FC<AiChatProps> = (args) => {
 }
 
 /**
- * Where a scrollable container already exists, it can be passed in to the component
- * such as for use inside a modal or drawer.
+ * Where a scrollable container exists in the including component, it can be passed in
+ * for the AiChat component to use in place of its own height constrained message container
+ * overflow scroll. This is useful for cases such as use inside a modal or drawer.
  */
 export const ScrollContainer: Story = {
   args: {
