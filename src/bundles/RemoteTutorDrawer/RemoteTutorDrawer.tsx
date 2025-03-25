@@ -99,8 +99,6 @@ const StyledHTML = styled.div(({ theme }) => ({
 const identity = <T,>(x: T): T => x
 
 type RemoteTutorDrawerProps = {
-  blockType?: "problem" | "video"
-
   className?: string
   /**
    * The origin of the messages that will be received to open the chat.

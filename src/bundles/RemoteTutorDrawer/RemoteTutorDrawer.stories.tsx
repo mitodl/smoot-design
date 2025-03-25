@@ -72,7 +72,7 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 
 const meta: Meta<typeof RemoteTutorDrawer> = {
   title: "smoot-design/AI/RemoteTutorDrawer",
-  render: ({ blockType, target }) => (
+  render: ({ target }, { parameters: { blockType } }) => (
     <>
       {blockType === "problem" ? (
         <IFrame
@@ -118,17 +118,19 @@ type Story = StoryObj<typeof RemoteTutorDrawer>
 
 export const ProblemStory: Story = {
   args: {
-    blockType: "problem",
     target: "problem-frame",
+  },
+  parameters: {
+    blockType: "problem",
   },
 }
 
 export const VideoStory: Story = {
   args: {
-    blockType: "video",
     target: "video-frame",
   },
   parameters: {
+    blockType: "video",
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
@@ -140,7 +142,7 @@ export const VideoStory: Story = {
       ],
     },
   },
-  render: ({ blockType, target }) => (
+  render: ({ target }, { parameters: { blockType } }) => (
     <>
       <IFrame
         payload={{
