@@ -43,17 +43,11 @@ const Page = styled.div(({ theme }) => ({
 const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
   ({ content }, ref) => {
     const [screen, setScreen] = useState<0 | 1>(0)
-    const containerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => setScreen(0), [content])
 
-    useEffect(() => {
-      containerRef.current?.focus()
-    }, [])
-
     const handleKeyDown = (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault()
         setScreen(screen === 0 ? 1 : 0)
       }
     }
