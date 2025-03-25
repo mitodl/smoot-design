@@ -16,6 +16,8 @@ import { AiChat } from "../../components/AiChat/AiChat"
 import { AiChatMessage } from "../../components/AiChat/types"
 import type { AiChatProps } from "../../components/AiChat/AiChat"
 import { ActionButton } from "../../components/Button/ActionButton"
+import { FlashcardsScreen } from "./FlashcardsScreen"
+import type { Flashcard } from "./FlashcardsScreen"
 
 type RemoteTutorDrawerInitMessage = {
   type: "smoot-design::tutor-drawer-open"
@@ -31,7 +33,7 @@ type RemoteTutorDrawerInitMessage = {
       requestBody?: Record<string, unknown>
     }
     summary?: {
-      contentUrl: string
+      apiUrl: string
     }
   }
 }
@@ -97,8 +99,6 @@ const StyledHTML = styled.div(({ theme }) => ({
 const identity = <T,>(x: T): T => x
 
 type RemoteTutorDrawerProps = {
-  blockType?: "problem" | "video"
-
   className?: string
   /**
    * The origin of the messages that will be received to open the chat.
@@ -132,9 +132,9 @@ const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
-const parseContent = (contentString: string) => {
+const parseContent = (summaryString: string) => {
   try {
-    const parsed = JSON.parse(contentString)
+    const parsed = JSON.parse(summaryString)
     const content = parsed[0]?.content
     const unescaped = content
       .replace(/\\n/g, "\n")
@@ -143,13 +143,16 @@ const parseContent = (contentString: string) => {
 
     return unescaped
   } catch (e) {
-    console.warn("Could not parse content:", e)
-    return contentString
+    console.warn("Could not parse summary:", e)
+    return summaryString
   }
 }
 
 const useContentFetch = (contentUrl: string | undefined) => {
-  const [summary, setSummary] = useState<string | null>(null)
+  const [response, setResponse] = useState<{
+    summary: string | null
+    flashcards: Flashcard[]
+  } | null>(null)
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -161,8 +164,11 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
-        const parsedContent = parseContent(result.content)
-        setSummary(parsedContent)
+        const parsedSummary = parseContent(result.summary)
+        setResponse({
+          summary: parsedSummary,
+          flashcards: result.flashcards,
+        })
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Failed to fetch"))
       } finally {
@@ -173,7 +179,7 @@ const useContentFetch = (contentUrl: string | undefined) => {
     fetchData()
   }, [contentUrl])
 
-  return { summary, error, loading }
+  return { response, error, loading }
 }
 
 const ChatComponent = ({
@@ -219,7 +225,21 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   const [tab, setTab] = useState("chat")
   const paperRef = useRef<HTMLDivElement>(null)
-  const { summary } = useContentFetch(payload?.summary?.contentUrl)
+  const { response } = useContentFetch(payload?.summary?.apiUrl)
+
+  const [_wasKeyboardFocus, setWasKeyboardFocus] = useState(false)
+  const mouseInteracted = useRef(false)
+
+  const handleMouseDown = () => {
+    mouseInteracted.current = true
+  }
+
+  const handleFocus = () => {
+    if (!mouseInteracted.current) {
+      setWasKeyboardFocus(true)
+    }
+    mouseInteracted.current = false
+  }
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -295,6 +315,12 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             onChange={(_event, val) => setTab(val)}
           >
             <TabButton value="chat" label="Chat" />
+            <TabButton
+              value="flashcards"
+              label="Flashcards"
+              onMouseDown={handleMouseDown}
+              onFocus={handleFocus}
+            />
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
           <StyledTabPanel value="chat">
@@ -304,10 +330,18 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               fetchOpts={fetchOpts}
             />
           </StyledTabPanel>
+          <StyledTabPanel value="flashcards">
+            <FlashcardsScreen
+              flashcards={response?.flashcards}
+              wasKeyboardFocus={_wasKeyboardFocus}
+            />
+          </StyledTabPanel>
           <StyledTabPanel value="summary">
             <Typography variant="h4" component="h4"></Typography>
             <StyledHTML>
-              <Markdown rehypePlugins={[rehypeRaw]}>{summary}</Markdown>
+              <Markdown rehypePlugins={[rehypeRaw]}>
+                {response?.summary ?? ""}
+              </Markdown>
             </StyledHTML>
           </StyledTabPanel>
         </TabContext>
