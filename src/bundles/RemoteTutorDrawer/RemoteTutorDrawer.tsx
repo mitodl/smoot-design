@@ -66,9 +66,6 @@ const StyledTabPanel = styled(TabPanel)({
 })
 
 const StyledAiChat = styled(AiChat)(({ hasTabs }: { hasTabs: boolean }) => ({
-  ".MitAiChat--root": {
-    minHeight: "100%",
-  },
   ".MitAiChat--chatScreenContainer": {
     padding: hasTabs ? 0 : "0 25px 0 40px",
   },

@@ -34,41 +34,46 @@ const classes = {
 
 const Container = styled.div()
 
-const ChatScreen = styled.div<{ noScroll: boolean }>(({ noScroll, theme }) => ({
-  padding: "16px 28px 0",
-  [theme.breakpoints.down("md")]: {
-    padding: "16px 16px 0",
-  },
-  boxSizing: "border-box",
-  background: "white",
-  position: "absolute",
-  bottom: 0,
-  top: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1,
-  ...(noScroll && {
-    padding: "0 28px",
+const ChatScreen = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll, theme }) => ({
+    padding: "16px 28px 0",
     [theme.breakpoints.down("md")]: {
-      padding: "0 16px",
+      padding: "16px 16px 0",
     },
+    boxSizing: "border-box",
+    background: "white",
+    position: "absolute",
+    bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    ...(externalScroll && {
+      padding: "0 28px",
+      [theme.breakpoints.down("md")]: {
+        padding: "0 16px",
+      },
+    }),
   }),
-}))
+)
 
-const ChatContainer = styled.div<{ noScroll: boolean }>(({ noScroll }) => ({
-  width: "100%",
-  height: noScroll ? "auto" : "100%",
-  display: "flex",
-  flexDirection: "column",
-}))
+const ChatContainer = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll }) => ({
+    width: "100%",
+    height: externalScroll ? "auto" : "100%",
+    minHeight: externalScroll ? "100%" : "auto",
+    display: "flex",
+    flexDirection: "column",
+  }),
+)
 
-const MessagesContainer = styled(ScrollSnap)<{ noScroll: boolean }>(
-  ({ noScroll }) => ({
+const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
+  ({ externalScroll }) => ({
     display: "flex",
     flexDirection: "column",
     flex: 1,
     padding: "14px 0",
-    overflow: noScroll ? "visible" : "auto",
+    overflow: externalScroll ? "visible" : "auto",
     gap: "16px",
   }),
 )
@@ -151,10 +156,10 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
-const BottomSection = styled.div<{ noScroll: boolean }>(
-  ({ noScroll, theme }) => ({
+const BottomSection = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll, theme }) => ({
     padding: "12px 0 16px",
-    ...(noScroll && {
+    ...(externalScroll && {
       position: "sticky",
       bottom: 0,
       background: theme.custom.colors.white,
@@ -249,7 +254,7 @@ const AiChat: FC<AiChatProps> = ({
 
   const lastMsg = messages[messages.length - 1]
 
-  const noScroll = !!scrollElement
+  const externalScroll = !!scrollElement
 
   return (
     <Container
@@ -292,22 +297,22 @@ const AiChat: FC<AiChatProps> = ({
         <ChatScreen
           className={classes.chatScreenContainer}
           data-testid="ai-chat-screen"
-          noScroll={noScroll}
+          externalScroll={externalScroll}
           ref={chatScreenRef}
         >
           <ChatContainer
             className={classNames(className, classes.root)}
-            noScroll={noScroll}
+            externalScroll={externalScroll}
             {...others}
           >
             <ChatTitle
               askTimTitle={askTimTitle}
-              noScroll={noScroll}
+              externalScroll={externalScroll}
               className={classNames(className, classes.title)}
             />
             <MessagesContainer
               className={classes.messagesContainer}
-              noScroll={noScroll}
+              externalScroll={externalScroll}
               ref={messagesContainerRef}
             >
               {messages.map((m) => (
@@ -363,7 +368,7 @@ const AiChat: FC<AiChatProps> = ({
               ) : null}
             </MessagesContainer>
             <BottomSection
-              noScroll={noScroll}
+              externalScroll={externalScroll}
               className={classes.bottomSection}
             >
               <form
