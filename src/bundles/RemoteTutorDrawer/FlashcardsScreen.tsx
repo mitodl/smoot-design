@@ -40,34 +40,34 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const Flashcard = React.forwardRef<HTMLDivElement, { content: Flashcard }>(
-  ({ content }, ref) => {
-    const [screen, setScreen] = useState<0 | 1>(0)
+const Flashcard = React.forwardRef<
+  HTMLDivElement,
+  { content: Flashcard; "aria-label": string }
+>(({ content, "aria-label": ariaLabel }, ref) => {
+  const [screen, setScreen] = useState<0 | 1>(0)
 
-    useEffect(() => setScreen(0), [content])
+  useEffect(() => setScreen(0), [content])
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        setScreen(screen === 0 ? 1 : 0)
-      }
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      setScreen(screen === 0 ? 1 : 0)
     }
+  }
 
-    return (
-      <FlashcardContainer
-        ref={ref}
-        onClick={() => setScreen(screen === 0 ? 1 : 0)}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-      >
-        <Typography variant="h5">
-          {screen === 0
-            ? `Q: ${content.question}`
-            : `Answer: ${content.answer}`}
-        </Typography>
-      </FlashcardContainer>
-    )
-  },
-)
+  return (
+    <FlashcardContainer
+      ref={ref}
+      onClick={() => setScreen(screen === 0 ? 1 : 0)}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label={ariaLabel}
+    >
+      <Typography variant="h5">
+        {screen === 0 ? `Q: ${content.question}` : `Answer: ${content.answer}`}
+      </Typography>
+    </FlashcardContainer>
+  )
+})
 
 Flashcard.displayName = "Flashcard"
 
