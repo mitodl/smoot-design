@@ -1,29 +1,28 @@
 import * as React from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
+import type { FC } from "react"
 import styled from "@emotion/styled"
-import { Input, AdornmentButton } from "../Input/Input"
-import { ActionButton } from "../Button/ActionButton"
-import {
-  RiCloseLine,
-  RiRobot2Line,
-  RiSendPlaneFill,
-  RiStopFill,
-  RiSparkling2Line,
-  RiMoreFill,
-} from "@remixicon/react"
-import { useAiChat } from "./utils"
-import Markdown from "react-markdown"
-import type { AiChatProps } from "./types"
-import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
+import Typography from "@mui/material/Typography"
 import classNames from "classnames"
+import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
+import { Input, AdornmentButton } from "../Input/Input"
+import type { AiChatMessage, AiChatProps } from "./types"
+import { EntryScreen } from "./EntryScreen"
+import Markdown from "react-markdown"
+import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
-import Typography from "@mui/material/Typography"
 import { Alert } from "../Alert/Alert"
+import { ChatTitle } from "./ChatTitle"
+import { useAiChat } from "./utils"
+import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
 
 const classes = {
   root: "MitAiChat--root",
   title: "MitAiChat--title",
+  entryScreenContainer: "MitAiChat--entryScreenContainer",
   conversationStarter: "MitAiChat--conversationStarter",
+  chatScreenContainer: "MitAiChat--chatScreenContainer",
   messagesContainer: "MitAiChat--messagesContainer",
   messageRow: "MitAiChat--messageRow",
   messageRowUser: "MitAiChat--messageRowUser",
@@ -33,48 +32,53 @@ const classes = {
   bottomSection: "MitAiChat--bottomSection",
 }
 
-const ChatContainer = styled.div({
-  width: "100%",
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-})
+const Container = styled.div()
 
-const CloseButton = styled(ActionButton)(({ theme }) => ({
-  "&&:hover": {
-    backgroundColor: theme.custom.colors.red,
-    color: theme.custom.colors.white,
-  },
-}))
+const ChatScreen = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll, theme }) => ({
+    padding: "16px 28px 0",
+    [theme.breakpoints.down("md")]: {
+      padding: "16px 16px 0",
+    },
+    boxSizing: "border-box",
+    background: "white",
+    position: "absolute",
+    bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    ...(externalScroll && {
+      padding: "0 28px",
+      [theme.breakpoints.down("md")]: {
+        padding: "0 16px",
+      },
+    }),
+  }),
+)
 
-const AskTimTitle = styled.div(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: "8px",
-  color: theme.custom.colors.darkGray2,
-  img: {
-    width: "24px",
-    height: "24px",
-  },
-  svg: {
-    fill: theme.custom.colors.red,
-    width: "24px",
-    height: "24px",
-  },
-}))
+const ChatContainer = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll }) => ({
+    width: "100%",
+    height: externalScroll ? "auto" : "100%",
+    minHeight: externalScroll ? "100%" : "auto",
+    display: "flex",
+    flexDirection: "column",
+  }),
+)
 
-const MessagesContainer = styled(ScrollSnap)({
-  display: "flex",
-  flexDirection: "column",
-  flex: 1,
-  padding: "14px 0",
-  overflow: "auto",
-  gap: "16px",
-})
+const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
+  ({ externalScroll }) => ({
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    padding: "14px 0",
+    overflow: externalScroll ? "visible" : "auto",
+    gap: "16px",
+  }),
+)
 
-const MessageRow = styled.div<{
-  reverse?: boolean
-}>({
+const MessageRow = styled.div({
   display: "flex",
   width: "100%",
   gap: "10px",
@@ -144,11 +148,6 @@ const Starter = styled.button(({ theme }) => ({
   borderRadius: "8px",
 }))
 
-const RobotIcon = styled(RiRobot2Line)({
-  width: "40px",
-  height: "40px",
-})
-
 const StyledSendButton = styled(RiSendPlaneFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
@@ -157,89 +156,44 @@ const StyledStopButton = styled(RiStopFill)(({ theme }) => ({
   fill: theme.custom.colors.red,
 }))
 
-const BottomSection = styled.div({
-  paddingTop: "12px",
-})
+const BottomSection = styled.div<{ externalScroll: boolean }>(
+  ({ externalScroll, theme }) => ({
+    padding: "12px 0 16px",
+    ...(externalScroll && {
+      position: "sticky",
+      bottom: 0,
+      background: theme.custom.colors.white,
+    }),
+  }),
+)
 
 const Disclaimer = styled(Typography)(({ theme }) => ({
   color: theme.custom.colors.silverGrayDark,
-  marginTop: "14px",
+  marginTop: "16px",
   textAlign: "center",
 }))
 
-type ChatTitleProps = {
-  title?: string
-  askTimTitle?: string
-  onClose?: () => void
-  className?: string
-}
-
-const ChatTitle = styled(
-  ({ title, askTimTitle, onClose, className }: ChatTitleProps) => {
-    return (
-      <div className={className}>
-        {askTimTitle ? (
-          <AskTimTitle>
-            <RiSparkling2Line />
-            <Typography variant="body1">
-              Ask<strong>TIM</strong>&nbsp;
-              {askTimTitle}
-            </Typography>
-          </AskTimTitle>
-        ) : null}
-        {title ? (
-          <>
-            <RobotIcon />
-            <Typography flex={1} variant="h5">
-              {title}
-            </Typography>
-          </>
-        ) : null}
-        {onClose ? (
-          <CloseButton
-            variant="tertiary"
-            edge="rounded"
-            onClick={onClose}
-            aria-label="Close chat"
-          >
-            <RiCloseLine />
-          </CloseButton>
-        ) : null}
-      </div>
-    )
-  },
-)<ChatTitleProps>(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "12px 0",
-  gap: "16px",
-  color: theme.custom.colors.white,
-  borderRadius: "8px 8px 0 0",
-}))
-
-const AiChatInternal: React.FC<AiChatProps> = function AiChat({
-  chatId,
-  className,
+const AiChat: FC<AiChatProps> = ({
+  entryScreenTitle,
+  entryScreenEnabled = true,
   conversationStarters,
+  initialMessages: _initialMessages,
+  askTimTitle,
   requestOpts,
-  initialMessages: initMsgs,
   parseContent,
   srLoadingMessages,
-  title,
-  askTimTitle,
-  onClose,
-  ImgComponent,
   placeholder = "",
-  scrollContainer,
+  className,
+  scrollElement,
+  chatId,
   ref,
   ...others // Could contain data attributes
-}) {
-  const messagesRef = React.useRef<HTMLDivElement>(null)
-  const initialMessages = React.useMemo(() => {
-    const prefix = Math.random().toString().slice(2)
-    return initMsgs.map((m, i) => ({ ...m, id: `initial-${prefix}-${i}` }))
-  }, [initMsgs])
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
+  const chatScreenRef = useRef<HTMLDivElement>(null)
+  const [initialMessages, setInitialMessages] = useState<AiChatMessage[]>()
 
   const {
     messages: unparsed,
@@ -251,16 +205,32 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     stop,
     error,
   } = useAiChat(requestOpts, {
-    initialMessages: initialMessages,
+    initialMessages,
     id: chatId,
   })
 
-  React.useImperativeHandle(ref, () => ({ append }), [append])
+  useScrollSnap({
+    scrollElement: scrollElement || messagesContainerRef.current,
+    contentElement: scrollElement ? messagesContainerRef.current : null,
+    threshold: 200,
+  })
 
-  const messages = React.useMemo(() => {
-    const initial = initialMessages.map((m) => m.id)
+  useEffect(() => {
+    if (_initialMessages) {
+      const prefix = Math.random().toString().slice(2)
+      setInitialMessages(
+        _initialMessages.map((m, i) => ({
+          ...m,
+          id: `initial-${prefix}-${i}`,
+        })),
+      )
+    }
+  }, [_initialMessages])
+
+  const messages = useMemo(() => {
+    const initial = initialMessages?.map((m) => m.id)
     return unparsed.map((m) => {
-      if (m.role === "assistant" && !initial.includes(m.id)) {
+      if (m.role === "assistant" && !initial?.includes(m.id)) {
         const content = parseContent ? parseContent(m.content) : m.content
         return { ...m, content }
       }
@@ -268,14 +238,14 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
     })
   }, [parseContent, unparsed, initialMessages])
 
-  const showStarters = messages.length === initialMessages.length
+  const showStarters = messages.length === (initialMessages?.length || 0)
 
   const waiting =
     !showStarters && !error && messages[messages.length - 1]?.role === "user"
   const stoppable = isLoading && messages[messages.length - 1]?.role !== "user"
 
   const scrollToBottom = () => {
-    const element = scrollContainer || messagesRef.current
+    const element = scrollElement || messagesContainerRef.current
     element?.scrollBy({
       behavior: "instant",
       top: element?.scrollHeight,
@@ -284,139 +254,186 @@ const AiChatInternal: React.FC<AiChatProps> = function AiChat({
 
   const lastMsg = messages[messages.length - 1]
 
+  const externalScroll = !!scrollElement
+
   return (
-    <ChatContainer className={classNames(className, classes.root)} {...others}>
-      <ChatTitle
-        title={title}
-        askTimTitle={askTimTitle}
-        onClose={onClose}
-        className={classNames(className, classes.title)}
-      />
-      <MessagesContainer
-        className={classes.messagesContainer}
-        ref={messagesRef}
-      >
-        {messages.map((m) => (
-          <MessageRow
-            key={m.id}
-            data-chat-role={m.role}
-            className={classNames(classes.messageRow, {
-              [classes.messageRowUser]: m.role === "user",
-              [classes.messageRowAssistant]: m.role === "assistant",
-            })}
-          >
-            <Message className={classes.message}>
-              <VisuallyHidden>
-                {m.role === "user" ? "You said: " : "Assistant said: "}
-              </VisuallyHidden>
-              <Markdown skipHtml>{m.content}</Markdown>
-            </Message>
-          </MessageRow>
-        ))}
-        {showStarters ? (
-          <StarterContainer>
-            {conversationStarters?.map((m) => (
-              <Starter
-                className={classes.conversationStarter}
-                key={m.content}
-                onClick={() => {
-                  scrollToBottom()
-                  append({ role: "user", content: m.content })
-                }}
-              >
-                {m.content}
-              </Starter>
-            ))}
-          </StarterContainer>
-        ) : null}
-        {waiting ? (
-          <MessageRow
-            className={classNames(
-              classes.messageRow,
-              classes.messageRowAssistant,
-            )}
-            key={"loading"}
-          >
-            <Message>
-              <RiMoreFill />
-            </Message>
-          </MessageRow>
-        ) : null}
-        {error ? (
-          <Alert severity="error" closable>
-            An unexpected error has occurred.
-          </Alert>
-        ) : null}
-      </MessagesContainer>
-      <BottomSection className={classes.bottomSection}>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (isLoading && stoppable) {
-              stop()
-            } else {
-              scrollToBottom()
-              handleSubmit(e)
+    <Container
+      className={className}
+      ref={containerRef}
+      /**
+       * Changing the `useChat` chatId seems to persist some state between
+       * hook calls. This can cause strange effects like loading API responses
+       * for previous chatId into new chatId.
+       *
+       * To avoid this, let's change the key, this will force React to make a new component
+       * not sharing any of the old state.
+       */
+      key={chatId}
+    >
+      {showEntryScreen ? (
+        <EntryScreen
+          className={classes.entryScreenContainer}
+          title={entryScreenTitle}
+          conversationStarters={conversationStarters}
+          onPromptSubmit={(prompt) => {
+            if (prompt.trim() === "") {
+              return
             }
+            setShowEntryScreen(false)
+            if (entryScreenTitle && !initialMessages) {
+              setInitialMessages([
+                {
+                  role: "assistant",
+                  content: entryScreenTitle,
+                  id: `initial-${Math.random().toString().slice(2)}-0`,
+                },
+              ])
+            }
+
+            append({ role: "user", content: prompt })
           }}
+        />
+      ) : (
+        <ChatScreen
+          className={classes.chatScreenContainer}
+          data-testid="ai-chat-screen"
+          externalScroll={externalScroll}
+          ref={chatScreenRef}
         >
-          <Input
-            fullWidth
-            size="chat"
-            className={classes.input}
-            placeholder={placeholder}
-            name="message"
-            sx={{ flex: 1 }}
-            value={input}
-            onChange={handleInputChange}
-            endAdornment={
-              isLoading ? (
-                <AdornmentButton
-                  aria-label="Stop"
-                  onClick={stop}
-                  disabled={!stoppable}
+          <ChatContainer
+            className={classNames(className, classes.root)}
+            externalScroll={externalScroll}
+            {...others}
+          >
+            <ChatTitle
+              askTimTitle={askTimTitle}
+              externalScroll={externalScroll}
+              className={classNames(className, classes.title)}
+            />
+            <MessagesContainer
+              className={classes.messagesContainer}
+              externalScroll={externalScroll}
+              ref={messagesContainerRef}
+            >
+              {messages.map((m) => (
+                <MessageRow
+                  key={m.id}
+                  data-chat-role={m.role}
+                  className={classNames(classes.messageRow, {
+                    [classes.messageRowUser]: m.role === "user",
+                    [classes.messageRowAssistant]: m.role === "assistant",
+                  })}
                 >
-                  <StyledStopButton />
-                </AdornmentButton>
-              ) : (
-                <AdornmentButton
-                  aria-label="Send"
-                  type="submit"
-                  onClick={(e) => {
+                  <Message className={classes.message}>
+                    <VisuallyHidden>
+                      {m.role === "user" ? "You said: " : "Assistant said: "}
+                    </VisuallyHidden>
+                    <Markdown skipHtml>{m.content}</Markdown>
+                  </Message>
+                </MessageRow>
+              ))}
+              {showStarters ? (
+                <StarterContainer>
+                  {conversationStarters?.map((m) => (
+                    <Starter
+                      className={classes.conversationStarter}
+                      key={m.content}
+                      onClick={() => {
+                        scrollToBottom()
+                        append({ role: "user", content: m.content })
+                      }}
+                    >
+                      {m.content}
+                    </Starter>
+                  ))}
+                </StarterContainer>
+              ) : null}
+              {waiting ? (
+                <MessageRow
+                  className={classNames(
+                    classes.messageRow,
+                    classes.messageRowAssistant,
+                  )}
+                  key={"loading"}
+                >
+                  <Message>
+                    <RiMoreFill />
+                  </Message>
+                </MessageRow>
+              ) : null}
+              {error ? (
+                <Alert severity="error" closable>
+                  An unexpected error has occurred.
+                </Alert>
+              ) : null}
+            </MessagesContainer>
+            <BottomSection
+              externalScroll={externalScroll}
+              className={classes.bottomSection}
+            >
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (isLoading && stoppable) {
+                    stop()
+                  } else {
                     scrollToBottom()
                     handleSubmit(e)
-                  }}
-                >
-                  <StyledSendButton />
-                </AdornmentButton>
-              )
-            }
-          />
-        </form>
-        <Disclaimer variant="body3">
-          AI-generated content may be incorrect.
-        </Disclaimer>
-      </BottomSection>
-      <SrAnnouncer
-        isLoading={isLoading}
-        loadingMessages={srLoadingMessages}
-        message={lastMsg.role === "assistant" ? lastMsg.content : ""}
-      />
-    </ChatContainer>
+                  }
+                }}
+              >
+                <Input
+                  fullWidth
+                  size="chat"
+                  className={classes.input}
+                  placeholder={placeholder}
+                  name="message"
+                  sx={{ flex: 1 }}
+                  value={input}
+                  onChange={handleInputChange}
+                  endAdornment={
+                    isLoading ? (
+                      <AdornmentButton
+                        aria-label="Stop"
+                        onClick={stop}
+                        disabled={!stoppable}
+                      >
+                        <StyledStopButton />
+                      </AdornmentButton>
+                    ) : (
+                      <AdornmentButton
+                        aria-label="Send"
+                        type="submit"
+                        onClick={(e) => {
+                          if (input.trim() === "") {
+                            e.preventDefault()
+                            return
+                          }
+                          scrollToBottom()
+                          handleSubmit(e)
+                        }}
+                      >
+                        <StyledSendButton />
+                      </AdornmentButton>
+                    )
+                  }
+                />
+              </form>
+              <Disclaimer variant="body3">
+                AI-generated content may be incorrect.
+              </Disclaimer>
+            </BottomSection>
+            <SrAnnouncer
+              isLoading={isLoading}
+              loadingMessages={srLoadingMessages}
+              message={lastMsg?.role === "assistant" ? lastMsg?.content : ""}
+            />
+          </ChatContainer>
+        </ChatScreen>
+      )}
+    </Container>
   )
 }
-
-const AiChat: React.FC<AiChatProps> = (props) => (
-  /**
-   * Changing the `useChat` chatId seems to persist some state between
-   * hook calls. This can cause strange effects like loading API responses
-   * for previous chatId into new chatId.
-   *
-   * To avoid this, let's change the key, this will force React to make a new component
-   * not sharing any of the old state.
-   */
-  <AiChatInternal key={props.chatId} {...props} />
-)
 
 export { AiChat }
 export type { AiChatProps }

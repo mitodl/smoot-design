@@ -52,6 +52,17 @@ const whenCount = async <T,>(cb: () => T[], count: number) => {
 }
 
 describe("AiChat", () => {
+  beforeEach(() => {
+    const MockObserverInstance = {
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+    }
+    global.ResizeObserver = jest
+      .fn()
+      .mockImplementation(() => MockObserverInstance)
+  })
+
   const setup = (props: Partial<AiChatProps> = {}) => {
     const initialMessages: AiChatProps["initialMessages"] = [
       { role: "assistant", content: faker.lorem.sentence() },
@@ -67,6 +78,7 @@ describe("AiChat", () => {
         conversationStarters={conversationStarters}
         requestOpts={{ apiUrl: API_URL }}
         placeholder="Type a message..."
+        entryScreenEnabled={false}
         {...props}
       />,
       { wrapper: ThemeProvider },
@@ -79,6 +91,7 @@ describe("AiChat", () => {
           initialMessages={initialMessages}
           conversationStarters={conversationStarters}
           requestOpts={{ apiUrl: API_URL }}
+          entryScreenEnabled={false}
           {...newProps}
         />,
       )
