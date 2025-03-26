@@ -79,8 +79,8 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
           payload={{
             blockType,
             target,
+            title: "AskTIM to recommend a course",
             chat: {
-              askTimTitle: "for help with Problem: Derivatives 1.1",
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
@@ -93,6 +93,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
           payload={{
             blockType,
             target,
+            title: "AskTIM about this video",
             chat: {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
@@ -142,28 +143,6 @@ export const VideoStory: Story = {
       ],
     },
   },
-  render: ({ target }, { parameters: { blockType } }) => (
-    <>
-      <IFrame
-        payload={{
-          blockType,
-          target,
-          chat: {
-            apiUrl: TEST_API_STREAMING,
-            initialMessages: INITIAL_MESSAGES,
-            conversationStarters: STARTERS,
-          },
-          summary: {
-            apiUrl: CONTENT_FILE_URL,
-          },
-        }}
-      />
-      <RemoteTutorDrawer
-        target={target}
-        messageOrigin="http://localhost:6006"
-      />
-    </>
-  ),
 }
 
 // From https://api.rc.learn.mit.edu/api/v1/contentfiles/16453238/
