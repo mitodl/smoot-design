@@ -174,22 +174,6 @@ const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
-const parseContent = (summaryString: string) => {
-  try {
-    const parsed = JSON.parse(summaryString)
-    const content = parsed[0]?.content
-    const unescaped = content
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-
-    return unescaped
-  } catch (e) {
-    console.warn("Could not parse summary:", e)
-    return summaryString
-  }
-}
-
 const useContentFetch = (contentUrl: string | undefined) => {
   const [response, setResponse] = useState<{
     summary: string | null
@@ -206,10 +190,9 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
-        const parsedSummary = parseContent(result.summary)
         setResponse({
-          summary: parsedSummary,
-          flashcards: result.flashcards,
+          summary: result.results?.[0]?.summary,
+          flashcards: result.results?.[0]?.flashcards,
         })
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Failed to fetch"))
