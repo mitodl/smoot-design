@@ -174,28 +174,11 @@ const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
-const parseContent = (summaryString: string) => {
-  try {
-    const parsed = JSON.parse(summaryString)
-    const content = parsed[0]?.content
-    const unescaped = content
-      .replace(/\\n/g, "\n")
-      .replace(/\\"/g, '"')
-      .replace(/\\'/g, "'")
-
-    return unescaped
-  } catch (e) {
-    console.warn("Could not parse summary:", e)
-    return summaryString
-  }
-}
-
 const useContentFetch = (contentUrl: string | undefined) => {
   const [response, setResponse] = useState<{
     summary: string | null
     flashcards: Flashcard[]
   } | null>(null)
-  const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -206,13 +189,19 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
-        const parsedSummary = parseContent(result.summary)
+        if (!result.results) {
+          throw new Error("Unexpected response")
+        }
+        const [contentFile] = result.results
+        if (!contentFile) {
+          throw new Error("No result found")
+        }
         setResponse({
-          summary: parsedSummary,
-          flashcards: result.flashcards,
+          summary: contentFile.summary,
+          flashcards: contentFile.flashcards,
         })
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Failed to fetch"))
+      } catch (error) {
+        console.error("Error fetching content", error)
       } finally {
         setLoading(false)
       }
@@ -221,7 +210,7 @@ const useContentFetch = (contentUrl: string | undefined) => {
     fetchData()
   }, [contentUrl])
 
-  return { response, error, loading }
+  return { response, loading }
 }
 
 const ChatComponent = ({
