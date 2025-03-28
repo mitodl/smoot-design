@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
+import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
+import { handlers } from "../../components/AiChat/test-utils/api"
 import {
   RemoteTutorDrawer,
   RemoteTutorDrawerInitMessage,
 } from "./RemoteTutorDrawer"
-import invariant from "tiny-invariant"
 
 type InitPayload = RemoteTutorDrawerInitMessage["payload"]
 
@@ -33,7 +34,7 @@ const buildIFrame = (payload: InitPayload) => (el: HTMLIFrameElement) => {
   invariant(doc && parent)
   const button = doc.createElement("button")
 
-  button.textContent = "Trigger chat (Send message to parent)"
+  button.textContent = "Open drawer (send message to parent)"
   doc.body.appendChild(button)
 
   const div = doc.createElement("div")
@@ -79,8 +80,8 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
           payload={{
             blockType,
             target,
+            title: "AskTIM for help with Problem: Derivatives 1.1",
             chat: {
-              askTimTitle: "for help with Problem: Derivatives 1.1",
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
@@ -93,6 +94,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
           payload={{
             blockType,
             target,
+            title: "AskTIM about this video",
             chat: {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
@@ -139,31 +141,10 @@ export const VideoStory: Story = {
             flashcards: mockFlashcards,
           })
         }),
+        ...handlers,
       ],
     },
   },
-  render: ({ target }, { parameters: { blockType } }) => (
-    <>
-      <IFrame
-        payload={{
-          blockType,
-          target,
-          chat: {
-            apiUrl: TEST_API_STREAMING,
-            initialMessages: INITIAL_MESSAGES,
-            conversationStarters: STARTERS,
-          },
-          summary: {
-            apiUrl: CONTENT_FILE_URL,
-          },
-        }}
-      />
-      <RemoteTutorDrawer
-        target={target}
-        messageOrigin="http://localhost:6006"
-      />
-    </>
-  ),
 }
 
 // From https://api.rc.learn.mit.edu/api/v1/contentfiles/16453238/

@@ -3,7 +3,7 @@ import { FC, useEffect, useState, useRef } from "react"
 import styled from "@emotion/styled"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
-import { RiCloseLine } from "@remixicon/react"
+import { RiCloseLine, RiSparkling2Line } from "@remixicon/react"
 import Drawer from "@mui/material/Drawer"
 import {
   TabButtonList,
@@ -24,9 +24,12 @@ type RemoteTutorDrawerInitMessage = {
   payload: {
     blockType?: "problem" | "video"
     target?: string
+    /**
+     * If the title begins "AskTIM", it is styled as the AskTIM logo.
+     */
+    title?: string
     chat: {
       chatId?: AiChatProps["chatId"]
-      askTimTitle?: AiChatProps["askTimTitle"]
       conversationStarters?: AiChatProps["conversationStarters"]
       initialMessages: AiChatProps["initialMessages"]
       apiUrl: AiChatProps["requestOpts"]["apiUrl"]
@@ -38,23 +41,58 @@ type RemoteTutorDrawerInitMessage = {
   }
 }
 
+const Header = styled.div<{ externalScroll?: boolean }>(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "4px",
+  color: theme.custom.colors.white,
+  position: "sticky",
+  top: 0,
+  padding: "32px 0 16px 0",
+  zIndex: 2,
+  backgroundColor: theme.custom.colors.white,
+  borderRadius: 0,
+}))
+
+const Title = styled.div(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  color: theme.custom.colors.darkGray2,
+  img: {
+    width: "24px",
+    height: "24px",
+  },
+  svg: {
+    fill: theme.custom.colors.red,
+    width: "24px",
+    height: "24px",
+    flexShrink: 0,
+  },
+  overflow: "hidden",
+  p: {
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  },
+}))
+
 const CloseButton = styled(ActionButton)(({ theme }) => ({
-  position: "fixed",
-  top: "24px",
-  right: "40px",
   backgroundColor: theme.custom.colors.lightGray2,
   "&&:hover": {
     backgroundColor: theme.custom.colors.red,
     color: theme.custom.colors.white,
   },
   zIndex: 3,
+  flexShrink: 0,
 }))
 
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
-  padding: "80px 0 16px",
+  padding: "0 0 16px",
   backgroundColor: theme.custom.colors.white,
   position: "sticky",
-  top: 0,
+  top: "84px",
   zIndex: 2,
   overflow: "visible",
 }))
@@ -69,8 +107,8 @@ const StyledAiChat = styled(AiChat)(({ hasTabs }: { hasTabs: boolean }) => ({
   ".MitAiChat--chatScreenContainer": {
     padding: hasTabs ? 0 : "0 25px 0 40px",
   },
-  ".MitAiChat--title": {
-    paddingTop: "32px",
+  ".MitAiChat--messagesContainer": {
+    paddingTop: hasTabs ? 0 : "88px",
   },
 }))
 
@@ -204,7 +242,6 @@ const ChatComponent = ({
   return (
     <StyledAiChat
       chatId={payload.chatId}
-      askTimTitle={payload.askTimTitle}
       conversationStarters={payload.conversationStarters}
       initialMessages={payload.initialMessages}
       entryScreenEnabled={false}
@@ -308,14 +345,29 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
       open={open}
       onClose={() => setOpen(false)}
     >
-      <CloseButton
-        variant="text"
-        size="medium"
-        onClick={() => setOpen(false)}
-        aria-label="Close"
-      >
-        <RiCloseLine />
-      </CloseButton>
+      <Header>
+        <Title>
+          <RiSparkling2Line />
+          <Typography variant="body1">
+            {payload.title?.includes("AskTIM") ? (
+              <>
+                Ask<strong>TIM</strong>
+                {payload.title.replace("AskTIM", "")}
+              </>
+            ) : (
+              payload.title
+            )}
+          </Typography>
+        </Title>
+        <CloseButton
+          variant="text"
+          size="medium"
+          onClick={() => setOpen(false)}
+          aria-label="Close"
+        >
+          <RiCloseLine />
+        </CloseButton>
+      </Header>
       {blockType === "problem" ? (
         <ChatComponent
           payload={chat}
