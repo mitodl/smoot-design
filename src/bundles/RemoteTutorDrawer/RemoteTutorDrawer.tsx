@@ -373,12 +373,14 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             onChange={(_event, val) => setTab(val)}
           >
             <TabButton value="chat" label="Chat" />
-            <TabButton
-              value="flashcards"
-              label="Flashcards"
-              onMouseDown={handleMouseDown}
-              onFocus={handleFocus}
-            />
+            {response?.flashcards?.length ? (
+              <TabButton
+                value="flashcards"
+                label="Flashcards"
+                onMouseDown={handleMouseDown}
+                onFocus={handleFocus}
+              />
+            ) : null}
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
           <StyledTabPanel value="chat">
@@ -390,12 +392,14 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               hasTabs={hasTabs}
             />
           </StyledTabPanel>
-          <StyledTabPanel value="flashcards">
-            <FlashcardsScreen
-              flashcards={response?.flashcards}
-              wasKeyboardFocus={_wasKeyboardFocus}
-            />
-          </StyledTabPanel>
+          {response?.flashcards?.length ? (
+            <StyledTabPanel value="flashcards">
+              <FlashcardsScreen
+                flashcards={response?.flashcards}
+                wasKeyboardFocus={_wasKeyboardFocus}
+              />
+            </StyledTabPanel>
+          ) : null}
           <StyledTabPanel value="summary">
             <Typography variant="h4" component="h4"></Typography>
             <StyledHTML>
