@@ -179,7 +179,6 @@ const useContentFetch = (contentUrl: string | undefined) => {
     summary: string | null
     flashcards: Flashcard[]
   } | null>(null)
-  const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -190,12 +189,19 @@ const useContentFetch = (contentUrl: string | undefined) => {
       try {
         const response = await fetch(contentUrl)
         const result = await response.json()
+        if (!result.results) {
+          throw new Error("Unexpected response")
+        }
+        const [contentFile] = result.results
+        if (!contentFile) {
+          throw new Error("No result found")
+        }
         setResponse({
-          summary: result.results?.[0]?.summary,
-          flashcards: result.results?.[0]?.flashcards,
+          summary: contentFile.summary,
+          flashcards: contentFile.flashcards,
         })
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Failed to fetch"))
+      } catch (error) {
+        console.error("Error fetching content", error)
       } finally {
         setLoading(false)
       }
@@ -204,7 +210,7 @@ const useContentFetch = (contentUrl: string | undefined) => {
     fetchData()
   }, [contentUrl])
 
-  return { response, error, loading }
+  return { response, loading }
 }
 
 const ChatComponent = ({
