@@ -111,7 +111,7 @@ export const FlashcardsScreen = ({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
 
-  if (!flashcards) {
+  if (!flashcards?.length) {
     return null
   }
 
