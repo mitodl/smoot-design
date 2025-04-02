@@ -94,7 +94,7 @@ const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   padding: "0 0 16px",
   backgroundColor: theme.custom.colors.white,
   position: "sticky",
-  top: "84px",
+  top: "88px",
   zIndex: 2,
   overflow: "visible",
 }))
@@ -116,7 +116,7 @@ const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(({ hasTabs, theme }) =
     },
   },
   ".MitAiChat--messagesContainer": {
-    paddingTop: hasTabs ? 0 : "88px",
+    paddingTop: hasTabs ? "8px" : "88px",
   },
 }))
 
@@ -406,7 +406,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         />
       ) : null}
       {blockType === "video" ? (
-        <TabContext value={tab}>
+        <TabContext value={tab} >
           <StyledTabButtonList
             styleVariant="chat"
             onChange={(_event, val) => setTab(val)}
@@ -422,7 +422,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             ) : null}
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
-          <StyledTabPanel value="chat">
+          <StyledTabPanel value="chat" keepMounted>
             <ChatComponent
               payload={{
                 ...chat,
