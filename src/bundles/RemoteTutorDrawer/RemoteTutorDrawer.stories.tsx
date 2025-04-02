@@ -171,7 +171,7 @@ export const VideoStory: Story = {
 }
 
 /**
- * Where conversation starters are not provided, they will be selected at randomfrom the returned flashcard questions
+ * Where conversation starters are not provided, they will be selected at random from the returned flashcard questions
  * or from `DEFAULT_VIDEO_STARTERS` provided.
  */
 export const FlashcardConversationStartersStory: Story = {
