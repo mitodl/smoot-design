@@ -107,12 +107,15 @@ const StyledTabPanel = styled(TabPanel)({
 
 const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(({ hasTabs, theme }) => ({
   ".MitAiChat--entryScreenContainer": {
-    padding: "114px 0 24px",
+    padding: hasTabs ?  "114px 0 24px" : "168px 32px 24px",
+    [theme.breakpoints.down("md")]: {
+      padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+    },
   },
   ".MitAiChat--chatScreenContainer": {
     padding: hasTabs ? 0 : "0 32px",
     [theme.breakpoints.down("md")]: {
-      padding: hasTabs ? 0 :"0 16px",
+      padding: hasTabs ? 0 : "0 16px",
     },
   },
   ".MitAiChat--messagesContainer": {
@@ -221,7 +224,7 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
-const DEFAULT_ENTRY_SCREEN_TITLE = "What do you want to know about this video?"
+const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE = "What do you want to know about this video?"
 
 const DEFAULT_VIDEO_STARTERS = [
   { content: "What are the most important concepts introduced in the video?" },
@@ -249,7 +252,7 @@ const ChatComponent = ({
   hasTabs: boolean
 }) => {
   if (!payload) return null
-
+console.log('entryScreenEnabled', entryScreenEnabled)
   return (
     <StyledAiChat
       chatId={payload.chatId}
@@ -401,7 +404,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           transformBody={transformBody}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
-          entryScreenEnabled={false}
+          entryScreenEnabled={payload.chat?.entryScreenEnabled ?? false}
+          entryScreenTitle={payload.chat.entryScreenTitle}
           hasTabs={hasTabs}
         />
       ) : null}
@@ -430,8 +434,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               transformBody={transformBody}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
-              entryScreenEnabled={true}
-              entryScreenTitle={payload.chat.entryScreenTitle ?? DEFAULT_ENTRY_SCREEN_TITLE}
+              entryScreenEnabled={payload.chat?.entryScreenEnabled ?? true}
+              entryScreenTitle={payload.chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE}
               conversationStarters={conversationStarters}
               hasTabs={hasTabs}
             />

@@ -86,6 +86,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
+              ...chat
             },
           }}
         />
@@ -128,6 +129,20 @@ export const ProblemStory: Story = {
     blockType: "problem",
     chat: {
       conversationStarters: STARTERS,
+    },
+  },
+}
+
+export const EntryScreenStory: Story = {
+  args: {
+    target: "entry-screen-frame",
+  },
+  parameters: {
+    blockType: "problem",
+    chat: {
+      conversationStarters: STARTERS,
+      entryScreenEnabled: true,
+      entryScreenTitle: "AskTIM about this problem",
     },
   },
 }
