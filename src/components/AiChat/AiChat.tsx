@@ -36,7 +36,7 @@ const Container = styled.div()
 
 const ChatScreen = styled.div<{ externalScroll: boolean }>(
   ({ externalScroll, theme }) => ({
-    padding: "16px 28px 0",
+    padding: "16px 32px 0",
     [theme.breakpoints.down("md")]: {
       padding: "16px 16px 0",
     },
@@ -49,7 +49,7 @@ const ChatScreen = styled.div<{ externalScroll: boolean }>(
     right: 0,
     zIndex: 1,
     ...(externalScroll && {
-      padding: "0 28px",
+      padding: "0 32px",
       [theme.breakpoints.down("md")]: {
         padding: "0 16px",
       },
@@ -280,16 +280,6 @@ const AiChat: FC<AiChatProps> = ({
               return
             }
             setShowEntryScreen(false)
-            if (entryScreenTitle && !initialMessages) {
-              setInitialMessages([
-                {
-                  role: "assistant",
-                  content: entryScreenTitle,
-                  id: `initial-${Math.random().toString().slice(2)}-0`,
-                },
-              ])
-            }
-
             append({ role: "user", content: prompt })
           }}
         />

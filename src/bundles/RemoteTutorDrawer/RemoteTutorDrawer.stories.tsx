@@ -74,7 +74,7 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 
 const meta: Meta<typeof RemoteTutorDrawer> = {
   title: "smoot-design/AI/RemoteTutorDrawer",
-  render: ({ target }, { parameters: { blockType } }) => (
+  render: ({ target }, { parameters: { blockType, chat } }) => (
     <>
       {blockType === "problem" ? (
         <IFrame
@@ -100,6 +100,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
+              ...chat
             },
             summary: {
               apiUrl: CONTENT_FILE_URL,
@@ -125,15 +126,49 @@ export const ProblemStory: Story = {
   },
   parameters: {
     blockType: "problem",
+    chat: {
+      conversationStarters: STARTERS,
+    },
   },
 }
 
+/**
+ * The chat entry screen is shown by default for the video blocks Tutor drawer.
+ */
 export const VideoStory: Story = {
   args: {
     target: "video-frame",
   },
   parameters: {
     blockType: "video",
+    chat: {
+      conversationStarters: STARTERS,
+    },
+    msw: {
+      handlers: [
+        http.get(CONTENT_FILE_URL, () => {
+          return HttpResponse.json(sampleResponse)
+        }),
+        ...handlers,
+      ],
+    },
+  },
+}
+
+/**
+ * Where conversation starters are not provided, they will be selected at randomfrom the returned flashcard questions
+ * or from `DEFAULT_VIDEO_STARTERS` provided.
+ */
+export const FlashcardConversationStartersStory: Story = {
+  args: {
+    target: "starters-frame",
+  },
+  parameters: {
+    blockType: "video",
+    chat: {
+      conversationStarters: undefined,
+      initialMessages: undefined,
+    },
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
