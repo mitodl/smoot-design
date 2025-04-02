@@ -96,7 +96,6 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
           payload={{
             blockType,
             target,
-            title: "AskTIM about this video",
             chat: {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,

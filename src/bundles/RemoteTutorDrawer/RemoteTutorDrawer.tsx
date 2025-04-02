@@ -377,7 +377,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     >
       <Header>
         <Title>
-          <RiSparkling2Line />
+          {payload.title ? <RiSparkling2Line /> : null}
           <Typography variant="body1">
             {payload.title?.includes("AskTIM") ? (
               <>
