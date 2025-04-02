@@ -105,23 +105,25 @@ const StyledTabPanel = styled(TabPanel)({
   position: "relative",
 })
 
-const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(({ hasTabs, theme }) => ({
-  ".MitAiChat--entryScreenContainer": {
-    padding: hasTabs ?  "114px 0 24px" : "168px 32px 24px",
-    [theme.breakpoints.down("md")]: {
-      padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(
+  ({ hasTabs, theme }) => ({
+    ".MitAiChat--entryScreenContainer": {
+      padding: hasTabs ? "114px 0 24px" : "168px 32px 24px",
+      [theme.breakpoints.down("md")]: {
+        padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+      },
     },
-  },
-  ".MitAiChat--chatScreenContainer": {
-    padding: hasTabs ? 0 : "0 32px",
-    [theme.breakpoints.down("md")]: {
-      padding: hasTabs ? 0 : "0 16px",
+    ".MitAiChat--chatScreenContainer": {
+      padding: hasTabs ? 0 : "0 32px",
+      [theme.breakpoints.down("md")]: {
+        padding: hasTabs ? 0 : "0 16px",
+      },
     },
-  },
-  ".MitAiChat--messagesContainer": {
-    paddingTop: hasTabs ? "8px" : "88px",
-  },
-}))
+    ".MitAiChat--messagesContainer": {
+      paddingTop: hasTabs ? "8px" : "88px",
+    },
+  }),
+)
 
 const StyledHTML = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
@@ -224,11 +226,15 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
-const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE = "What do you want to know about this video?"
+const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE =
+  "What do you want to know about this video?"
 
 const DEFAULT_VIDEO_STARTERS = [
   { content: "What are the most important concepts introduced in the video?" },
-  { content: "What examples are used to illustrate concepts covered in the video?" },
+  {
+    content:
+      "What examples are used to illustrate concepts covered in the video?",
+  },
   { content: "What are the key terms introduced in this video?" },
 ]
 
@@ -252,7 +258,7 @@ const ChatComponent = ({
   hasTabs: boolean
 }) => {
   if (!payload) return null
-console.log('entryScreenEnabled', entryScreenEnabled)
+  console.log("entryScreenEnabled", entryScreenEnabled)
   return (
     <StyledAiChat
       chatId={payload.chatId}
@@ -343,11 +349,15 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   const conversationStarters = useMemo(() => {
     if (!payload) return []
-    return payload.chat.conversationStarters ||
-      (response?.flashcards ? randomItems(response.flashcards, 3).map((flashcard) => ({ content: flashcard.question })) : DEFAULT_VIDEO_STARTERS)
-    },
-    [payload, response]
-  )
+    return (
+      payload.chat.conversationStarters ||
+      (response?.flashcards
+        ? randomItems(response.flashcards, 3).map((flashcard) => ({
+            content: flashcard.question,
+          }))
+        : DEFAULT_VIDEO_STARTERS)
+    )
+  }, [payload, response])
 
   if (!payload) {
     return null
@@ -367,8 +377,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           boxSizing: "border-box",
           padding: {
             xs: "0 16px",
-            md: "0 32px"
-          }
+            md: "0 32px",
+          },
         },
       }}
       anchor="right"
@@ -410,7 +420,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         />
       ) : null}
       {blockType === "video" ? (
-        <TabContext value={tab} >
+        <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
             onChange={(_event, val) => setTab(val)}
@@ -435,7 +445,10 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
               entryScreenEnabled={payload.chat?.entryScreenEnabled ?? true}
-              entryScreenTitle={payload.chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE}
+              entryScreenTitle={
+                payload.chat.entryScreenTitle ??
+                DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
+              }
               conversationStarters={conversationStarters}
               hasTabs={hasTabs}
             />

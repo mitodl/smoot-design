@@ -86,7 +86,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
-              ...chat
+              ...chat,
             },
           }}
         />
@@ -100,7 +100,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
               apiUrl: TEST_API_STREAMING,
               initialMessages: INITIAL_MESSAGES,
               conversationStarters: STARTERS,
-              ...chat
+              ...chat,
             },
             summary: {
               apiUrl: CONTENT_FILE_URL,
