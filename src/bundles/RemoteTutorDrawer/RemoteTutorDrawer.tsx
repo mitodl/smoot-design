@@ -258,7 +258,6 @@ const ChatComponent = ({
   hasTabs: boolean
 }) => {
   if (!payload) return null
-  console.log("entryScreenEnabled", entryScreenEnabled)
   return (
     <StyledAiChat
       chatId={payload.chatId}
