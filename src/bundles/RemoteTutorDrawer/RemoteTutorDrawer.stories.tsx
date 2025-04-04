@@ -115,7 +115,6 @@ export const EntryScreenStory: Story = {
     payload: {
       blockType: "problem",
       target: "entry-screen-frame",
-      title: "AskTIM for help with Problem: Derivatives 1.1",
       chat: {
         apiUrl: TEST_API_STREAMING,
         initialMessages: INITIAL_MESSAGES,
@@ -140,7 +139,6 @@ export const VideoStory: Story = {
       target: "video-frame",
       chat: {
         apiUrl: TEST_API_STREAMING,
-        initialMessages: INITIAL_MESSAGES,
         conversationStarters: STARTERS,
       },
       summary: {

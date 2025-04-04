@@ -83,7 +83,6 @@ const Starter = styled.button(({ theme }) => ({
   backgroundColor: "transparent",
   textAlign: "left",
   [theme.breakpoints.down("sm")]: {
-    textAlign: "center",
     padding: "12px 36px",
   },
   ":hover": {
