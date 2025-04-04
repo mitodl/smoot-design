@@ -234,4 +234,42 @@ describe("AiChat", () => {
     const alert = await screen.findByRole("alert")
     expect(alert).toHaveTextContent("An unexpected error has occurred")
   })
+
+  test("Shows the entry screen if entryScreenEnabled is true", async () => {
+    setup({
+      entryScreenEnabled: true,
+      entryScreenTitle: "Entry Screen Title",
+    })
+    await expect(screen.getByText("Entry Screen Title")).toBeInTheDocument()
+  })
+
+  test("Entry screen click submit prompt", async () => {
+    setup({
+      entryScreenEnabled: true,
+      entryScreenTitle: "Entry Screen Title",
+      initialMessages: [],
+      conversationStarters: [],
+    })
+
+    await user.click(screen.getByRole("textbox"))
+    await user.paste("User message")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+
+    const messages = getMessages()
+    expect(messages[0]).toHaveTextContent("User message")
+  })
+
+  test("Entry screen click starter to submit prompt", async () => {
+    setup({
+      entryScreenEnabled: true,
+      entryScreenTitle: "Entry Screen Title",
+      initialMessages: [],
+      conversationStarters: [{ content: "Starter 1" }],
+    })
+
+    await user.click(screen.getByRole("button", { name: "Starter 1" }))
+
+    const messages = getMessages()
+    expect(messages[0]).toHaveTextContent("Starter 1")
+  })
 })

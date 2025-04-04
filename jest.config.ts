@@ -12,8 +12,12 @@ const config: Config.InitialOptions = {
   transform: {
     "^.+\\.(t|j)sx?$": "@swc/jest",
   },
+  transformIgnorePatterns: [
+    "node_modules/"
+  ],
   moduleNameMapper: {
     "\\.(css|scss|svg|jpg|jpeg|png)$": "<rootDir>/test-utils/filemock.js",
+    "^rehype-raw$": "<rootDir>/test-utils/modulemock.js"
   },
   rootDir: "./src",
 }

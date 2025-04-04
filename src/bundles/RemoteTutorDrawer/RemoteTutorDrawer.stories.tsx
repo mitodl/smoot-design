@@ -74,39 +74,9 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 
 const meta: Meta<typeof RemoteTutorDrawer> = {
   title: "smoot-design/AI/RemoteTutorDrawer",
-  render: ({ target }, { parameters: { blockType } }) => (
+  render: ({ target }, { parameters: { payload } }) => (
     <>
-      {blockType === "problem" ? (
-        <IFrame
-          payload={{
-            blockType,
-            target,
-            title: "AskTIM for help with Problem: Derivatives 1.1",
-            chat: {
-              apiUrl: TEST_API_STREAMING,
-              initialMessages: INITIAL_MESSAGES,
-              conversationStarters: STARTERS,
-            },
-          }}
-        />
-      ) : null}
-      {blockType === "video" ? (
-        <IFrame
-          payload={{
-            blockType,
-            target,
-            title: "AskTIM about this video",
-            chat: {
-              apiUrl: TEST_API_STREAMING,
-              initialMessages: INITIAL_MESSAGES,
-              conversationStarters: STARTERS,
-            },
-            summary: {
-              apiUrl: CONTENT_FILE_URL,
-            },
-          }}
-        />
-      ) : null}
+      <IFrame payload={payload} />
       <RemoteTutorDrawer
         target={target}
         messageOrigin="http://localhost:6006"
@@ -124,16 +94,89 @@ export const ProblemStory: Story = {
     target: "problem-frame",
   },
   parameters: {
-    blockType: "problem",
+    payload: {
+      blockType: "problem",
+      target: "problem-frame",
+      title: "AskTIM for help with Problem: Derivatives 1.1",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        initialMessages: INITIAL_MESSAGES,
+        conversationStarters: STARTERS,
+      },
+    },
   },
 }
 
+export const EntryScreenStory: Story = {
+  args: {
+    target: "entry-screen-frame",
+  },
+  parameters: {
+    payload: {
+      blockType: "problem",
+      target: "entry-screen-frame",
+      title: "AskTIM for help with Problem: Derivatives 1.1",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        initialMessages: INITIAL_MESSAGES,
+        conversationStarters: STARTERS,
+        entryScreenEnabled: true,
+        entryScreenTitle: "AskTIM about this problem",
+      },
+    },
+  },
+}
+
+/**
+ * The chat entry screen is shown by default for the video blocks Tutor drawer.
+ */
 export const VideoStory: Story = {
   args: {
     target: "video-frame",
   },
   parameters: {
-    blockType: "video",
+    payload: {
+      blockType: "video",
+      target: "video-frame",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        initialMessages: INITIAL_MESSAGES,
+        conversationStarters: STARTERS,
+      },
+      summary: {
+        apiUrl: CONTENT_FILE_URL,
+      },
+    },
+    msw: {
+      handlers: [
+        http.get(CONTENT_FILE_URL, () => {
+          return HttpResponse.json(sampleResponse)
+        }),
+        ...handlers,
+      ],
+    },
+  },
+}
+
+/**
+ * Where conversation starters are not provided, they will be selected at random from the returned flashcard questions
+ * or from `DEFAULT_VIDEO_STARTERS` provided.
+ */
+export const FlashcardConversationStartersStory: Story = {
+  args: {
+    target: "starters-frame",
+  },
+  parameters: {
+    payload: {
+      blockType: "video",
+      target: "starters-frame",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+      },
+      summary: {
+        apiUrl: CONTENT_FILE_URL,
+      },
+    },
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {

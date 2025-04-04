@@ -1,3 +1,4 @@
+// @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef } from "react"
 import styled from "@emotion/styled"
@@ -255,7 +256,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   fetchOpts,
   target,
 }: RemoteTutorDrawerProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
   const [payload, setPayload] = useState<
     RemoteTutorDrawerInitMessage["payload"] | null
   >(null)
@@ -286,7 +287,15 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }
 
   useEffect(() => {
+    console.log("Setting up message listener with origin:", messageOrigin)
     const cb = (event: MessageEvent) => {
+      console.log("Message received:", {
+        origin: event.origin,
+        expectedOrigin: messageOrigin,
+        data: event.data,
+        target: event.data?.payload?.target,
+        expectedTarget: target,
+      })
       if (event.origin !== messageOrigin) {
         if (process.env.NODE_ENV === "development") {
           console.warn(
@@ -300,13 +309,16 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         event.data.type === "smoot-design::tutor-drawer-open" &&
         event.data.payload.target === target
       ) {
+        console.log("Opening drawer with payload:", event.data.payload)
         setOpen(true)
         setPayload(event.data.payload)
       }
     }
     window.addEventListener("message", cb)
+    console.log("Message listener attached")
     return () => {
       window.removeEventListener("message", cb)
+      console.log("Message listener removed")
     }
   }, [messageOrigin, target])
 
@@ -319,6 +331,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   return (
     <Drawer
+      data-testid="remote-tutor-drawer"
       className={className}
       PaperProps={{
         ref: paperRefCallback,
@@ -336,8 +349,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     >
       <Header>
         <Title>
-          <RiSparkling2Line />
-          <Typography variant="body1">
+          {payload.title ? <RiSparkling2Line /> : null}
+          <Typography variant="body1" component="h2">
             {payload.title?.includes("AskTIM") ? (
               <>
                 Ask<strong>TIM</strong>
