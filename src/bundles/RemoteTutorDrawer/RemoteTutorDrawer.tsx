@@ -1,5 +1,5 @@
 import * as React from "react"
-import { FC, useEffect, useState, useRef } from "react"
+import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
@@ -31,9 +31,11 @@ type RemoteTutorDrawerInitMessage = {
     chat: {
       chatId?: AiChatProps["chatId"]
       conversationStarters?: AiChatProps["conversationStarters"]
-      initialMessages: AiChatProps["initialMessages"]
+      initialMessages?: AiChatProps["initialMessages"]
       apiUrl: AiChatProps["requestOpts"]["apiUrl"]
       requestBody?: Record<string, unknown>
+      entryScreenEnabled?: AiChatProps["entryScreenEnabled"]
+      entryScreenTitle?: AiChatProps["entryScreenTitle"]
     }
     summary?: {
       apiUrl: string
@@ -92,7 +94,7 @@ const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   padding: "0 0 16px",
   backgroundColor: theme.custom.colors.white,
   position: "sticky",
-  top: "84px",
+  top: "88px",
   zIndex: 2,
   overflow: "visible",
 }))
@@ -103,14 +105,25 @@ const StyledTabPanel = styled(TabPanel)({
   position: "relative",
 })
 
-const StyledAiChat = styled(AiChat)(({ hasTabs }: { hasTabs: boolean }) => ({
-  ".MitAiChat--chatScreenContainer": {
-    padding: hasTabs ? 0 : "0 25px 0 40px",
-  },
-  ".MitAiChat--messagesContainer": {
-    paddingTop: hasTabs ? 0 : "88px",
-  },
-}))
+const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(
+  ({ hasTabs, theme }) => ({
+    ".MitAiChat--entryScreenContainer": {
+      padding: hasTabs ? "114px 0 24px" : "168px 32px 24px",
+      [theme.breakpoints.down("md")]: {
+        padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+      },
+    },
+    ".MitAiChat--chatScreenContainer": {
+      padding: hasTabs ? 0 : "0 32px",
+      [theme.breakpoints.down("md")]: {
+        padding: hasTabs ? 0 : "0 16px",
+      },
+    },
+    ".MitAiChat--messagesContainer": {
+      paddingTop: hasTabs ? "8px" : "88px",
+    },
+  }),
+)
 
 const StyledHTML = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
@@ -213,28 +226,46 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
+const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE =
+  "What do you want to know about this video?"
+
+const DEFAULT_VIDEO_STARTERS = [
+  { content: "What are the most important concepts introduced in the video?" },
+  {
+    content:
+      "What examples are used to illustrate concepts covered in the video?",
+  },
+  { content: "What are the key terms introduced in this video?" },
+]
+
 const ChatComponent = ({
   payload,
   transformBody,
   fetchOpts,
   scrollElement,
+  entryScreenEnabled,
+  entryScreenTitle,
+  conversationStarters,
   hasTabs,
 }: {
   payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
-  scrollElement?: AiChatProps["scrollElement"]
+  scrollElement: AiChatProps["scrollElement"]
+  entryScreenEnabled: boolean
+  entryScreenTitle?: AiChatProps["entryScreenTitle"]
+  conversationStarters?: AiChatProps["conversationStarters"]
   hasTabs: boolean
 }) => {
   if (!payload) return null
-
   return (
     <StyledAiChat
       chatId={payload.chatId}
-      conversationStarters={payload.conversationStarters}
+      conversationStarters={conversationStarters}
       initialMessages={payload.initialMessages}
-      entryScreenEnabled={false}
       scrollElement={scrollElement}
+      entryScreenEnabled={entryScreenEnabled}
+      entryScreenTitle={entryScreenTitle}
       requestOpts={{
         transformBody: (messages) => ({
           ...payload.requestBody,
@@ -246,6 +277,11 @@ const ChatComponent = ({
       hasTabs={hasTabs}
     />
   )
+}
+
+const randomItems = <T,>(array: T[], count: number): T[] => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
 }
 
 const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
@@ -310,6 +346,24 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     }
   }, [messageOrigin, target])
 
+  useEffect(() => {
+    scrollElement?.scrollTo({
+      top: tab === "chat" ? scrollElement.scrollHeight : 0,
+    })
+  }, [tab, scrollElement])
+
+  const conversationStarters = useMemo(() => {
+    if (!payload) return []
+    return (
+      payload.chat.conversationStarters ||
+      (response?.flashcards
+        ? randomItems(response.flashcards, 3).map((flashcard) => ({
+            content: flashcard.question,
+          }))
+        : DEFAULT_VIDEO_STARTERS)
+    )
+  }, [payload, response])
+
   if (!payload) {
     return null
   }
@@ -326,8 +380,10 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           width: "900px",
           maxWidth: "100%",
           boxSizing: "border-box",
-          scrollbarGutter: "stable",
-          padding: "0 25px 0 40px",
+          padding: {
+            xs: "0 16px",
+            md: "0 32px",
+          },
         },
       }}
       anchor="right"
@@ -336,7 +392,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     >
       <Header>
         <Title>
-          <RiSparkling2Line />
+          {payload.title ? <RiSparkling2Line /> : null}
           <Typography variant="body1">
             {payload.title?.includes("AskTIM") ? (
               <>
@@ -363,6 +419,8 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           transformBody={transformBody}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
+          entryScreenEnabled={payload.chat?.entryScreenEnabled ?? false}
+          entryScreenTitle={payload.chat.entryScreenTitle}
           hasTabs={hasTabs}
         />
       ) : null}
@@ -370,7 +428,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
-            onChange={(_event, val) => setTab(val)}
+            onChange={(e, tab) => setTab(tab)}
           >
             <TabButton value="chat" label="Chat" />
             {response?.flashcards?.length ? (
@@ -383,12 +441,20 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             ) : null}
             <TabButton value="summary" label="Summary" />
           </StyledTabButtonList>
-          <StyledTabPanel value="chat">
+          <StyledTabPanel value="chat" keepMounted>
             <ChatComponent
-              payload={chat}
+              payload={{
+                ...chat,
+              }}
               transformBody={transformBody}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
+              entryScreenEnabled={payload.chat?.entryScreenEnabled ?? true}
+              entryScreenTitle={
+                payload.chat.entryScreenTitle ??
+                DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
+              }
+              conversationStarters={conversationStarters}
               hasTabs={hasTabs}
             />
           </StyledTabPanel>
