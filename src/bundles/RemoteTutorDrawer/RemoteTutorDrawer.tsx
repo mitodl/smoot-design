@@ -346,6 +346,12 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     }
   }, [messageOrigin, target])
 
+  useEffect(() => {
+    scrollElement?.scrollTo({
+      top: tab === "chat" ? scrollElement.scrollHeight : 0,
+    })
+  }, [tab, scrollElement])
+
   const conversationStarters = useMemo(() => {
     if (!payload) return []
     return (
@@ -422,7 +428,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
-            onChange={(_event, val) => setTab(val)}
+            onChange={(e, tab) => setTab(tab)}
           >
             <TabButton value="chat" label="Chat" />
             {response?.flashcards?.length ? (
