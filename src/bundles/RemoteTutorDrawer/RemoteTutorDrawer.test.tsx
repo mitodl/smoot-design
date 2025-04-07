@@ -68,6 +68,7 @@ describe("RemoteTutorDrawer", () => {
       return HttpResponse.text("AI Response")
     }),
     http.get(CONTENT_FILE_URL, () => {
+      console.log("Returning content response", CONTENT_RESPONSE)
       return HttpResponse.json(CONTENT_RESPONSE)
     }),
   )
@@ -244,4 +245,88 @@ describe("RemoteTutorDrawer", () => {
 
     screen.getByText("What do you want to know about this video?")
   })
+
+  test(
+    "Flashcard shows content and can be click navigated",
+    server.boundary(async () => {
+      await setup({
+        type: "smoot-design::tutor-drawer-open",
+        payload: {
+          blockType: "video",
+          target: "ai-chat",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+          },
+          summary: {
+            apiUrl: CONTENT_FILE_URL,
+          },
+        },
+      })
+
+      await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+      await user.click(screen.getByText("Q: Test question 1?"))
+
+      screen.getByText("Answer: Test answer 1")
+
+      await user.click(screen.getByRole("button", { name: "Right arrow" }))
+
+      await user.click(screen.getByText("Q: Test question 2?"))
+
+      screen.getByText("Answer: Test answer 2")
+
+      await user.click(screen.getByRole("button", { name: "Left arrow" }))
+
+      screen.getByText("Q: Test question 1?")
+    }),
+  )
+
+  test(
+    "Flashcard shows content and can be keyboard navigated and cycles",
+    server.boundary(async () => {
+      await setup({
+        type: "smoot-design::tutor-drawer-open",
+        payload: {
+          blockType: "video",
+          target: "ai-chat",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+          },
+          summary: {
+            apiUrl: CONTENT_FILE_URL,
+          },
+        },
+      })
+
+      await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+      screen.getByText("Q: Test question 1?")
+
+      await user.keyboard("{enter}")
+
+      screen.getByText("Answer: Test answer 1")
+
+      await user.keyboard("{arrowright}")
+
+      screen.getByText("Q: Test question 2?")
+
+      await user.keyboard("{enter}")
+
+      screen.getByText("Answer: Test answer 2")
+
+      await user.keyboard("{arrowleft}")
+
+      screen.getByText("Q: Test question 1?")
+
+      await user.keyboard("{arrowleft}")
+
+      screen.getByText("Q: Test question 3?")
+
+      await user.keyboard("{arrowright}")
+      await user.keyboard("{arrowright}")
+      await user.keyboard("{arrowright}")
+
+      screen.getByText("Q: Test question 3?")
+    }),
+  )
 })

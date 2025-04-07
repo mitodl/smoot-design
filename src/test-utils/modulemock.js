@@ -1,3 +1,3 @@
 module.exports = () => {
-  return (tree) => tree
-}
+  return (tree) => tree;
+};
