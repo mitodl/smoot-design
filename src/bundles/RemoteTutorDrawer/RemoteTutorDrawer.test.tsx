@@ -83,71 +83,38 @@ describe("RemoteTutorDrawer", () => {
 
   afterAll(() => server.close())
 
-  const setup = async (
-    message: RemoteTutorDrawerInitMessage,
-    // contentResponse = CONTENT_RESPONSE,
-  ) => {
-    try {
-      // server = setupServer(
-      //   http.post(TEST_API_STREAMING, async () => {
-      //     return HttpResponse.text("AI Response")
-      //   }),
-      //   http.get(CONTENT_FILE_URL, () => {
-      //     console.log(
-      //       "About to return content response:",
-      //       JSON.stringify(contentResponse, null, 2),
-      //     )
-      //     return HttpResponse.json(contentResponse)
-      //   }),
-      // )
+  const setup = async (message: RemoteTutorDrawerInitMessage) => {
+    server.listen()
 
-      server.listen()
+    const { container } = render(
+      <RemoteTutorDrawer
+        data-testid="remote-tutor-drawer"
+        messageOrigin="http://localhost:6006"
+        target="ai-chat"
+      />,
+      { wrapper: ThemeProvider },
+    )
 
-      const { container } = render(
-        <RemoteTutorDrawer
-          data-testid="remote-tutor-drawer"
-          messageOrigin="http://localhost:6006"
-          target="ai-chat"
-        />,
-        { wrapper: ThemeProvider },
-      )
+    await waitFor(
+      () => {
+        expect(
+          container.querySelector(
+            '[data-testid="remote-tutor-drawer-waiting"]',
+          ),
+        ).toBeInTheDocument()
+      },
+      { timeout: 5000 },
+    )
 
-      await waitFor(
-        () => {
-          expect(
-            container.querySelector(
-              '[data-testid="remote-tutor-drawer-waiting"]',
-            ),
-          ).toBeInTheDocument()
-        },
-        { timeout: 5000 },
-      )
+    const event = new MessageEvent("message", {
+      data: message,
+      origin: "http://localhost:6006",
+    })
 
-      try {
-        const event = new MessageEvent("message", {
-          data: message,
-          origin: "http://localhost:6006",
-        })
-        await act(async () => {
-          window.dispatchEvent(event)
-          await new Promise((resolve) => setTimeout(resolve, 100))
-        })
-      } catch (error: unknown) {
-        console.error("Error in act:", error)
-        if (error && typeof error === "object" && "errors" in error) {
-          const aggregateError = error as { errors: unknown[] } & Error
-          console.error("AggregateError details:", {
-            errors: aggregateError.errors,
-            message: aggregateError.message,
-            name: aggregateError.name,
-          })
-        }
-        throw error
-      }
-    } catch (error) {
-      console.error("Setup error:", error)
-      throw error
-    }
+    await act(async () => {
+      window.dispatchEvent(event)
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
   }
 
   test("Problem drawer opens showing title", async () => {
@@ -277,28 +244,4 @@ describe("RemoteTutorDrawer", () => {
 
     screen.getByText("What do you want to know about this video?")
   })
-
-  /*
-  test("User can input a prompt", async () => {
-    await setup({
-      type: "smoot-design::tutor-drawer-open",
-      payload: {
-        blockType: "problem",
-        target: "ai-chat",
-        chat: {
-          apiUrl: TEST_API_STREAMING,
-        },
-      },
-    })
-
-    const input = screen.getByRole("textbox", { name: "" })
-    await user.click(input)
-    await user.paste("User prompt")
-    await user.click(screen.getByRole("button", { name: "Send" }))
-
-    const messages = await whenCount(getMessages, 2)
-    // const messages = getMessages()
-    expect(messages[0]).toHaveTextContent("User prompt")
-  })
-*/
 })
