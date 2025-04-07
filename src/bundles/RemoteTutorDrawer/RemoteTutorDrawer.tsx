@@ -323,15 +323,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }
 
   useEffect(() => {
-    console.log("Setting up message listener with origin:", messageOrigin)
     const cb = (event: MessageEvent) => {
-      console.log("Message received:", {
-        origin: event.origin,
-        expectedOrigin: messageOrigin,
-        data: event.data,
-        target: event.data?.payload?.target,
-        expectedTarget: target,
-      })
       if (event.origin !== messageOrigin) {
         if (process.env.NODE_ENV === "development") {
           console.warn(
@@ -345,21 +337,18 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
         event.data.type === "smoot-design::tutor-drawer-open" &&
         event.data.payload.target === target
       ) {
-        console.log("Opening drawer with payload:", event.data.payload)
         setOpen(true)
         setPayload(event.data.payload)
       }
     }
     window.addEventListener("message", cb)
-    console.log("Message listener attached")
     return () => {
       window.removeEventListener("message", cb)
-      console.log("Message listener removed")
     }
   }, [messageOrigin, target])
 
   useEffect(() => {
-    scrollElement?.scrollTo({
+    scrollElement?.scrollTo?.({
       top: tab === "chat" ? scrollElement.scrollHeight : 0,
     })
   }, [tab, scrollElement])
@@ -368,7 +357,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     if (!payload) return []
     return (
       payload.chat.conversationStarters ||
-      (response?.flashcards
+      (response?.flashcards?.length && response.flashcards.length >= 3
         ? randomItems(response.flashcards, 3).map((flashcard) => ({
             content: flashcard.question,
           }))
@@ -377,7 +366,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }, [payload, response])
 
   if (!payload) {
-    return null
+    return <div data-testid="remote-tutor-drawer-waiting"></div>
   }
 
   const { blockType, chat } = payload

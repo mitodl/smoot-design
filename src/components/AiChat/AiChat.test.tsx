@@ -243,7 +243,7 @@ describe("AiChat", () => {
     await expect(screen.getByText("Entry Screen Title")).toBeInTheDocument()
   })
 
-  test("Entry screen click submit prompt", async () => {
+  test("User can submit a prompt from the entry screen", async () => {
     setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
@@ -259,7 +259,7 @@ describe("AiChat", () => {
     expect(messages[0]).toHaveTextContent("User message")
   })
 
-  test("Entry screen click starter to submit prompt", async () => {
+  test("User can click starter on the entry screen to submit a prompt", async () => {
     setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
