@@ -54,10 +54,6 @@ const Flashcard = React.forwardRef<
     }
   }
 
-  console.log(
-    ">>>>>>>>>>>>>>>>>>>>>>>>>>>>",
-    screen === 0 ? `Q: ${content.question}` : `Answer: ${content.answer}`,
-  )
   return (
     <FlashcardContainer
       ref={ref}

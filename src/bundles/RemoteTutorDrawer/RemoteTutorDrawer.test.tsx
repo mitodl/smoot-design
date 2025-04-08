@@ -3,14 +3,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { RemoteTutorDrawer } from "./RemoteTutorDrawer"
-import type {
-  RemoteTutorDrawerProps,
-  RemoteTutorDrawerInitMessage,
-} from "./RemoteTutorDrawer"
+import type { RemoteTutorDrawerInitMessage } from "./RemoteTutorDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { http, HttpResponse } from "msw"
-import { setupServer, SetupServer } from "msw/node"
+import { setupServer } from "msw/node"
 
 const TEST_API_STREAMING = "http://localhost:4567/test"
 const CONTENT_FILE_URL = "http://localhost:4567/api/v1/contentfiles/1"
@@ -41,19 +38,6 @@ const CONTENT_RESPONSE = {
   ],
 }
 
-// const getMessages = (): HTMLElement[] => {
-//   return Array.from(document.querySelectorAll(".MitAiChat--message"))
-// }
-
-// const whenCount = async <T,>(cb: () => T[], count: number) => {
-//   return await waitFor(() => {
-//     const result = cb()
-//     console.log("Result:", result)
-//     expect(result).toHaveLength(count)
-//     return result
-//   })
-// }
-
 class MockResizeObserver {
   observe = jest.fn()
   unobserve = jest.fn()
@@ -63,12 +47,11 @@ class MockResizeObserver {
 global.ResizeObserver = MockResizeObserver
 
 describe("RemoteTutorDrawer", () => {
-  let server = setupServer(
+  const server = setupServer(
     http.post(TEST_API_STREAMING, async () => {
       return HttpResponse.text("AI Response")
     }),
     http.get(CONTENT_FILE_URL, () => {
-      console.log("Returning content response", CONTENT_RESPONSE)
       return HttpResponse.json(CONTENT_RESPONSE)
     }),
   )
@@ -87,7 +70,7 @@ describe("RemoteTutorDrawer", () => {
   const setup = async (message: RemoteTutorDrawerInitMessage) => {
     server.listen()
 
-    const { container } = render(
+    render(
       <RemoteTutorDrawer
         data-testid="remote-tutor-drawer"
         messageOrigin="http://localhost:6006"
@@ -99,9 +82,7 @@ describe("RemoteTutorDrawer", () => {
     await waitFor(
       () => {
         expect(
-          container.querySelector(
-            '[data-testid="remote-tutor-drawer-waiting"]',
-          ),
+          screen.getByTestId("remote-tutor-drawer-waiting"),
         ).toBeInTheDocument()
       },
       { timeout: 5000 },
