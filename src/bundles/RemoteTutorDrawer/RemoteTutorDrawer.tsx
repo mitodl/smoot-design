@@ -292,7 +292,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   fetchOpts,
   target,
 }: RemoteTutorDrawerProps) => {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
   const [payload, setPayload] = useState<
     RemoteTutorDrawerInitMessage["payload"] | null
   >(null)
