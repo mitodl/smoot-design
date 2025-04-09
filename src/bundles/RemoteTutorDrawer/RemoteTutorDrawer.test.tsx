@@ -1,5 +1,3 @@
-// This was giving false positives
-/* eslint-disable testing-library/await-async-utils */
 import { act, render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { RemoteTutorDrawer } from "./RemoteTutorDrawer"
@@ -61,7 +59,6 @@ describe("RemoteTutorDrawer", () => {
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
     server.resetHandlers()
   })
 
@@ -79,14 +76,7 @@ describe("RemoteTutorDrawer", () => {
       { wrapper: ThemeProvider },
     )
 
-    await waitFor(
-      () => {
-        expect(
-          screen.getByTestId("remote-tutor-drawer-waiting"),
-        ).toBeInTheDocument()
-      },
-      { timeout: 5000 },
-    )
+    await screen.findByTestId("remote-tutor-drawer-waiting")
 
     const event = new MessageEvent("message", {
       data: message,
@@ -146,29 +136,26 @@ describe("RemoteTutorDrawer", () => {
     screen.getByRole("button", { name: "Prompt 3" })
   })
 
-  test(
-    "Video drawer chat entry screen selects starters from flashcards",
-    server.boundary(async () => {
-      await setup({
-        type: "smoot-design::tutor-drawer-open",
-        payload: {
-          blockType: "video",
-          target: "ai-chat",
-          chat: {
-            entryScreenTitle: "Entry screen title",
-            apiUrl: TEST_API_STREAMING,
-          },
-          summary: {
-            apiUrl: CONTENT_FILE_URL,
-          },
+  test("Video drawer chat entry screen selects starters from flashcards", async () => {
+    await setup({
+      type: "smoot-design::tutor-drawer-open",
+      payload: {
+        blockType: "video",
+        target: "ai-chat",
+        chat: {
+          entryScreenTitle: "Entry screen title",
+          apiUrl: TEST_API_STREAMING,
         },
-      })
+        summary: {
+          apiUrl: CONTENT_FILE_URL,
+        },
+      },
+    })
 
-      screen.getByRole("button", { name: "Test question 1?" })
-      screen.getByRole("button", { name: "Test question 2?" })
-      screen.getByRole("button", { name: "Test question 3?" })
-    }),
-  )
+    screen.getByRole("button", { name: "Test question 1?" })
+    screen.getByRole("button", { name: "Test question 2?" })
+    screen.getByRole("button", { name: "Test question 3?" })
+  })
 
   test(
     "Video drawer chat entry screen shows default starters where no flashcards are available",
@@ -250,13 +237,13 @@ describe("RemoteTutorDrawer", () => {
 
       screen.getByText("Answer: Test answer 1")
 
-      await user.click(screen.getByRole("button", { name: "Right arrow" }))
+      await user.click(screen.getByRole("button", { name: "Next card" }))
 
       await user.click(screen.getByText("Q: Test question 2?"))
 
       screen.getByText("Answer: Test answer 2")
 
-      await user.click(screen.getByRole("button", { name: "Left arrow" }))
+      await user.click(screen.getByRole("button", { name: "Previous card" }))
 
       screen.getByText("Q: Test question 1?")
     }),

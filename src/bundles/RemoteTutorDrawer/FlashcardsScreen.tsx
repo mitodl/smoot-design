@@ -129,7 +129,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label="Left arrow"
+          aria-label="Previous card"
         >
           <RiArrowLeftLine aria-hidden />
         </ActionButton>
@@ -142,7 +142,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label="Right arrow"
+          aria-label="Next card"
         >
           <RiArrowRightLine aria-hidden />
         </ActionButton>
