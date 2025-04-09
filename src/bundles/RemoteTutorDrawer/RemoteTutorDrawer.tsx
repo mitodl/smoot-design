@@ -1,3 +1,4 @@
+// @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
@@ -347,7 +348,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }, [messageOrigin, target])
 
   useEffect(() => {
-    scrollElement?.scrollTo({
+    scrollElement?.scrollTo?.({
       top: tab === "chat" ? scrollElement.scrollHeight : 0,
     })
   }, [tab, scrollElement])
@@ -356,7 +357,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
     if (!payload) return []
     return (
       payload.chat.conversationStarters ||
-      (response?.flashcards
+      (response?.flashcards?.length && response.flashcards.length >= 3
         ? randomItems(response.flashcards, 3).map((flashcard) => ({
             content: flashcard.question,
           }))
@@ -365,7 +366,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }, [payload, response])
 
   if (!payload) {
-    return null
+    return <div data-testid="remote-tutor-drawer-waiting"></div>
   }
 
   const { blockType, chat } = payload
@@ -373,6 +374,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   return (
     <Drawer
+      data-testid="remote-tutor-drawer"
       className={className}
       PaperProps={{
         ref: paperRefCallback,
@@ -393,7 +395,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
       <Header>
         <Title>
           {payload.title ? <RiSparkling2Line /> : null}
-          <Typography variant="body1">
+          <Typography variant="body1" component="h2">
             {payload.title?.includes("AskTIM") ? (
               <>
                 Ask<strong>TIM</strong>

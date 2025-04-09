@@ -22,7 +22,7 @@ export type TabButtonListProps = TabListProps & {
 }
 
 const TabButtonList: React.FC<TabButtonListProps> = styled(
-  (props: TabButtonListProps) => (
+  ({ styleVariant, ...props }: TabButtonListProps) => (
     <MuiTabList {...defaultTabListProps} {...props} />
   ),
 )(({ theme, styleVariant }) => ({

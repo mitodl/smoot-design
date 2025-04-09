@@ -74,40 +74,9 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 
 const meta: Meta<typeof RemoteTutorDrawer> = {
   title: "smoot-design/AI/RemoteTutorDrawer",
-  render: ({ target }, { parameters: { blockType, chat } }) => (
+  render: ({ target }, { parameters: { payload } }) => (
     <>
-      {blockType === "problem" ? (
-        <IFrame
-          payload={{
-            blockType,
-            target,
-            title: "AskTIM for help with Problem: Derivatives 1.1",
-            chat: {
-              apiUrl: TEST_API_STREAMING,
-              initialMessages: INITIAL_MESSAGES,
-              conversationStarters: STARTERS,
-              ...chat,
-            },
-          }}
-        />
-      ) : null}
-      {blockType === "video" ? (
-        <IFrame
-          payload={{
-            blockType,
-            target,
-            chat: {
-              apiUrl: TEST_API_STREAMING,
-              initialMessages: INITIAL_MESSAGES,
-              conversationStarters: STARTERS,
-              ...chat,
-            },
-            summary: {
-              apiUrl: CONTENT_FILE_URL,
-            },
-          }}
-        />
-      ) : null}
+      <IFrame payload={payload} />
       <RemoteTutorDrawer
         target={target}
         messageOrigin="http://localhost:6006"
@@ -125,9 +94,15 @@ export const ProblemStory: Story = {
     target: "problem-frame",
   },
   parameters: {
-    blockType: "problem",
-    chat: {
-      conversationStarters: STARTERS,
+    payload: {
+      blockType: "problem",
+      target: "problem-frame",
+      title: "AskTIM for help with Problem: Derivatives 1.1",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        initialMessages: INITIAL_MESSAGES,
+        conversationStarters: STARTERS,
+      },
     },
   },
 }
@@ -137,11 +112,16 @@ export const EntryScreenStory: Story = {
     target: "entry-screen-frame",
   },
   parameters: {
-    blockType: "problem",
-    chat: {
-      conversationStarters: STARTERS,
-      entryScreenEnabled: true,
-      entryScreenTitle: "AskTIM about this problem",
+    payload: {
+      blockType: "problem",
+      target: "entry-screen-frame",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        initialMessages: INITIAL_MESSAGES,
+        conversationStarters: STARTERS,
+        entryScreenEnabled: true,
+        entryScreenTitle: "AskTIM about this problem",
+      },
     },
   },
 }
@@ -154,9 +134,16 @@ export const VideoStory: Story = {
     target: "video-frame",
   },
   parameters: {
-    blockType: "video",
-    chat: {
-      conversationStarters: STARTERS,
+    payload: {
+      blockType: "video",
+      target: "video-frame",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        conversationStarters: STARTERS,
+      },
+      summary: {
+        apiUrl: CONTENT_FILE_URL,
+      },
     },
     msw: {
       handlers: [
@@ -178,10 +165,15 @@ export const FlashcardConversationStartersStory: Story = {
     target: "starters-frame",
   },
   parameters: {
-    blockType: "video",
-    chat: {
-      conversationStarters: undefined,
-      initialMessages: undefined,
+    payload: {
+      blockType: "video",
+      target: "starters-frame",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+      },
+      summary: {
+        apiUrl: CONTENT_FILE_URL,
+      },
     },
     msw: {
       handlers: [
