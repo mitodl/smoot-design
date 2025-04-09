@@ -194,6 +194,7 @@ const AiChat: FC<AiChatProps> = ({
   const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const [initialMessages, setInitialMessages] = useState<AiChatMessage[]>()
+  const promptInputRef = useRef<HTMLDivElement>(null)
 
   const {
     messages: unparsed,
@@ -226,6 +227,12 @@ const AiChat: FC<AiChatProps> = ({
       )
     }
   }, [_initialMessages])
+
+  useEffect(() => {
+    if (!showEntryScreen) {
+      promptInputRef.current?.querySelector("input")?.focus()
+    }
+  }, [showEntryScreen])
 
   const messages = useMemo(() => {
     const initial = initialMessages?.map((m) => m.id)
@@ -373,6 +380,7 @@ const AiChat: FC<AiChatProps> = ({
                 }}
               >
                 <Input
+                  ref={promptInputRef}
                   fullWidth
                   size="chat"
                   className={classes.input}

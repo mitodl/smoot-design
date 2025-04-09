@@ -147,7 +147,7 @@ const EntryScreen = ({
           <Starter
             key={index}
             onClick={() => onPromptSubmit(content)}
-            tabIndex={index}
+            tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 onPromptSubmit(content)
