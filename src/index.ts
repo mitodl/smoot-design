@@ -29,4 +29,11 @@ export type { TextFieldProps } from "./components/TextField/TextField"
 
 export { SrAnnouncer } from "./components/SrAnnouncer/SrAnnouncer"
 export type { SrAnnouncerProps } from "./components/SrAnnouncer/SrAnnouncer"
+
+export {
+  TabButton,
+  TabButtonLink,
+  TabButtonList,
+} from "./components/TabButtons/TabButtonList"
+
 export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
