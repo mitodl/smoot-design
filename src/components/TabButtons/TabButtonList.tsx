@@ -17,7 +17,7 @@ const defaultTabListProps = {
 
 type StyleVariant = "chat"
 
-export type TabButtonListProps = TabListProps & {
+type TabButtonListProps = TabListProps & {
   styleVariant?: StyleVariant
 }
 
@@ -104,12 +104,21 @@ type TabButtonProps = Omit<TabProps<"button">, "color"> & {
   styleVariant?: StyleVariant
 }
 
+/**
+ * Wrapper around [MUI Tab](https://mui.com/material-ui/api/tab/) using our
+ * Button as the `component` implementation.
+ */
 const TabButton = (props: TabButtonProps) => (
   <MuiTab {...props} component={TabButtonInner} />
 )
 
+/**
+ * Wrapper around [MUI Tab](https://mui.com/material-ui/api/tab/) using our
+ * ButtonLink as the `component` implementation.
+ */
 const TabButtonLink = ({ ...props }: TabProps<typeof TabLinkInner>) => (
   <MuiTab {...props} component={TabLinkInner} />
 )
 
 export { TabButtonList, TabButton, TabButtonLink }
+export type { TabButtonListProps, TabButtonProps }
