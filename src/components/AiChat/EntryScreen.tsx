@@ -54,6 +54,10 @@ const StyledInput = styled(Input)({
   borderRadius: "8px",
   margin: "8px 0 24px 0",
   flexShrink: 0,
+  "button:focus-visible": {
+    outlineOffset: "-1px",
+    borderRadius: "7px",
+  },
 })
 
 const SendIcon = styled(RiSendPlaneFill)(({ theme }) => ({
@@ -132,6 +136,9 @@ const EntryScreen = ({
         size="chat"
         onChange={onPromptChange}
         onKeyDown={onPromptKeyDown}
+        inputProps={{
+          "aria-label": "Ask a question",
+        }}
         endAdornment={
           <AdornmentButton
             aria-label="Send"

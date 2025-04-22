@@ -118,15 +118,6 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
       borderRadius: "8px",
       borderColor: theme.custom.colors.silverGrayLight,
       backgroundColor: theme.custom.colors.white,
-      "&:hover:not(.Mui-disabled), &.Mui-focused, :hover:not(.Mui-disabled):not(.Mui-focused)":
-        {
-          boxShadow: "0px 8px 20px 0px rgba(120, 147, 172, 0.10)",
-          borderColor: theme.custom.colors.silverGray,
-          outline: "none",
-          svg: {
-            fill: theme.custom.colors.lightRed,
-          },
-        },
       ".Mit-AdornmentButton": {
         padding: "0 16px",
       },
@@ -209,7 +200,7 @@ const noForward = Object.keys({
  * **Note:** This component is a styled version of MUI's `InputBase`. See
  * MUI's documentation for full info.
  *
- * - [Smoot Design Input Documentation](https://mitodl.github.io/smoot-design/https://mitodl.github.io/smoot-design/)
+ * - [Smoot Design Input Documentation](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-input--docs)
  * - [InputBase Documentation](https://mui.com/api/input-base/)
  */
 const Input: React.FC<InputProps> = styled(InputBase, {

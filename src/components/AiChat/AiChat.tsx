@@ -168,6 +168,10 @@ const BottomSection = styled.div<{ externalScroll: boolean }>(
       bottom: 0,
       background: theme.custom.colors.white,
     }),
+    "button:focus-visible": {
+      outlineOffset: "-1px",
+      borderRadius: "7px",
+    },
   }),
 )
 
@@ -393,6 +397,9 @@ const AiChat: FC<AiChatProps> = ({
                   sx={{ flex: 1 }}
                   value={input}
                   onChange={handleInputChange}
+                  inputProps={{
+                    "aria-label": "Ask a question",
+                  }}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton
