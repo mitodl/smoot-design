@@ -326,7 +326,7 @@ const AiChat: FC<AiChatProps> = ({
                   })}
                 >
                   <Message className={classes.message}>
-                    <VisuallyHidden as="h6">
+                    <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
                     <Markdown skipHtml>{m.content}</Markdown>
