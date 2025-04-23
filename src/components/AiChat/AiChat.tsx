@@ -123,10 +123,6 @@ const Message = styled.div(({ theme }) => ({
     borderRadius: "8px 0px 8px 8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
-  "&:focus-visible": {
-    outlineOffset: "-1px",
-    padding: "12px 16px",
-  },
 }))
 
 const StarterContainer = styled.div({
@@ -329,8 +325,8 @@ const AiChat: FC<AiChatProps> = ({
                     [classes.messageRowAssistant]: m.role === "assistant",
                   })}
                 >
-                  <Message className={classes.message} tabIndex={0}>
-                    <VisuallyHidden>
+                  <Message className={classes.message}>
+                    <VisuallyHidden as="h6">
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
                     <Markdown skipHtml>{m.content}</Markdown>
