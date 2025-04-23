@@ -16,6 +16,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
+import { MathJaxContext, MathJax } from "better-react-mathjax"
 
 const classes = {
   root: "MitAiChat--root",
@@ -257,171 +258,173 @@ const AiChat: FC<AiChatProps> = ({
   const externalScroll = !!scrollElement
 
   return (
-    <Container
-      className={className}
-      ref={containerRef}
-      /**
-       * Changing the `useChat` chatId seems to persist some state between
-       * hook calls. This can cause strange effects like loading API responses
-       * for previous chatId into new chatId.
-       *
-       * To avoid this, let's change the key, this will force React to make a new component
-       * not sharing any of the old state.
-       */
-      key={chatId}
-    >
-      {showEntryScreen ? (
-        <EntryScreen
-          className={classes.entryScreenContainer}
-          title={entryScreenTitle}
-          conversationStarters={conversationStarters}
-          onPromptSubmit={(prompt) => {
-            if (prompt.trim() === "") {
-              return
-            }
-            setShowEntryScreen(false)
-            append({ role: "user", content: prompt })
-          }}
-        />
-      ) : (
-        <ChatScreen
-          className={classes.chatScreenContainer}
-          data-testid="ai-chat-screen"
-          externalScroll={externalScroll}
-          ref={chatScreenRef}
-        >
-          <ChatContainer
-            className={classNames(className, classes.root)}
+    <MathJaxContext>
+      <Container
+        className={className}
+        ref={containerRef}
+        /**
+         * Changing the `useChat` chatId seems to persist some state between
+         * hook calls. This can cause strange effects like loading API responses
+         * for previous chatId into new chatId.
+         *
+         * To avoid this, let's change the key, this will force React to make a new component
+         * not sharing any of the old state.
+         */
+        key={chatId}
+      >
+        {showEntryScreen ? (
+          <EntryScreen
+            className={classes.entryScreenContainer}
+            title={entryScreenTitle}
+            conversationStarters={conversationStarters}
+            onPromptSubmit={(prompt) => {
+              if (prompt.trim() === "") {
+                return
+              }
+              setShowEntryScreen(false)
+              append({ role: "user", content: prompt })
+            }}
+          />
+        ) : (
+          <ChatScreen
+            className={classes.chatScreenContainer}
+            data-testid="ai-chat-screen"
             externalScroll={externalScroll}
-            {...others}
+            ref={chatScreenRef}
           >
-            <ChatTitle
-              askTimTitle={askTimTitle}
+            <ChatContainer
+              className={classNames(className, classes.root)}
               externalScroll={externalScroll}
-              className={classNames(className, classes.title)}
-            />
-            <MessagesContainer
-              className={classes.messagesContainer}
-              externalScroll={externalScroll}
-              ref={messagesContainerRef}
+              {...others}
             >
-              {messages.map((m) => (
-                <MessageRow
-                  key={m.id}
-                  data-chat-role={m.role}
-                  className={classNames(classes.messageRow, {
-                    [classes.messageRowUser]: m.role === "user",
-                    [classes.messageRowAssistant]: m.role === "assistant",
-                  })}
-                >
-                  <Message className={classes.message}>
-                    <VisuallyHidden>
-                      {m.role === "user" ? "You said: " : "Assistant said: "}
-                    </VisuallyHidden>
-                    <Markdown skipHtml>{m.content}</Markdown>
-                  </Message>
-                </MessageRow>
-              ))}
-              {showStarters ? (
-                <StarterContainer>
-                  {conversationStarters?.map((m) => (
-                    <Starter
-                      className={classes.conversationStarter}
-                      key={m.content}
-                      onClick={() => {
-                        scrollToBottom()
-                        append({ role: "user", content: m.content })
-                      }}
-                    >
-                      {m.content}
-                    </Starter>
-                  ))}
-                </StarterContainer>
-              ) : null}
-              {waiting ? (
-                <MessageRow
-                  className={classNames(
-                    classes.messageRow,
-                    classes.messageRowAssistant,
-                  )}
-                  key={"loading"}
-                >
-                  <Message>
-                    <RiMoreFill />
-                  </Message>
-                </MessageRow>
-              ) : null}
-              {error ? (
-                <Alert severity="error" closable>
-                  An unexpected error has occurred.
-                </Alert>
-              ) : null}
-            </MessagesContainer>
-            <BottomSection
-              externalScroll={externalScroll}
-              className={classes.bottomSection}
-            >
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  if (isLoading && stoppable) {
-                    stop()
-                  } else {
-                    scrollToBottom()
-                    handleSubmit(e)
-                  }
-                }}
+              <ChatTitle
+                askTimTitle={askTimTitle}
+                externalScroll={externalScroll}
+                className={classNames(className, classes.title)}
+              />
+              <MessagesContainer
+                className={classes.messagesContainer}
+                externalScroll={externalScroll}
+                ref={messagesContainerRef}
               >
-                <Input
-                  fullWidth
-                  size="chat"
-                  className={classes.input}
-                  placeholder={placeholder}
-                  name="message"
-                  sx={{ flex: 1 }}
-                  value={input}
-                  onChange={handleInputChange}
-                  endAdornment={
-                    isLoading ? (
-                      <AdornmentButton
-                        aria-label="Stop"
-                        onClick={stop}
-                        disabled={!stoppable}
-                      >
-                        <StyledStopButton />
-                      </AdornmentButton>
-                    ) : (
-                      <AdornmentButton
-                        aria-label="Send"
-                        type="submit"
-                        onClick={(e) => {
-                          if (input.trim() === "") {
-                            e.preventDefault()
-                            return
-                          }
+                {messages.map((m) => (
+                  <MessageRow
+                    key={m.id}
+                    data-chat-role={m.role}
+                    className={classNames(classes.messageRow, {
+                      [classes.messageRowUser]: m.role === "user",
+                      [classes.messageRowAssistant]: m.role === "assistant",
+                    })}
+                  >
+                    <Message className={classes.message}>
+                      <VisuallyHidden>
+                        {m.role === "user" ? "You said: " : "Assistant said: "}
+                      </VisuallyHidden>
+                      <MathJax><Markdown skipHtml>{m.content}</Markdown></MathJax>
+                    </Message>
+                  </MessageRow>
+                ))}
+                {showStarters ? (
+                  <StarterContainer>
+                    {conversationStarters?.map((m) => (
+                      <Starter
+                        className={classes.conversationStarter}
+                        key={m.content}
+                        onClick={() => {
                           scrollToBottom()
-                          handleSubmit(e)
+                          append({ role: "user", content: m.content })
                         }}
                       >
-                        <StyledSendButton />
-                      </AdornmentButton>
-                    )
-                  }
-                />
-              </form>
-              <Disclaimer variant="body3">
-                AI-generated content may be incorrect.
-              </Disclaimer>
-            </BottomSection>
-            <SrAnnouncer
-              isLoading={isLoading}
-              loadingMessages={srLoadingMessages}
-              message={lastMsg?.role === "assistant" ? lastMsg?.content : ""}
-            />
-          </ChatContainer>
-        </ChatScreen>
-      )}
-    </Container>
+                        {m.content}
+                      </Starter>
+                    ))}
+                  </StarterContainer>
+                ) : null}
+                {waiting ? (
+                  <MessageRow
+                    className={classNames(
+                      classes.messageRow,
+                      classes.messageRowAssistant,
+                    )}
+                    key={"loading"}
+                  >
+                    <Message>
+                      <RiMoreFill />
+                    </Message>
+                  </MessageRow>
+                ) : null}
+                {error ? (
+                  <Alert severity="error" closable>
+                    An unexpected error has occurred.
+                  </Alert>
+                ) : null}
+              </MessagesContainer>
+              <BottomSection
+                externalScroll={externalScroll}
+                className={classes.bottomSection}
+              >
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (isLoading && stoppable) {
+                      stop()
+                    } else {
+                      scrollToBottom()
+                      handleSubmit(e)
+                    }
+                  }}
+                >
+                  <Input
+                    fullWidth
+                    size="chat"
+                    className={classes.input}
+                    placeholder={placeholder}
+                    name="message"
+                    sx={{ flex: 1 }}
+                    value={input}
+                    onChange={handleInputChange}
+                    endAdornment={
+                      isLoading ? (
+                        <AdornmentButton
+                          aria-label="Stop"
+                          onClick={stop}
+                          disabled={!stoppable}
+                        >
+                          <StyledStopButton />
+                        </AdornmentButton>
+                      ) : (
+                        <AdornmentButton
+                          aria-label="Send"
+                          type="submit"
+                          onClick={(e) => {
+                            if (input.trim() === "") {
+                              e.preventDefault()
+                              return
+                            }
+                            scrollToBottom()
+                            handleSubmit(e)
+                          }}
+                        >
+                          <StyledSendButton />
+                        </AdornmentButton>
+                      )
+                    }
+                  />
+                </form>
+                <Disclaimer variant="body3">
+                  AI-generated content may be incorrect.
+                </Disclaimer>
+              </BottomSection>
+              <SrAnnouncer
+                isLoading={isLoading}
+                loadingMessages={srLoadingMessages}
+                message={lastMsg?.role === "assistant" ? lastMsg?.content : ""}
+              />
+            </ChatContainer>
+          </ChatScreen>
+        )}
+      </Container>
+    </MathJaxContext>
   )
 }
 
