@@ -164,6 +164,10 @@ const BottomSection = styled.div<{ externalScroll: boolean }>(
       bottom: 0,
       background: theme.custom.colors.white,
     }),
+    "button:focus-visible": {
+      outlineOffset: "-1px",
+      borderRadius: "7px",
+    },
   }),
 )
 
@@ -194,6 +198,7 @@ const AiChat: FC<AiChatProps> = ({
   const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const [initialMessages, setInitialMessages] = useState<AiChatMessage[]>()
+  const promptInputRef = useRef<HTMLDivElement>(null)
 
   const {
     messages: unparsed,
@@ -226,6 +231,12 @@ const AiChat: FC<AiChatProps> = ({
       )
     }
   }, [_initialMessages])
+
+  useEffect(() => {
+    if (!showEntryScreen) {
+      promptInputRef.current?.querySelector("input")?.focus()
+    }
+  }, [showEntryScreen])
 
   const messages = useMemo(() => {
     const initial = initialMessages?.map((m) => m.id)
@@ -315,7 +326,7 @@ const AiChat: FC<AiChatProps> = ({
                   })}
                 >
                   <Message className={classes.message}>
-                    <VisuallyHidden>
+                    <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
                     <Markdown skipHtml>{m.content}</Markdown>
@@ -373,6 +384,7 @@ const AiChat: FC<AiChatProps> = ({
                 }}
               >
                 <Input
+                  ref={promptInputRef}
                   fullWidth
                   size="chat"
                   className={classes.input}
@@ -381,6 +393,9 @@ const AiChat: FC<AiChatProps> = ({
                   sx={{ flex: 1 }}
                   value={input}
                   onChange={handleInputChange}
+                  inputProps={{
+                    "aria-label": "Ask a question",
+                  }}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton
