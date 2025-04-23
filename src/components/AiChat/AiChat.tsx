@@ -103,13 +103,10 @@ const Message = styled.div(({ theme }) => ({
     marginBottom: 0,
   },
   "ol, ul": {
-    paddingInlineStart: "32px",
+    paddingInlineStart: "16px",
     li: {
       margin: "16px 0",
     },
-  },
-  ul: {
-    marginInlineStart: "-16px",
   },
   a: {
     color: theme.custom.colors.red,
