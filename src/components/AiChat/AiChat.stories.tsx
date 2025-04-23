@@ -109,6 +109,14 @@ Sometimes, unordered lists are nested within ordered lists:
     - Item 2.1
     - Item 2.2
 
+Sometimes, ordered lists are nested within unordered lists:
+- Item 1
+    1. Item 1.1
+    2. Item 1.2
+- Item 2
+    1. Item 2.1
+    2. Item 2.2
+
 Here is a longer paragraph and **bold text** and *italic text*. Lorem ipsum dolor sit amet, consectetur adipiscing elit
 sed do eiusmod tempor [incididunt](https://mit.edu) ut labore et dolore magna aliqua. Ut enim ad minim veniam.
 
