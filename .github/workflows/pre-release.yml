@@ -1,0 +1,56 @@
+name: Release
+on:
+  issue_comment:
+    types: [created] # Trigger when a new comment is created
+
+permissions:
+  contents: read # for checkout
+  issues: write # to be able to comment on issues and pull requests
+
+jobs:
+  release:
+    if: |
+      startsWith(github.event.comment.body, '/pre-release') &&
+      github.event.issue.pull_request != null # Ensure it only runs on pull request comments
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }} # Use the branch from the pull request
+      - name: Setup Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      - name: Pre-release
+        id: pre_release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_NPM_TOKEN }}
+        run: |
+          VERSION=$(npm version 0.0.0-$(git rev-parse --short HEAD) | grep -oE '0\.0\.0-[a-z0-9]+')
+          npm publish --tag preview
+          echo "version=$VERSION" >> $GITHUB_ENV
+      - name: Comment on the issue or pull request
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Pre-release workflow has completed successfully.
+            Published version: `${{ env.version }}`
+
+            To update a previously-installed version with `yarn`:
+            ```bash
+            yarn upgrade @mitodl/smoot-design@${{ env.version }}
+            ```
