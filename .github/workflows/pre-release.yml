@@ -8,8 +8,9 @@ permissions:
   issues: write # to be able to comment on issues and pull requests
 
 jobs:
-  release:
+  prerelease:
     if: |
+      github.repository == 'mitodl/smoot-design' &&
       startsWith(github.event.comment.body, '/pre-release') &&
       github.event.issue.pull_request != null # Ensure it only runs on pull request comments
     name: Release
