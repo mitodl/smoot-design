@@ -44,7 +44,7 @@ type SizeStyleProps = {
   size: Size
   multiline?: boolean
 }
-const sizeStyles = ({ theme, size, multiline }: SizeStyleProps) => {
+const sizeStyles = ({ theme, size }: SizeStyleProps) => {
   return Object.assign(
     {},
     (size === "small" || size === "medium") && {
@@ -57,27 +57,8 @@ const sizeStyles = ({ theme, size, multiline }: SizeStyleProps) => {
       },
       ...theme.typography.body1,
     },
-    size === "medium" && {
-      paddingLeft: "12px",
-      paddingRight: "12px",
-    },
-    size === "small" &&
-      !multiline && {
-        height: "32px",
-      },
-    size === "medium" &&
-      !multiline && {
-        height: "40px",
-      },
-    size === "large" &&
-      !multiline && {
-        height: "48px",
-      },
-    size === "hero" &&
-      !multiline && {
-        height: "72px",
-      },
     size === "small" && {
+      height: "32px",
       padding: "0 8px",
       ".Mit-AdornmentButton": {
         width: "32px",
@@ -88,6 +69,7 @@ const sizeStyles = ({ theme, size, multiline }: SizeStyleProps) => {
       },
     },
     size === "medium" && {
+      height: "40px",
       padding: "0 12px",
       ".Mit-AdornmentButton": {
         width: "40px",
@@ -98,12 +80,14 @@ const sizeStyles = ({ theme, size, multiline }: SizeStyleProps) => {
       },
     },
     size === "large" && {
+      height: "48px",
       padding: "0 16px",
       ".Mit-AdornmentButton": {
         width: "48px",
       },
     },
     size === "hero" && {
+      height: "72px",
       padding: "0 24px",
       ".Mit-AdornmentButton": {
         width: "72px",
@@ -173,6 +157,8 @@ const noForward = Object.keys({
   responsive: true,
 } satisfies Record<keyof CustomInputProps, boolean>)
 
+const SIZES = ["small", "medium", "large", "hero"] as const
+
 /**
  * Use `Input` for a visually unlabelled input field. If used, it should still
  * have an accessible label, e.g., provided via `aria-label`.
@@ -190,110 +176,24 @@ const Input = styled(InputBase, {
   ...baseInputStyles(theme),
   ...sizeStyles({ theme, size: "medium" }),
   variants: [
-    {
-      props: { size: "small" },
-      style: sizeStyles({ theme, size: "small" }),
-    },
-    {
-      props: { size: "large" },
-      style: sizeStyles({ theme, size: "large" }),
-    },
-    {
-      props: { size: "hero" },
-      style: sizeStyles({ theme, size: "hero" }),
-    },
-    {
-      props: { size: "small", multiline: true },
-      style: sizeStyles({ theme, size: "small", multiline: true }),
-    },
-    {
-      props: { size: "medium", multiline: true },
-      style: sizeStyles({ theme, size: "medium", multiline: true }),
-    },
-    {
-      props: { size: "large", multiline: true },
-      style: sizeStyles({ theme, size: "large", multiline: true }),
-    },
-    {
-      props: { size: "hero", multiline: true },
-      style: sizeStyles({ theme, size: "hero", multiline: true }),
-    },
-    {
-      props: { size: "small", responsive: true },
-      style: {
-        // TODO breakpoints in here are not working
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["small"],
-        }),
+    ...SIZES.flatMap((size) => [
+      {
+        props: { size },
+        style: sizeStyles({ theme, size }),
       },
-    },
-    {
-      props: { size: "medium", responsive: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["medium"],
-        }),
+      {
+        props: { size, responsive: true },
+        style: {
+          [theme.breakpoints.down("sm")]: sizeStyles({
+            theme,
+            size: responsiveSize[size],
+          }),
+        },
       },
-    },
+    ]),
     {
-      props: { size: "large", responsive: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["large"],
-        }),
-      },
-    },
-    {
-      props: { size: "hero", responsive: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["hero"],
-        }),
-      },
-    },
-    {
-      props: { size: "small", responsive: true, multiline: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["small"],
-          multiline: true,
-        }),
-      },
-    },
-    {
-      props: { size: "medium", responsive: true, multiline: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["medium"],
-          multiline: true,
-        }),
-      },
-    },
-    {
-      props: { size: "large", responsive: true, multiline: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["large"],
-          multiline: true,
-        }),
-      },
-    },
-    {
-      props: { size: "hero", responsive: true, multiline: true },
-      style: {
-        [theme.breakpoints.down("sm")]: sizeStyles({
-          theme,
-          size: responsiveSize["hero"],
-          multiline: true,
-        }),
-      },
+      props: { multiline: true },
+      style: { height: "unset" },
     },
   ],
 }))

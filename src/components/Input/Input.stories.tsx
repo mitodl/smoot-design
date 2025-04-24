@@ -85,10 +85,10 @@ export const Sizes: Story = {
   render: (args) => {
     return (
       <Stack direction="row" gap={1}>
-        <Input size="small" {...args} />
-        <Input size="medium" {...args} />
-        <Input size="large" {...args} />
-        <Input size="hero" {...args} />
+        <Input responsive {...args} size="small" />
+        <Input responsive {...args} size="medium" />
+        <Input responsive {...args} size="large" />
+        <Input responsive {...args} size="hero" />
       </Stack>
     )
   },
