@@ -1,7 +1,6 @@
 name: Release
 on:
-  issue_comment:
-    types: [created] # Trigger when a new comment is created
+  workflow_dispatch: # Trigger manually
 
 permissions:
   contents: read # for checkout
@@ -9,10 +8,6 @@ permissions:
 
 jobs:
   prerelease:
-    if: |
-      github.repository == 'mitodl/smoot-design' &&
-      startsWith(github.event.comment.body, '/pre-release') &&
-      github.event.issue.pull_request != null # Ensure it only runs on pull request comments
     name: Release
     runs-on: ubuntu-latest
     permissions:
@@ -25,7 +20,6 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }} # Use the branch from the pull request
       - name: Setup Node.js
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4
         with:
@@ -42,11 +36,19 @@ jobs:
           VERSION=$(npm version 0.0.0-$(git rev-parse --short HEAD) | grep -oE '0\.0\.0-[a-z0-9]+')
           npm publish --tag preview
           echo "version=$VERSION" >> $GITHUB_ENV
-      - name: Comment on the issue or pull request
+      - name: Find PR for current branch
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --state open --head "$GITHUB_REF_NAME" --json number -q '.[0].number')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_ENV
+      - name: Comment on the PR if it exists
+        if: env.pr_number
         uses: peter-evans/create-or-update-comment@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
+          issue-number: ${{ env.pr_number }}
           body: |
             Pre-release workflow has completed successfully.
             Published version: `${{ env.version }}`
