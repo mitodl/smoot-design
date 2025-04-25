@@ -9,6 +9,7 @@ import { Input, AdornmentButton } from "../Input/Input"
 import type { AiChatMessage, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
 import Markdown from "react-markdown"
+
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
@@ -16,6 +17,8 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
+import rehypeMathjax  from 'rehype-mathjax/svg'
+import remarkMath from 'remark-math'
 
 const classes = {
   root: "MitAiChat--root",
@@ -329,7 +332,7 @@ const AiChat: FC<AiChatProps> = ({
                     <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
-                    <Markdown skipHtml>{m.content}</Markdown>
+                    <Markdown  remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{m.content}</Markdown>
                   </Message>
                 </MessageRow>
               ))}

@@ -117,6 +117,17 @@ And some inline code, \`\`<inline></inline>\`\` and code block:
 def f(x):
     print(x)
 \`\`\`
+
+and some math:
+\n
+
+$$
+x = \frac{-b\pm\sqrt{b^2-4ac}}{2a}
+$$
+$$
+x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
+$$
+
 `
 
 /**
