@@ -1,7 +1,5 @@
 name: Pre-release
 on:
-  pull_request:
-
   workflow_dispatch: # Trigger manually
 
 permissions:
@@ -22,3 +20,40 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4
+        with:
+          node-version: "lts/*"
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
+      - name: Pre-release
+        id: pre_release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_NPM_TOKEN }}
+        run: |
+          VERSION=$(npm version 0.0.0-$(git rev-parse --short HEAD) | grep -oE '0\.0\.0-[a-z0-9]+')
+          npm publish --tag preview
+          echo "version=$VERSION" >> $GITHUB_ENV
+      - name: Find PR for current branch
+        id: find_pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --state open --head "$GITHUB_REF_NAME" --json number -q '.[0].number')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_ENV
+      - name: Comment on the PR if it exists
+        if: env.pr_number
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ env.pr_number }}
+          body: |
+            Pre-release workflow has completed successfully.
+            Published version: `${{ env.version }}`
+
+            To update a previously-installed version with `yarn`:
+            ```bash
+            yarn upgrade @mitodl/smoot-design@${{ env.version }}
+            ```
