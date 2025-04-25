@@ -7,7 +7,8 @@ import classNames from "classnames"
 import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
 import type { AiChatDisplayProps, AiChatProps } from "./types"
-import Markdown from "react-markdown"
+import { EntryScreen } from "./EntryScreen"
+
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
@@ -15,7 +16,8 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { AiChatProvider, useAiChat } from "./AiChatContext"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import { EntryScreen } from "./EntryScreen"
+import type { Message } from "@ai-sdk/react"
+import Markdown from "./Markdown"
 
 const classes = {
   root: "MitAiChat--root",
@@ -188,6 +190,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   className,
   scrollElement,
   ref,
+  useMathJax = false,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -275,23 +278,33 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               externalScroll={externalScroll}
               ref={messagesContainerRef}
             >
-              {messages.map((m) => (
-                <MessageRow
-                  key={m.id}
-                  data-chat-role={m.role}
-                  className={classNames(classes.messageRow, {
-                    [classes.messageRowUser]: m.role === "user",
-                    [classes.messageRowAssistant]: m.role === "assistant",
-                  })}
-                >
-                  <Message className={classes.message}>
-                    <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
-                      {m.role === "user" ? "You said: " : "Assistant said: "}
-                    </VisuallyHidden>
-                    <Markdown skipHtml>{m.content}</Markdown>
-                  </Message>
-                </MessageRow>
-              ))}
+              {messages.map((m: Message, i) => {
+                // Our Markdown+Mathjax has issues when rendering streaming display math
+                // Force a re-render of the last (streaming) message when it's done loading.
+                const key =
+                  i === messages.length - 1 && isLoading
+                    ? `isLoading-${m.id}`
+                    : m.id
+                return (
+                  <MessageRow
+                    key={key}
+                    data-chat-role={m.role}
+                    className={classNames(classes.messageRow, {
+                      [classes.messageRowUser]: m.role === "user",
+                      [classes.messageRowAssistant]: m.role === "assistant",
+                    })}
+                  >
+                    <Message className={classes.message}>
+                      <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
+                        {m.role === "user" ? "You said: " : "Assistant said: "}
+                      </VisuallyHidden>
+                      <Markdown enableMathjax={useMathJax}>
+                        {m.content}
+                      </Markdown>
+                    </Message>
+                  </MessageRow>
+                )
+              })}
               {showStarters ? (
                 <StarterContainer>
                   {conversationStarters?.map((m) => (
