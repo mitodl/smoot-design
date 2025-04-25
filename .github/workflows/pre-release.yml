@@ -56,5 +56,5 @@ jobs:
 
             To update a previously-installed version with `yarn`:
             ```bash
-            yarn upgrade @mitodl/smoot-design@${{ env.version }}
+            yarn up @mitodl/smoot-design@${{ env.version }}
             ```
