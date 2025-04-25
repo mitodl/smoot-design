@@ -33,7 +33,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_NPM_TOKEN }}
         run: |
-          VERSION=$(npm version 0.0.0-$(git rev-parse --short HEAD) | grep -oE '0\.0\.0-[a-z0-9]+')
+          VERSION=$(npm version 0.0.0-$(git rev-parse --short HEAD) --git-tag-version false | grep -oE '0\.0\.0-[a-z0-9]+')
           npm publish --tag preview
           echo "version=$VERSION" >> $GITHUB_ENV
       - name: Find PR for current branch
