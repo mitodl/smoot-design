@@ -1,4 +1,4 @@
-name: Release
+name: Pre-release
 on:
   workflow_dispatch: # Trigger manually
 
@@ -7,7 +7,7 @@ permissions:
   issues: write # to be able to comment on issues and pull requests
 
 jobs:
-  prerelease:
+  pre-release:
     name: Release
     runs-on: ubuntu-latest
     permissions:
