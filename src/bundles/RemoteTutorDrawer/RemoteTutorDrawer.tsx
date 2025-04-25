@@ -391,11 +391,13 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
       anchor="right"
       open={open}
       onClose={() => setOpen(false)}
+      role="dialog"
+      aria-modal="true"
     >
       <Header>
         <Title>
           {payload.title ? <RiSparkling2Line /> : null}
-          <Typography variant="body1" component="h2">
+          <Typography variant="body1" component="h1">
             {payload.title?.includes("AskTIM") ? (
               <>
                 Ask<strong>TIM</strong>

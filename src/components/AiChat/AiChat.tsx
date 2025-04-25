@@ -75,6 +75,9 @@ const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
     padding: "14px 0",
     overflow: externalScroll ? "visible" : "auto",
     gap: "16px",
+    [`> .${classes.messageRowAssistant}:first-child`]: {
+      marginTop: "16px",
+    },
   }),
 )
 
@@ -94,7 +97,6 @@ const MessageRow = styled.div({
 const Message = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
   backgroundColor: theme.custom.colors.white,
-  padding: "12px 16px",
   ...theme.typography.body2,
   "p:first-of-type": {
     marginTop: 0,
@@ -117,10 +119,8 @@ const Message = styled.div(({ theme }) => ({
     fontWeight: "normal",
   },
   borderRadius: "12px",
-  [`.${classes.messageRowAssistant} &`]: {
-    padding: "12px 16px 12px 0",
-  },
   [`.${classes.messageRowUser} &`]: {
+    padding: "12px 16px",
     borderRadius: "8px 0px 8px 8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
