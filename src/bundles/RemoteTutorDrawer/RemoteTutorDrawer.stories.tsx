@@ -107,6 +107,23 @@ export const ProblemStory: Story = {
   },
 }
 
+export const ProblemDefaultInitialMessagesStory: Story = {
+  args: {
+    target: "problem-frame-default-initial-messages",
+  },
+  parameters: {
+    payload: {
+      blockType: "problem",
+      target: "problem-frame-default-initial-messages",
+      title: "AskTIM for help with Problem: Derivatives 1.1",
+      chat: {
+        apiUrl: TEST_API_STREAMING,
+        conversationStarters: STARTERS,
+      },
+    },
+  },
+}
+
 export const EntryScreenStory: Story = {
   args: {
     target: "entry-screen-frame",
