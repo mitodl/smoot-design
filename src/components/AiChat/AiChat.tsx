@@ -17,10 +17,8 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import rehypeMathjax  from 'rehype-mathjax/svg'
+import rehypeMathjax  from 'rehype-mathjax'
 import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import 'katex/dist/katex.min.css' // `rehype-katex` does not import the CSS for you
 
 const classes = {
   root: "MitAiChat--root",
@@ -196,6 +194,7 @@ const AiChat: FC<AiChatProps> = ({
   scrollElement,
   chatId,
   ref,
+  useMathJax = false,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -334,7 +333,10 @@ const AiChat: FC<AiChatProps> = ({
                     <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
-                    <Markdown  remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax, rehypeKatex]}>{m.content}</Markdown>
+                    { useMathJax ?
+                       (<Markdown  remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{m.content}</Markdown>)
+                       : (<Markdown>{m.content}</Markdown>)
+                    }
                   </Message>
                 </MessageRow>
               ))}

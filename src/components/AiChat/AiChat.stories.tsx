@@ -118,16 +118,16 @@ def f(x):
     print(x)
 \`\`\`
 
-and some math:
+and some inline  math: $x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$
+
+and some block math:
 \n
 
-$$
-x = \frac{-b\pm\sqrt{b^2-4ac}}{2a}
-$$
 $$
 x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
+Math is rendered using MathJax only if the useMathJax prop is set to true.
 `
 
 /**
@@ -144,6 +144,7 @@ export const MarkdownStyling: Story = {
         content: DEMO_MARKDOWN,
       },
     ],
+    useMathJax: true,
   },
 }
 
