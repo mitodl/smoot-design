@@ -118,9 +118,9 @@ def f(x):
     print(x)
 \`\`\`
 
-and some inline  math: $x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$
+And some inline  math: $x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$
 
-and some block math:
+And some block math:
 \n
 
 $$
