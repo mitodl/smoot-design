@@ -94,7 +94,7 @@ type AiChatProps = {
    * the AiChat will scroll to the bottom as chat messages are added.
    */
   scrollElement?: HTMLElement | null
-  
+
   /**
    * If true, the chat will display math equations using MathJax.
    * Defaults to false.

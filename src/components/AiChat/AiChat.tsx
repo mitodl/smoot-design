@@ -17,8 +17,8 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import rehypeMathjax  from 'rehype-mathjax'
-import remarkMath from 'remark-math'
+import rehypeMathjax from "rehype-mathjax"
+import remarkMath from "remark-math"
 
 const classes = {
   root: "MitAiChat--root",
@@ -333,10 +333,16 @@ const AiChat: FC<AiChatProps> = ({
                     <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
-                    { useMathJax ?
-                       (<Markdown  remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{m.content}</Markdown>)
-                       : (<Markdown>{m.content}</Markdown>)
-                    }
+                    {useMathJax ? (
+                      <Markdown
+                        remarkPlugins={[remarkMath]}
+                        rehypePlugins={[rehypeMathjax]}
+                      >
+                        {m.content}
+                      </Markdown>
+                    ) : (
+                      <Markdown>{m.content}</Markdown>
+                    )}
                   </Message>
                 </MessageRow>
               ))}
