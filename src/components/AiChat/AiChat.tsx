@@ -17,7 +17,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import rehypeMathjax from "rehype-mathjax"
+import rehypeMathjax from "rehype-mathjax/svg"
 import remarkMath from "remark-math"
 
 const classes = {
