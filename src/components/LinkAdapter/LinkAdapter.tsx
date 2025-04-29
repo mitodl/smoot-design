@@ -30,7 +30,7 @@ const LinkAdapter = React.forwardRef<HTMLAnchorElement, LinkAdapterProps>(
   function LinkAdapter({ Component, ...props }, ref) {
     const theme = useTheme()
     const LinkComponent = Component ?? theme.custom.LinkAdapter
-    return <PlainLink as={LinkComponent} ref={ref} {...props} />
+    return <PlainLink as={LinkComponent} ref={ref} {...props}>{props.children}</PlainLink>
   },
 )
 

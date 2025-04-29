@@ -94,7 +94,7 @@ TabButtonInner.displayName = "TabButtonInner"
 const TabLinkInner = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
   (props, ref) => {
     const { className, ...others } = props
-    return <TabLinkStyled {...defaultTabButtonProps} {...others} ref={ref} />
+    return <TabLinkStyled {...defaultTabButtonProps} {...others} ref={ref}>{props.children}</TabLinkStyled>
   },
 )
 
