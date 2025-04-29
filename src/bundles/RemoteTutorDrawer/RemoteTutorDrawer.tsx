@@ -19,6 +19,7 @@ import type { AiChatProps } from "../../components/AiChat/AiChat"
 import { ActionButton } from "../../components/Button/ActionButton"
 import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
+import "katex/dist/katex.min.css"
 
 type RemoteTutorDrawerInitMessage = {
   type: "smoot-design::tutor-drawer-open"

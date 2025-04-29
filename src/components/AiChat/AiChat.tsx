@@ -17,7 +17,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import rehypeMathjax from "rehype-mathjax/svg"
+import rehypeKatex from "rehype-katex"
 import remarkMath from "remark-math"
 
 const classes = {
@@ -336,7 +336,7 @@ const AiChat: FC<AiChatProps> = ({
                     {useMathJax ? (
                       <Markdown
                         remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeMathjax]}
+                        rehypePlugins={[rehypeKatex]}
                       >
                         {m.content}
                       </Markdown>
