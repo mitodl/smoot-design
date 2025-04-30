@@ -17,7 +17,7 @@
     "preserveWatchOutput": true,
     "types": ["node", "jest", "@testing-library/jest-dom", "jest-extended"],
     "outDir": "./dist/esm",
-    "rootDir": "./src",
+    "rootDir": "./src"
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx", "./static/**/*"]
 }
