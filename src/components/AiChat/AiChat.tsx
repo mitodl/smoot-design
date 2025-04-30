@@ -16,7 +16,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import type { Message } from "@ai-sdk/react"
+import type { Message } from "ai/react"
 
 const classes = {
   root: "MitAiChat--root",

@@ -62,7 +62,6 @@
     }
   },
   "dependencies": {
-    "@ai-sdk/react": "^1.2.10",
     "@emotion/cache": "^11.14.0",
     "@mui/utils": "^6.1.6",
     "ai": "^4.0.13",
