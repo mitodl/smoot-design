@@ -2695,6 +2695,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.13.0"
     "@typescript-eslint/typescript-estree": "npm:^8.13.0"
     ai: "npm:^4.0.13"
+    better-react-mathjax: "npm:^2.3.0"
     classnames: "npm:^2.5.1"
     conventional-changelog-conventionalcommits: "npm:^8.0.0"
     eslint: "npm:8.57.1"
@@ -6670,6 +6671,17 @@ __metadata:
   dependencies:
     open: "npm:^8.0.4"
   checksum: 10/24668e5a837d0d2c0edf17ad5ebcfeb00a8a5578a5eb09f7a409e1a60617cdfea40b8ebfc95e5f12d9568157930d033e6805788fcf0780413ac982c95d3745d1
+  languageName: node
+  linkType: hard
+
+"better-react-mathjax@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "better-react-mathjax@npm:2.3.0"
+  dependencies:
+    mathjax-full: "npm:^3.2.2"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 10/c8780681758c161d20d369d084eac18b8ec0317eb77bafbfe48c753fc75b718ccd6480f9edb9359223a5c16801268370be6631bc438d76db954b85398194419f
   languageName: node
   linkType: hard
 
@@ -12535,7 +12547,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjax-full@npm:^3.0.0":
+"mathjax-full@npm:^3.0.0, mathjax-full@npm:^3.2.2":
   version: 3.2.2
   resolution: "mathjax-full@npm:3.2.2"
   dependencies:

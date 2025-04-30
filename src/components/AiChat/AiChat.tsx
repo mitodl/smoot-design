@@ -8,7 +8,6 @@ import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
 import type { AiChatMessage, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
-import Markdown from "react-markdown"
 
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
@@ -17,8 +16,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import rehypeMathjax from "rehype-mathjax/svg"
-import remarkMath from "remark-math"
+import Markdown from "./Markdown"
 
 const classes = {
   root: "MitAiChat--root",
@@ -333,16 +331,7 @@ const AiChat: FC<AiChatProps> = ({
                     <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                       {m.role === "user" ? "You said: " : "Assistant said: "}
                     </VisuallyHidden>
-                    {useMathJax ? (
-                      <Markdown
-                        remarkPlugins={[remarkMath]}
-                        rehypePlugins={[rehypeMathjax]}
-                      >
-                        {m.content}
-                      </Markdown>
-                    ) : (
-                      <Markdown>{m.content}</Markdown>
-                    )}
+                    <Markdown enableMathjax={useMathJax}>{m.content}</Markdown>
                   </Message>
                 </MessageRow>
               ))}

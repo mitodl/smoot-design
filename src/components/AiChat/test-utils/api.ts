@@ -1,7 +1,7 @@
 import { http, HttpResponse, delay } from "msw"
 
 const SAMPLE_RESPONSES = [
-  `For exploring AI applications in business, I recommend the following course from MIT:
+  `For exploring $E=mc^2$ AI applications in business, I recommend the following course from MIT:
 
 1. **[Machine Learning, Modeling, and Simulation Principles](https://xpro.mit.edu/courses/course-v1:xPRO+MLx1/)**: Offered by MIT xPRO, this course is part of the program "Machine Learning, Modeling, and Simulation: Engineering Problem-Solving in the Age of AI." It focuses on the principles of machine learning and how they can be applied to solve engineering problems, which is highly relevant for business applications of AI.
 
@@ -9,7 +9,7 @@ This course is not free, but it provides a certification upon completion, which 
 <!-- Comment! -->
 `,
   `
-To understand global warming, I recommend the following resources from MIT:
+To understand $E=mc^2$ global warming, I recommend the following resources from MIT:
 
 1. **[Global Warming Science](https://www.edx.org/learn/global-warming/massachusetts-institute-of-technology-global-warming-science)**: This course offered by MITx covers the physics, chemistry, biology, and geology of the earth’s climate system. It's a comprehensive introduction to the scientific principles underlying global warming.
 
@@ -19,7 +19,7 @@ These courses are free and provide a solid foundation in understanding the scien
 <!-- Comment! -->
 `,
   `
-Here are some courses on linear algebra that you can explore:
+Here are some  $E=mc^2$ courses on linear algebra that you can explore:
 
 1. **[Linear Algebra (MIT OpenCourseWare)](https://openlearninglibrary.mit.edu/courses/course-v1:OCW+18.06SC+2T2019/about)**: This course covers matrix theory and linear algebra, emphasizing topics useful in various disciplines such as physics, economics, social sciences, natural sciences, and engineering. It parallels the combination of theory and applications in Professor Strang's textbook "Introduction to Linear Algebra." This course is free and available through MIT OpenCourseWare.
 
@@ -30,7 +30,7 @@ Here are some courses on linear algebra that you can explore:
 These courses provide a comprehensive introduction to linear algebra and its applications across various fields.
 <!-- Comment! -->
 `,
-  `Here are some courses on quantum computing that offer certificates:
+  `Here are $E=mc^2$ some courses on quantum computing that offer certificates:
 
 1. [Introduction to Quantum Computing](https://xpro.mit.edu/courses/course-v1:xPRO+QCFx1/)
    - **Description**: This is the first course in the Quantum Computing Fundamentals professional certificate program. You can earn a Professional Certificate and CEUs by completing both courses in the program. Alternatively, you can take this course individually for a certificate of completion and CEUs.
