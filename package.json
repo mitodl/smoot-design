@@ -62,9 +62,9 @@
     }
   },
   "dependencies": {
+    "@ai-sdk/react": "1.2.10",
     "@emotion/cache": "^11.14.0",
     "@mui/utils": "^6.1.6",
-    "@ai-sdk/react": "^4.0.13",
     "classnames": "^2.5.1",
     "lodash": "^4.17.21",
     "react-markdown": "^10.0.0",
