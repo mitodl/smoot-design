@@ -61,6 +61,7 @@ const Flashcard = React.forwardRef<
       onKeyDown={handleKeyDown}
       tabIndex={0}
       aria-label={ariaLabel}
+      role="button"
     >
       <Typography variant="h5">
         {screen === 0 ? `Q: ${content.question}` : `Answer: ${content.answer}`}
