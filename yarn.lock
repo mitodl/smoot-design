@@ -52,6 +52,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/react@npm:^1.2.10":
+  version: 1.2.10
+  resolution: "@ai-sdk/react@npm:1.2.10"
+  dependencies:
+    "@ai-sdk/provider-utils": "npm:2.2.7"
+    "@ai-sdk/ui-utils": "npm:1.2.9"
+    swr: "npm:^2.2.5"
+    throttleit: "npm:2.1.0"
+  peerDependencies:
+    react: ^18 || ^19 || ^19.0.0-rc
+    zod: ^3.23.8
+  peerDependenciesMeta:
+    zod:
+      optional: true
+  checksum: 10/4108ea4a3c06728b7b85227bfbf1b6dc76fd09a5d6a1fdc8e30ea056814f29a6ee6a1ba2a2f3a9f8a5f6e7534119b50f2e5e67afbfa31c29b3045fa32993a64b
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/ui-utils@npm:1.2.8":
   version: 1.2.8
   resolution: "@ai-sdk/ui-utils@npm:1.2.8"
@@ -62,6 +80,19 @@ __metadata:
   peerDependencies:
     zod: ^3.23.8
   checksum: 10/78a17cd8f7229dbac38f5ec9affdee9808e087791ad37f168ba9a35180b86bf54c8de312c77f3dd15151be8a7494655b6984370fa4704286560c006cf0333dc2
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/ui-utils@npm:1.2.9":
+  version: 1.2.9
+  resolution: "@ai-sdk/ui-utils@npm:1.2.9"
+  dependencies:
+    "@ai-sdk/provider": "npm:1.1.3"
+    "@ai-sdk/provider-utils": "npm:2.2.7"
+    zod-to-json-schema: "npm:^3.24.1"
+  peerDependencies:
+    zod: ^3.23.8
+  checksum: 10/44a39b0455a2631349a51b7ff34ab10d27207c6c41ed908d728b50a22a5b5af6d35107819c770b1017f49d9ec502a9b34d2a8d984deed4ebc5a75ac305df1c07
   languageName: node
   linkType: hard
 
@@ -2778,6 +2809,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@mitodl/smoot-design@workspace:."
   dependencies:
+    "@ai-sdk/react": "npm:^1.2.10"
     "@chromatic-com/storybook": "npm:^3.0.0"
     "@emotion/cache": "npm:^11.14.0"
     "@emotion/react": "npm:^11.11.1"

@@ -16,6 +16,7 @@ import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
 import { useAiChat } from "./utils"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
+import type { Message } from "@ai-sdk/react"
 
 const classes = {
   root: "MitAiChat--root",
@@ -241,7 +242,7 @@ const AiChat: FC<AiChatProps> = ({
 
   const messages = useMemo(() => {
     const initial = initialMessages?.map((m) => m.id)
-    return unparsed.map((m) => {
+    return unparsed.map((m: Message) => {
       if (m.role === "assistant" && !initial?.includes(m.id)) {
         const content = parseContent ? parseContent(m.content) : m.content
         return { ...m, content }
@@ -317,7 +318,7 @@ const AiChat: FC<AiChatProps> = ({
               externalScroll={externalScroll}
               ref={messagesContainerRef}
             >
-              {messages.map((m) => (
+              {messages.map((m: Message) => (
                 <MessageRow
                   key={m.id}
                   data-chat-role={m.role}

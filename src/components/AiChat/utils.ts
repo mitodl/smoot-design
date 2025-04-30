@@ -1,4 +1,5 @@
-import { useChat, UseChatOptions } from "ai/react"
+import { useChat, UseChatOptions } from "@ai-sdk/react"
+import type { Message } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage } from "./types"
 import { useMemo } from "react"
 
@@ -32,7 +33,7 @@ const useAiChat = (requestOpts: RequestOpts, opts: UseChatOptions) => {
     api: requestOpts.apiUrl,
     streamProtocol: "text",
     fetch: fetcher,
-    onFinish: (message) => {
+    onFinish: (message: Message) => {
       if (!requestOpts.onFinish) return
       if (message.role === "assistant" || message.role === "user") {
         requestOpts.onFinish?.(message as AiChatMessage)
