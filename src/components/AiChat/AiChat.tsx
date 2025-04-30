@@ -1,22 +1,21 @@
 import * as React from "react"
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import classNames from "classnames"
 import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
-import type { AiChatMessage, AiChatProps } from "./types"
-import { EntryScreen } from "./EntryScreen"
+import type { AiChatDisplayProps, AiChatProps } from "./types"
 import Markdown from "react-markdown"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"
 import { Alert } from "../Alert/Alert"
 import { ChatTitle } from "./ChatTitle"
-import { useAiChat } from "./utils"
+import { AiChatProvider, useAiChat } from "./AiChatContext"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
-import type { Message } from "@ai-sdk/react"
+import { EntryScreen } from "./EntryScreen"
 
 const classes = {
   root: "MitAiChat--root",
@@ -179,31 +178,25 @@ const Disclaimer = styled(Typography)(({ theme }) => ({
   textAlign: "center",
 }))
 
-const AiChat: FC<AiChatProps> = ({
-  entryScreenTitle,
-  entryScreenEnabled = true,
+const AiChatDisplay: FC<AiChatDisplayProps> = ({
   conversationStarters,
-  initialMessages: _initialMessages,
   askTimTitle,
-  requestOpts,
-  parseContent,
+  entryScreenEnabled = true,
+  entryScreenTitle,
   srLoadingMessages,
   placeholder = "",
   className,
   scrollElement,
-  chatId,
   ref,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   const chatScreenRef = useRef<HTMLDivElement>(null)
-  const [initialMessages, setInitialMessages] = useState<AiChatMessage[]>()
   const promptInputRef = useRef<HTMLDivElement>(null)
 
   const {
-    messages: unparsed,
+    messages,
     input,
     handleInputChange,
     handleSubmit,
@@ -211,10 +204,8 @@ const AiChat: FC<AiChatProps> = ({
     isLoading,
     stop,
     error,
-  } = useAiChat(requestOpts, {
     initialMessages,
-    id: chatId,
-  })
+  } = useAiChat()
 
   useScrollSnap({
     scrollElement: scrollElement || messagesContainerRef.current,
@@ -222,34 +213,12 @@ const AiChat: FC<AiChatProps> = ({
     threshold: 200,
   })
 
-  useEffect(() => {
-    if (_initialMessages) {
-      const prefix = Math.random().toString().slice(2)
-      setInitialMessages(
-        _initialMessages.map((m, i) => ({
-          ...m,
-          id: `initial-${prefix}-${i}`,
-        })),
-      )
-    }
-  }, [_initialMessages])
-
+  const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   useEffect(() => {
     if (!showEntryScreen) {
       promptInputRef.current?.querySelector("input")?.focus()
     }
   }, [showEntryScreen])
-
-  const messages = useMemo(() => {
-    const initial = initialMessages?.map((m) => m.id)
-    return unparsed.map((m: Message) => {
-      if (m.role === "assistant" && !initial?.includes(m.id)) {
-        const content = parseContent ? parseContent(m.content) : m.content
-        return { ...m, content }
-      }
-      return m
-    })
-  }, [parseContent, unparsed, initialMessages])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
@@ -270,19 +239,7 @@ const AiChat: FC<AiChatProps> = ({
   const externalScroll = !!scrollElement
 
   return (
-    <Container
-      className={className}
-      ref={containerRef}
-      /**
-       * Changing the `useChat` chatId seems to persist some state between
-       * hook calls. This can cause strange effects like loading API responses
-       * for previous chatId into new chatId.
-       *
-       * To avoid this, let's change the key, this will force React to make a new component
-       * not sharing any of the old state.
-       */
-      key={chatId}
-    >
+    <Container className={className} ref={containerRef}>
       {showEntryScreen ? (
         <EntryScreen
           className={classes.entryScreenContainer}
@@ -318,7 +275,7 @@ const AiChat: FC<AiChatProps> = ({
               externalScroll={externalScroll}
               ref={messagesContainerRef}
             >
-              {messages.map((m: Message) => (
+              {messages.map((m) => (
                 <MessageRow
                   key={m.id}
                   data-chat-role={m.role}
@@ -442,5 +399,23 @@ const AiChat: FC<AiChatProps> = ({
   )
 }
 
-export { AiChat }
-export type { AiChatProps }
+const AiChat: FC<AiChatProps> = ({
+  requestOpts,
+  initialMessages,
+  chatId,
+  parseContent,
+  ...displayProps
+}) => {
+  return (
+    <AiChatProvider
+      requestOpts={requestOpts}
+      chatId={chatId}
+      initialMessages={initialMessages}
+      parseContent={parseContent}
+    >
+      <AiChatDisplay {...displayProps} />
+    </AiChatProvider>
+  )
+}
+
+export { AiChatDisplay, AiChat }
