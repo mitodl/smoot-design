@@ -1,5 +1,5 @@
-import { useChat, UseChatOptions } from "ai/react"
-import type { Message } from "ai/react"
+import { useChat, UseChatOptions } from "@ai-sdk/react"
+import type { Message } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage } from "./types"
 import { useMemo } from "react"
 
