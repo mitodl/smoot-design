@@ -29,6 +29,9 @@ jobs:
           CODECOV: true
           NODE_ENV: test
 
+      - name: Build
+        run: yarn build
+
   build-storybook:
     runs-on: ubuntu-latest
     steps:
