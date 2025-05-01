@@ -7,6 +7,13 @@ import * as React from "react"
 import { http, HttpResponse } from "msw"
 import { setupServer } from "msw/node"
 
+jest.mock("react-markdown", () => {
+  return {
+    __esModule: true,
+    default: ({ children }: { children: string }) => <div>{children}</div>,
+  }
+})
+
 const TEST_API_STREAMING = "http://localhost:4567/test"
 const CONTENT_FILE_URL = "http://localhost:4567/api/v1/contentfiles/1"
 

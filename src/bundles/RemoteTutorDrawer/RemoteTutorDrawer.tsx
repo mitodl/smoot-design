@@ -227,6 +227,14 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
+const DEFAULT_PROBLEM_INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
+  {
+    role: "assistant",
+    content:
+      "Let's try to work on this problem together. It would be great to hear how you're thinking about solving it. Can you walk me through the approach you're considering?",
+  },
+]
+
 const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE =
   "What do you want to know about this video?"
 
@@ -247,6 +255,7 @@ const ChatComponent = ({
   entryScreenEnabled,
   entryScreenTitle,
   conversationStarters,
+  initialMessages,
   hasTabs,
 }: {
   payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
@@ -256,6 +265,7 @@ const ChatComponent = ({
   entryScreenEnabled: boolean
   entryScreenTitle?: AiChatProps["entryScreenTitle"]
   conversationStarters?: AiChatProps["conversationStarters"]
+  initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
 }) => {
   if (!payload) return null
@@ -263,7 +273,7 @@ const ChatComponent = ({
     <StyledAiChat
       chatId={payload.chatId}
       conversationStarters={conversationStarters}
-      initialMessages={payload.initialMessages}
+      initialMessages={initialMessages}
       scrollElement={scrollElement}
       entryScreenEnabled={entryScreenEnabled}
       entryScreenTitle={entryScreenTitle}
@@ -425,6 +435,9 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           scrollElement={scrollElement}
           entryScreenEnabled={payload.chat?.entryScreenEnabled ?? false}
           entryScreenTitle={payload.chat.entryScreenTitle}
+          initialMessages={
+            payload.chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
+          }
           hasTabs={hasTabs}
         />
       ) : null}
@@ -459,6 +472,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
                 DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
               }
               conversationStarters={conversationStarters}
+              initialMessages={payload.chat.initialMessages}
               hasTabs={hasTabs}
             />
           </StyledTabPanel>
