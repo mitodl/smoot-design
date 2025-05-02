@@ -1,4 +1,4 @@
-// Some of these are based on (compatible, but simplified / restricted) versions of ai/react types.
+// Some of these are based on (compatible, but simplified / restricted) versions of @ai-sdk/react types.
 
 import { RefAttributes } from "react"
 
@@ -26,13 +26,26 @@ type RequestOpts = {
   onFinish?: (message: AiChatMessage) => void
 }
 
-type AiChatProps = {
+type AiChatContextProps = {
   /**
    * Changing the `chatId` will reset the chat. Changing the `chatId` to a
    * previously used value will restore the session state.
    */
   chatId?: string
+  /**
+   * Options for making requests to the AI service.
+   */
+  requestOpts: RequestOpts
 
+  parseContent?: (content: unknown) => string
+  /**
+   * Initial messages to display on the chat. If not provided, the entry screen title will be used as the initial message.
+   */
+  initialMessages?: Omit<AiChatMessage, "id">[]
+  children?: React.ReactNode
+}
+
+type AiChatDisplayProps = {
   /**
    * If provided, renders the "AskTIM" title motif followed by the text.
    */
@@ -44,7 +57,6 @@ type AiChatProps = {
   placeholder?: string
 
   className?: string
-
   /**
    * Set to false to disable the entry screen and load the chat immediately.
    * Defaults to true.
@@ -57,21 +69,9 @@ type AiChatProps = {
   entryScreenTitle?: string
 
   /**
-   * Initial messages to display on the chat. If not provided, the entry screen title will be used as the initial message.
-   */
-  initialMessages?: Omit<AiChatMessage, "id">[]
-
-  /**
    * Prompt suggestions for the user, clickable on the entry screen or in the chat if the entry screen is not enabled.
    */
   conversationStarters?: { content: string }[]
-
-  /**
-   * Options for making requests to the AI service.
-   */
-  requestOpts: RequestOpts
-
-  parseContent?: (content: unknown) => string
 
   /**
    * A message to display while the component is in a loading state.
@@ -96,4 +96,12 @@ type AiChatProps = {
   scrollElement?: HTMLElement | null
 } & RefAttributes<HTMLDivElement>
 
-export type { RequestOpts, AiChatProps, AiChatMessage }
+type AiChatProps = AiChatContextProps & AiChatDisplayProps
+
+export type {
+  RequestOpts,
+  AiChatMessage,
+  AiChatContextProps,
+  AiChatDisplayProps,
+  AiChatProps,
+}

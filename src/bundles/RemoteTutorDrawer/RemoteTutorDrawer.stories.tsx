@@ -74,6 +74,7 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 
 const meta: Meta<typeof RemoteTutorDrawer> = {
   title: "smoot-design/AI/RemoteTutorDrawer",
+  component: RemoteTutorDrawer,
   render: ({ target }, { parameters: { payload } }) => (
     <>
       <IFrame payload={payload} />
