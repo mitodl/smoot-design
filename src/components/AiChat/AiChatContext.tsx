@@ -27,6 +27,10 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
     return fetch(url, options)
   }
 
+/**
+ * All of `@ai-sdk/react`'s [`useChat`](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)
+ * results, plus the initial messages.
+ */
 type AiChatContextResult = UseChatHelpers & {
   initialMessages: AiChatMessage[] | null
 }
@@ -94,13 +98,13 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
 }
 
 /**
- * Returns the AiChatContext.
+ * Returns the AiChatContext, which includes all results from `@ai-sdk/react`'s
+ * [`useChat`](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat) hook as
+ * well as the initial messages.
  *
- * This is largely a wrapper around `useChat` from `@ai-sdk/react`, but it also provides
- * the initial messages and a custom fetcher.
- *
- * Using a context avoids this issue https://github.com/vercel/ai/issues/3266
- * since the caller no longer needs to provide the initial messages.
+ * In addition to customizing the fetcher, using a context allows us to avoid
+ * this issue https://github.com/vercel/ai/issues/3266 since the caller no
+ * longer needs to provide the initial messages.
  */
 const useAiChat = (): AiChatContextResult => {
   const context = React.useContext(AiChatContext)
