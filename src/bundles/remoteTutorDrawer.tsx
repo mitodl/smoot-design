@@ -8,6 +8,7 @@ import {
 } from "../components/ThemeProvider/ThemeProvider"
 import { CacheProvider } from "@emotion/react"
 import createCache from "@emotion/cache"
+import { MathJaxContext } from "better-react-mathjax"
 
 /**
  * Renders the RemoteTutorDrawer in an shadow DOM in order to isolate the drawer
@@ -38,7 +39,10 @@ const init = (opts: RemoteTutorDrawerProps) => {
   createRoot(shadowRootEl).render(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
-        <RemoteTutorDrawer {...opts} />
+        <MathJaxContext>
+          <RemoteTutorDrawer {...opts} />
+        </MathJaxContext>
+        ,
       </ThemeProvider>
     </CacheProvider>,
   )

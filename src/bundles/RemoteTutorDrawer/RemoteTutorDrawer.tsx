@@ -256,6 +256,7 @@ const ChatComponent = ({
   conversationStarters,
   initialMessages,
   hasTabs,
+  needsMathJax,
 }: {
   payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
@@ -266,6 +267,7 @@ const ChatComponent = ({
   conversationStarters?: AiChatProps["conversationStarters"]
   initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
+  needsMathJax: boolean
 }) => {
   if (!payload) return null
   return (
@@ -285,6 +287,7 @@ const ChatComponent = ({
         fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
       }}
       hasTabs={hasTabs}
+      useMathJax={needsMathJax}
     />
   )
 }
@@ -380,7 +383,6 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
 
   const { blockType, chat } = payload
   const hasTabs = blockType === "video"
-
   return (
     <Drawer
       data-testid="remote-tutor-drawer"
@@ -438,6 +440,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
             payload.chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
           }
           hasTabs={hasTabs}
+          needsMathJax={true}
         />
       ) : null}
       {blockType === "video" ? (
@@ -473,6 +476,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
               conversationStarters={conversationStarters}
               initialMessages={payload.chat.initialMessages}
               hasTabs={hasTabs}
+              needsMathJax={false}
             />
           </StyledTabPanel>
           {response?.flashcards?.length ? (

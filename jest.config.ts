@@ -16,6 +16,9 @@ const config: Config.InitialOptions = {
     "\\.(css|scss|svg|jpg|jpeg|png)$": "<rootDir>/test-utils/filemock.js",
     "^rehype-raw$": "<rootDir>/test-utils/modulemock.js",
     "^react-markdown$": "<rootDir>/test-utils/modulemock.js",
+    "^rehype-mathjax/browser$": "<rootDir>/test-utils/modulemock.js",
+    "^remark-math$": "<rootDir>/test-utils/modulemock.js",
+    "^better-react-mathjax$": "<rootDir>/test-utils/modulemock.js",
   },
   rootDir: "./src",
 }

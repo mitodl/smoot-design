@@ -5,6 +5,7 @@ import type { AiChatProps } from "./types"
 import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"
 import { FC, useEffect, useRef, useState } from "react"
+import { MathJaxContext } from "better-react-mathjax"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
@@ -45,9 +46,11 @@ const meta: Meta<typeof AiChat> = {
   render: (args) => <AiChat {...args} />,
   decorators: (Story, context) => {
     return (
-      <Container>
-        <Story key={String(context.args.entryScreenEnabled)} />
-      </Container>
+      <MathJaxContext>
+        <Container>
+          <Story key={String(context.args.entryScreenEnabled)} />
+        </Container>
+      </MathJaxContext>
     )
   },
   args: {
@@ -125,6 +128,17 @@ And some inline code, \`\`<inline></inline>\`\` and code block:
 def f(x):
     print(x)
 \`\`\`
+
+And some inline  math: $x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$
+
+And some block math:
+\n
+
+$$
+x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
+$$
+
+Math is rendered using MathJax only if the useMathJax prop is set to true.
 `
 
 /**
@@ -141,6 +155,7 @@ export const MarkdownStyling: Story = {
         content: DEMO_MARKDOWN,
       },
     ],
+    useMathJax: true,
   },
 }
 

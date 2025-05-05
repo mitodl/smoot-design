@@ -7,7 +7,7 @@ import * as React from "react"
 import { http, HttpResponse } from "msw"
 import { setupServer } from "msw/node"
 
-jest.mock("react-markdown", () => {
+jest.mock("../../components/AiChat/Markdown", () => {
   return {
     __esModule: true,
     default: ({ children }: { children: string }) => <div>{children}</div>,

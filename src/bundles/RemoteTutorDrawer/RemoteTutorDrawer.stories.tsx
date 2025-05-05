@@ -8,6 +8,7 @@ import {
   RemoteTutorDrawer,
   RemoteTutorDrawerInitMessage,
 } from "./RemoteTutorDrawer"
+import { MathJaxContext } from "better-react-mathjax"
 
 type InitPayload = RemoteTutorDrawerInitMessage["payload"]
 
@@ -78,10 +79,12 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
   render: ({ target }, { parameters: { payload } }) => (
     <>
       <IFrame payload={payload} />
-      <RemoteTutorDrawer
-        target={target}
-        messageOrigin="http://localhost:6006"
-      />
+      <MathJaxContext>
+        <RemoteTutorDrawer
+          target={target}
+          messageOrigin="http://localhost:6006"
+        />
+      </MathJaxContext>
     </>
   ),
 }
