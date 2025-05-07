@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => ({
       name: "remoteTutorDrawer",
       fileName: (format) => `remoteTutorDrawer.${format}.js`,
     },
+    sourcemap: true,
   },
   define: {
     "process.env.NODE_ENV": JSON.stringify(mode),
