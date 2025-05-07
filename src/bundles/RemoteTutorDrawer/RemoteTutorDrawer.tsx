@@ -18,6 +18,7 @@ import type { AiChatProps, AiChatMessage } from "../../components/AiChat/types"
 import { ActionButton } from "../../components/Button/ActionButton"
 import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
+import { VERSION } from "../../VERSION"
 
 type RemoteTutorDrawerInitMessage = {
   type: "smoot-design::tutor-drawer-open"
@@ -386,6 +387,7 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   return (
     <Drawer
       data-testid="remote-tutor-drawer"
+      data-smoot-version={VERSION}
       className={className}
       PaperProps={{
         ref: paperRefCallback,
