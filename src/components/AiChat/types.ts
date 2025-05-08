@@ -100,6 +100,11 @@ type AiChatDisplayProps = {
    * Defaults to false.
    */
   useMathJax?: boolean
+  /**
+   * If true, the chat input will be autofocused on load.
+   * Defaults to true.
+   */
+  autofocus?: boolean
 } & RefAttributes<HTMLDivElement>
 
 type AiChatProps = AiChatContextProps & AiChatDisplayProps

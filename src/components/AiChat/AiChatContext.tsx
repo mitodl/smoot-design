@@ -2,6 +2,7 @@ import * as React from "react"
 import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
 import { useMemo, createContext } from "react"
+import retryingFetch from "../../utils/retryingFetch"
 
 const identity = <T,>(x: T): T => x
 
@@ -9,7 +10,7 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
   (requestOpts: RequestOpts) => async (url, opts) => {
     if (typeof opts?.body !== "string") {
       console.error("Unexpected body type.")
-      return window.fetch(url, opts)
+      return retryingFetch(url, opts)
     }
     const messages: AiChatMessage[] = JSON.parse(opts?.body).messages
     const transformBody: RequestOpts["transformBody"] =
@@ -24,7 +25,7 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
         ...requestOpts.fetchOpts?.headers,
       },
     }
-    return fetch(url, options)
+    return retryingFetch(url, options)
   }
 
 /**
