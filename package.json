@@ -67,6 +67,7 @@
     "@mui/utils": "^6.1.6",
     "better-react-mathjax": "^2.3.0",
     "classnames": "^2.5.1",
+    "fetch-retry": "^6.0.0",
     "lodash": "^4.17.21",
     "react-markdown": "^10.0.0",
     "rehype-mathjax": "^7.1.0",
