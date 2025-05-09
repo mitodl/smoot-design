@@ -46,6 +46,15 @@ const init = (opts: RemoteTutorDrawerProps) => {
       </ThemeProvider>
     </CacheProvider>,
   )
+
+  // Ensure mathjax context menu is rendered above the drawer
+  const style = document.createElement("style")
+  style.textContent = `
+    .CtxtMenu_Menu {
+      z-index: ${theme.zIndex.drawer + 100} !important;
+    }
+  `
+  document.head.appendChild(style)
 }
 
 export { init }
