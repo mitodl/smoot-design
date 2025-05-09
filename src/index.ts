@@ -36,4 +36,6 @@ export {
   TabButtonList,
 } from "./components/TabButtons/TabButtonList"
 
+export { VERSION } from "./VERSION"
+
 export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
