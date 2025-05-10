@@ -62,7 +62,7 @@
     }
   },
   "dependencies": {
-    "@ai-sdk/react": "1.2.11",
+    "@ai-sdk/react": "1.2.12",
     "@emotion/cache": "^11.14.0",
     "@mui/utils": "^6.1.6",
     "better-react-mathjax": "^2.3.0",
