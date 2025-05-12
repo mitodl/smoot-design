@@ -17,26 +17,21 @@ import { MathJaxContext } from "better-react-mathjax"
 const init = (opts: RemoteTutorDrawerProps) => {
   const container = document.createElement("div")
   document.body.appendChild(container)
-  const shadowContainer = container.attachShadow({ mode: "open" })
-  const shadowRootEl = document.createElement("div")
-  shadowRootEl.id = "smoot-chat-drawer-root"
-  shadowContainer.append(shadowRootEl)
-  // See https://mui.com/material-ui/customization/shadow-dom/
-  // Ensure style tags are rendered in shadow root
+  container.id = "smoot-chat-drawer-root"
+
   const cache = createCache({
     key: "css",
     prepend: true,
-    container: shadowContainer,
+    container: container,
   })
   const theme = createTheme({
     components: {
-      // Ensure modals, etc, are rendered in shadow root
-      MuiPopover: { defaultProps: { container: shadowRootEl } },
-      MuiPopper: { defaultProps: { container: shadowRootEl } },
-      MuiModal: { defaultProps: { container: shadowRootEl } },
+      MuiPopover: { defaultProps: { container: container } },
+      MuiPopper: { defaultProps: { container: container } },
+      MuiModal: { defaultProps: { container: container } },
     },
   })
-  createRoot(shadowRootEl).render(
+  createRoot(container).render(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <MathJaxContext>
@@ -48,7 +43,6 @@ const init = (opts: RemoteTutorDrawerProps) => {
   )
 
   // Ensure mathjax context menu is rendered above the drawer
-  // NOTE: must be done in regular DOM, not hte shadowdom.
   // Mathjax context menu is appended to end of body.
   const style = document.createElement("style")
   style.textContent = `
