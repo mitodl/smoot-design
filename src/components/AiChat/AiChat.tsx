@@ -109,9 +109,6 @@ const Message = styled.div(({ theme }) => ({
   "ol,ul": {
     paddingInlineStart: "16px",
     margin: "12px 0 12px 4px",
-    // "ol, ul": {
-    //   marginLeft: 0,
-    // },
   },
   "ol > li, ul > li": {
     margin: "12px 0",
