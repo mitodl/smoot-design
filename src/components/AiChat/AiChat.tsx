@@ -106,14 +106,38 @@ const Message = styled.div(({ theme }) => ({
   "p:last-of-type": {
     marginBottom: 0,
   },
-  "ol, ul": {
+  "ol,ul": {
     paddingInlineStart: "16px",
-    marginLeft: "6px",
-    "ol, ul": {
-      marginLeft: 0,
+    margin: "12px 0 12px 4px",
+  },
+  "ol > li, ul > li": {
+    margin: "12px 0",
+    "ol,ul": {
+      margin: "12px 0 12px 4px",
     },
     li: {
-      margin: "16px 0",
+      margin: "6px 0",
+    },
+  },
+  ul: {
+    paddingInlineStart: 0,
+    "> li": {
+      listStyleType: "none",
+      position: "relative",
+      "&::before": {
+        content: '"–"',
+        position: "absolute",
+        left: 0,
+        color: "#888",
+        marginRight: "8px",
+      },
+      paddingLeft: "16px",
+    },
+  },
+  "ol + ul": {
+    marginLeft: "24px",
+    li: {
+      margin: "6px 0",
     },
   },
   a: {
