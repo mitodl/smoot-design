@@ -29,7 +29,6 @@ An example use case is within Open edX courses:
 
 To control the drawer, the iframe sends messages via `window.parent.postMessage`. Most configuration is handled via such messages.
 
-
 ## Props
 
 While most inputs are controlled via message events from the iframe, the drawer accepts a few props directly:
@@ -39,7 +38,6 @@ While most inputs are controlled via message events from the iframe, the drawer 
 Props passed to the AiDrawerManager are shared across RemoteTutorDrawer drawer instances. If they cannot share props, such as a
 case that each drawer is talking to a different chat server and needs individual `fetchOpts` or `transformBody`, render an
 AiDrawerManager instance for each, ideally using the RemoteTutorDrawer alias so the intent is clear.
-
 
 The message events emitted from iframe should have shape:
 
