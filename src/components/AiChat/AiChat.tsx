@@ -8,7 +8,6 @@ import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
 import type { AiChatDisplayProps, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
-
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
 import { VisuallyHidden } from "../VisuallyHidden/VisuallyHidden"

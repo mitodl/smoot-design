@@ -1,7 +1,7 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { RemoteTutorDrawer } from "./RemoteTutorDrawer/RemoteTutorDrawer"
-import type { RemoteTutorDrawerProps } from "./RemoteTutorDrawer/RemoteTutorDrawer"
+import { AiDrawerManager } from "./RemoteTutorDrawer/AiDrawerManager"
+import type { AiDrawerManagerProps } from "./RemoteTutorDrawer/AiDrawerManager"
 import {
   ThemeProvider,
   createTheme,
@@ -11,10 +11,9 @@ import createCache from "@emotion/cache"
 import { MathJaxContext } from "better-react-mathjax"
 
 /**
- * Renders the RemoteTutorDrawer in an shadow DOM in order to isolate the drawer
- * styles from external stylesheets.
+ * Renders the AiDrawerManager to the page.
  */
-const init = (opts: RemoteTutorDrawerProps) => {
+const init = (opts: AiDrawerManagerProps) => {
   const container = document.createElement("div")
   document.body.appendChild(container)
   container.id = "smoot-chat-drawer-root"
@@ -35,9 +34,8 @@ const init = (opts: RemoteTutorDrawerProps) => {
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <MathJaxContext>
-          <RemoteTutorDrawer {...opts} />
+          <AiDrawerManager {...opts} />
         </MathJaxContext>
-        ,
       </ThemeProvider>
     </CacheProvider>,
   )

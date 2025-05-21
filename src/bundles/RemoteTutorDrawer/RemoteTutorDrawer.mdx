@@ -7,32 +7,7 @@ import { gitLink } from "../../story-utils"
 
 <Title />
 
-The RemoteTutorDrawer is an AiChat Drawer controlled "remotely" via messages from iframes. An example use case is within Open edx courses:
-
-- The RemoteTutorDrawer is rendered in the learning MFE
-- it is controlled via messages from XBlock content; the XBlock content is rendered in an iframe within the learning MFE.
-
-To control the drawer, the iframe sends messages via `window.parent.postMessage`. Most configuration is handled via such messages.
-
-<Primary />
-
-## Inputs
-
-While most inputs are controlled via message events from the iframe, the drawer accepts a few props directly:
-
-<Controls />
-
-The message events emitted from iframe should have shape:
-
-```typescript
-type ChatInitMessage = {
-  type: "smoot-design::chat-open"
-  payload: {
-    /** config data */
-  }
-}
-```
-
-See <a href={gitLink("src/bundles/RemoteTutorDrawer/RemoteTutorDrawer.tsx")}>RemoteTutorDrawer.ts</a> for details of the `payload`.
+RemoteTutorDrawer now aliases AiDrawerManager and should be rendered once on the page except for the
+case that props cannot be shared across drawer instances. The RemoteTutorDrawer is not exported externally.
 
 <Stories includePrimary={false} />

@@ -1,4 +1,5 @@
 import path from "path"
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { defineConfig } from "vite"
 
 export default defineConfig(({ mode }) => ({
@@ -6,8 +7,8 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist/bundled/",
     lib: {
       entry: [path.resolve(__dirname, "src/bundles/aiDrawerManager.tsx")],
-      name: "aiDrawerManager",
-      fileName: (format) => `aiDrawerManager.${format}.js`,
+      name: "remoteTutorDrawer",
+      fileName: (format) => `remoteTutorDrawer.${format}.js`,
     },
     sourcemap: true,
   },

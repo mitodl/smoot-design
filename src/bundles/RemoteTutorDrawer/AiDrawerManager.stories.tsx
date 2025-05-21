@@ -4,8 +4,9 @@ import type { Meta, StoryObj } from "@storybook/react"
 import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
+import { AiDrawerManager } from "./AiDrawerManager"
 import {
-  RemoteTutorDrawer,
+  // RemoteTutorDrawer,
   RemoteTutorDrawerInitMessage,
 } from "./RemoteTutorDrawer"
 import { MathJaxContext } from "better-react-mathjax"
@@ -34,9 +35,9 @@ const buildIFrame = (payload: InitPayload) => (el: HTMLIFrameElement) => {
   const doc = el.contentDocument
   const parent = el.contentWindow?.parent
   invariant(doc && parent)
+
   const button = doc.createElement("button")
   button.style["padding"] = "6px"
-
   button.textContent = "Open drawer (send message to parent)"
   doc.body.appendChild(button)
 
@@ -77,79 +78,131 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
   )
 }
 
-const meta: Meta<typeof RemoteTutorDrawer> = {
-  title: "smoot-design/AI/RemoteTutorDrawer",
-  component: RemoteTutorDrawer,
-  render: ({ target }, { parameters: { payload } }) => (
-    <>
-      <IFrame payload={payload} />
+const meta: Meta<typeof AiDrawerManager> = {
+  title: "smoot-design/AI/AiDrawerManager",
+  component: AiDrawerManager,
+  render: ({ target }) => (
+    <div style={{ fontFamily: "Nunito Sans, sans-serif", color: "#2e3438" }}>
+      <h3>Tutor Bot</h3>
+      <IFrame
+        payload={{
+          blockType: "problem",
+          target: "problem-frame",
+          title: "AskTIM for help with Problem: Derivatives 1.1",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+            initialMessages: INITIAL_MESSAGES,
+            conversationStarters: STARTERS,
+          },
+        }}
+      />
+      <h3>Tutor Bot with default initial messages</h3>
+      <IFrame
+        payload={{
+          blockType: "problem",
+          target: "problem-frame-default-initial-messages",
+          title: "AskTIM for help with Problem: Derivatives 1.1",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+            conversationStarters: STARTERS,
+          },
+        }}
+      />
+      <h3>Tutor Bot with entry screen</h3>
+      <IFrame
+        payload={{
+          blockType: "problem",
+          target: "entry-screen-frame",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+            initialMessages: INITIAL_MESSAGES,
+            conversationStarters: STARTERS,
+            entryScreenEnabled: true,
+            entryScreenTitle: "AskTIM about this problem",
+          },
+        }}
+      />
+      <h3>Video Drawer</h3>
+      <IFrame
+        payload={{
+          blockType: "video",
+          target: "video-frame",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+            conversationStarters: STARTERS,
+          },
+          summary: {
+            apiUrl: CONTENT_FILE_URL,
+          },
+        }}
+      />
       <MathJaxContext>
-        <RemoteTutorDrawer
+        <AiDrawerManager
           target={target}
           messageOrigin="http://localhost:6006"
         />
       </MathJaxContext>
-    </>
+    </div>
   ),
 }
 
 export default meta
 
-type Story = StoryObj<typeof RemoteTutorDrawer>
+type Story = StoryObj<typeof AiDrawerManager>
 
-export const ProblemStory: Story = {
-  args: {
-    target: "problem-frame",
-  },
-  parameters: {
-    payload: {
-      blockType: "problem",
-      target: "problem-frame",
-      title: "AskTIM for help with Problem: Derivatives 1.1",
-      chat: {
-        apiUrl: TEST_API_STREAMING,
-        initialMessages: INITIAL_MESSAGES,
-        conversationStarters: STARTERS,
-      },
-    },
-  },
-}
+// export const ProblemStory: Story = {
+//   args: {
+//     target: "problem-frame",
+//   },
+//   parameters: {
+//     payload: {
+//       blockType: "problem",
+//       target: "problem-frame",
+//       title: "AskTIM for help with Problem: Derivatives 1.1",
+//       chat: {
+//         apiUrl: TEST_API_STREAMING,
+//         initialMessages: INITIAL_MESSAGES,
+//         conversationStarters: STARTERS,
+//       },
+//     },
+//   },
+// }
 
-export const ProblemDefaultInitialMessagesStory: Story = {
-  args: {
-    target: "problem-frame-default-initial-messages",
-  },
-  parameters: {
-    payload: {
-      blockType: "problem",
-      target: "problem-frame-default-initial-messages",
-      title: "AskTIM for help with Problem: Derivatives 1.1",
-      chat: {
-        apiUrl: TEST_API_STREAMING,
-        conversationStarters: STARTERS,
-      },
-    },
-  },
-}
+// export const ProblemDefaultInitialMessagesStory: Story = {
+//   args: {
+//     target: "problem-frame-default-initial-messages",
+//   },
+//   parameters: {
+//     payload: {
+//       blockType: "problem",
+//       target: "problem-frame-default-initial-messages",
+//       title: "AskTIM for help with Problem: Derivatives 1.1",
+//       chat: {
+//         apiUrl: TEST_API_STREAMING,
+//         conversationStarters: STARTERS,
+//       },
+//     },
+//   },
+// }
 
-export const EntryScreenStory: Story = {
-  args: {
-    target: "entry-screen-frame",
-  },
-  parameters: {
-    payload: {
-      blockType: "problem",
-      target: "entry-screen-frame",
-      chat: {
-        apiUrl: TEST_API_STREAMING,
-        initialMessages: INITIAL_MESSAGES,
-        conversationStarters: STARTERS,
-        entryScreenEnabled: true,
-        entryScreenTitle: "AskTIM about this problem",
-      },
-    },
-  },
-}
+// export const EntryScreenStory: Story = {
+//   args: {
+//     target: "entry-screen-frame",
+//   },
+//   parameters: {
+//     payload: {
+//       blockType: "problem",
+//       target: "entry-screen-frame",
+//       chat: {
+//         apiUrl: TEST_API_STREAMING,
+//         initialMessages: INITIAL_MESSAGES,
+//         conversationStarters: STARTERS,
+//         entryScreenEnabled: true,
+//         entryScreenTitle: "AskTIM about this problem",
+//       },
+//     },
+//   },
+// }
 
 /**
  * The chat entry screen is shown by default for the video blocks Tutor drawer.
@@ -159,17 +212,6 @@ export const VideoStory: Story = {
     target: "video-frame",
   },
   parameters: {
-    payload: {
-      blockType: "video",
-      target: "video-frame",
-      chat: {
-        apiUrl: TEST_API_STREAMING,
-        conversationStarters: STARTERS,
-      },
-      summary: {
-        apiUrl: CONTENT_FILE_URL,
-      },
-    },
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
@@ -185,31 +227,31 @@ export const VideoStory: Story = {
  * Where conversation starters are not provided, they will be selected at random from the returned flashcard questions
  * or from `DEFAULT_VIDEO_STARTERS` provided.
  */
-export const FlashcardConversationStartersStory: Story = {
-  args: {
-    target: "starters-frame",
-  },
-  parameters: {
-    payload: {
-      blockType: "video",
-      target: "starters-frame",
-      chat: {
-        apiUrl: TEST_API_STREAMING,
-      },
-      summary: {
-        apiUrl: CONTENT_FILE_URL,
-      },
-    },
-    msw: {
-      handlers: [
-        http.get(CONTENT_FILE_URL, () => {
-          return HttpResponse.json(sampleResponse)
-        }),
-        ...handlers,
-      ],
-    },
-  },
-}
+// export const FlashcardConversationStartersStory: Story = {
+//   args: {
+//     target: "starters-frame",
+//   },
+//   parameters: {
+//     payload: {
+//       blockType: "video",
+//       target: "starters-frame",
+//       chat: {
+//         apiUrl: TEST_API_STREAMING,
+//       },
+//       summary: {
+//         apiUrl: CONTENT_FILE_URL,
+//       },
+//     },
+//     msw: {
+//       handlers: [
+//         http.get(CONTENT_FILE_URL, () => {
+//           return HttpResponse.json(sampleResponse)
+//         }),
+//         ...handlers,
+//       ],
+//     },
+//   },
+// }
 
 // From https://api.rc.learn.mit.edu/api/v1/contentfiles/?edx_module_id=asset-v1%3AMITxT%2B3.012Sx%2B3T2024%2Btype%40asset%2Bblock%400cc53e11-1f91-4ed8-8bab-0d873db8cb90-en.srt
 const sampleResponse = {
