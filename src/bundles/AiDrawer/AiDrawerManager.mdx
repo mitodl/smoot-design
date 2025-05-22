@@ -8,18 +8,18 @@ import { gitLink } from "../../story-utils"
 <Title />
 
 The AiDrawerManager listens for `window.parent.postMessage` messages, intended to be posted from within iframes,
-and creates a RemoteTutorDrawer instance for each new message, opening the drawer, while keeping previous instances
+and creates an AiDrawer instance (previously RemoteTutorDrawer) for each new message, opening the drawer, while keeping previous instances
 mounted after being closed to preserve their state whilst still on the page if the same message is posted to open the drawer.
 
 A single AiDrawerManager instance should be rendered on the parent page. This replaces the need for multiple
-RemoteTutorDrawer instances and `target` props to select the intended drawer.
+AiDrawer instances and `target` props to select the intended drawer.
 
 The instances are keyed on the messages `.payload.chat.chatId` if set. This is the value used by AiChatContext to retrieve
 chat sessions from the backend after page reloads. If not set, the message payload itself is used (hashed internally) to key
 each instance.
 
 The AiDrawerManager should also be used where there is only a single drawer on the page as the `postMessage()` message event
-handler and open/close state have been hoisted from the RemoteTutorDrawer. For backwards compatibility the RemoteTutorDrawer
+handler and open/close state have been hoisted from the AiDrawer. For backwards compatibility the AiDrawer
 now aliases AiDrawerManager and accepts the same props.
 
 An example use case is within Open edX courses:
@@ -35,9 +35,9 @@ While most inputs are controlled via message events from the iframe, the drawer 
 
 <Controls />
 
-Props passed to the AiDrawerManager are shared across RemoteTutorDrawer drawer instances. If they cannot share props, such as a
+Props passed to the AiDrawerManager are shared across AiDrawer drawer instances. If they cannot share props, such as a
 case that each drawer is talking to a different chat server and needs individual `fetchOpts` or `transformBody`, render an
-AiDrawerManager instance for each, ideally using the RemoteTutorDrawer alias so the intent is clear.
+AiDrawerManager instance for each, ideally using the AiDrawer alias so the intent is clear.
 
 The message events emitted from iframe should have shape:
 
@@ -50,6 +50,6 @@ type ChatInitMessage = {
 }
 ```
 
-See <a href={gitLink("src/bundles/RemoteTutorDrawer/RemoteTutorDrawer.tsx")}>RemoteTutorDrawer.ts</a> for details of the `payload`.
+See <a href={gitLink("src/bundles/AiDrawer/AiDrawer.tsx")}>AiDrawer.ts</a> for details of the `payload`.
 
 <Stories />

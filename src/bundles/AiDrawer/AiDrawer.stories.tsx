@@ -4,13 +4,10 @@ import type { Meta, StoryObj } from "@storybook/react"
 import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
-import {
-  RemoteTutorDrawer,
-  RemoteTutorDrawerInitMessage,
-} from "./RemoteTutorDrawer"
+import { AiDrawer, AiDrawerInitMessage } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
 
-type InitPayload = RemoteTutorDrawerInitMessage["payload"]
+type InitPayload = AiDrawerInitMessage["payload"]
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const CONTENT_FILE_URL =
@@ -56,7 +53,7 @@ const buildIFrame = (payload: InitPayload) => (el: HTMLIFrameElement) => {
   textarea.style["width"] = "100%"
   textarea.style["height"] = "500px"
 
-  const message: RemoteTutorDrawerInitMessage = {
+  const message: AiDrawerInitMessage = {
     type: "smoot-design::tutor-drawer-open",
     payload,
   }
@@ -77,17 +74,14 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
   )
 }
 
-const meta: Meta<typeof RemoteTutorDrawer> = {
-  title: "smoot-design/AI/RemoteTutorDrawer",
-  component: RemoteTutorDrawer,
+const meta: Meta<typeof AiDrawer> = {
+  title: "smoot-design/AI/AiDrawer",
+  component: AiDrawer,
   render: ({ target }, { parameters: { payload } }) => (
     <>
       <IFrame payload={payload} />
       <MathJaxContext>
-        <RemoteTutorDrawer
-          target={target}
-          messageOrigin="http://localhost:6006"
-        />
+        <AiDrawer target={target} messageOrigin="http://localhost:6006" />
       </MathJaxContext>
     </>
   ),
@@ -95,7 +89,7 @@ const meta: Meta<typeof RemoteTutorDrawer> = {
 
 export default meta
 
-type Story = StoryObj<typeof RemoteTutorDrawer>
+type Story = StoryObj<typeof AiDrawer>
 
 export const ProblemStory: Story = {
   args: {

@@ -20,8 +20,8 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 
-type RemoteTutorDrawerInitMessage = {
-  type: "smoot-design::tutor-drawer-open"
+type AiDrawerInitMessage = {
+  type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
   payload: {
     blockType?: "problem" | "video"
     target?: string
@@ -154,7 +154,7 @@ const StyledHTML = styled.div(({ theme }) => ({
 
 const identity = <T,>(x: T): T => x
 
-type RemoteTutorDrawerProps = {
+type AiDrawerProps = {
   className?: string
   /**
    * The origin of the messages that will be received to open the chat.
@@ -181,16 +181,16 @@ type RemoteTutorDrawerProps = {
   /**
    * Pass to target a specific drawer instance where multiple are on the page.
    */
-  /** @deprecated The AiDrawerManager now handles multiple RemoteTutorDrawer instance removing the need to target */
+  /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
   target?: string
 
-  payload?: RemoteTutorDrawerInitMessage["payload"]
+  payload?: AiDrawerInitMessage["payload"]
 
   open?: boolean
   onClose?: () => void
 }
 
-const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
+const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
@@ -265,7 +265,7 @@ const ChatComponent = ({
   hasTabs,
   needsMathJax,
 }: {
-  payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
+  payload: AiDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
   scrollElement: AiChatProps["scrollElement"]
@@ -305,14 +305,14 @@ const randomItems = <T,>(array: T[], count: number): T[] => {
   return shuffled.slice(0, count)
 }
 
-const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
+const AiDrawer: FC<AiDrawerProps> = ({
   transformBody = identity,
   className,
   fetchOpts,
   payload,
   open,
   onClose,
-}: RemoteTutorDrawerProps) => {
+}: AiDrawerProps) => {
   const [tab, setTab] = useState("chat")
   const { response } = useContentFetch(payload?.summary?.apiUrl)
 
@@ -479,5 +479,5 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   )
 }
 
-export { RemoteTutorDrawer }
-export type { RemoteTutorDrawerProps, RemoteTutorDrawerInitMessage }
+export { AiDrawer }
+export type { AiDrawerProps, AiDrawerInitMessage }

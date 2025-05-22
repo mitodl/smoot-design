@@ -1,13 +1,10 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
-import type {
-  RemoteTutorDrawerProps,
-  RemoteTutorDrawerInitMessage,
-} from "./RemoteTutorDrawer"
-import { RemoteTutorDrawer } from "./RemoteTutorDrawer"
+import type { AiDrawerProps, AiDrawerInitMessage } from "./AiDrawer"
+import { AiDrawer } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
 
-const hashPayload = (payload: RemoteTutorDrawerInitMessage["payload"]) => {
+const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
   let hash = 5381
   for (let i = 0; i < str.length; i++) {
@@ -17,7 +14,7 @@ const hashPayload = (payload: RemoteTutorDrawerInitMessage["payload"]) => {
   return Math.abs(hash).toString(36)
 }
 
-export type AiDrawerManagerProps = RemoteTutorDrawerProps
+export type AiDrawerManagerProps = AiDrawerProps
 
 const AiDrawerManager = ({
   className,
@@ -32,7 +29,7 @@ const AiDrawerManager = ({
       {
         key: string
         open: boolean
-        payload: RemoteTutorDrawerInitMessage["payload"]
+        payload: AiDrawerInitMessage["payload"]
       }
     >
   >({})
@@ -50,8 +47,10 @@ const AiDrawerManager = ({
       console.log("event", event)
 
       if (
-        event.data.type === "smoot-design::tutor-drawer-open"
-        // event.data.payload.target === target
+        [
+          "smoot-design::ai-drawer-open",
+          "smoot-design::tutor-drawer-open", // legacy
+        ].includes(event.data.type)
       ) {
         const key = hashPayload(event.data.payload)
 
@@ -80,12 +79,11 @@ const AiDrawerManager = ({
   return (
     <MathJaxContext>
       {Object.values(drawerStates).map(({ key, open, payload }) => (
-        <RemoteTutorDrawer
+        <AiDrawer
           key={key}
           className={className}
           messageOrigin={messageOrigin}
           transformBody={transformBody}
-          // target={target}
           fetchOpts={fetchOpts}
           payload={payload}
           open={open}

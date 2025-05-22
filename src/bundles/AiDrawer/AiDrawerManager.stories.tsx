@@ -8,7 +8,7 @@ import { AiDrawerManager } from "./AiDrawerManager"
 import {
   // RemoteTutorDrawer,
   RemoteTutorDrawerInitMessage,
-} from "./RemoteTutorDrawer"
+} from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
 
 type InitPayload = RemoteTutorDrawerInitMessage["payload"]

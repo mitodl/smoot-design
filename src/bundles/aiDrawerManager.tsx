@@ -1,7 +1,7 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { AiDrawerManager } from "./RemoteTutorDrawer/AiDrawerManager"
-import type { AiDrawerManagerProps } from "./RemoteTutorDrawer/AiDrawerManager"
+import { AiDrawerManager } from "./AiDrawer/AiDrawerManager"
+import type { AiDrawerManagerProps } from "./AiDrawer/AiDrawerManager"
 import {
   ThemeProvider,
   createTheme,

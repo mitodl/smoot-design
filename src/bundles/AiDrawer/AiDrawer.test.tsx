@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react"
 import user from "@testing-library/user-event"
-import { RemoteTutorDrawer } from "./RemoteTutorDrawer"
-import type { RemoteTutorDrawerInitMessage } from "./RemoteTutorDrawer"
+import { AiDrawer } from "./AiDrawer"
+import type { AiDrawerInitMessage } from "./AiDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { http, HttpResponse } from "msw"
@@ -51,7 +51,7 @@ class MockResizeObserver {
 
 global.ResizeObserver = MockResizeObserver
 
-describe("RemoteTutorDrawer", () => {
+describe("AiDrawer", () => {
   const server = setupServer(
     http.post(TEST_API_STREAMING, async () => {
       return HttpResponse.text("AI Response")
@@ -71,11 +71,11 @@ describe("RemoteTutorDrawer", () => {
 
   afterAll(() => server.close())
 
-  const setup = async (message: RemoteTutorDrawerInitMessage) => {
+  const setup = async (message: AiDrawerInitMessage) => {
     server.listen()
 
     render(
-      <RemoteTutorDrawer
+      <AiDrawer
         data-testid="remote-tutor-drawer"
         messageOrigin="http://localhost:6006"
         target="ai-chat"
