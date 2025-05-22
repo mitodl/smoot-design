@@ -231,6 +231,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     stop,
     error,
     initialMessages,
+    status,
   } = useAiChat()
 
   useScrollSnap({
@@ -245,6 +246,16 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
       promptInputRef.current?.querySelector("input")?.focus()
     }
   }, [showEntryScreen])
+
+  useEffect(() => {
+    if (
+      messages.some(
+        (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
+      )
+    ) {
+      setShowEntryScreen(false)
+    }
+  }, [messages, status])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
