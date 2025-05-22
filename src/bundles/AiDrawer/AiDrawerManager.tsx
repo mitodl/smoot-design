@@ -14,7 +14,13 @@ const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   return Math.abs(hash).toString(36)
 }
 
-export type AiDrawerManagerProps = AiDrawerProps
+type AiDrawerManagerProps = {
+  /**
+   * The origin of the messages that will be received to open the chat.
+   * The drawer will ignore all message events not from this origin.
+   */
+  messageOrigin: string
+} & AiDrawerProps
 
 const AiDrawerManager = ({
   className,
@@ -33,6 +39,7 @@ const AiDrawerManager = ({
       }
     >
   >({})
+
   useEffect(() => {
     const cb = (event: MessageEvent) => {
       if (event.origin !== messageOrigin) {
@@ -43,8 +50,6 @@ const AiDrawerManager = ({
         }
         return
       }
-
-      console.log("event", event)
 
       if (
         [
@@ -74,15 +79,12 @@ const AiDrawerManager = ({
     }
   }, [messageOrigin, target])
 
-  console.log("drawerStates", drawerStates)
-
   return (
     <MathJaxContext>
       {Object.values(drawerStates).map(({ key, open, payload }) => (
         <AiDrawer
           key={key}
           className={className}
-          messageOrigin={messageOrigin}
           transformBody={transformBody}
           fetchOpts={fetchOpts}
           payload={payload}
@@ -100,3 +102,4 @@ const AiDrawerManager = ({
 }
 
 export { AiDrawerManager }
+export type { AiDrawerManagerProps }

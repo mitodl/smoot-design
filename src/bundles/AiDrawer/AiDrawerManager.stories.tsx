@@ -5,13 +5,10 @@ import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawerManager } from "./AiDrawerManager"
-import {
-  // RemoteTutorDrawer,
-  RemoteTutorDrawerInitMessage,
-} from "./AiDrawer"
+import { AiDrawerInitMessage } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
 
-type InitPayload = RemoteTutorDrawerInitMessage["payload"]
+type InitPayload = AiDrawerInitMessage["payload"]
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const CONTENT_FILE_URL =
@@ -57,7 +54,7 @@ const buildIFrame = (payload: InitPayload) => (el: HTMLIFrameElement) => {
   textarea.style["width"] = "100%"
   textarea.style["height"] = "500px"
 
-  const message: RemoteTutorDrawerInitMessage = {
+  const message: AiDrawerInitMessage = {
     type: "smoot-design::tutor-drawer-open",
     payload,
   }
@@ -81,13 +78,12 @@ const IFrame = ({ payload }: { payload: InitPayload }) => {
 const meta: Meta<typeof AiDrawerManager> = {
   title: "smoot-design/AI/AiDrawerManager",
   component: AiDrawerManager,
-  render: ({ target }) => (
+  render: () => (
     <div style={{ fontFamily: "Nunito Sans, sans-serif", color: "#2e3438" }}>
       <h3>Tutor Bot</h3>
       <IFrame
         payload={{
           blockType: "problem",
-          target: "problem-frame",
           title: "AskTIM for help with Problem: Derivatives 1.1",
           chat: {
             apiUrl: TEST_API_STREAMING,
@@ -100,7 +96,6 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
-          target: "problem-frame-default-initial-messages",
           title: "AskTIM for help with Problem: Derivatives 1.1",
           chat: {
             apiUrl: TEST_API_STREAMING,
@@ -112,7 +107,6 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
-          target: "entry-screen-frame",
           chat: {
             apiUrl: TEST_API_STREAMING,
             initialMessages: INITIAL_MESSAGES,
@@ -123,10 +117,13 @@ const meta: Meta<typeof AiDrawerManager> = {
         }}
       />
       <h3>Video Drawer</h3>
+      <p>
+        The chat entry screen is shown by default for the video blocks Tutor
+        drawer.
+      </p>
       <IFrame
         payload={{
           blockType: "video",
-          target: "video-frame",
           chat: {
             apiUrl: TEST_API_STREAMING,
             conversationStarters: STARTERS,
@@ -136,11 +133,27 @@ const meta: Meta<typeof AiDrawerManager> = {
           },
         }}
       />
+
+      <h3>Video Drawer Flashcard Conversation Starters</h3>
+      <p>
+        Where conversation starters are not provided, they will be selected at
+        random from the returned flashcard questions or from
+        <code> DEFAULT_VIDEO_STARTERS</code> provided.
+      </p>
+      <IFrame
+        payload={{
+          blockType: "video",
+          target: "starters-frame",
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+          },
+          summary: {
+            apiUrl: CONTENT_FILE_URL,
+          },
+        }}
+      />
       <MathJaxContext>
-        <AiDrawerManager
-          target={target}
-          messageOrigin="http://localhost:6006"
-        />
+        <AiDrawerManager messageOrigin="http://localhost:6006" />
       </MathJaxContext>
     </div>
   ),
@@ -150,64 +163,7 @@ export default meta
 
 type Story = StoryObj<typeof AiDrawerManager>
 
-// export const ProblemStory: Story = {
-//   args: {
-//     target: "problem-frame",
-//   },
-//   parameters: {
-//     payload: {
-//       blockType: "problem",
-//       target: "problem-frame",
-//       title: "AskTIM for help with Problem: Derivatives 1.1",
-//       chat: {
-//         apiUrl: TEST_API_STREAMING,
-//         initialMessages: INITIAL_MESSAGES,
-//         conversationStarters: STARTERS,
-//       },
-//     },
-//   },
-// }
-
-// export const ProblemDefaultInitialMessagesStory: Story = {
-//   args: {
-//     target: "problem-frame-default-initial-messages",
-//   },
-//   parameters: {
-//     payload: {
-//       blockType: "problem",
-//       target: "problem-frame-default-initial-messages",
-//       title: "AskTIM for help with Problem: Derivatives 1.1",
-//       chat: {
-//         apiUrl: TEST_API_STREAMING,
-//         conversationStarters: STARTERS,
-//       },
-//     },
-//   },
-// }
-
-// export const EntryScreenStory: Story = {
-//   args: {
-//     target: "entry-screen-frame",
-//   },
-//   parameters: {
-//     payload: {
-//       blockType: "problem",
-//       target: "entry-screen-frame",
-//       chat: {
-//         apiUrl: TEST_API_STREAMING,
-//         initialMessages: INITIAL_MESSAGES,
-//         conversationStarters: STARTERS,
-//         entryScreenEnabled: true,
-//         entryScreenTitle: "AskTIM about this problem",
-//       },
-//     },
-//   },
-// }
-
-/**
- * The chat entry screen is shown by default for the video blocks Tutor drawer.
- */
-export const VideoStory: Story = {
+export const AiDrawerManagerStory: Story = {
   args: {
     target: "video-frame",
   },
@@ -222,36 +178,6 @@ export const VideoStory: Story = {
     },
   },
 }
-
-/**
- * Where conversation starters are not provided, they will be selected at random from the returned flashcard questions
- * or from `DEFAULT_VIDEO_STARTERS` provided.
- */
-// export const FlashcardConversationStartersStory: Story = {
-//   args: {
-//     target: "starters-frame",
-//   },
-//   parameters: {
-//     payload: {
-//       blockType: "video",
-//       target: "starters-frame",
-//       chat: {
-//         apiUrl: TEST_API_STREAMING,
-//       },
-//       summary: {
-//         apiUrl: CONTENT_FILE_URL,
-//       },
-//     },
-//     msw: {
-//       handlers: [
-//         http.get(CONTENT_FILE_URL, () => {
-//           return HttpResponse.json(sampleResponse)
-//         }),
-//         ...handlers,
-//       ],
-//     },
-//   },
-// }
 
 // From https://api.rc.learn.mit.edu/api/v1/contentfiles/?edx_module_id=asset-v1%3AMITxT%2B3.012Sx%2B3T2024%2Btype%40asset%2Bblock%400cc53e11-1f91-4ed8-8bab-0d873db8cb90-en.srt
 const sampleResponse = {

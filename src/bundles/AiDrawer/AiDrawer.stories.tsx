@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawer, AiDrawerInitMessage } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
+import Button from "@mui/material/Button"
 
 type InitPayload = AiDrawerInitMessage["payload"]
 
@@ -26,65 +26,28 @@ const STARTERS = [
   { content: "I am curious about AI applications for business" },
 ]
 
-const buildIFrame = (payload: InitPayload) => (el: HTMLIFrameElement) => {
-  if (!el) return
-  const doc = el.contentDocument
-  const parent = el.contentWindow?.parent
-  invariant(doc && parent)
-  const button = doc.createElement("button")
-  button.style["padding"] = "6px"
-
-  button.textContent = "Open drawer (send message to parent)"
-  doc.body.appendChild(button)
-
-  doc.body.style.fontFamily = "Nunito Sans, sans-serif"
-  doc.body.style.color = "#2e3438"
-
-  const div = doc.createElement("div")
-  doc.body.appendChild(div)
-
-  const p = doc.createElement("p")
-  p.textContent = "Message Data:"
-  div.appendChild(p)
-
-  const textarea = doc.createElement("textarea")
-  div.append(textarea)
-  textarea.style["display"] = "block"
-  textarea.style["width"] = "100%"
-  textarea.style["height"] = "500px"
-
-  const message: AiDrawerInitMessage = {
-    type: "smoot-design::tutor-drawer-open",
-    payload,
-  }
-  textarea.value = JSON.stringify(message, null, 2)
-  button.addEventListener("click", () => {
-    parent.postMessage(JSON.parse(textarea.value))
-  })
-}
-
-const IFrame = ({ payload }: { payload: InitPayload }) => {
-  return (
-    <iframe
-      width="100%"
-      height="600px"
-      ref={buildIFrame(payload)}
-      title="button frame"
-    />
-  )
-}
-
 const meta: Meta<typeof AiDrawer> = {
   title: "smoot-design/AI/AiDrawer",
   component: AiDrawer,
-  render: ({ target }, { parameters: { payload } }) => (
-    <>
-      <IFrame payload={payload} />
-      <MathJaxContext>
-        <AiDrawer target={target} messageOrigin="http://localhost:6006" />
-      </MathJaxContext>
-    </>
-  ),
+  render: ({ payload }) => {
+    const [open, setOpen] = React.useState(false)
+    return (
+      <>
+        <Button variant="outlined" onClick={() => setOpen(true)}>
+          Open Drawer
+        </Button>
+        <p>Message data:</p>
+        <pre>{JSON.stringify({ payload }, null, 2)}</pre>
+        <MathJaxContext>
+          <AiDrawer
+            payload={payload}
+            open={open}
+            onClose={() => setOpen(false)}
+          />
+        </MathJaxContext>
+      </>
+    )
+  },
 }
 
 export default meta
@@ -93,9 +56,6 @@ type Story = StoryObj<typeof AiDrawer>
 
 export const ProblemStory: Story = {
   args: {
-    target: "problem-frame",
-  },
-  parameters: {
     payload: {
       blockType: "problem",
       target: "problem-frame",
@@ -111,9 +71,6 @@ export const ProblemStory: Story = {
 
 export const ProblemDefaultInitialMessagesStory: Story = {
   args: {
-    target: "problem-frame-default-initial-messages",
-  },
-  parameters: {
     payload: {
       blockType: "problem",
       target: "problem-frame-default-initial-messages",
@@ -128,9 +85,6 @@ export const ProblemDefaultInitialMessagesStory: Story = {
 
 export const EntryScreenStory: Story = {
   args: {
-    target: "entry-screen-frame",
-  },
-  parameters: {
     payload: {
       blockType: "problem",
       target: "entry-screen-frame",
@@ -150,9 +104,6 @@ export const EntryScreenStory: Story = {
  */
 export const VideoStory: Story = {
   args: {
-    target: "video-frame",
-  },
-  parameters: {
     payload: {
       blockType: "video",
       target: "video-frame",
@@ -164,6 +115,8 @@ export const VideoStory: Story = {
         apiUrl: CONTENT_FILE_URL,
       },
     },
+  },
+  parameters: {
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
@@ -181,9 +134,6 @@ export const VideoStory: Story = {
  */
 export const FlashcardConversationStartersStory: Story = {
   args: {
-    target: "starters-frame",
-  },
-  parameters: {
     payload: {
       blockType: "video",
       target: "starters-frame",
@@ -194,6 +144,8 @@ export const FlashcardConversationStartersStory: Story = {
         apiUrl: CONTENT_FILE_URL,
       },
     },
+  },
+  parameters: {
     msw: {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {

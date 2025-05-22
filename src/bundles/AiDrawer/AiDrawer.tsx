@@ -157,11 +157,6 @@ const identity = <T,>(x: T): T => x
 type AiDrawerProps = {
   className?: string
   /**
-   * The origin of the messages that will be received to open the chat.
-   * The drawer will ignore all message events not from this origin.
-   */
-  messageOrigin: string
-  /**
    * Transform the body of the request before sending it to the server.
    * Its result will be merged with the per-message requestBody opt, with
    * transformBody taking precedence.
@@ -362,6 +357,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
 
   const { title, blockType, chat } = payload
   const hasTabs = blockType === "video"
+
   return (
     <Drawer
       data-testid="remote-tutor-drawer"
