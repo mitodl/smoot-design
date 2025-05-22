@@ -1,6 +1,6 @@
 import { act, render, screen } from "@testing-library/react"
 import user from "@testing-library/user-event"
-import { AiDrawer } from "./AiDrawer"
+import { AiDrawerManager } from "./AiDrawerManager"
 import type { AiDrawerInitMessage } from "./AiDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import * as React from "react"
@@ -51,7 +51,7 @@ class MockResizeObserver {
 
 global.ResizeObserver = MockResizeObserver
 
-describe("AiDrawer", () => {
+describe("AiDrawerManager", () => {
   const server = setupServer(
     http.post(TEST_API_STREAMING, async () => {
       return HttpResponse.text("AI Response")
@@ -74,16 +74,11 @@ describe("AiDrawer", () => {
   const setup = async (message: AiDrawerInitMessage) => {
     server.listen()
 
-    render(
-      <AiDrawer
-        data-testid="remote-tutor-drawer"
-        messageOrigin="http://localhost:6006"
-        target="ai-chat"
-      />,
-      { wrapper: ThemeProvider },
-    )
+    render(<AiDrawerManager messageOrigin="http://localhost:6006" />, {
+      wrapper: ThemeProvider,
+    })
 
-    await screen.findByTestId("remote-tutor-drawer-waiting")
+    await screen.findByTestId("ai-drawer-manager-waiting")
 
     const event = new MessageEvent("message", {
       data: message,
@@ -98,10 +93,9 @@ describe("AiDrawer", () => {
 
   test("Problem drawer opens showing title", async () => {
     await setup({
-      type: "smoot-design::tutor-drawer-open",
+      type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "problem",
-        target: "ai-chat",
         title: "Drawer Title",
         chat: {
           apiUrl: TEST_API_STREAMING,
@@ -114,10 +108,9 @@ describe("AiDrawer", () => {
 
   test("Video drawer opens showing chat entry screen and tabs", async () => {
     await setup({
-      type: "smoot-design::tutor-drawer-open",
+      type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        target: "ai-chat",
         chat: {
           entryScreenTitle: "Entry screen title",
           apiUrl: TEST_API_STREAMING,
@@ -145,10 +138,9 @@ describe("AiDrawer", () => {
 
   test("Video drawer chat entry screen selects starters from flashcards", async () => {
     await setup({
-      type: "smoot-design::tutor-drawer-open",
+      type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        target: "ai-chat",
         chat: {
           entryScreenTitle: "Entry screen title",
           apiUrl: TEST_API_STREAMING,
@@ -177,10 +169,9 @@ describe("AiDrawer", () => {
       )
 
       await setup({
-        type: "smoot-design::tutor-drawer-open",
+        type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          target: "ai-chat",
           chat: {
             entryScreenTitle: "Entry screen title",
             apiUrl: TEST_API_STREAMING,
@@ -205,10 +196,9 @@ describe("AiDrawer", () => {
 
   test("Video drawer chat entry screen displays default title", async () => {
     await setup({
-      type: "smoot-design::tutor-drawer-open",
+      type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        target: "ai-chat",
         chat: {
           apiUrl: TEST_API_STREAMING,
         },
@@ -225,10 +215,9 @@ describe("AiDrawer", () => {
     "Flashcard shows content and can be click navigated",
     server.boundary(async () => {
       await setup({
-        type: "smoot-design::tutor-drawer-open",
+        type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          target: "ai-chat",
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
@@ -260,10 +249,9 @@ describe("AiDrawer", () => {
     "Flashcard shows content and can be keyboard navigated and cycles",
     server.boundary(async () => {
       await setup({
-        type: "smoot-design::tutor-drawer-open",
+        type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          target: "ai-chat",
           chat: {
             apiUrl: TEST_API_STREAMING,
           },

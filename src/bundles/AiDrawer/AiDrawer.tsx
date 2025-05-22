@@ -352,7 +352,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   }, [payload, response])
 
   if (!payload) {
-    return <div data-testid="remote-tutor-drawer-waiting"></div>
+    return <div data-testid="ai-drawer-waiting"></div>
   }
 
   const { title, blockType, chat } = payload
@@ -360,7 +360,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
 
   return (
     <Drawer
-      data-testid="remote-tutor-drawer"
       data-smoot-version={VERSION}
       className={className}
       PaperProps={{

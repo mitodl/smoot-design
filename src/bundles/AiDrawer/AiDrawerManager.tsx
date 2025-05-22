@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
-import type { AiDrawerProps, AiDrawerInitMessage } from "./AiDrawer"
 import { AiDrawer } from "./AiDrawer"
+import type { AiDrawerProps, AiDrawerInitMessage } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
@@ -78,6 +78,10 @@ const AiDrawerManager = ({
       window.removeEventListener("message", cb)
     }
   }, [messageOrigin, target])
+
+  if (Object.values(drawerStates).length === 0) {
+    return <div data-testid="ai-drawer-manager-waiting"></div>
+  }
 
   return (
     <MathJaxContext>
