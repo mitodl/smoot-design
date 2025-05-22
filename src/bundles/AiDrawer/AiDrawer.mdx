@@ -1,0 +1,14 @@
+import { Meta, Title, Controls, Stories } from "@storybook/blocks"
+import * as AiDrawer from "./AiDrawer.stories"
+
+<Meta of={AiDrawer} />
+
+<Title />
+
+AiDrawerManager replaces AiDrawer (previously RemoteTutorDrawer) and should be rendered once on the page except for the
+case that props cannot be shared across drawer instances. The AiDrawer is not intended to be used directly as AiDrawerManager
+now listens for `postMessage()` messages and controls the open state.
+
+<Controls />
+
+<Stories includePrimary={false} />

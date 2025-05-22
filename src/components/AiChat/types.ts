@@ -42,6 +42,7 @@ type AiChatContextProps = {
    * Initial messages to display on the chat. If not provided, the entry screen title will be used as the initial message.
    */
   initialMessages?: Omit<AiChatMessage, "id">[]
+
   children?: React.ReactNode
 }
 
@@ -57,6 +58,7 @@ type AiChatDisplayProps = {
   placeholder?: string
 
   className?: string
+
   /**
    * Set to false to disable the entry screen and load the chat immediately.
    * Defaults to true.

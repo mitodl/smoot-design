@@ -20,8 +20,8 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 
-type RemoteTutorDrawerInitMessage = {
-  type: "smoot-design::tutor-drawer-open"
+type AiDrawerInitMessage = {
+  type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
   payload: {
     blockType?: "problem" | "video"
     target?: string
@@ -154,13 +154,8 @@ const StyledHTML = styled.div(({ theme }) => ({
 
 const identity = <T,>(x: T): T => x
 
-type RemoteTutorDrawerProps = {
+type AiDrawerProps = {
   className?: string
-  /**
-   * The origin of the messages that will be received to open the chat.
-   * The drawer will ignore all message events not from this origin.
-   */
-  messageOrigin: string
   /**
    * Transform the body of the request before sending it to the server.
    * Its result will be merged with the per-message requestBody opt, with
@@ -181,10 +176,16 @@ type RemoteTutorDrawerProps = {
   /**
    * Pass to target a specific drawer instance where multiple are on the page.
    */
+  /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
   target?: string
+
+  payload?: AiDrawerInitMessage["payload"]
+
+  open?: boolean
+  onClose?: () => void
 }
 
-const DEFAULT_FETCH_OPTS: RemoteTutorDrawerProps["fetchOpts"] = {
+const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
   credentials: "include",
 }
 
@@ -259,7 +260,7 @@ const ChatComponent = ({
   hasTabs,
   needsMathJax,
 }: {
-  payload: RemoteTutorDrawerInitMessage["payload"]["chat"]
+  payload: AiDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
   scrollElement: AiChatProps["scrollElement"]
@@ -273,6 +274,7 @@ const ChatComponent = ({
   if (!payload) return null
   return (
     <StyledAiChat
+      key={payload.chatId}
       chatId={payload.chatId}
       conversationStarters={conversationStarters}
       initialMessages={initialMessages}
@@ -298,18 +300,14 @@ const randomItems = <T,>(array: T[], count: number): T[] => {
   return shuffled.slice(0, count)
 }
 
-const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
-  messageOrigin,
+const AiDrawer: FC<AiDrawerProps> = ({
   transformBody = identity,
   className,
   fetchOpts,
-  target,
-}: RemoteTutorDrawerProps) => {
-  const [open, setOpen] = useState(false)
-  const [payload, setPayload] = useState<
-    RemoteTutorDrawerInitMessage["payload"] | null
-  >(null)
-
+  payload,
+  open,
+  onClose,
+}: AiDrawerProps) => {
   const [tab, setTab] = useState("chat")
   const { response } = useContentFetch(payload?.summary?.apiUrl)
 
@@ -336,31 +334,6 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }
 
   useEffect(() => {
-    const cb = (event: MessageEvent) => {
-      if (event.origin !== messageOrigin) {
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `RemoteTutorDrawer: received message from unexpected origin: ${event.origin}`,
-          )
-        }
-        return
-      }
-
-      if (
-        event.data.type === "smoot-design::tutor-drawer-open" &&
-        event.data.payload.target === target
-      ) {
-        setOpen(true)
-        setPayload(event.data.payload)
-      }
-    }
-    window.addEventListener("message", cb)
-    return () => {
-      window.removeEventListener("message", cb)
-    }
-  }, [messageOrigin, target])
-
-  useEffect(() => {
     scrollElement?.scrollTo?.({
       top: tab === "chat" ? scrollElement.scrollHeight : 0,
     })
@@ -379,14 +352,14 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   }, [payload, response])
 
   if (!payload) {
-    return <div data-testid="remote-tutor-drawer-waiting"></div>
+    return <div data-testid="ai-drawer-waiting"></div>
   }
 
-  const { blockType, chat } = payload
+  const { title, blockType, chat } = payload
   const hasTabs = blockType === "video"
+
   return (
     <Drawer
-      data-testid="remote-tutor-drawer"
       data-smoot-version={VERSION}
       className={className}
       PaperProps={{
@@ -403,28 +376,29 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
       }}
       anchor="right"
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={onClose}
       role="dialog"
       aria-modal="true"
+      keepMounted
     >
       <Header>
         <Title>
-          {payload.title ? <RiSparkling2Line /> : null}
+          {title ? <RiSparkling2Line /> : null}
           <Typography variant="body1" component="h1">
-            {payload.title?.includes("AskTIM") ? (
+            {title?.includes("AskTIM") ? (
               <>
                 Ask<strong>TIM</strong>
-                {payload.title.replace("AskTIM", "")}
+                {title.replace("AskTIM", "")}
               </>
             ) : (
-              payload.title
+              title
             )}
           </Typography>
         </Title>
         <CloseButton
           variant="text"
           size="medium"
-          onClick={() => setOpen(false)}
+          onClick={onClose}
           aria-label="Close"
         >
           <RiCloseLine />
@@ -436,10 +410,10 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           transformBody={transformBody}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
-          entryScreenEnabled={payload.chat?.entryScreenEnabled ?? false}
-          entryScreenTitle={payload.chat.entryScreenTitle}
+          entryScreenEnabled={chat?.entryScreenEnabled ?? false}
+          entryScreenTitle={chat.entryScreenTitle}
           initialMessages={
-            payload.chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
+            chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
           }
           hasTabs={hasTabs}
           needsMathJax={true}
@@ -464,19 +438,16 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
           </StyledTabButtonList>
           <StyledTabPanel value="chat" keepMounted>
             <ChatComponent
-              payload={{
-                ...chat,
-              }}
+              payload={chat}
               transformBody={transformBody}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
-              entryScreenEnabled={payload.chat?.entryScreenEnabled ?? true}
+              entryScreenEnabled={chat?.entryScreenEnabled ?? true}
               entryScreenTitle={
-                payload.chat.entryScreenTitle ??
-                DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
+                chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
               }
               conversationStarters={conversationStarters}
-              initialMessages={payload.chat.initialMessages}
+              initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
               needsMathJax={false}
             />
@@ -503,5 +474,5 @@ const RemoteTutorDrawer: FC<RemoteTutorDrawerProps> = ({
   )
 }
 
-export { RemoteTutorDrawer }
-export type { RemoteTutorDrawerProps, RemoteTutorDrawerInitMessage }
+export { AiDrawer }
+export type { AiDrawerProps, AiDrawerInitMessage }

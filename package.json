@@ -18,6 +18,7 @@
     "build:esm": "tsc",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:bundles": "vite build --outDir dist/bundles",
+    "build:bundles:legacy": "vite build --config vite.config.legacy.mts --outDir dist/bundles",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
     "lint-check": "eslint src/ .storybook/",
