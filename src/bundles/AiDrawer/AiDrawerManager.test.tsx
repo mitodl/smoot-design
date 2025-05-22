@@ -14,6 +14,12 @@ jest.mock("../../components/AiChat/Markdown", () => {
   }
 })
 
+jest.mock("better-react-mathjax", () => ({
+  MathJaxContext: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}))
+
 const TEST_API_STREAMING = "http://localhost:4567/test"
 const CONTENT_FILE_URL = "http://localhost:4567/api/v1/contentfiles/1"
 
