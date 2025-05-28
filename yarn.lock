@@ -2826,7 +2826,7 @@ __metadata:
   peerDependencies:
     "@emotion/react": ^11.11.1
     "@emotion/styled": ^11.11.0
-    "@mui/lab": ^7.0.0
+    "@mui/lab": ^7.0.0-beta.1
     "@mui/material": ^7.0.0
     "@mui/system": ^7.0.0
     "@remixicon/react": ^4.2.0
