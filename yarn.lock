@@ -2829,7 +2829,7 @@ __metadata:
     "@typescript-eslint/typescript-estree": "npm:^8.13.0"
     better-react-mathjax: "npm:^2.3.0"
     classnames: "npm:^2.5.1"
-    conventional-changelog-conventionalcommits: "npm:^8.0.0"
+    conventional-changelog-conventionalcommits: "npm:^9.0.0"
     eslint: "npm:8.57.1"
     eslint-config-mitodl: "npm:^2.1.0"
     eslint-config-prettier: "npm:^10.0.0"
@@ -7504,12 +7504,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"conventional-changelog-conventionalcommits@npm:^8.0.0":
-  version: 8.0.0
-  resolution: "conventional-changelog-conventionalcommits@npm:8.0.0"
+"conventional-changelog-conventionalcommits@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "conventional-changelog-conventionalcommits@npm:9.0.0"
   dependencies:
     compare-func: "npm:^2.0.0"
-  checksum: 10/23122a76c69ebe7490968f7c0779b0a6b73011eebbad0563ac5571c6015319acf13bb8dca178d7a5484f10b64744ae7ba35d40f71a8bdc5430e73dd7e032f45d
+  checksum: 10/8bb313f4e6a210ff966f408112628d5f10003984c398c1d4a69083f14e9aeff4f3f9a35b155ef3e67384fbe58fca95b92849acfa6690c26bf838ea4c599006aa
   languageName: node
   linkType: hard
 
