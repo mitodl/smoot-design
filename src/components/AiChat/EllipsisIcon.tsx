@@ -26,7 +26,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="ry"
         values="8;8;6;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0s"
       ></animate>
@@ -34,7 +34,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="rx"
         values="8;8;9;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0s"
       ></animate>
@@ -54,7 +54,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="ry"
         values="8;8;6;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0.3s"
       ></animate>
@@ -62,7 +62,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="rx"
         values="8;8;9;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0.3s"
       ></animate>
@@ -82,7 +82,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="ry"
         values="8;8;6;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0.6s"
       ></animate>
@@ -90,7 +90,7 @@ const EllipsisIcon: FC<EllipsisIconProps> = ({ className }) => (
         attributeName="rx"
         values="8;8;9;8;8"
         dur="2s"
-        keyTimes="0;0.5;0.6;0.7;1"
+        keyTimes="0;0.52;0.6;0.7;1"
         repeatCount="indefinite"
         begin="0.6s"
       ></animate>
