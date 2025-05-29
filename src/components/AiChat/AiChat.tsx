@@ -4,7 +4,7 @@ import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import classNames from "classnames"
-import { RiSendPlaneFill, RiStopFill, RiMoreFill } from "@remixicon/react"
+import { RiSendPlaneFill, RiStopFill } from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
 import type { AiChatDisplayProps, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
@@ -17,6 +17,7 @@ import { AiChatProvider, useAiChat } from "./AiChatContext"
 import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
 import type { Message } from "@ai-sdk/react"
 import Markdown from "./Markdown"
+import EllipsisIcon from "./EllipsisIcon"
 
 const classes = {
   root: "MitAiChat--root",
@@ -203,6 +204,14 @@ const Disclaimer = styled(Typography)(({ theme }) => ({
   textAlign: "center",
 }))
 
+const StyledEllipsisIcon = styled(EllipsisIcon)(({ theme }) => ({
+  ellipse: {
+    fill: theme.custom.colors.darkGray2,
+  },
+  width: "24px",
+  height: "24px",
+}))
+
 const AiChatDisplay: FC<AiChatDisplayProps> = ({
   conversationStarters,
   askTimTitle,
@@ -364,7 +373,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   key={"loading"}
                 >
                   <Message>
-                    <RiMoreFill />
+                    <StyledEllipsisIcon />
                   </Message>
                 </MessageRow>
               ) : null}
