@@ -13,12 +13,14 @@ import {
 
 import { fn } from "@storybook/test"
 import { enumValues } from "../../story-utils"
+import CircularProgress from "@mui/material/CircularProgress"
 
 const ICONS = {
   None: undefined,
   ArrowBackIcon: <RiArrowLeftLine />,
   DeleteIcon: <RiDeleteBinLine />,
   TestTubeIcon: <RiTestTubeLine />,
+  Loading: <CircularProgress color="inherit" size="1em" />,
 }
 
 const VARIANTS = enumValues<ButtonProps["variant"]>({
@@ -157,12 +159,21 @@ export const Sizes: Story = {
 
 export const WithIcons: Story = {
   render: (args) => (
-    <Stack direction="column" alignItems="start" gap={2} sx={{ my: 2 }}>
-      {Object.entries(ICONS).map(([key, icon]) => (
-        <Button {...args} startIcon={icon} key={key}>
-          {key}
-        </Button>
-      ))}
+    <Stack direction="row" justifyContent="space-around">
+      <Stack direction="column" alignItems="start" gap={2} sx={{ my: 2 }}>
+        {Object.entries(ICONS).map(([key, icon]) => (
+          <Button {...args} startIcon={icon} key={key}>
+            {key}
+          </Button>
+        ))}
+      </Stack>
+      <Stack direction="column" alignItems="end" gap={2} sx={{ my: 2 }}>
+        {Object.entries(ICONS).map(([key, icon]) => (
+          <Button {...args} endIcon={icon} key={key}>
+            {key}
+          </Button>
+        ))}
+      </Stack>
     </Stack>
   ),
 }
