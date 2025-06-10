@@ -3,6 +3,7 @@ import styled from "@emotion/styled"
 import { css } from "@emotion/react"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
+import CircularProgress from "@mui/material/CircularProgress"
 import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
@@ -325,8 +326,6 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
 )
 
 ButtonLink.displayName = "ButtonLink"
-
-import CircularProgress from "@mui/material/CircularProgress"
 
 /**
  * A loading spinner sized for our buttons; use it as the `startIcon` or `endIcon` prop.
