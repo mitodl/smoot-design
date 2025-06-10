@@ -5,6 +5,7 @@ import { defineConfig } from "vite"
 export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist/bundled/",
+    emptyOutDir: false,
     lib: {
       entry: [path.resolve(__dirname, "src/bundles/aiDrawerManager.tsx")],
       name: "remoteTutorDrawer",
