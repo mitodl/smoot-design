@@ -1,6 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/react"
-import { Button, ButtonLink } from "./Button"
+import { Button, ButtonLink, ButtonLoadingIcon } from "./Button"
 import type { ButtonProps } from "./Button"
 import Grid from "@mui/material/Grid2"
 import Stack from "@mui/material/Stack"
@@ -13,14 +13,12 @@ import {
 
 import { fn } from "@storybook/test"
 import { enumValues } from "../../story-utils"
-import CircularProgress from "@mui/material/CircularProgress"
 
 const ICONS = {
   None: undefined,
   ArrowBackIcon: <RiArrowLeftLine />,
   DeleteIcon: <RiDeleteBinLine />,
   TestTubeIcon: <RiTestTubeLine />,
-  Loading: <CircularProgress color="inherit" size="1em" />,
 }
 
 const VARIANTS = enumValues<ButtonProps["variant"]>({
@@ -154,6 +152,50 @@ export const Sizes: Story = {
         )
       })}
     </Grid>
+  ),
+}
+
+export const WithLoadingSpinner: Story = {
+  render: (args) => (
+    <Stack direction="row" justifyContent="space-around">
+      <Stack direction="column" alignItems="end" gap={2} sx={{ my: 2 }}>
+        <Button {...args} variant="primary" endIcon={<ButtonLoadingIcon />}>
+          Primary
+        </Button>
+        <Button {...args} variant="secondary" endIcon={<ButtonLoadingIcon />}>
+          Secondary
+        </Button>
+        <Button {...args} variant="tertiary" endIcon={<ButtonLoadingIcon />}>
+          Tertiary
+        </Button>
+      </Stack>
+      <Stack direction="column" alignItems="end" gap={2} sx={{ my: 2 }}>
+        <Button
+          {...args}
+          disabled
+          variant="primary"
+          endIcon={<ButtonLoadingIcon />}
+        >
+          Primary
+        </Button>
+        <Button
+          {...args}
+          disabled
+          variant="secondary"
+          endIcon={<ButtonLoadingIcon />}
+        >
+          Secondary
+        </Button>
+        <Button
+          {...args}
+          disabled
+          variant="tertiary"
+          endIcon={<ButtonLoadingIcon />}
+        >
+          Tertiary
+        </Button>
+      </Stack>
+    </Stack>
   ),
 }
 
