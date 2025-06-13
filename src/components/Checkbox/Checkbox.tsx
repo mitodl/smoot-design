@@ -86,8 +86,8 @@ const Container = styled.div<{ theme?: Theme }>(({ theme }) => [
 
 export type CheckboxProps = {
   label?: string
-  value?: string
-  name?: string
+  value: string
+  name: string
   checked?: boolean
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   className?: string
@@ -95,7 +95,7 @@ export type CheckboxProps = {
 }
 
 /**
- * A standalone checkbox. For several checkboxes together, use the `CheckboxGroup` component.
+ * A standalone checkbox. For several checkboxes together, use the `CheckboxChoiceField` component.
  */
 const Checkbox: React.FC<CheckboxProps> = ({
   label,
