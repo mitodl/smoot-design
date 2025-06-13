@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Checkbox, CheckboxProps } from "./Checkbox"
+import { Checkbox, CheckboxProps } from "../Checkbox/Checkbox"
 import FormControl from "@mui/material/FormControl"
 import FormLabel from "@mui/material/FormLabel"
 import styled from "@emotion/styled"
