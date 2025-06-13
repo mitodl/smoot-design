@@ -31,6 +31,20 @@ export type { InputProps } from "./components/Input/Input"
 export { TextField } from "./components/TextField/TextField"
 export type { TextFieldProps } from "./components/TextField/TextField"
 
+export { Checkbox, childCheckboxStyles } from "./components/Checkbox/Checkbox"
+export type { CheckboxProps } from "./components/Checkbox/Checkbox"
+export { CheckboxChoiceField } from "./components/CheckboxChoiceField/CheckboxChoiceField"
+export type { CheckboxChoiceFieldProps } from "./components/CheckboxChoiceField/CheckboxChoiceField"
+
+export {
+  RadioChoiceField,
+  BooleanRadioChoiceField,
+} from "./components/RadioChoiceField/RadioChoiceField"
+export type {
+  RadioChoiceFieldProps,
+  BooleanRadioChoiceFieldProps,
+} from "./components/RadioChoiceField/RadioChoiceField"
+
 export { SrAnnouncer } from "./components/SrAnnouncer/SrAnnouncer"
 export type { SrAnnouncerProps } from "./components/SrAnnouncer/SrAnnouncer"
 
