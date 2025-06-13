@@ -1,4 +1,5 @@
-import React, { useState, ChangeEvent } from "react"
+import * as React from "react"
+import { useState, ChangeEvent } from "react"
 import type { Meta, StoryObj } from "@storybook/react"
 import { Checkbox } from "./Checkbox"
 import type { CheckboxProps } from "./Checkbox"
