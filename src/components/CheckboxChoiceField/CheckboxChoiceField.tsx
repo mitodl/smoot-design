@@ -54,9 +54,9 @@ const CheckboxChoiceField: React.FC<CheckboxChoiceFieldProps> = ({
   vertical = false,
   disabled = false,
 }) => {
-  const isChecked = (choice: CheckboxProps) => {
+  const isChecked = (value: string) => {
     if (values === undefined) return undefined
-    return values.includes(choice.value)
+    return values.includes(value)
   }
   const _Container = vertical ? VerticalContainer : Container
   const handleChange: CheckboxProps["onChange"] = (event) => {
@@ -85,7 +85,7 @@ const CheckboxChoiceField: React.FC<CheckboxChoiceFieldProps> = ({
             <Checkbox
               key={choice.value}
               name={name}
-              checked={isChecked(choice)}
+              checked={isChecked(choice.value)}
               onChange={handleChange}
               disabled={disabled}
               {...choice}
