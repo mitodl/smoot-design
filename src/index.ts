@@ -27,7 +27,7 @@ export type { InputProps } from "./components/Input/Input"
 export { TextField } from "./components/TextField/TextField"
 export type { TextFieldProps } from "./components/TextField/TextField"
 
-export { Checkbox } from "./components/Checkbox/Checkbox"
+export { Checkbox, childCheckboxStyles } from "./components/Checkbox/Checkbox"
 export type { CheckboxProps } from "./components/Checkbox/Checkbox"
 export { CheckboxChoiceField } from "./components/CheckboxChoiceField/CheckboxChoiceField"
 export type { CheckboxChoiceFieldProps } from "./components/CheckboxChoiceField/CheckboxChoiceField"
