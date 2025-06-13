@@ -4,11 +4,14 @@ import FormControl from "@mui/material/FormControl"
 import FormLabel from "@mui/material/FormLabel"
 import styled from "@emotion/styled"
 
+type CheckboxChoice = Omit<CheckboxProps, "name" | "onChange" | "checked"> & {
+  value: string
+}
 export type CheckboxChoiceFieldProps = {
   label?: React.ReactNode
   value?: string[]
   name: string
-  choices: Omit<CheckboxProps, "name" | "onChange" | "checked">[]
+  choices: CheckboxChoice[]
   values?: string[]
   onChange?: (
     event: React.ChangeEvent<HTMLInputElement>,
