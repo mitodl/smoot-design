@@ -8,7 +8,11 @@ export {
   createTheme,
 } from "./components/ThemeProvider/ThemeProvider"
 
-export { Button, ButtonLink } from "./components/Button/Button"
+export {
+  Button,
+  ButtonLoadingIcon,
+  ButtonLink,
+} from "./components/Button/Button"
 export type { ButtonProps, ButtonLinkProps } from "./components/Button/Button"
 
 export {

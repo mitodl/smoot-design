@@ -27,6 +27,11 @@ initialize({
 })
 
 const preview: Preview = {
+  parameters: {
+    docs: {
+      toc: true,
+    },
+  },
   decorators: [
     (Story) => (
       <ThemeProvider>
