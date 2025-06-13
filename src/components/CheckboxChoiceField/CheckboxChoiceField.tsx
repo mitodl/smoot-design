@@ -10,7 +10,7 @@ type CheckboxChoice = Omit<CheckboxProps, "name" | "onChange" | "checked"> & {
 export type CheckboxChoiceFieldProps = {
   label?: React.ReactNode
   value?: string[]
-  name: string
+  name?: string
   choices: CheckboxChoice[]
   values?: string[]
   onChange?: (

@@ -87,7 +87,7 @@ const Container = styled.div<{ theme?: Theme }>(({ theme }) => [
 export type CheckboxProps = {
   label?: string
   value?: string
-  name: string
+  name?: string
   checked?: boolean
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
   className?: string
