@@ -8,6 +8,9 @@ export {
   createTheme,
 } from "./components/ThemeProvider/ThemeProvider"
 
+export { Alert } from "./components/Alert/Alert"
+export type { AlertProps } from "./components/Alert/Alert"
+
 export {
   Button,
   ButtonLoadingIcon,
