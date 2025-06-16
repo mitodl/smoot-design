@@ -29,8 +29,8 @@ export type {
 
 export type { LinkAdapterPropsOverrides } from "./components/LinkAdapter/LinkAdapter"
 
-export { Input } from "./components/Input/Input"
-export type { InputProps } from "./components/Input/Input"
+export { Input, AdornmentButton } from "./components/Input/Input"
+export type { InputProps, AdornmentButtonProps } from "./components/Input/Input"
 export { TextField } from "./components/TextField/TextField"
 export type { TextFieldProps } from "./components/TextField/TextField"
 
