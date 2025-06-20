@@ -2,7 +2,7 @@
 /* eslint-disable testing-library/await-async-utils */
 import { render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
-import { AiChat } from "./AiChat"
+import { AiChat, replaceMathjax } from "./AiChat"
 import { ThemeProvider } from "../ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { AiChatProps } from "./types"
@@ -272,4 +272,33 @@ describe("AiChat", () => {
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("Starter 1")
   })
+})
+
+test("replaceMathjax replaces unsupported MathJax syntax", () => {
+  const input = `Hello \\(E=mc^2\\) and \\(a^2 + b^2 = c^2\\). Also
+
+  \\[
+  F = ma
+  \\]
+
+  and
+
+  \\[ PV = NkT \\]
+
+  Bye now.
+  `
+
+  const expectedOutput = `Hello $E=mc^2$ and $a^2 + b^2 = c^2$. Also
+
+  $$
+  F = ma
+  $$
+
+  and
+
+  $$ PV = NkT $$
+
+  Bye now.
+  `
+  expect(replaceMathjax(input)).toBe(expectedOutput)
 })
