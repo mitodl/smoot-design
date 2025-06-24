@@ -341,9 +341,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                       <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
                         {m.role === "user" ? "You said: " : "Assistant said: "}
                       </VisuallyHidden>
-                      <Markdown enableMathjax={useMathJax}>
-                        {m.content}
-                      </Markdown>
+                      {useMathJax ? (
+                        <Markdown enableMathjax={true}>
+                          {replaceMathjax(m.content)}
+                        </Markdown>
+                      ) : (
+                        <Markdown>{m.content}</Markdown>
+                      )}
                     </Message>
                   </MessageRow>
                 )
@@ -474,4 +478,21 @@ const AiChat: FC<AiChatProps> = ({
   )
 }
 
-export { AiChatDisplay, AiChat }
+// react-markdown expects Mathjax delimiters to be $...$ or $$...$$
+// the prompt for the tutorbot asks for Mathjax tags with $ format but
+// the LLM does not get it right all the time
+// this function replaces the Mathjax tags with the correct format
+// eventually we will probably be able to remove this as LLMs get better
+function replaceMathjax(inputString: string): string {
+  // Replace instances of \(...\) and \[...\] Mathjax tags with $...$
+  // and $$...$$ tags.
+  const INLINE_MATH_REGEX = /\\\((.*?)\\\)/g
+  const DISPLAY_MATH_REGEX = /\\\[(([\s\S]*?))\\\]/g
+  inputString = inputString.replace(
+    INLINE_MATH_REGEX,
+    (_match, p1) => `$${p1}$`,
+  )
+  return inputString.replace(DISPLAY_MATH_REGEX, (_match, p1) => `$$${p1}$$`)
+}
+
+export { AiChatDisplay, AiChat, replaceMathjax }
