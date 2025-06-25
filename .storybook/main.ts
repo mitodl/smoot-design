@@ -19,7 +19,7 @@ const config: StorybookConfig = {
   addons: [
     "@storybook/addon-links",
     "@storybook/addon-webpack5-compiler-swc",
-    "@storybook/addon-docs"
+    "@storybook/addon-docs",
   ],
 
   webpackFinal: async (config) => {
