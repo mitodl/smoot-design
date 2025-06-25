@@ -6,7 +6,7 @@ module.exports = {
     "plugin:import/typescript",
     "plugin:mdx/recommended",
     "prettier",
-    "plugin:storybook/recommended"
+    "plugin:storybook/recommended",
   ],
   plugins: ["testing-library", "import", "styled-components-a11y"],
   ignorePatterns: ["**/build/**"],
