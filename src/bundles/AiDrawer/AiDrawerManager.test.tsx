@@ -1,4 +1,5 @@
-import { act, render, screen } from "@testing-library/react"
+import { act, render } from "@testing-library/react"
+import { screen } from "@testing-library/dom"
 import user from "@testing-library/user-event"
 import { AiDrawerManager } from "./AiDrawerManager"
 import type {

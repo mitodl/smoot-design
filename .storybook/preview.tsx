@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Preview } from "@storybook/react"
+import { Preview } from "@storybook/nextjs"
 import { ThemeProvider } from "../src/components/ThemeProvider/ThemeProvider"
 import { initialize, mswLoader } from "msw-storybook-addon"
 

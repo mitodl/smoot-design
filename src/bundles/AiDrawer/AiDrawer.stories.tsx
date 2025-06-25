@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawer, AiDrawerSettings } from "./AiDrawer"
