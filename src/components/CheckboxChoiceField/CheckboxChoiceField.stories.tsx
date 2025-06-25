@@ -1,11 +1,11 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import {
   CheckboxChoiceField,
   CheckboxChoiceFieldProps,
 } from "./CheckboxChoiceField"
 import Typography from "@mui/material/Typography"
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 
 const CHOICES: CheckboxChoiceFieldProps["choices"] = [
   { label: "Choice 1", value: "1" },

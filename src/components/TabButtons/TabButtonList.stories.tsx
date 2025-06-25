@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import { useState } from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { TabButtonList, TabButton, TabButtonLink } from "./TabButtonList"
 import type { TabButtonListProps } from "./TabButtonList"
 import TabContext from "@mui/lab/TabContext"

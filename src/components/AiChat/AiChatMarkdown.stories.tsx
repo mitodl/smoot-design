@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { AiChat } from "./AiChat"
 import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"

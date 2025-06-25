@@ -1,12 +1,12 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { TextField } from "./TextField"
 import type { TextFieldProps } from "./TextField"
 import { AdornmentButton } from "../Input/Input"
 import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid"
 import { RiSearchLine, RiCalendarLine, RiCloseLine } from "@remixicon/react"
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 
 const SIZES = enumValues<NonNullable<TextFieldProps["size"]>>({
