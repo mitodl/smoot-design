@@ -147,7 +147,6 @@ export const States: Story = {
         <Grid size={{ xs: 8 }}>
           <Input
             // This is a story just demonstrating the autofocus prop
-            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             {...args}
           />

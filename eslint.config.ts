@@ -58,7 +58,7 @@ export default [
 
   // Base configuration for all files
   {
-    files: ["**/*.{js,jsx,ts,tsx,mdx}"],
+    files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {
       "@typescript-eslint": typescriptEslint,
       "styled-components-a11y": styledComponentsA11y,
@@ -88,6 +88,7 @@ export default [
       // We need both rules below. One for normal elements, one for styled
       "jsx-a11y/control-has-associated-label": ["error"],
       "styled-components-a11y/control-has-associated-label": ["error"],
+      "jsx-a11y/anchor-has-content": ["error"],
       "@typescript-eslint/triple-slash-reference": [
         "error",
         {
