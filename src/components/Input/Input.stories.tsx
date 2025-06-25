@@ -1,11 +1,11 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Input, AdornmentButton } from "./Input"
 import type { InputProps } from "./Input"
 import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid2"
 import { RiCalendarLine, RiCloseLine, RiSearchLine } from "@remixicon/react"
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 import Typography from "@mui/material/Typography"
 

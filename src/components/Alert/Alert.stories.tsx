@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Alert } from "./Alert"
 import Stack from "@mui/material/Stack"
 

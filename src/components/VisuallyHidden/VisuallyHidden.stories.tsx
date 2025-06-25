@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { VisuallyHidden } from "./VisuallyHidden"
 
 const meta: Meta<typeof VisuallyHidden> = {
