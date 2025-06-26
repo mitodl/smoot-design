@@ -1,8 +1,13 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { AiDrawer } from "./AiDrawer"
-import type { AiDrawerProps, AiDrawerInitMessage } from "./AiDrawer"
+import type { AiDrawerProps, AiDrawerSettings } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
+
+type AiDrawerInitMessage = {
+  type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
+  payload: AiDrawerSettings
+}
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
@@ -20,6 +25,11 @@ type AiDrawerManagerProps = {
    * The drawer will ignore all message events not from this origin.
    */
   messageOrigin: string
+  /**
+   * Pass to target a specific drawer instance where multiple are on the page.
+   */
+  /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
+  target?: string
 } & AiDrawerProps
 
 const AiDrawerManager = ({
@@ -92,7 +102,7 @@ const AiDrawerManager = ({
           className={className}
           transformBody={transformBody}
           fetchOpts={fetchOpts}
-          payload={payload}
+          settings={payload}
           open={open}
           onClose={() => {
             setDrawerStates((prev) => ({
@@ -107,4 +117,4 @@ const AiDrawerManager = ({
 }
 
 export { AiDrawerManager }
-export type { AiDrawerManagerProps }
+export type { AiDrawerManagerProps, AiDrawerInitMessage }

@@ -5,7 +5,7 @@ import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawerManager } from "./AiDrawerManager"
-import { AiDrawerInitMessage } from "./AiDrawer"
+import type { AiDrawerInitMessage } from "./AiDrawerManager"
 import { MathJaxContext } from "better-react-mathjax"
 
 type InitPayload = AiDrawerInitMessage["payload"]
@@ -143,7 +143,6 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
-          target: "starters-frame",
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
