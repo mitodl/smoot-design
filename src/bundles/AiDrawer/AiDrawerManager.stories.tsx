@@ -11,6 +11,7 @@ import { MathJaxContext } from "better-react-mathjax"
 type InitPayload = AiDrawerInitMessage["payload"]
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TRACKING_EVENTS_ENDPOINT = "http://localhost:4567/tracking-events"
 const CONTENT_FILE_URL =
   "http://localhost:4567/api/v1/contentfiles/?edx_module_id=1"
 
@@ -84,7 +85,9 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockId: "problem-frame",
           title: "AskTIM for help with Problem: Derivatives 1.1",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             initialMessages: INITIAL_MESSAGES,
@@ -96,7 +99,9 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockId: "problem-frame-default",
           title: "AskTIM for help with Problem: Derivatives 1.1",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             conversationStarters: STARTERS,
@@ -107,6 +112,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockId: "problem-frame-entry",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             initialMessages: INITIAL_MESSAGES,
@@ -124,6 +131,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
+          blockId: "video-frame",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             conversationStarters: STARTERS,
@@ -143,6 +152,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
+          blockId: "video-frame-flashcard",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
@@ -171,6 +182,11 @@ export const AiDrawerManagerStory: Story = {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
           return HttpResponse.json(sampleResponse)
+        }),
+        http.post(TRACKING_EVENTS_ENDPOINT, async ({ request }) => {
+          const body = await request.json()
+          console.log("TrackingEvent", body)
+          return HttpResponse.json({ success: true })
         }),
         ...handlers,
       ],

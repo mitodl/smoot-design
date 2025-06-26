@@ -6,7 +6,9 @@ import { MathJaxContext } from "better-react-mathjax"
 
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
-  payload: AiDrawerSettings
+  payload: AiDrawerSettings & {
+    trackingUrl?: string
+  }
 }
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
@@ -95,23 +97,36 @@ const AiDrawerManager = ({
 
   return (
     <MathJaxContext>
-      {Object.values(drawerStates).map(({ key, open, payload }) => (
-        <AiDrawer
-          key={key}
-          onTrackingEvent={console.log}
-          className={className}
-          transformBody={transformBody}
-          fetchOpts={fetchOpts}
-          settings={payload}
-          open={open}
-          onClose={() => {
-            setDrawerStates((prev) => ({
-              ...prev,
-              [key]: { ...prev[key], open: false },
-            }))
-          }}
-        />
-      ))}
+      {Object.values(drawerStates).map(({ key, open, payload }) => {
+        const { trackingUrl, ...settings } = payload
+        return (
+          <AiDrawer
+            key={key}
+            className={className}
+            transformBody={transformBody}
+            fetchOpts={fetchOpts}
+            settings={settings}
+            open={open}
+            onClose={() => {
+              setDrawerStates((prev) => ({
+                ...prev,
+                [key]: { ...prev[key], open: false },
+              }))
+            }}
+            onTrackingEvent={(event) => {
+              if (trackingUrl) {
+                window.fetch(trackingUrl, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(event),
+                })
+              }
+            }}
+          />
+        )
+      })}
     </MathJaxContext>
   )
 }

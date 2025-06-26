@@ -1,5 +1,7 @@
 interface ITrackingEvent {
   type: string
+  // The block id with which the drawer is associated
+  blockId: string
 }
 
 const TrackingEventType = {
@@ -41,6 +43,7 @@ type TrackingEvent =
 type TrackingEventHandler = (event: TrackingEvent) => void
 
 export type {
+  ITrackingEvent,
   TrackingEventHandler,
   OpenEvent,
   CloseEvent,

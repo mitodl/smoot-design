@@ -63,6 +63,7 @@ export const ProblemStory: Story = {
   args: {
     settings: {
       blockType: "problem",
+      blockId: "problem-1",
       title: "AskTIM for help with Problem: Derivatives 1.1",
       chat: {
         apiUrl: TEST_API_STREAMING,
@@ -77,6 +78,7 @@ export const ProblemDefaultInitialMessagesStory: Story = {
   args: {
     settings: {
       blockType: "problem",
+      blockId: "problem-2",
       title: "AskTIM for help with Problem: Derivatives 1.1",
       chat: {
         apiUrl: TEST_API_STREAMING,
@@ -90,6 +92,7 @@ export const EntryScreenStory: Story = {
   args: {
     settings: {
       blockType: "problem",
+      blockId: "problem-3",
       chat: {
         apiUrl: TEST_API_STREAMING,
         initialMessages: INITIAL_MESSAGES,
@@ -108,6 +111,7 @@ export const VideoStory: Story = {
   args: {
     settings: {
       blockType: "video",
+      blockId: "video-1",
       chat: {
         apiUrl: TEST_API_STREAMING,
         conversationStarters: STARTERS,
@@ -137,6 +141,7 @@ export const FlashcardConversationStartersStory: Story = {
   args: {
     settings: {
       blockType: "video",
+      blockId: "video-2",
       chat: {
         apiUrl: TEST_API_STREAMING,
       },
