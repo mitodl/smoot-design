@@ -19,11 +19,13 @@ import { ActionButton } from "../../components/Button/ActionButton"
 import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
+import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
 
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
   payload: {
     blockType?: "problem" | "video"
+    blockId?: string
     target?: string
     /**
      * If the title begins "AskTIM", it is styled as the AskTIM logo.
@@ -183,6 +185,7 @@ type AiDrawerProps = {
 
   open?: boolean
   onClose?: () => void
+  onTrackingEvent?: TrackingEventHandler
 }
 
 const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
@@ -259,6 +262,7 @@ const ChatComponent = ({
   initialMessages,
   hasTabs,
   needsMathJax,
+  onTrackingEvent,
 }: {
   payload: AiDrawerInitMessage["payload"]["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
@@ -270,6 +274,7 @@ const ChatComponent = ({
   initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
   needsMathJax: boolean
+  onTrackingEvent?: TrackingEventHandler
 }) => {
   if (!payload) return null
   return (
@@ -288,11 +293,40 @@ const ChatComponent = ({
         }),
         apiUrl: payload.apiUrl,
         fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
+        onFinish: (message) =>
+          onTrackingEvent?.({
+            type: TrackingEventType.Response,
+            value: message.content,
+          }),
       }}
       hasTabs={hasTabs}
       useMathJax={needsMathJax}
+      onSubmit={(message, meta) => {
+        onTrackingEvent?.({
+          type: TrackingEventType.Submit,
+          value: message,
+          source: meta.source,
+        })
+      }}
     />
   )
+}
+
+const useOnDrawerOpened = (open: boolean | undefined, callback: () => void) => {
+  /**
+   * This could be moved to AiDrawerManager.tsx; however, using an effect
+   * here allows us to keep all tracking-related code within the AiDrawer
+   * component.
+   */
+  const cb = useRef(callback)
+  React.useEffect(() => {
+    cb.current = callback
+  }, [callback])
+  useEffect(() => {
+    if (open) {
+      cb.current()
+    }
+  }, [open])
 }
 
 const randomItems = <T,>(array: T[], count: number): T[] => {
@@ -307,6 +341,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   payload,
   open,
   onClose,
+  onTrackingEvent = console.log,
 }: AiDrawerProps) => {
   const [tab, setTab] = useState("chat")
   const { response } = useContentFetch(payload?.summary?.apiUrl)
@@ -351,6 +386,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
     )
   }, [payload, response])
 
+  useOnDrawerOpened(open, () => {
+    onTrackingEvent?.({ type: TrackingEventType.Open })
+  })
+
   if (!payload) {
     return <div data-testid="ai-drawer-waiting"></div>
   }
@@ -376,7 +415,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
       }}
       anchor="right"
       open={open}
-      onClose={onClose}
+      onClose={() => {
+        onClose?.()
+        onTrackingEvent?.({ type: TrackingEventType.Close })
+      }}
       role="dialog"
       aria-modal="true"
       keepMounted
@@ -417,13 +459,20 @@ const AiDrawer: FC<AiDrawerProps> = ({
           }
           hasTabs={hasTabs}
           needsMathJax={true}
+          onTrackingEvent={onTrackingEvent}
         />
       ) : null}
       {blockType === "video" ? (
         <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
-            onChange={(e, tab) => setTab(tab)}
+            onChange={(e, tab) => {
+              setTab(tab)
+              onTrackingEvent?.({
+                type: TrackingEventType.TabChange,
+                value: tab,
+              })
+            }}
           >
             <TabButton value="chat" label="Chat" />
             {response?.flashcards?.length ? (
@@ -450,6 +499,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
               needsMathJax={false}
+              onTrackingEvent={onTrackingEvent}
             />
           </StyledTabPanel>
           {response?.flashcards?.length ? (

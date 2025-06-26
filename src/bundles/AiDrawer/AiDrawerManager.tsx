@@ -88,6 +88,7 @@ const AiDrawerManager = ({
       {Object.values(drawerStates).map(({ key, open, payload }) => (
         <AiDrawer
           key={key}
+          onTrackingEvent={console.log}
           className={className}
           transformBody={transformBody}
           fetchOpts={fetchOpts}

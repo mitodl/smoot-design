@@ -100,7 +100,13 @@ const Starter = styled.button(({ theme }) => ({
 type EntryScreenProps = {
   title?: string
   conversationStarters?: { content: string }[]
-  onPromptSubmit: (prompt: string) => void
+  onPromptSubmit: (
+    prompt: string,
+    meta: {
+      source: "input" | "conversation-starter"
+    },
+  ) => void
+  onStarterClick?: (content: string) => void
   className?: string
 }
 
@@ -122,7 +128,7 @@ const EntryScreen = ({
       data-testid="ai-chat-entry-screen"
       onSubmit={(e) => {
         e.preventDefault()
-        onPromptSubmit(prompt)
+        onPromptSubmit(prompt, { source: "input" })
       }}
     >
       <TimLogoBox>
@@ -149,7 +155,9 @@ const EntryScreen = ({
         {conversationStarters?.map(({ content }, index) => (
           <Starter
             key={index}
-            onClick={() => onPromptSubmit(content)}
+            onClick={() =>
+              onPromptSubmit(content, { source: "conversation-starter" })
+            }
             tabIndex={0}
           >
             <Typography variant="body2">{content}</Typography>
