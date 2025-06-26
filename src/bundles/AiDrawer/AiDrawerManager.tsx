@@ -7,6 +7,9 @@ import { MathJaxContext } from "better-react-mathjax"
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
   payload: AiDrawerSettings & {
+    /**
+     * If provided, POST requests will be sent to this URL containing drawer event data.
+     */
     trackingUrl?: string
   }
 }
@@ -32,7 +35,7 @@ type AiDrawerManagerProps = {
    */
   /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
   target?: string
-} & AiDrawerProps
+} & Pick<AiDrawerProps, "className" | "transformBody" | "fetchOpts">
 
 const AiDrawerManager = ({
   className,
