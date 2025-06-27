@@ -48,6 +48,13 @@ const meta: Meta<typeof AiDrawer> = {
       </>
     )
   },
+  argTypes: {
+    payload: {
+      // JSON controls break form submission via keyboard. See
+      // https://github.com/storybookjs/storybook/issues/31881
+      control: false,
+    },
+  },
 }
 
 export default meta

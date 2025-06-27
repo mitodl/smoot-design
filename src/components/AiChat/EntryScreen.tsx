@@ -6,7 +6,7 @@ import { AdornmentButton, Input } from "../Input/Input"
 import TimLogo from "./TimLogo"
 import { useState } from "react"
 
-const Container = styled.div(({ theme }) => ({
+const Container = styled.form(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -116,16 +116,15 @@ const EntryScreen = ({
     setPrompt(e.target.value)
   }
 
-  const onPromptKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === "Enter" && prompt) {
-      onPromptSubmit(prompt)
-    } else {
-      setPrompt(prompt)
-    }
-  }
-
   return (
-    <Container className={className} data-testid="ai-chat-entry-screen">
+    <Container
+      className={className}
+      data-testid="ai-chat-entry-screen"
+      onSubmit={(e) => {
+        e.preventDefault()
+        onPromptSubmit(prompt)
+      }}
+    >
       <TimLogoBox>
         <RiSparkling2Line />
         <StyledTimLogo />
@@ -134,16 +133,13 @@ const EntryScreen = ({
       <StyledInput
         fullWidth
         size="chat"
+        name="prompt"
         onChange={onPromptChange}
-        onKeyDown={onPromptKeyDown}
         inputProps={{
           "aria-label": "Ask a question",
         }}
         endAdornment={
-          <AdornmentButton
-            aria-label="Send"
-            onClick={() => onPromptSubmit(prompt)}
-          >
+          <AdornmentButton type="submit" aria-label="Send">
             <SendIcon />
           </AdornmentButton>
         }
@@ -155,11 +151,6 @@ const EntryScreen = ({
             key={index}
             onClick={() => onPromptSubmit(content)}
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                onPromptSubmit(content)
-              }
-            }}
           >
             <Typography variant="body2">{content}</Typography>
           </Starter>

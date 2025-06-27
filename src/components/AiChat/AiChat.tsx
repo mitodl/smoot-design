@@ -396,10 +396,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   e.preventDefault()
                   if (isLoading && stoppable) {
                     stop()
-                  } else {
-                    scrollToBottom()
-                    handleSubmit(e)
                   }
+                  scrollToBottom()
+                  handleSubmit(e)
                 }}
               >
                 <Input
@@ -419,24 +418,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     isLoading ? (
                       <AdornmentButton
                         aria-label="Stop"
-                        onClick={stop}
+                        type="submit"
                         disabled={!stoppable}
                       >
                         <StyledStopButton />
                       </AdornmentButton>
                     ) : (
-                      <AdornmentButton
-                        aria-label="Send"
-                        type="submit"
-                        onClick={(e) => {
-                          if (input.trim() === "") {
-                            e.preventDefault()
-                            return
-                          }
-                          scrollToBottom()
-                          handleSubmit(e)
-                        }}
-                      >
+                      <AdornmentButton type="submit" aria-label="Send">
                         <StyledSendButton />
                       </AdornmentButton>
                     )
