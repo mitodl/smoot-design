@@ -223,6 +223,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   scrollElement,
   ref,
   useMathJax = false,
+  onSubmit,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -291,12 +292,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
           className={classes.entryScreenContainer}
           title={entryScreenTitle}
           conversationStarters={conversationStarters}
-          onPromptSubmit={(prompt) => {
+          onPromptSubmit={(prompt, meta) => {
             if (prompt.trim() === "") {
               return
             }
             setShowEntryScreen(false)
             append({ role: "user", content: prompt })
+            onSubmit?.(prompt, meta)
           }}
         />
       ) : (
@@ -361,6 +363,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                       onClick={() => {
                         scrollToBottom()
                         append({ role: "user", content: m.content })
+                        onSubmit?.(m.content, {
+                          source: "conversation-starter",
+                        })
                       }}
                     >
                       {m.content}
@@ -399,6 +404,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   }
                   scrollToBottom()
                   handleSubmit(e)
+                  onSubmit?.(input, { source: "input" })
                 }}
               >
                 <Input
