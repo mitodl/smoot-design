@@ -25,14 +25,15 @@ const meta: Meta<typeof SrAnnouncer> = {
     return (
       <>
         <label>
-          Force Visible:
           <input
             type="checkbox"
             checked={forceVisible}
             onChange={(e) => setForceVisible(e.target.checked)}
+            aria-label="Force visible"
           />
-          <p>By default, the content of this story is visually hidden.</p>
+          Force Visible
         </label>
+        <p>By default, the content of this story is visually hidden.</p>
         <hr />
         <Container forceVisible={forceVisible}>
           <Story />

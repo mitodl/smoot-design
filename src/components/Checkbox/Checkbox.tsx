@@ -106,28 +106,35 @@ const Checkbox: React.FC<CheckboxProps> = ({
   className,
   disabled = false,
 }) => {
+  const checkboxId = React.useId()
+  const labelId = React.useId()
+
   return (
     <Container className={className}>
       {label ? (
-        <label>
+        <label htmlFor={checkboxId} id={labelId}>
           <input
+            id={checkboxId}
             type="checkbox"
             name={name}
             value={value}
             checked={checked}
             onChange={onChange}
             disabled={disabled}
+            aria-labelledby={labelId}
           />
           <span className="checkbox-label">{label}</span>
         </label>
       ) : (
         <input
+          id={checkboxId}
           type="checkbox"
           name={name}
           value={value}
           checked={checked}
           onChange={onChange}
           disabled={disabled}
+          aria-label={`Checkbox ${name || value || ""}`.trim() || "Checkbox"}
         />
       )}
     </Container>

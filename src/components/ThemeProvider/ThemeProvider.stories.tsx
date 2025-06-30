@@ -7,7 +7,7 @@ const CustomLinkAdapater = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentProps<"a">
 >((props, ref) => (
-  // eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+  // eslint-disable-next-line jsx-a11y/anchor-has-content
   <a
     ref={ref}
     onClick={(e) => {
