@@ -1,7 +1,6 @@
 interface ITrackingEvent {
   type: string
-  // The block id with which the drawer is associated
-  blockId: string
+  data?: Record<string, unknown>
 }
 
 const TrackingEventType = {
@@ -21,16 +20,22 @@ interface CloseEvent extends ITrackingEvent {
 }
 interface SubmitEvent extends ITrackingEvent {
   type: typeof TrackingEventType.Submit
-  value: string
-  source: "input" | "conversation-starter"
+  data: {
+    value: string
+    source: "input" | "conversation-starter"
+  }
 }
 interface ResponseEvent extends ITrackingEvent {
   type: typeof TrackingEventType.Response
-  value: string
+  data: {
+    value: string
+  }
 }
 interface TabChangeEvent extends ITrackingEvent {
   type: typeof TrackingEventType.TabChange
-  value: string
+  data: {
+    value: string
+  }
 }
 
 type TrackingEvent =

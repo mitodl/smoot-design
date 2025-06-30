@@ -7,6 +7,7 @@ import { MathJaxContext } from "better-react-mathjax"
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
   payload: AiDrawerSettings & {
+    blockUsageKey?: string
     /**
      * If provided, POST requests will be sent to this URL containing drawer event data.
      */
@@ -118,12 +119,20 @@ const AiDrawerManager = ({
             }}
             onTrackingEvent={(event) => {
               if (trackingUrl) {
+                const { type, data } = event
+                const prefix = "ol_openedx_chat.drawer"
                 window.fetch(trackingUrl, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
                   },
-                  body: JSON.stringify(event),
+                  body: JSON.stringify({
+                    event_type: `${prefix}.${type}`,
+                    event_data: {
+                      ...data,
+                      blockUsageKey: payload.blockUsageKey,
+                    },
+                  }),
                 })
               }
             }}

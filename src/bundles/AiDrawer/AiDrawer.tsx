@@ -23,7 +23,6 @@ import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
-  blockId: string
   /**
    * If the title begins "AskTIM", it is styled as the AskTIM logo.
    */
@@ -252,7 +251,6 @@ const ChatComponent = ({
   initialMessages,
   hasTabs,
   needsMathJax,
-  blockId,
   onTrackingEvent,
 }: {
   settings: AiDrawerSettings["chat"]
@@ -265,7 +263,6 @@ const ChatComponent = ({
   initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
   needsMathJax: boolean
-  blockId: string
   onTrackingEvent?: TrackingEventHandler
 }) => {
   if (!settings) return null
@@ -287,19 +284,21 @@ const ChatComponent = ({
         fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
         onFinish: (message) =>
           onTrackingEvent?.({
-            blockId,
             type: TrackingEventType.Response,
-            value: message.content,
+            data: {
+              value: message.content,
+            },
           }),
       }}
       hasTabs={hasTabs}
       useMathJax={needsMathJax}
       onSubmit={(message, meta) => {
         onTrackingEvent?.({
-          blockId,
           type: TrackingEventType.Submit,
-          value: message,
-          source: meta.source,
+          data: {
+            value: message,
+            source: meta.source,
+          },
         })
       }}
     />
@@ -354,6 +353,11 @@ const AiDrawer: FC<AiDrawerProps> = ({
     mouseInteracted.current = false
   }
 
+  const handleClose = () => {
+    onClose?.()
+    onTrackingEvent?.({ type: TrackingEventType.Close })
+  }
+
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
 
   const paperRefCallback = (node: HTMLDivElement | null) => {
@@ -380,10 +384,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
     )
   }, [settings, response])
 
-  const blockId = settings?.blockId || "unknown-block"
-
   useOnDrawerOpened(open, () => {
-    onTrackingEvent?.({ type: TrackingEventType.Open, blockId })
+    onTrackingEvent?.({ type: TrackingEventType.Open })
   })
 
   if (!settings) {
@@ -411,10 +413,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
       }}
       anchor="right"
       open={open}
-      onClose={() => {
-        onClose?.()
-        onTrackingEvent?.({ type: TrackingEventType.Close, blockId })
-      }}
+      onClose={handleClose}
       role="dialog"
       aria-modal="true"
       keepMounted
@@ -436,7 +435,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
         <CloseButton
           variant="text"
           size="medium"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close"
         >
           <RiCloseLine />
@@ -455,7 +454,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
           }
           hasTabs={hasTabs}
           needsMathJax={true}
-          blockId={blockId}
           onTrackingEvent={onTrackingEvent}
         />
       ) : null}
@@ -466,9 +464,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
             onChange={(e, tab) => {
               setTab(tab)
               onTrackingEvent?.({
-                blockId,
                 type: TrackingEventType.TabChange,
-                value: tab,
+                data: {
+                  value: tab,
+                },
               })
             }}
           >
@@ -497,7 +496,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
               initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
               needsMathJax={false}
-              blockId={blockId}
               onTrackingEvent={onTrackingEvent}
             />
           </StyledTabPanel>

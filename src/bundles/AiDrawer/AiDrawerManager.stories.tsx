@@ -85,7 +85,7 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
-          blockId: "problem-frame",
+          blockUsageKey: "problem-frame",
           title: "AskTIM for help with Problem: Derivatives 1.1",
           trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
@@ -99,7 +99,7 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
-          blockId: "problem-frame-default",
+          blockUsageKey: "problem-frame-default",
           title: "AskTIM for help with Problem: Derivatives 1.1",
           trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
@@ -112,7 +112,7 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
-          blockId: "problem-frame-entry",
+          blockUsageKey: "problem-frame-entry",
           trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
@@ -131,7 +131,7 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
-          blockId: "video-frame",
+          blockUsageKey: "video-frame",
           trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
@@ -152,7 +152,7 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
-          blockId: "video-frame-flashcard",
+          blockUsageKey: "video-frame-flashcard",
           trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,

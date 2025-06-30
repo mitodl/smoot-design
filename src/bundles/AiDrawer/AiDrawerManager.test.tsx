@@ -7,7 +7,7 @@ import * as React from "react"
 import { http, HttpResponse } from "msw"
 import { setupServer } from "msw/node"
 import { faker } from "@faker-js/faker/locale/en"
-import { TrackingEvent, TrackingEventType } from "./trackingEvents"
+import { TrackingEventType } from "./trackingEvents"
 
 jest.mock("../../components/AiChat/Markdown", () => {
   return {
@@ -61,9 +61,10 @@ class MockResizeObserver {
 global.ResizeObserver = MockResizeObserver
 
 const trackingEvent = jest.fn()
-const assertTrackingEvent = (...data: TrackingEvent[]) => {
+const assertTrackingEvent = (...data: unknown[]) => {
   expect(trackingEvent).toHaveBeenCalledTimes(data.length)
   data.forEach((eventData) => {
+    console.log(eventData)
     expect(trackingEvent).toHaveBeenCalledWith(eventData)
   })
   trackingEvent.mockClear()
@@ -108,10 +109,13 @@ describe("AiDrawerManager", () => {
       origin: "http://localhost:6006",
     })
 
-    await act(async () => {
-      window.dispatchEvent(event)
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    })
+    const open = async () =>
+      await act(async () => {
+        window.dispatchEvent(event)
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      })
+    await open()
+    return { open }
   }
 
   test("Problem drawer opens showing title", async () => {
@@ -119,7 +123,7 @@ describe("AiDrawerManager", () => {
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "problem",
-        blockId: "test-problem-1",
+        blockUsageKey: "test-problem-1",
         title: "Drawer Title",
         chat: {
           apiUrl: TEST_API_STREAMING,
@@ -135,7 +139,7 @@ describe("AiDrawerManager", () => {
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        blockId: "test-video-1",
+        blockUsageKey: "test-video-1",
         chat: {
           entryScreenTitle: "Entry screen title",
           apiUrl: TEST_API_STREAMING,
@@ -166,7 +170,7 @@ describe("AiDrawerManager", () => {
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        blockId: "test-video-2",
+        blockUsageKey: "test-video-2",
         chat: {
           entryScreenTitle: "Entry screen title",
           apiUrl: TEST_API_STREAMING,
@@ -198,7 +202,7 @@ describe("AiDrawerManager", () => {
         type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          blockId: "test-video-3",
+          blockUsageKey: "test-video-3",
           chat: {
             entryScreenTitle: "Entry screen title",
             apiUrl: TEST_API_STREAMING,
@@ -226,7 +230,7 @@ describe("AiDrawerManager", () => {
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        blockId: "test-video-4",
+        blockUsageKey: "test-video-4",
         chat: {
           apiUrl: TEST_API_STREAMING,
         },
@@ -246,7 +250,7 @@ describe("AiDrawerManager", () => {
         type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          blockId: "test-video-5",
+          blockUsageKey: "test-video-5",
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
@@ -281,7 +285,7 @@ describe("AiDrawerManager", () => {
         type: "smoot-design::ai-drawer-open",
         payload: {
           blockType: "video",
-          blockId: "test-video-6",
+          blockUsageKey: "test-video-6",
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
@@ -324,12 +328,13 @@ describe("AiDrawerManager", () => {
   )
 
   test("Sending Tracking Events [Video]", async () => {
-    const blockId = faker.string.uuid()
+    const blockUsageKey = faker.string.uuid()
+    const eventPrefix = "ol_openedx_chat.drawer"
     await setup({
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "video",
-        blockId: blockId,
+        blockUsageKey,
         trackingUrl: TEST_TRACKING_EVENTS,
         chat: {
           entryScreenTitle: "Entry screen title",
@@ -346,51 +351,63 @@ describe("AiDrawerManager", () => {
       },
     })
 
-    assertTrackingEvent({ type: TrackingEventType.Open, blockId })
+    assertTrackingEvent({
+      event_type: `${eventPrefix}.${TrackingEventType.Open}`,
+      event_data: { blockUsageKey },
+    })
 
     await user.click(screen.getByRole("tab", { name: "Flashcards" }))
     assertTrackingEvent({
-      type: TrackingEventType.TabChange,
-      blockId,
-      value: "flashcards",
+      event_type: `${eventPrefix}.${TrackingEventType.TabChange}`,
+      event_data: {
+        blockUsageKey,
+        value: "flashcards",
+      },
     })
 
     await user.click(screen.getByRole("tab", { name: "Chat" }))
     assertTrackingEvent({
-      type: TrackingEventType.TabChange,
-      blockId,
-      value: "chat",
+      event_type: `${eventPrefix}.${TrackingEventType.TabChange}`,
+      event_data: {
+        blockUsageKey,
+        value: "chat",
+      },
     })
 
     await user.click(screen.getByRole("button", { name: "Prompt 1" }))
     assertTrackingEvent(
       {
-        type: TrackingEventType.Submit,
-        blockId,
-        value: "Prompt 1",
-        source: "conversation-starter",
+        event_type: `${eventPrefix}.${TrackingEventType.Submit}`,
+        event_data: {
+          blockUsageKey,
+          value: "Prompt 1",
+          source: "conversation-starter",
+        },
       },
       {
-        type: TrackingEventType.Response,
-        blockId,
-        value: "AI Response",
+        event_type: `${eventPrefix}.${TrackingEventType.Response}`,
+        event_data: {
+          blockUsageKey,
+          value: "AI Response",
+        },
       },
     )
 
     await user.keyboard("{Escape}")
     assertTrackingEvent({
-      type: TrackingEventType.Close,
-      blockId,
+      event_type: `${eventPrefix}.${TrackingEventType.Close}`,
+      event_data: { blockUsageKey },
     })
   })
 
   test("Sending Tracking Events [Problem]", async () => {
-    const blockId = faker.string.uuid()
-    await setup({
+    const blockUsageKey = faker.string.uuid()
+    const eventPrefix = "ol_openedx_chat.drawer"
+    const { open } = await setup({
       type: "smoot-design::ai-drawer-open",
       payload: {
         blockType: "problem",
-        blockId: blockId,
+        blockUsageKey,
         trackingUrl: TEST_TRACKING_EVENTS,
         chat: {
           entryScreenTitle: "Entry screen title",
@@ -404,7 +421,10 @@ describe("AiDrawerManager", () => {
       },
     })
 
-    assertTrackingEvent({ type: TrackingEventType.Open, blockId })
+    assertTrackingEvent({
+      event_type: `${eventPrefix}.${TrackingEventType.Open}`,
+      event_data: { blockUsageKey },
+    })
 
     const textbox = screen.getByRole("textbox", { name: "Ask a question" })
     await user.type(textbox, "Cat")
@@ -412,22 +432,38 @@ describe("AiDrawerManager", () => {
 
     assertTrackingEvent(
       {
-        type: TrackingEventType.Submit,
-        blockId,
-        value: "Cat",
-        source: "input",
+        event_type: `${eventPrefix}.${TrackingEventType.Submit}`,
+        event_data: {
+          blockUsageKey,
+          value: "Cat",
+          source: "input",
+        },
       },
       {
-        type: TrackingEventType.Response,
-        blockId,
-        value: "AI Response",
+        event_type: `${eventPrefix}.${TrackingEventType.Response}`,
+        event_data: {
+          blockUsageKey,
+          value: "AI Response",
+        },
       },
     )
 
     await user.keyboard("{Escape}")
     assertTrackingEvent({
-      type: TrackingEventType.Close,
-      blockId,
+      event_type: `${eventPrefix}.${TrackingEventType.Close}`,
+      event_data: { blockUsageKey },
+    })
+
+    await open()
+    assertTrackingEvent({
+      event_type: `${eventPrefix}.${TrackingEventType.Open}`,
+      event_data: { blockUsageKey },
+    })
+
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    assertTrackingEvent({
+      event_type: `${eventPrefix}.${TrackingEventType.Close}`,
+      event_data: { blockUsageKey },
     })
   })
 })
