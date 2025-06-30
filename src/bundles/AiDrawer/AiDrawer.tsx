@@ -305,11 +305,16 @@ const ChatComponent = ({
   )
 }
 
+/**
+ * Call the callback when open changes from false to true.
+ */
 const useOnDrawerOpened = (open: boolean | undefined, callback: () => void) => {
   /**
-   * This could be moved to AiDrawerManager.tsx; however, using an effect
-   * here allows us to keep all tracking-related code within the AiDrawer
-   * component.
+   * Implementation Notes:
+   *  - Uses a ref to ensure the current value of the callback is used
+   *  - All handling of open events could be handled in AiDrawerManager.tsx, but
+   *   keeping it here lets as keep all event-tracking handler calling in
+   *   AiDrawerManager.
    */
   const cb = useRef(callback)
   React.useEffect(() => {
