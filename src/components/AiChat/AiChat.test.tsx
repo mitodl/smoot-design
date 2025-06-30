@@ -71,6 +71,7 @@ describe("AiChat", () => {
       { content: faker.lorem.sentence() },
       { content: faker.lorem.sentence() },
     ]
+    const onSubmit = jest.fn()
     const view = render(
       <AiChat
         data-testid="ai-chat"
@@ -79,6 +80,7 @@ describe("AiChat", () => {
         requestOpts={{ apiUrl: API_URL }}
         placeholder="Type a message..."
         entryScreenEnabled={false}
+        onSubmit={onSubmit}
         {...props}
       />,
       { wrapper: ThemeProvider },
@@ -92,16 +94,17 @@ describe("AiChat", () => {
           conversationStarters={conversationStarters}
           requestOpts={{ apiUrl: API_URL }}
           entryScreenEnabled={false}
+          onSubmit={onSubmit}
           {...newProps}
         />,
       )
     }
 
-    return { initialMessages, conversationStarters, rerender }
+    return { initialMessages, conversationStarters, rerender, onSubmit }
   }
 
   test("Clicking conversation starters and sending chats", async () => {
-    const { initialMessages, conversationStarters } = setup()
+    const { initialMessages, conversationStarters, onSubmit } = setup()
 
     const scrollBy = jest.spyOn(HTMLElement.prototype, "scrollBy")
 
@@ -118,6 +121,10 @@ describe("AiChat", () => {
 
     await user.click(starterEls[chosen])
     expect(scrollBy).toHaveBeenCalled()
+    expect(onSubmit).toHaveBeenCalledWith(
+      conversationStarters[chosen].content,
+      { source: "conversation-starter" },
+    )
     scrollBy.mockReset()
 
     const messageEls = await whenCount(getMessages, 3)
@@ -136,6 +143,7 @@ describe("AiChat", () => {
     const afterSending = await whenCount(getMessages, 5)
     expect(afterSending[3]).toHaveTextContent("User message")
     expect(afterSending[4]).toHaveTextContent("AI Response 1")
+    expect(onSubmit).toHaveBeenCalledWith("User message", { source: "input" })
   })
 
   test("Messages persist if chat has same chatId", async () => {
@@ -244,7 +252,7 @@ describe("AiChat", () => {
   })
 
   test("User can submit a prompt from the entry screen", async () => {
-    setup({
+    const { onSubmit } = setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
       initialMessages: [],
@@ -254,13 +262,14 @@ describe("AiChat", () => {
     await user.click(screen.getByRole("textbox"))
     await user.paste("User message")
     await user.click(screen.getByRole("button", { name: "Send" }))
+    expect(onSubmit).toHaveBeenCalledWith("User message", { source: "input" })
 
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("User message")
   })
 
   test("User can click starter on the entry screen to submit a prompt", async () => {
-    setup({
+    const { onSubmit } = setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
       initialMessages: [],
@@ -268,7 +277,9 @@ describe("AiChat", () => {
     })
 
     await user.click(screen.getByRole("button", { name: "Starter 1" }))
-
+    expect(onSubmit).toHaveBeenCalledWith("Starter 1", {
+      source: "conversation-starter",
+    })
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("Starter 1")
   })

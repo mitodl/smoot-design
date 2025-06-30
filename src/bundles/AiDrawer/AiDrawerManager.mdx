@@ -45,7 +45,16 @@ The message events emitted from iframe should have shape:
 type ChatInitMessage = {
   type: "smoot-design::chat-open"
   payload: {
-    /** config data */
+    ...settings /** AiDrawerSettings */,
+    /**
+     * If provided, POST requests will be sent to this URL containing
+     * data about how the user interacts with the drawer.
+    */
+    trackingUrl?: string,
+    /**
+     * Attached to tracking events
+    */
+    blockUsageKey?: string
   }
 }
 ```

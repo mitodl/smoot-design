@@ -19,28 +19,25 @@ import { ActionButton } from "../../components/Button/ActionButton"
 import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
+import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
 
-type AiDrawerInitMessage = {
-  type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
-  payload: {
-    blockType?: "problem" | "video"
-    target?: string
-    /**
-     * If the title begins "AskTIM", it is styled as the AskTIM logo.
-     */
-    title?: string
-    chat: {
-      chatId?: AiChatProps["chatId"]
-      conversationStarters?: AiChatProps["conversationStarters"]
-      initialMessages?: AiChatProps["initialMessages"]
-      apiUrl: AiChatProps["requestOpts"]["apiUrl"]
-      requestBody?: Record<string, unknown>
-      entryScreenEnabled?: AiChatProps["entryScreenEnabled"]
-      entryScreenTitle?: AiChatProps["entryScreenTitle"]
-    }
-    summary?: {
-      apiUrl: string
-    }
+type AiDrawerSettings = {
+  blockType?: "problem" | "video"
+  /**
+   * If the title begins "AskTIM", it is styled as the AskTIM logo.
+   */
+  title?: string
+  chat: {
+    chatId?: AiChatProps["chatId"]
+    conversationStarters?: AiChatProps["conversationStarters"]
+    initialMessages?: AiChatProps["initialMessages"]
+    apiUrl: AiChatProps["requestOpts"]["apiUrl"]
+    requestBody?: Record<string, unknown>
+    entryScreenEnabled?: AiChatProps["entryScreenEnabled"]
+    entryScreenTitle?: AiChatProps["entryScreenTitle"]
+  }
+  summary?: {
+    apiUrl: string
   }
 }
 
@@ -173,16 +170,11 @@ type AiDrawerProps = {
    */
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 
-  /**
-   * Pass to target a specific drawer instance where multiple are on the page.
-   */
-  /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
-  target?: string
-
-  payload?: AiDrawerInitMessage["payload"]
+  settings?: AiDrawerSettings
 
   open?: boolean
   onClose?: () => void
+  onTrackingEvent?: TrackingEventHandler
 }
 
 const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
@@ -249,7 +241,7 @@ const DEFAULT_VIDEO_STARTERS = [
 ]
 
 const ChatComponent = ({
-  payload,
+  settings,
   transformBody,
   fetchOpts,
   scrollElement,
@@ -259,8 +251,9 @@ const ChatComponent = ({
   initialMessages,
   hasTabs,
   needsMathJax,
+  onTrackingEvent,
 }: {
-  payload: AiDrawerInitMessage["payload"]["chat"]
+  settings: AiDrawerSettings["chat"]
   transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
   scrollElement: AiChatProps["scrollElement"]
@@ -270,12 +263,13 @@ const ChatComponent = ({
   initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
   needsMathJax: boolean
+  onTrackingEvent?: TrackingEventHandler
 }) => {
-  if (!payload) return null
+  if (!settings) return null
   return (
     <StyledAiChat
-      key={payload.chatId}
-      chatId={payload.chatId}
+      key={settings.chatId}
+      chatId={settings.chatId}
       conversationStarters={conversationStarters}
       initialMessages={initialMessages}
       scrollElement={scrollElement}
@@ -283,16 +277,54 @@ const ChatComponent = ({
       entryScreenTitle={entryScreenTitle}
       requestOpts={{
         transformBody: (messages) => ({
-          ...payload.requestBody,
+          ...settings.requestBody,
           ...transformBody?.(messages),
         }),
-        apiUrl: payload.apiUrl,
+        apiUrl: settings.apiUrl,
         fetchOpts: { ...DEFAULT_FETCH_OPTS, ...fetchOpts },
+        onFinish: (message) =>
+          onTrackingEvent?.({
+            type: TrackingEventType.Response,
+            data: {
+              value: message.content,
+            },
+          }),
       }}
       hasTabs={hasTabs}
       useMathJax={needsMathJax}
+      onSubmit={(message, meta) => {
+        onTrackingEvent?.({
+          type: TrackingEventType.Submit,
+          data: {
+            value: message,
+            source: meta.source,
+          },
+        })
+      }}
     />
   )
+}
+
+/**
+ * Call the callback when open changes from false to true.
+ */
+const useOnDrawerOpened = (open: boolean | undefined, callback: () => void) => {
+  /**
+   * Implementation Notes:
+   *  - Uses a ref to ensure the current value of the callback is used
+   *  - All handling of open events could be handled in AiDrawerManager.tsx, but
+   *   keeping it here lets as keep all event-tracking handler calling in
+   *   AiDrawerManager.
+   */
+  const cb = useRef(callback)
+  React.useEffect(() => {
+    cb.current = callback
+  }, [callback])
+  useEffect(() => {
+    if (open) {
+      cb.current()
+    }
+  }, [open])
 }
 
 const randomItems = <T,>(array: T[], count: number): T[] => {
@@ -304,12 +336,13 @@ const AiDrawer: FC<AiDrawerProps> = ({
   transformBody = identity,
   className,
   fetchOpts,
-  payload,
+  settings,
   open,
   onClose,
+  onTrackingEvent,
 }: AiDrawerProps) => {
   const [tab, setTab] = useState("chat")
-  const { response } = useContentFetch(payload?.summary?.apiUrl)
+  const { response } = useContentFetch(settings?.summary?.apiUrl)
 
   const [_wasKeyboardFocus, setWasKeyboardFocus] = useState(false)
   const mouseInteracted = useRef(false)
@@ -323,6 +356,11 @@ const AiDrawer: FC<AiDrawerProps> = ({
       setWasKeyboardFocus(true)
     }
     mouseInteracted.current = false
+  }
+
+  const handleClose = () => {
+    onClose?.()
+    onTrackingEvent?.({ type: TrackingEventType.Close })
   }
 
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
@@ -340,22 +378,26 @@ const AiDrawer: FC<AiDrawerProps> = ({
   }, [tab, scrollElement])
 
   const conversationStarters = useMemo(() => {
-    if (!payload) return []
+    if (!settings) return []
     return (
-      payload.chat.conversationStarters ||
+      settings.chat.conversationStarters ||
       (response?.flashcards?.length && response.flashcards.length >= 3
         ? randomItems(response.flashcards, 3).map((flashcard) => ({
             content: flashcard.question,
           }))
         : DEFAULT_VIDEO_STARTERS)
     )
-  }, [payload, response])
+  }, [settings, response])
 
-  if (!payload) {
+  useOnDrawerOpened(open, () => {
+    onTrackingEvent?.({ type: TrackingEventType.Open })
+  })
+
+  if (!settings) {
     return <div data-testid="ai-drawer-waiting"></div>
   }
 
-  const { title, blockType, chat } = payload
+  const { title, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
   return (
@@ -376,7 +418,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
       }}
       anchor="right"
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       role="dialog"
       aria-modal="true"
       keepMounted
@@ -398,7 +440,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
         <CloseButton
           variant="text"
           size="medium"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close"
         >
           <RiCloseLine />
@@ -406,7 +448,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
       </Header>
       {blockType === "problem" ? (
         <ChatComponent
-          payload={chat}
+          settings={chat}
           transformBody={transformBody}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
@@ -417,13 +459,22 @@ const AiDrawer: FC<AiDrawerProps> = ({
           }
           hasTabs={hasTabs}
           needsMathJax={true}
+          onTrackingEvent={onTrackingEvent}
         />
       ) : null}
       {blockType === "video" ? (
         <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
-            onChange={(e, tab) => setTab(tab)}
+            onChange={(e, tab) => {
+              setTab(tab)
+              onTrackingEvent?.({
+                type: TrackingEventType.TabChange,
+                data: {
+                  value: tab,
+                },
+              })
+            }}
           >
             <TabButton value="chat" label="Chat" />
             {response?.flashcards?.length ? (
@@ -438,7 +489,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           </StyledTabButtonList>
           <StyledTabPanel value="chat" keepMounted>
             <ChatComponent
-              payload={chat}
+              settings={chat}
               transformBody={transformBody}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
@@ -450,6 +501,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
               needsMathJax={false}
+              onTrackingEvent={onTrackingEvent}
             />
           </StyledTabPanel>
           {response?.flashcards?.length ? (
@@ -475,4 +527,4 @@ const AiDrawer: FC<AiDrawerProps> = ({
 }
 
 export { AiDrawer }
-export type { AiDrawerProps, AiDrawerInitMessage }
+export type { AiDrawerProps, AiDrawerSettings }

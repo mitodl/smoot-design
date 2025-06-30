@@ -107,6 +107,13 @@ type AiChatDisplayProps = {
    * Defaults to true.
    */
   autofocus?: boolean
+
+  onSubmit?: (
+    messageText: string,
+    meta: {
+      source: "input" | "conversation-starter"
+    },
+  ) => void
 } & RefAttributes<HTMLDivElement>
 
 type AiChatProps = AiChatContextProps & AiChatDisplayProps

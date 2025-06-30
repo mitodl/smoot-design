@@ -1,8 +1,19 @@
 import * as React from "react"
 import { useEffect, useState } from "react"
 import { AiDrawer } from "./AiDrawer"
-import type { AiDrawerProps, AiDrawerInitMessage } from "./AiDrawer"
+import type { AiDrawerProps, AiDrawerSettings } from "./AiDrawer"
 import { MathJaxContext } from "better-react-mathjax"
+
+type AiDrawerInitMessage = {
+  type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
+  payload: AiDrawerSettings & {
+    blockUsageKey?: string
+    /**
+     * If provided, POST requests will be sent to this URL containing drawer event data.
+     */
+    trackingUrl?: string
+  }
+}
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
@@ -20,7 +31,12 @@ type AiDrawerManagerProps = {
    * The drawer will ignore all message events not from this origin.
    */
   messageOrigin: string
-} & AiDrawerProps
+  /**
+   * Pass to target a specific drawer instance where multiple are on the page.
+   */
+  /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
+  target?: string
+} & Pick<AiDrawerProps, "className" | "transformBody" | "fetchOpts">
 
 const AiDrawerManager = ({
   className,
@@ -85,25 +101,47 @@ const AiDrawerManager = ({
 
   return (
     <MathJaxContext>
-      {Object.values(drawerStates).map(({ key, open, payload }) => (
-        <AiDrawer
-          key={key}
-          className={className}
-          transformBody={transformBody}
-          fetchOpts={fetchOpts}
-          payload={payload}
-          open={open}
-          onClose={() => {
-            setDrawerStates((prev) => ({
-              ...prev,
-              [key]: { ...prev[key], open: false },
-            }))
-          }}
-        />
-      ))}
+      {Object.values(drawerStates).map(({ key, open, payload }) => {
+        const { trackingUrl, ...settings } = payload
+        return (
+          <AiDrawer
+            key={key}
+            className={className}
+            transformBody={transformBody}
+            fetchOpts={fetchOpts}
+            settings={settings}
+            open={open}
+            onClose={() => {
+              setDrawerStates((prev) => ({
+                ...prev,
+                [key]: { ...prev[key], open: false },
+              }))
+            }}
+            onTrackingEvent={(event) => {
+              if (trackingUrl) {
+                const { type, data } = event
+                const prefix = "ol_openedx_chat.drawer"
+                window.fetch(trackingUrl, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    event_type: `${prefix}.${type}`,
+                    event_data: {
+                      ...data,
+                      blockUsageKey: payload.blockUsageKey,
+                    },
+                  }),
+                })
+              }
+            }}
+          />
+        )
+      })}
     </MathJaxContext>
   )
 }
 
 export { AiDrawerManager }
-export type { AiDrawerManagerProps }
+export type { AiDrawerManagerProps, AiDrawerInitMessage }
