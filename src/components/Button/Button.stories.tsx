@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Button, ButtonLink, ButtonLoadingIcon } from "./Button"
 import type { ButtonProps } from "./Button"
 import Grid from "@mui/material/Grid2"
@@ -11,7 +11,7 @@ import {
   RiMailLine,
 } from "@remixicon/react"
 
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 
 const ICONS = {
