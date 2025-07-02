@@ -1,7 +1,10 @@
 import { act, render, screen } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { AiDrawerManager } from "./AiDrawerManager"
-import type { AiDrawerInitMessage } from "./AiDrawerManager"
+import type {
+  AiDrawerInitMessage,
+  AiDrawerManagerProps,
+} from "./AiDrawerManager"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { http, HttpResponse } from "msw"
@@ -69,6 +72,17 @@ const assertTrackingEvent = (...data: unknown[]) => {
   })
   trackingEvent.mockClear()
 }
+const getTrackingClient = () => ({
+  post: (url: string, data: unknown) => {
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+  },
+})
 
 describe("AiDrawerManager", () => {
   const server = setupServer(
@@ -95,12 +109,18 @@ describe("AiDrawerManager", () => {
 
   afterAll(() => server.close())
 
-  const setup = async (message: AiDrawerInitMessage) => {
+  const setup = async (
+    message: AiDrawerInitMessage,
+    props: Partial<AiDrawerManagerProps> = {},
+  ) => {
     server.listen()
 
-    render(<AiDrawerManager messageOrigin="http://localhost:6006" />, {
-      wrapper: ThemeProvider,
-    })
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" {...props} />,
+      {
+        wrapper: ThemeProvider,
+      },
+    )
 
     await screen.findByTestId("ai-drawer-manager-waiting")
 
@@ -330,26 +350,31 @@ describe("AiDrawerManager", () => {
   test("Sending Tracking Events [Video]", async () => {
     const blockUsageKey = faker.string.uuid()
     const eventPrefix = "ol_openedx_chat.drawer"
-    await setup({
-      type: "smoot-design::ai-drawer-open",
-      payload: {
-        blockType: "video",
-        blockUsageKey,
-        trackingUrl: TEST_TRACKING_EVENTS,
-        chat: {
-          entryScreenTitle: "Entry screen title",
-          apiUrl: TEST_API_STREAMING,
-          conversationStarters: [
-            { content: "Prompt 1" },
-            { content: "Prompt 2" },
-            { content: "Prompt 3" },
-          ],
-        },
-        summary: {
-          apiUrl: CONTENT_FILE_URL,
+    await setup(
+      {
+        type: "smoot-design::ai-drawer-open",
+        payload: {
+          blockType: "video",
+          blockUsageKey,
+          trackingUrl: TEST_TRACKING_EVENTS,
+          chat: {
+            entryScreenTitle: "Entry screen title",
+            apiUrl: TEST_API_STREAMING,
+            conversationStarters: [
+              { content: "Prompt 1" },
+              { content: "Prompt 2" },
+              { content: "Prompt 3" },
+            ],
+          },
+          summary: {
+            apiUrl: CONTENT_FILE_URL,
+          },
         },
       },
-    })
+      {
+        getTrackingClient,
+      },
+    )
 
     assertTrackingEvent({
       event_type: `${eventPrefix}.${TrackingEventType.Open}`,
@@ -403,23 +428,28 @@ describe("AiDrawerManager", () => {
   test("Sending Tracking Events [Problem]", async () => {
     const blockUsageKey = faker.string.uuid()
     const eventPrefix = "ol_openedx_chat.drawer"
-    const { open } = await setup({
-      type: "smoot-design::ai-drawer-open",
-      payload: {
-        blockType: "problem",
-        blockUsageKey,
-        trackingUrl: TEST_TRACKING_EVENTS,
-        chat: {
-          entryScreenTitle: "Entry screen title",
-          apiUrl: TEST_API_STREAMING,
-          conversationStarters: [
-            { content: "Prompt 1" },
-            { content: "Prompt 2" },
-            { content: "Prompt 3" },
-          ],
+    const { open } = await setup(
+      {
+        type: "smoot-design::ai-drawer-open",
+        payload: {
+          blockType: "problem",
+          blockUsageKey,
+          trackingUrl: TEST_TRACKING_EVENTS,
+          chat: {
+            entryScreenTitle: "Entry screen title",
+            apiUrl: TEST_API_STREAMING,
+            conversationStarters: [
+              { content: "Prompt 1" },
+              { content: "Prompt 2" },
+              { content: "Prompt 3" },
+            ],
+          },
         },
       },
-    })
+      {
+        getTrackingClient,
+      },
+    )
 
     assertTrackingEvent({
       event_type: `${eventPrefix}.${TrackingEventType.Open}`,

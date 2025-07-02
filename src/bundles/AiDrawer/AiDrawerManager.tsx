@@ -36,6 +36,14 @@ type AiDrawerManagerProps = {
    */
   /** @deprecated The AiDrawerManager now handles multiple AiDrawer instance removing the need to target */
   target?: string
+  /**
+   * Function that returns API Client for use with tracking events.
+   *
+   * E.g., getAuthenticatedHttpClient from @edx/frontend-platform/auth
+   */
+  getTrackingClient?: () => {
+    post: (url: string, data: Record<string, unknown>) => void
+  }
 } & Pick<AiDrawerProps, "className" | "transformBody" | "fetchOpts">
 
 const AiDrawerManager = ({
@@ -43,6 +51,7 @@ const AiDrawerManager = ({
   messageOrigin,
   transformBody,
   fetchOpts,
+  getTrackingClient,
   target,
 }: AiDrawerManagerProps) => {
   const [drawerStates, setDrawerStates] = useState<
@@ -117,22 +126,21 @@ const AiDrawerManager = ({
                 [key]: { ...prev[key], open: false },
               }))
             }}
-            onTrackingEvent={(event) => {
+            onTrackingEvent={async (event) => {
               if (trackingUrl) {
+                const trackingClient = getTrackingClient?.()
+                if (!trackingClient) {
+                  console.warn("trackingClient is not provided")
+                  return
+                }
                 const { type, data } = event
                 const prefix = "ol_openedx_chat.drawer"
-                window.fetch(trackingUrl, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
+                trackingClient.post(trackingUrl, {
+                  event_type: `${prefix}.${type}`,
+                  event_data: {
+                    ...data,
+                    blockUsageKey: payload.blockUsageKey,
                   },
-                  body: JSON.stringify({
-                    event_type: `${prefix}.${type}`,
-                    event_data: {
-                      ...data,
-                      blockUsageKey: payload.blockUsageKey,
-                    },
-                  }),
                 })
               }
             }}
