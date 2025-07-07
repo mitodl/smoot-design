@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <script src="./static/bundles/syllabusAskTim.umd.js"></script>
+    <script>
+      const searchParams = new URLSearchParams(window.location.search)
+      const courseId = searchParams.get("course_id") ?? undefined
+      syllabusAskTim.init({ courseId })
+    </script>
+  </body>
+</html>
