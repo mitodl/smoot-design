@@ -19,7 +19,7 @@
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:bundles": "vite build",
     "build:bundles:legacy": "vite build --config vite.config.legacy.mts",
-    "build:bundles:syllabusAskTim": "vite build --config vite.config.syllabusAskTim.mts",
+    "build:bundles:aiChat": "vite build --config vite.config.aiChat.mts",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
     "lint-check": "eslint src/ .storybook/",
