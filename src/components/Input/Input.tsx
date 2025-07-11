@@ -237,7 +237,7 @@ const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
       fill: theme.custom.colors.silverGray,
     },
   },
-  ":hover": {
+  ":hover:not(:disabled)": {
     background: disabled ? "inherit" : "rgba(0, 0, 0, 0.06)",
   },
   color: theme.custom.colors.silverGray,

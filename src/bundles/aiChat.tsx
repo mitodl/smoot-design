@@ -20,7 +20,7 @@ const StyledAiChat = styled(AiChat)({
    * Unset some openedx styles that conflict with our chat styling.
    * There are probably other conflicts not handled here.
    */
-  "& input[type=text]:focus": {
+  "& input[type=text], & input[type=text]:focus": {
     border: "unset",
     boxShadow: "unset",
   },
