@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <title>Home</title>
-    <script src="./static/bundles/aiDrawerManager.umd.js"></script>
     <style>
       .app-frame {
         width: 600px;
@@ -12,11 +11,11 @@
       }
     </style>
   </head>
-
   <body>
     <iframe class="app-frame" src="./iframe.html"></iframe>
   </body>
-  <script>
+  <script type="module">
+    import * as aiDrawerManager from "./static/bundles/aiDrawerManager.es.js"
     /**
      * Accepts options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-ai-aidrawermanager--docs
      */

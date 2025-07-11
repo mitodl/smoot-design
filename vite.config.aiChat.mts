@@ -7,9 +7,9 @@ export default defineConfig(({ mode }) => ({
     outDir: "dist/bundles/",
     emptyOutDir: false,
     lib: {
-      entry: [path.resolve(__dirname, "src/bundles/aiDrawerManager.tsx")],
-      name: "remoteTutorDrawer",
-      fileName: (format) => `remoteTutorDrawer.${format}.js`,
+      entry: [path.resolve(__dirname, "src/bundles/aiChat.tsx")],
+      name: "aiChat",
+      fileName: (format) => `aiChat.${format}.js`,
     },
     sourcemap: true,
   },

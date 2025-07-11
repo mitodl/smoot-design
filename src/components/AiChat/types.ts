@@ -24,6 +24,14 @@ type RequestOpts = {
    */
   fetchOpts?: RequestInit
   onFinish?: (message: AiChatMessage) => void
+  /**
+   * Cookie name from which to read CSRF token.
+   */
+  csrfCookieName?: string
+  /**
+   * Header name to which to write CSRF token.
+   */
+  csrfHeaderName?: string
 }
 
 type AiChatContextProps = {

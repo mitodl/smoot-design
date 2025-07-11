@@ -61,6 +61,8 @@ describe("AiChat", () => {
     global.ResizeObserver = jest
       .fn()
       .mockImplementation(() => MockObserverInstance)
+
+    document.cookie = ""
   })
 
   const setup = (props: Partial<AiChatProps> = {}) => {
@@ -282,6 +284,30 @@ describe("AiChat", () => {
     })
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("Starter 1")
+  })
+
+  test("csrfCookieName and csrfHeaderName are used to set CSRF token if provided", async () => {
+    const csrfCookieName = "my-csrf-cookie"
+    const csrfHeaderName = "My-Csrf-Header"
+    document.cookie = `${csrfCookieName}=test-csrf-token`
+    setup({
+      requestOpts: {
+        apiUrl: API_URL,
+        csrfCookieName,
+        csrfHeaderName,
+      },
+    })
+
+    await user.click(getConversationStarters()[0])
+
+    expect(window.fetch).toHaveBeenCalledWith(
+      API_URL,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          [csrfHeaderName]: "test-csrf-token",
+        }),
+      }),
+    )
   })
 })
 

@@ -3,6 +3,7 @@ import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
 import { useMemo, createContext } from "react"
 import retryingFetch from "../../utils/retryingFetch"
+import { getCookie } from "../../utils/getCookie"
 
 const identity = <T,>(x: T): T => x
 
@@ -24,6 +25,14 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
         "Content-Type": "application/json",
         ...requestOpts.fetchOpts?.headers,
       },
+    }
+
+    const { csrfCookieName, csrfHeaderName } = requestOpts
+    if (csrfCookieName && csrfHeaderName) {
+      options.headers = {
+        ...options.headers,
+        [csrfHeaderName]: getCookie(csrfCookieName) ?? "",
+      }
     }
     return retryingFetch(url, options)
   }

@@ -3,7 +3,7 @@ import { defineConfig } from "vite"
 
 export default defineConfig(({ mode }) => ({
   build: {
-    outDir: "dist/bundled/",
+    outDir: "dist/bundles/",
     lib: {
       entry: [path.resolve(__dirname, "src/bundles/aiDrawerManager.tsx")],
       name: "aiDrawerManager",
