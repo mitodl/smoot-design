@@ -67,7 +67,6 @@ const trackingEvent = jest.fn()
 const assertTrackingEvent = (...data: unknown[]) => {
   expect(trackingEvent).toHaveBeenCalledTimes(data.length)
   data.forEach((eventData) => {
-    console.log(eventData)
     expect(trackingEvent).toHaveBeenCalledWith(eventData)
   })
   trackingEvent.mockClear()
@@ -282,19 +281,25 @@ describe("AiDrawerManager", () => {
 
       await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
-      await user.click(screen.getByText("Q: Test question 1?"))
+      const q1 = screen.getByRole("button", {
+        name: "Question: Test question 1?",
+      })
+      expect(q1).toHaveTextContent("Q: Test question 1?")
+      await user.click(q1)
 
-      screen.getByText("Answer: Test answer 1")
+      screen.getByRole("button", { name: "Answer: Test answer 1" })
 
       await user.click(screen.getByRole("button", { name: "Next card" }))
 
-      await user.click(screen.getByText("Q: Test question 2?"))
+      await user.click(
+        screen.getByRole("button", { name: "Question: Test question 2?" }),
+      )
 
-      screen.getByText("Answer: Test answer 2")
+      screen.getByRole("button", { name: "Answer: Test answer 2" })
 
       await user.click(screen.getByRole("button", { name: "Previous card" }))
 
-      screen.getByText("Q: Test question 1?")
+      screen.getByRole("button", { name: "Question: Test question 1?" })
     }),
   )
 
@@ -317,33 +322,33 @@ describe("AiDrawerManager", () => {
 
       await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
-      screen.getByText("Q: Test question 1?")
+      screen.getByRole("button", { name: "Question: Test question 1?" })
 
       await user.keyboard("{enter}")
 
-      screen.getByText("Answer: Test answer 1")
+      screen.getByRole("button", { name: "Answer: Test answer 1" })
 
       await user.keyboard("{arrowright}")
 
-      screen.getByText("Q: Test question 2?")
+      screen.getByRole("button", { name: "Question: Test question 2?" })
 
       await user.keyboard("{enter}")
 
-      screen.getByText("Answer: Test answer 2")
+      screen.getByRole("button", { name: "Answer: Test answer 2" })
 
       await user.keyboard("{arrowleft}")
 
-      screen.getByText("Q: Test question 1?")
+      screen.getByRole("button", { name: "Question: Test question 1?" })
 
       await user.keyboard("{arrowleft}")
 
-      screen.getByText("Q: Test question 3?")
+      screen.getByRole("button", { name: "Question: Test question 3?" })
 
       await user.keyboard("{arrowright}")
       await user.keyboard("{arrowright}")
       await user.keyboard("{arrowright}")
 
-      screen.getByText("Q: Test question 3?")
+      screen.getByRole("button", { name: "Question: Test question 3?" })
     }),
   )
 
