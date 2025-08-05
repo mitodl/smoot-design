@@ -67,7 +67,6 @@ const trackingEvent = jest.fn()
 const assertTrackingEvent = (...data: unknown[]) => {
   expect(trackingEvent).toHaveBeenCalledTimes(data.length)
   data.forEach((eventData) => {
-    console.log(eventData)
     expect(trackingEvent).toHaveBeenCalledWith(eventData)
   })
   trackingEvent.mockClear()

@@ -18,7 +18,10 @@ type RequestOpts = {
    *
    * JSON.stringify is applied to the return value.
    */
-  transformBody?: (messages: AiChatMessage[]) => unknown
+  transformBody?: (
+    messages: AiChatMessage[],
+    body?: Record<string, string>,
+  ) => unknown
   /**
    * Extra options to pass to fetch.
    */
@@ -52,6 +55,9 @@ type AiChatContextProps = {
   initialMessages?: Omit<AiChatMessage, "id">[]
 
   children?: React.ReactNode
+
+  additionalBody?: Record<string, string>
+  setAdditionalBody?: (body: Record<string, string>) => void
 }
 
 type AiChatDisplayProps = {
@@ -106,7 +112,7 @@ type AiChatDisplayProps = {
   scrollElement?: HTMLElement | null
 
   /**
-   * If true, the chat will display math equations using MathJax.
+   * If true, the chat will display math equations using MathJax..
    * Defaults to false.
    */
   useMathJax?: boolean
@@ -115,6 +121,11 @@ type AiChatDisplayProps = {
    * Defaults to true.
    */
   autofocus?: boolean
+
+  /**
+   * URL to fetch problem set list for dropdown.
+   */
+  problemSetListUrl?: string
 
   onSubmit?: (
     messageText: string,

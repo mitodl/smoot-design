@@ -123,6 +123,39 @@ const meta: Meta<typeof AiDrawerManager> = {
           },
         }}
       />
+      <h3>Tutor Bot with assignment selection</h3>
+      <IFrame
+        payload={{
+          blockType: "problem",
+          blockUsageKey: "problem-frame-assignment",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
+          chat: {
+            apiUrl: TEST_API_STREAMING,
+            initialMessages: INITIAL_MESSAGES,
+            conversationStarters: STARTERS,
+            entryScreenEnabled: false,
+            entryScreenTitle: "AskTIM about this problem",
+            assignmentList: [
+              {
+                displayName: "Assignment 1",
+                usageKey: "assignment-1",
+              },
+              {
+                displayName: "Assignment 2",
+                usageKey: "assignment-2",
+              },
+              {
+                displayName: "Assignment 3",
+                usageKey: "assignment-3",
+              },
+              {
+                displayName: "Assignment 4",
+                usageKey: "assignment-4",
+              },
+            ],
+          },
+        }}
+      />
       <h3>Video Drawer</h3>
       <p>
         The chat entry screen is shown by default for the video blocks Tutor
@@ -185,7 +218,6 @@ export const AiDrawerManagerStory: Story = {
         }),
         http.post(TRACKING_EVENTS_ENDPOINT, async ({ request }) => {
           const body = await request.json()
-          console.log("TrackingEvent", body)
           return HttpResponse.json({ success: true })
         }),
         ...handlers,

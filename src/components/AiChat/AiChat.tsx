@@ -18,6 +18,9 @@ import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
 import type { Message } from "@ai-sdk/react"
 import Markdown from "./Markdown"
 import EllipsisIcon from "./EllipsisIcon"
+import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
+import { useFetch } from "./utils"
+import { SelectChangeEvent } from "@mui/material/Select"
 
 const classes = {
   root: "MitAiChat--root",
@@ -68,6 +71,13 @@ const ChatContainer = styled.div<{ externalScroll: boolean }>(
     flexDirection: "column",
   }),
 )
+
+const AssignmentSelect = styled(SimpleSelectField)(({ theme }) => ({
+  width: "295px",
+  "> div": {
+    width: "inherit",
+  },
+}))
 
 const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
   ({ externalScroll }) => ({
@@ -224,12 +234,16 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   ref,
   useMathJax = false,
   onSubmit,
+  problemSetListUrl,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const promptInputRef = useRef<HTMLDivElement>(null)
+  const { response: problemSetListResponse } = useFetch<{
+    problem_set_titles: string[]
+  }>(problemSetListUrl)
 
   const {
     messages,
@@ -242,6 +256,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     error,
     initialMessages,
     status,
+    additionalBody,
+    setAdditionalBody,
   } = useAiChat()
 
   useScrollSnap({
@@ -281,6 +297,10 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     })
   }
 
+  const onProblemSetChange = (event: SelectChangeEvent<string | string[]>) => {
+    setAdditionalBody?.({ problem_set_title: event.target.value as string })
+  }
+
   const lastMsg = messages[messages.length - 1]
 
   const externalScroll = !!scrollElement
@@ -317,7 +337,30 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               askTimTitle={askTimTitle}
               externalScroll={externalScroll}
               className={classNames(className, classes.title)}
+              control={
+                problemSetListResponse?.problem_set_titles?.length ? (
+                  <AssignmentSelect
+                    label="Assignments"
+                    options={[
+                      {
+                        value: "",
+                        label: "Select an assignment",
+                        disabled: true,
+                      },
+                      ...problemSetListResponse.problem_set_titles.map(
+                        (title) => ({
+                          value: title,
+                          label: title,
+                        }),
+                      ),
+                    ]}
+                    value={additionalBody?.problem_set_title ?? ""}
+                    onChange={onProblemSetChange}
+                  />
+                ) : null
+              }
             />
+
             <MessagesContainer
               className={classes.messagesContainer}
               externalScroll={externalScroll}
