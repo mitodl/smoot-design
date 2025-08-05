@@ -1,5 +1,7 @@
 "use client"
 
+import { SelectChangeEvent } from "./components/SelectField/SelectField"
+
 export { default as styled } from "@emotion/styled"
 export { css, Global } from "@emotion/react"
 
@@ -40,6 +42,16 @@ export { CheckboxChoiceField } from "./components/CheckboxChoiceField/CheckboxCh
 export type { CheckboxChoiceFieldProps } from "./components/CheckboxChoiceField/CheckboxChoiceField"
 
 export {
+  FormFieldWrapper,
+  ControlLabel,
+  Description,
+} from "./components/FormHelpers/FormHelpers"
+export type {
+  FormFieldWrapperProps,
+  ControlLabelProps,
+} from "./components/FormHelpers/FormHelpers"
+
+export {
   RadioChoiceField,
   BooleanRadioChoiceField,
 } from "./components/RadioChoiceField/RadioChoiceField"
@@ -47,6 +59,13 @@ export type {
   RadioChoiceFieldProps,
   BooleanRadioChoiceFieldProps,
 } from "./components/RadioChoiceField/RadioChoiceField"
+
+export { Select, SelectField } from "./components/SelectField/SelectField"
+export type {
+  SelectChangeEvent,
+  SelectProps,
+  SelectFieldProps,
+} from "./components/SelectField/SelectField"
 
 export { SrAnnouncer } from "./components/SrAnnouncer/SrAnnouncer"
 export type { SrAnnouncerProps } from "./components/SrAnnouncer/SrAnnouncer"
