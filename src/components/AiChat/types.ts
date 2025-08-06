@@ -124,8 +124,16 @@ type AiChatDisplayProps = {
 
   /**
    * URL to fetch problem set list for dropdown.
+   *
+   * The problem set selection is passed as the second argument to the `transformBody` function
+   * provided as `{ problem_set_title: string }`.
    */
   problemSetListUrl?: string
+
+  /**
+   * Initial messages to display on problem set selection.
+   */
+  problemSetInitialMessages?: Omit<AiChatMessage, "id">[]
 
   onSubmit?: (
     messageText: string,

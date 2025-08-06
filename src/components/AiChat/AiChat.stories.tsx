@@ -110,27 +110,6 @@ export const JsonResponses: Story = {
   },
 }
 
-export const Temp: Story = {
-  args: {
-    requestOpts: {
-      apiUrl: TEST_API_STREAMING,
-      transformBody: (messages, body) => ({
-        message: messages[messages.length - 1].content,
-        problem_set_title: body?.problem_set_title,
-      }),
-    },
-    initialMessages: [
-      {
-        content:
-          "Hi! Please select an assignment from the dropdown menu to begin.",
-        role: "assistant",
-      },
-    ],
-    conversationStarters: STARTERS,
-    entryScreenEnabled: false,
-  },
-}
-
 export const AssignmentSelection: Story = {
   args: {
     requestOpts: {
@@ -150,6 +129,12 @@ export const AssignmentSelection: Story = {
     conversationStarters: [],
     entryScreenEnabled: false,
     problemSetListUrl: TEST_API_PROBLEM_SET_LIST,
+    problemSetInitialMessages: [
+      {
+        role: "assistant",
+        content: "Which question are you working on?",
+      },
+    ],
   },
 }
 

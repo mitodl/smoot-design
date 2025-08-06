@@ -77,6 +77,9 @@ const AssignmentSelect = styled(SimpleSelectField)({
   "> div": {
     width: "inherit",
   },
+  label: {
+    display: "none",
+  },
 })
 
 const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
@@ -235,6 +238,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   useMathJax = false,
   onSubmit,
   problemSetListUrl,
+  problemSetInitialMessages,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -257,6 +261,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     initialMessages,
     status,
     additionalBody,
+    setMessages,
     setAdditionalBody,
   } = useAiChat()
 
@@ -298,6 +303,14 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   }
 
   const onProblemSetChange = (event: SelectChangeEvent<string | string[]>) => {
+    if (problemSetInitialMessages) {
+      setMessages(
+        problemSetInitialMessages.map((message, i) => ({
+          ...message,
+          id: `initial-${i}`,
+        })),
+      )
+    }
     setAdditionalBody?.({ problem_set_title: event.target.value as string })
   }
 

@@ -112,17 +112,6 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
     })
   }, [parseContent, unparsed, initialMessages])
 
-  const _setAdditionalBody = (body: Record<string, string>) => {
-    setMessages([
-      {
-        role: "assistant",
-        content: "Which question are you working on?",
-        id: "initial-0",
-      },
-    ])
-    setAdditionalBody(body)
-  }
-
   return (
     <AiChatContext.Provider
       /**
@@ -132,9 +121,9 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
       value={{
         initialMessages,
         messages,
-        additionalBody,
-        setAdditionalBody: _setAdditionalBody,
         setMessages,
+        additionalBody,
+        setAdditionalBody,
         ...others,
       }}
     >
