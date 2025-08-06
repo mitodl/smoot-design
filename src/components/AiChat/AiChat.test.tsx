@@ -179,10 +179,13 @@ describe("AiChat", () => {
     await user.paste("User message")
     await user.click(screen.getByRole("button", { name: "Send" }))
 
-    expect(transformBody).toHaveBeenCalledWith([
-      expect.objectContaining(initialMessages[0]),
-      expect.objectContaining({ content: "User message", role: "user" }),
-    ])
+    expect(transformBody).toHaveBeenCalledWith(
+      [
+        expect.objectContaining(initialMessages[0]),
+        expect.objectContaining({ content: "User message", role: "user" }),
+      ],
+      {},
+    )
     expect(mockFetch).toHaveBeenCalledTimes(1)
     expect(mockFetch).toHaveBeenCalledWith(
       API_URL,
