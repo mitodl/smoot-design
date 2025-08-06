@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useChat, UseChatOptions } from "@ai-sdk/react"
 import type { Message } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage } from "./types"
-import { useMemo } from "react"
 
 const identity = <T>(x: T): T => x
 

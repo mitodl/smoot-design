@@ -72,12 +72,12 @@ const ChatContainer = styled.div<{ externalScroll: boolean }>(
   }),
 )
 
-const AssignmentSelect = styled(SimpleSelectField)(({ theme }) => ({
+const AssignmentSelect = styled(SimpleSelectField)({
   width: "295px",
   "> div": {
     width: "inherit",
   },
-}))
+})
 
 const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
   ({ externalScroll }) => ({

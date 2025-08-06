@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useState } from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { SimpleSelect, SimpleSelectProps } from "./SimpleSelect"
 import type { SimpleSelectOption } from "./SimpleSelect"
 import type { SelectChangeEvent } from "@mui/material/Select"

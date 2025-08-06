@@ -1,7 +1,5 @@
 "use client"
 
-import { SelectChangeEvent } from "./components/SelectField/SelectField"
-
 export { default as styled } from "@emotion/styled"
 export { css, Global } from "@emotion/react"
 

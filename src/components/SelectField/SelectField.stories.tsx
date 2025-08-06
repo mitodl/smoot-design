@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { SelectField } from "./SelectField"
 import type { SelectFieldProps } from "./SelectField"
 import { MenuItem } from "../MenuItem/MenuItem"
