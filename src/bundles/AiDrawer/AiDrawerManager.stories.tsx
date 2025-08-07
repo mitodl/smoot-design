@@ -183,9 +183,7 @@ export const AiDrawerManagerStory: Story = {
         http.get(CONTENT_FILE_URL, () => {
           return HttpResponse.json(sampleResponse)
         }),
-        http.post(TRACKING_EVENTS_ENDPOINT, async ({ request }) => {
-          const body = await request.json()
-          console.log("TrackingEvent", body)
+        http.post(TRACKING_EVENTS_ENDPOINT, () => {
           return HttpResponse.json({ success: true })
         }),
         ...handlers,

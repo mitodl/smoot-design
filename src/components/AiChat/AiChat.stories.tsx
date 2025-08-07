@@ -1,5 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
+import { http, HttpResponse } from "msw"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
 import styled from "@emotion/styled"
@@ -9,6 +10,7 @@ import { MathJaxContext } from "better-react-mathjax"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
+const TEST_API_PROBLEM_SET_LIST = "http://localhost:4567/problem_set_list"
 
 const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
   {
@@ -41,7 +43,21 @@ const meta: Meta<typeof AiChat> = {
   title: "smoot-design/AI/AiChat",
   component: AiChat,
   parameters: {
-    msw: { handlers },
+    msw: {
+      handlers: [
+        http.get(TEST_API_PROBLEM_SET_LIST, () => {
+          return HttpResponse.json({
+            problem_set_titles: [
+              "Assignment 1",
+              "Assignment 2",
+              "Assignment 3",
+              "Assignment 4",
+            ],
+          })
+        }),
+        ...handlers,
+      ],
+    },
   },
   render: (args) => <AiChat {...args} />,
   decorators: (Story, context) => {
@@ -91,6 +107,34 @@ export const JsonResponses: Story = {
     parseContent: (content: unknown) => {
       return JSON.parse(content as string).message
     },
+  },
+}
+
+export const AssignmentSelection: Story = {
+  args: {
+    requestOpts: {
+      apiUrl: TEST_API_STREAMING,
+      transformBody: (messages, body) => ({
+        message: messages[messages.length - 1].content,
+        problem_set_title: body?.problem_set_title,
+      }),
+    },
+    initialMessages: [
+      {
+        content:
+          "Hi! Please select an assignment from the dropdown menu to begin.",
+        role: "assistant",
+      },
+    ],
+    conversationStarters: [],
+    entryScreenEnabled: false,
+    problemSetListUrl: TEST_API_PROBLEM_SET_LIST,
+    problemSetInitialMessages: [
+      {
+        role: "assistant",
+        content: "Which question are you working on?",
+      },
+    ],
   },
 }
 

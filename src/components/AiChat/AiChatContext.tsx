@@ -1,24 +1,29 @@
 import * as React from "react"
 import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
-import { useMemo, createContext } from "react"
+import { useMemo, createContext, useState } from "react"
 import retryingFetch from "../../utils/retryingFetch"
 import { getCookie } from "../../utils/getCookie"
 
 const identity = <T,>(x: T): T => x
 
-const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
-  (requestOpts: RequestOpts) => async (url, opts) => {
+const getFetcher: (
+  requestOpts: RequestOpts,
+  additionalBody: Record<string, string>,
+) => typeof fetch =
+  (requestOpts: RequestOpts, additionalBody: Record<string, string> = {}) =>
+  async (url, opts) => {
     if (typeof opts?.body !== "string") {
       console.error("Unexpected body type.")
       return retryingFetch(url, opts)
     }
-    const messages: AiChatMessage[] = JSON.parse(opts?.body).messages
+    const parsedBody = JSON.parse(opts?.body)
+    const messages: AiChatMessage[] = parsedBody.messages
     const transformBody: RequestOpts["transformBody"] =
       requestOpts.transformBody ?? identity
     const options: RequestInit = {
       ...opts,
-      body: JSON.stringify(transformBody(messages)),
+      body: JSON.stringify(transformBody(messages, additionalBody)),
       ...requestOpts.fetchOpts,
       headers: {
         ...opts?.headers,
@@ -43,6 +48,8 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
  */
 type AiChatContextResult = UseChatHelpers & {
   initialMessages: AiChatMessage[] | null
+  additionalBody?: Record<string, string>
+  setAdditionalBody?: (body: Record<string, string>) => void
 }
 const AiChatContext = createContext<AiChatContextResult | null>(null)
 
@@ -66,8 +73,19 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
     )
   }, [_initialMessages])
 
-  const fetcher = useMemo(() => getFetcher(requestOpts), [requestOpts])
-  const { messages: unparsed, ...others } = useChat({
+  const [additionalBody, setAdditionalBody] = useState<Record<string, string>>(
+    {},
+  )
+
+  const fetcher = useMemo(
+    () => getFetcher(requestOpts, additionalBody),
+    [requestOpts, additionalBody],
+  )
+  const {
+    messages: unparsed,
+    setMessages,
+    ...others
+  } = useChat({
     api: requestOpts.apiUrl,
     streamProtocol: "text",
     fetch: fetcher,
@@ -100,7 +118,14 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
        * Ensure that child state is reset when chatId changes.
        */
       key={chatId}
-      value={{ initialMessages, messages, ...others }}
+      value={{
+        initialMessages,
+        messages,
+        setMessages,
+        additionalBody,
+        setAdditionalBody,
+        ...others,
+      }}
     >
       {children}
     </AiChatContext.Provider>
