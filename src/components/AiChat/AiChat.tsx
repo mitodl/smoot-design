@@ -306,7 +306,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     if (problemSetInitialMessages) {
       setMessages(
         problemSetInitialMessages.map((message, i) => ({
-          ...message,
+          content: message.content?.replace(
+            "<title>",
+            event.target.value as string,
+          ),
+          role: message.role,
           id: `initial-${i}`,
         })),
       )
