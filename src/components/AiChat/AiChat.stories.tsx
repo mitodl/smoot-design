@@ -132,7 +132,7 @@ export const AssignmentSelection: Story = {
     problemSetInitialMessages: [
       {
         role: "assistant",
-        content: "Which question are you working on?",
+        content: "Can I help you with any of the problems in <title>?",
       },
     ],
   },

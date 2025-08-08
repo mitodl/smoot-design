@@ -132,6 +132,7 @@ type AiChatDisplayProps = {
 
   /**
    * Initial messages to display on problem set selection.
+   * Occurrences of "<title>" in the content will be replaced with the problem set title.
    */
   problemSetInitialMessages?: Omit<AiChatMessage, "id">[]
 
