@@ -8,7 +8,6 @@ import {
 } from "../components/ThemeProvider/ThemeProvider"
 import { CacheProvider } from "@emotion/react"
 import createCache from "@emotion/cache"
-import { MathJaxContext } from "better-react-mathjax"
 
 /**
  * Renders the AiDrawerManager to the page.
@@ -33,9 +32,7 @@ const init = (opts: AiDrawerManagerProps) => {
   createRoot(container).render(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
-        <MathJaxContext>
-          <AiDrawerManager {...opts} />
-        </MathJaxContext>
+        <AiDrawerManager {...opts} />
       </ThemeProvider>
     </CacheProvider>,
   )

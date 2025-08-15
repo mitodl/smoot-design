@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, Suspense } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
@@ -21,6 +21,17 @@ import EllipsisIcon from "./EllipsisIcon"
 import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
 import { useFetch } from "./utils"
 import { SelectChangeEvent } from "@mui/material/Select"
+import { MathJaxContext } from "better-react-mathjax"
+
+const ConditionalMathJaxWrapper: React.FC<{
+  useMathJax: boolean
+  children: React.ReactNode
+}> = ({ useMathJax, children }) => {
+  if (!useMathJax) {
+    return <>{children}</>
+  }
+  return <MathJaxContext>{children}</MathJaxContext>
+}
 
 const classes = {
   root: "MitAiChat--root",
@@ -377,81 +388,84 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 ) : null
               }
             />
-
-            <MessagesContainer
-              className={classes.messagesContainer}
-              externalScroll={externalScroll}
-              ref={messagesContainerRef}
-            >
-              {messages.map((m: Message, i) => {
-                // Our Markdown+Mathjax has issues when rendering streaming display math
-                // Force a re-render of the last (streaming) message when it's done loading.
-                const key =
-                  i === messages.length - 1 && isLoading
-                    ? `isLoading-${m.id}`
-                    : m.id
-                return (
+            <ConditionalMathJaxWrapper useMathJax={useMathJax}>
+              <MessagesContainer
+                className={classes.messagesContainer}
+                externalScroll={externalScroll}
+                ref={messagesContainerRef}
+              >
+                {messages.map((m: Message, i) => {
+                  // Our Markdown+Mathjax has issues when rendering streaming display math
+                  // Force a re-render of the last (streaming) message when it's done loading.
+                  const key =
+                    i === messages.length - 1 && isLoading
+                      ? `isLoading-${m.id}`
+                      : m.id
+                  return (
+                    <MessageRow
+                      key={key}
+                      data-chat-role={m.role}
+                      className={classNames(classes.messageRow, {
+                        [classes.messageRowUser]: m.role === "user",
+                        [classes.messageRowAssistant]: m.role === "assistant",
+                      })}
+                    >
+                      <Message className={classes.message}>
+                        <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
+                          {m.role === "user"
+                            ? "You said: "
+                            : "Assistant said: "}
+                        </VisuallyHidden>
+                        {useMathJax ? (
+                          <Markdown enableMathjax={true}>
+                            {replaceMathjax(m.content)}
+                          </Markdown>
+                        ) : (
+                          <Markdown>{m.content}</Markdown>
+                        )}
+                      </Message>
+                    </MessageRow>
+                  )
+                })}
+                {showStarters ? (
+                  <StarterContainer>
+                    {conversationStarters?.map((m) => (
+                      <Starter
+                        className={classes.conversationStarter}
+                        key={m.content}
+                        onClick={() => {
+                          scrollToBottom()
+                          append({ role: "user", content: m.content })
+                          onSubmit?.(m.content, {
+                            source: "conversation-starter",
+                          })
+                        }}
+                      >
+                        {m.content}
+                      </Starter>
+                    ))}
+                  </StarterContainer>
+                ) : null}
+                {waiting ? (
                   <MessageRow
-                    key={key}
-                    data-chat-role={m.role}
-                    className={classNames(classes.messageRow, {
-                      [classes.messageRowUser]: m.role === "user",
-                      [classes.messageRowAssistant]: m.role === "assistant",
-                    })}
+                    className={classNames(
+                      classes.messageRow,
+                      classes.messageRowAssistant,
+                    )}
+                    key={"loading"}
                   >
-                    <Message className={classes.message}>
-                      <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
-                        {m.role === "user" ? "You said: " : "Assistant said: "}
-                      </VisuallyHidden>
-                      {useMathJax ? (
-                        <Markdown enableMathjax={true}>
-                          {replaceMathjax(m.content)}
-                        </Markdown>
-                      ) : (
-                        <Markdown>{m.content}</Markdown>
-                      )}
+                    <Message>
+                      <StyledEllipsisIcon />
                     </Message>
                   </MessageRow>
-                )
-              })}
-              {showStarters ? (
-                <StarterContainer>
-                  {conversationStarters?.map((m) => (
-                    <Starter
-                      className={classes.conversationStarter}
-                      key={m.content}
-                      onClick={() => {
-                        scrollToBottom()
-                        append({ role: "user", content: m.content })
-                        onSubmit?.(m.content, {
-                          source: "conversation-starter",
-                        })
-                      }}
-                    >
-                      {m.content}
-                    </Starter>
-                  ))}
-                </StarterContainer>
-              ) : null}
-              {waiting ? (
-                <MessageRow
-                  className={classNames(
-                    classes.messageRow,
-                    classes.messageRowAssistant,
-                  )}
-                  key={"loading"}
-                >
-                  <Message>
-                    <StyledEllipsisIcon />
-                  </Message>
-                </MessageRow>
-              ) : null}
-              {error ? (
-                <Alert severity="error" closable>
-                  An unexpected error has occurred.
-                </Alert>
-              ) : null}
-            </MessagesContainer>
+                ) : null}
+                {error ? (
+                  <Alert severity="error" closable>
+                    An unexpected error has occurred.
+                  </Alert>
+                ) : null}
+              </MessagesContainer>
+            </ConditionalMathJaxWrapper>
             <BottomSection
               externalScroll={externalScroll}
               className={classes.bottomSection}
