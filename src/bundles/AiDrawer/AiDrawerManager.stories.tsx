@@ -6,7 +6,6 @@ import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawerManager } from "./AiDrawerManager"
 import type { AiDrawerInitMessage } from "./AiDrawerManager"
-import { MathJaxContext } from "better-react-mathjax"
 
 type InitPayload = AiDrawerInitMessage["payload"]
 
@@ -162,9 +161,7 @@ const meta: Meta<typeof AiDrawerManager> = {
           },
         }}
       />
-      <MathJaxContext>
-        <AiDrawerManager messageOrigin="http://localhost:6006" />
-      </MathJaxContext>
+      <AiDrawerManager messageOrigin="http://localhost:6006" />
     </div>
   ),
 }

@@ -2,7 +2,6 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import { AiDrawer } from "./AiDrawer"
 import type { AiDrawerProps, AiDrawerSettings } from "./AiDrawer"
-import { MathJaxContext } from "better-react-mathjax"
 
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
@@ -109,7 +108,7 @@ const AiDrawerManager = ({
   }
 
   return (
-    <MathJaxContext>
+    <>
       {Object.values(drawerStates).map(({ key, open, payload }) => {
         const { trackingUrl, ...settings } = payload
         return (
@@ -147,7 +146,7 @@ const AiDrawerManager = ({
           />
         )
       })}
-    </MathJaxContext>
+    </>
   )
 }
 
