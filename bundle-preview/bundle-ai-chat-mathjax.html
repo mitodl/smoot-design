@@ -10,12 +10,12 @@
       import * as aiChat from "./static/bundles/aiChat.es.js"
 
       const requestOpts = {
-        apiUrl: "https://api.rc.learn.mit.edu/ai/http/tutor_agent/",
-        transformBody: (messages) => {
+        apiUrl: "https://api.rc.learn.mit.edu/ai/http/demo_canvas_tutor_agent/",
+        transformBody: (messages, { problem_set_title }) => {
           const body = {
-            collection_name: "content_files",
             message: messages[messages.length - 1].content,
-            course_id: "course-v1:xPRO+PCDEx",
+            run_readable_id: "14566-kaleba:20211202+canvas",
+            problem_set_title,
           }
           return body
         },
@@ -43,6 +43,14 @@
             },
           ],
           useMathJax: true,
+          problemSetListUrl:
+            "https://api.rc.learn.mit.edu/ai/api/v0/problem_set_list/?run_readable_id=14566-kaleba%3A20211202%2Bcanvas",
+          problemSetInitialMessages: [
+            {
+              role: "assistant",
+              content: "Can I help you with any of the problems in <title>?",
+            },
+          ],
         },
         {
           container: document.getElementById("ai-chat-container"),
