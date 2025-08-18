@@ -38,18 +38,16 @@
             },
             {
               role: "assistant",
-              content: "The Fourier Transform is a powerful mathematical tool that decomposes a function into its constituent frequencies. It transforms a function from the time domain to the frequency domain.\n\nFor a continuous function f(t), the Fourier Transform F(ω) is defined as:\n\n$$F(\\omega) = \\int_{-\\infty}^{\\infty} f(t) e^{-i\\omega t} dt$$\n\nWhere:\n- F(ω) is the Fourier transform of f(t)\n- ω is the angular frequency\n- i is the imaginary unit\n- The integral is taken over all time\n\nThe inverse Fourier Transform allows us to recover the original function:\n\n$$f(t) = \\frac{1}{2\\pi} \\int_{-\\infty}^{\\infty} F(\\omega) e^{i\\omega t} d\\omega$$\n\nThis transformation is fundamental in signal processing, physics, and engineering for analyzing periodic and non-periodic signals.",
-            }
+              content:
+                "The Fourier Transform is a powerful mathematical tool that decomposes a function into its constituent frequencies. It transforms a function from the time domain to the frequency domain.\n\nFor a continuous function f(t), the Fourier Transform F(ω) is defined as:\n\n$$F(\\omega) = \\int_{-\\infty}^{\\infty} f(t) e^{-i\\omega t} dt$$\n\nWhere:\n- F(ω) is the Fourier transform of f(t)\n- ω is the angular frequency\n- i is the imaginary unit\n- The integral is taken over all time\n\nThe inverse Fourier Transform allows us to recover the original function:\n\n$$f(t) = \\frac{1}{2\\pi} \\int_{-\\infty}^{\\infty} F(\\omega) e^{i\\omega t} d\\omega$$\n\nThis transformation is fundamental in signal processing, physics, and engineering for analyzing periodic and non-periodic signals.",
+            },
           ],
-
-
-          useMathJax: true,        },,
+          useMathJax: true,
+        },
         {
           container: document.getElementById("ai-chat-container"),
         },
       )
     </script>
   </body>
-</html>
-
 </html>
