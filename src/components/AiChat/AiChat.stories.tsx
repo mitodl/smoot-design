@@ -6,7 +6,6 @@ import type { AiChatProps } from "./types"
 import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"
 import { FC, useEffect, useRef, useState } from "react"
-import { MathJaxContext } from "better-react-mathjax"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
@@ -62,11 +61,9 @@ const meta: Meta<typeof AiChat> = {
   render: (args) => <AiChat {...args} />,
   decorators: (Story, context) => {
     return (
-      <MathJaxContext>
-        <Container>
-          <Story key={String(context.args.entryScreenEnabled)} />
-        </Container>
-      </MathJaxContext>
+      <Container>
+        <Story key={String(context.args.entryScreenEnabled)} />
+      </Container>
     )
   },
   args: {

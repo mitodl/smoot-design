@@ -4,7 +4,6 @@ import type { Meta, StoryObj } from "@storybook/nextjs"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawer, AiDrawerSettings } from "./AiDrawer"
-import { MathJaxContext } from "better-react-mathjax"
 import Button from "@mui/material/Button"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
@@ -36,13 +35,11 @@ const meta: Meta<typeof AiDrawer> = {
         </Button>
         <p>Message data:</p>
         <pre>{JSON.stringify({ settings }, null, 2)}</pre>
-        <MathJaxContext>
-          <AiDrawer
-            settings={settings}
-            open={open}
-            onClose={() => setOpen(false)}
-          />
-        </MathJaxContext>
+        <AiDrawer
+          settings={settings}
+          open={open}
+          onClose={() => setOpen(false)}
+        />
       </>
     )
   },
