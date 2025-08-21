@@ -501,7 +501,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                       <AdornmentButton
                         aria-label="Stop"
                         type="submit"
-                        disabled={!stoppable || needsProblemSet}
+                        disabled={!stoppable}
                       >
                         <StyledStopButton />
                       </AdornmentButton>
