@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown"
 import rehypeMathjax from "rehype-mathjax/browser"
 import remarkMath from "remark-math"
 import { MathJax } from "better-react-mathjax"
+import rehypeRaw from "rehype-raw"
 
 type MarkdownProps = {
   children?: string
@@ -10,11 +11,11 @@ type MarkdownProps = {
 }
 const Markdown: React.FC<MarkdownProps> = ({ children, enableMathjax }) => {
   const remarkPlugins = enableMathjax ? [remarkMath] : undefined
-  const rehypePlugins = enableMathjax ? [rehypeMathjax] : undefined
+  const rehypePlugins = enableMathjax ? [rehypeRaw, rehypeMathjax] : [rehypeRaw]
 
   const markdown = (
     <ReactMarkdown
-      skipHtml={true}
+      disallowedElements={["script", "applet", "iframe", "link"]}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
     >
