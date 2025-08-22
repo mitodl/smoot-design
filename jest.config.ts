@@ -18,6 +18,7 @@ const config: Config.InitialOptions = {
     "^react-markdown$": "<rootDir>/test-utils/modulemock.js",
     "^rehype-mathjax/browser$": "<rootDir>/test-utils/modulemock.js",
     "^remark-math$": "<rootDir>/test-utils/modulemock.js",
+    "^remark-supersub$": "<rootDir>/test-utils/modulemock.js",
     "^better-react-mathjax$": "<rootDir>/test-utils/modulemock.js",
   },
   rootDir: "./src",
