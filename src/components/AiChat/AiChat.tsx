@@ -174,10 +174,9 @@ const Message = styled.div(({ theme }) => ({
     borderRadius: "8px 0px 8px 8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
-  "span > a": {
-    verticalAlign: "super",
-    fontSize: ".83em",
+  "a:has(sup)": {
     textDecoration: "none",
+    fontSize: "0.83em",
   },
 }))
 
