@@ -174,6 +174,10 @@ const Message = styled.div(({ theme }) => ({
     borderRadius: "8px 0px 8px 8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
+  "a:has(sup)": {
+    textDecoration: "none",
+    fontSize: "0.83em",
+  },
 }))
 
 const StarterContainer = styled.div({
