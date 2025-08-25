@@ -263,6 +263,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const { response: problemSetListResponse } = useFetch<{
     problem_set_titles: string[]
   }>(problemSetListUrl)
+  const [needsProblemSet, setNeedsProblemSet] = useState(!!problemSetListUrl)
 
   const {
     messages,
@@ -330,6 +331,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
         })),
       )
     }
+    setNeedsProblemSet(!event.target.value)
     setAdditionalBody?.({ problem_set_title: event.target.value as string })
   }
 
@@ -508,7 +510,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         <StyledStopButton />
                       </AdornmentButton>
                     ) : (
-                      <AdornmentButton type="submit" aria-label="Send">
+                      <AdornmentButton
+                        type="submit"
+                        aria-label="Send"
+                        disabled={needsProblemSet}
+                      >
                         <StyledSendButton />
                       </AdornmentButton>
                     )
