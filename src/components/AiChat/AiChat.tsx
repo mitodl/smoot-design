@@ -295,6 +295,12 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   }, [showEntryScreen])
 
   useEffect(() => {
+    if (problemSetListResponse) {
+      setNeedsProblemSet(!!problemSetListResponse.problem_set_titles?.length)
+    }
+  }, [problemSetListResponse])
+
+  useEffect(() => {
     if (
       messages.some(
         (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
