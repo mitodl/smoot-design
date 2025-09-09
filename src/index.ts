@@ -6,6 +6,7 @@ export { css, Global } from "@emotion/react"
 export {
   ThemeProvider,
   createTheme,
+  defaultThemeOptions,
 } from "./components/ThemeProvider/ThemeProvider"
 
 export { Alert } from "./components/Alert/Alert"
