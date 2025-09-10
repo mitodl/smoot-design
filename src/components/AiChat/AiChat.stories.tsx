@@ -10,6 +10,8 @@ import { FC, useEffect, useRef, useState } from "react"
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const TEST_API_JSON = "http://localhost:4567/json"
 const TEST_API_PROBLEM_SET_LIST = "http://localhost:4567/problem_set_list"
+const TEST_API_PROBLEM_SET_LIST_EMPTY =
+  "http://localhost:4567/problem_set_list_empty"
 
 const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
   {
@@ -52,6 +54,11 @@ const meta: Meta<typeof AiChat> = {
               "Assignment 3",
               "Assignment 4",
             ],
+          })
+        }),
+        http.get(TEST_API_PROBLEM_SET_LIST_EMPTY, () => {
+          return HttpResponse.json({
+            problem_set_titles: [],
           })
         }),
         ...handlers,
@@ -130,6 +137,41 @@ export const AssignmentSelection: Story = {
       {
         role: "assistant",
         content: "Can I help you with any of the problems in <title>?",
+      },
+    ],
+  },
+}
+
+export const AssignmentSelectionEmpty: Story = {
+  args: {
+    requestOpts: {
+      apiUrl: TEST_API_STREAMING,
+      transformBody: (messages, body) => ({
+        message: messages[messages.length - 1].content,
+        problem_set_title: body?.problem_set_title,
+      }),
+    },
+    initialMessages: [
+      {
+        content:
+          "Hi! Please select an assignment from the dropdown menu to begin.",
+        role: "assistant",
+      },
+    ],
+    conversationStarters: [],
+    entryScreenEnabled: false,
+    problemSetListUrl: TEST_API_PROBLEM_SET_LIST_EMPTY,
+    problemSetInitialMessages: [
+      {
+        role: "assistant",
+        content: "Can I help you with any of the problems in <title>?",
+      },
+    ],
+    problemSetEmptyMessages: [
+      {
+        role: "assistant",
+        content:
+          "Hi! We're setting up this course right now. Please check back later.",
       },
     ],
   },

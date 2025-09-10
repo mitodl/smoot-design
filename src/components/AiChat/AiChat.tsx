@@ -254,6 +254,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   onSubmit,
   problemSetListUrl,
   problemSetInitialMessages,
+  problemSetEmptyMessages,
   ...others // Could contain data attributes
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -295,8 +296,27 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   }, [showEntryScreen])
 
   useEffect(() => {
-    if (problemSetListResponse) {
-      setNeedsProblemSet(!!problemSetListResponse.problem_set_titles?.length)
+    if (
+      problemSetListResponse &&
+      !problemSetListResponse.problem_set_titles?.length
+    ) {
+      if (problemSetEmptyMessages) {
+        setMessages(
+          problemSetEmptyMessages.map((message, i) => ({
+            id: `initial-${i}`,
+            ...message,
+          })),
+        )
+      } else {
+        setMessages([
+          {
+            id: "initial-0",
+            role: "assistant",
+            content:
+              "Hi! It looks like there are no assignments available right now. I'm here to help when there is an assignment ready to start.",
+          },
+        ])
+      }
     }
   }, [problemSetListResponse])
 
@@ -506,6 +526,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   inputProps={{
                     "aria-label": "Ask a question",
                   }}
+                  disabled={needsProblemSet}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton

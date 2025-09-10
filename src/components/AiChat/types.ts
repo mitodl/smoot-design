@@ -136,6 +136,11 @@ type AiChatDisplayProps = {
    */
   problemSetInitialMessages?: Omit<AiChatMessage, "id">[]
 
+  /**
+   * Initial messages to display on problem set selection if no problem sets are available.
+   */
+  problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
+
   onSubmit?: (
     messageText: string,
     meta: {
