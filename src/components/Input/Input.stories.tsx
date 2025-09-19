@@ -128,17 +128,16 @@ export const Adornments: Story = {
 
 const PageStyles = styled.div(`
   input {
-    background: red;
+    background-color: red;
     border: 2px solid blue;
-  }
-
-  input:disabled {
-    background: red;
-
   }
 
   input[type="text"] {
     background: red;
+  }
+
+  input:disabled {
+    background-image: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
   }
 
   .MuiInputBase-input {

@@ -144,13 +144,13 @@ const baseInputStyles = (theme: Theme) => ({
   "&.Mui-disabled": {
     backgroundColor: theme.custom.colors.lightGray1,
     input: {
-      backgroundColor: "unset",
+      background: "unset",
     },
   },
   "&:hover:not(.Mui-disabled):not(.Mui-focused)": {
     borderColor: theme.custom.colors.darkGray2,
     input: {
-      backgroundColor: "unset",
+      background: "unset",
     },
   },
   "&.Mui-focused": {
@@ -198,8 +198,9 @@ const baseInputStyles = (theme: Theme) => ({
    * - Will not override .class1 .class2 input[type="text"]
    */
   "&&& input": {
-    backgroundColor: "unset",
-    border: "none",
+    background: "unset",
+    border: "unset",
+    boxShadow: "unset",
   },
 })
 
