@@ -136,7 +136,7 @@
     "storybook": "^9.0.13",
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "type-fest": "^4.26.1",
+    "type-fest": "^5.0.0",
     "typescript": "^5.6.3",
     "vite": "^7.0.0"
   },
