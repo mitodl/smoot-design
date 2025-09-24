@@ -26,7 +26,8 @@
     "lint-fix": "yarn lint-check --fix",
     "fmt-check": "prettier --ignore-path .gitignore --ignore-path .prettierignore --check .",
     "fmt-fix": "prettier --ignore-path .gitignore --ignore-path .prettierignore --write .",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "postinstall": "echo '@mitodl/smoot-design postinstall: done' && touch smoot_postinstall_record.txt"
   },
   "exports": {
     ".": {
