@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
@@ -21,26 +21,77 @@ import EllipsisIcon from "./EllipsisIcon"
 import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
 import { useFetch } from "./utils"
 import { SelectChangeEvent } from "@mui/material/Select"
-import { MathJaxContext } from "better-react-mathjax"
+import { type MathJax3Config, MathJaxContext } from "better-react-mathjax"
+import deepmerge from "@mui/utils/deepmerge"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
+  config?: MathJax3Config
   children: React.ReactNode
-}> = ({ useMathJax, children }) => {
+}> = ({ useMathJax, config = {}, children }) => {
   if (!useMathJax) {
     return <>{children}</>
   }
   return (
     <MathJaxContext
-      config={{
-        loader: { load: ["[tex]/boldsymbol"] },
-        tex: {
-          packages: { "[+]": ["boldsymbol"] },
+      config={deepmerge(
+        {
+          startup: {
+            typeset: false,
+          },
+          loader: { load: ["[tex]/boldsymbol"] },
+          tex: {
+            packages: { "[+]": ["boldsymbol"] },
+          },
         },
-      }}
+        config,
+      )}
     >
       {children}
     </MathJaxContext>
+  )
+}
+
+/**
+ * Component that provides isolation between React and MathJax DOM manipulation
+ *
+ * Seeing errors e.g. Error: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+ *
+ * MathJax manipulates the DOM directly, and when React tries to reconcile during updates during streaming, it encounters DOM nodes that MathJax has modified or replaced.
+ *
+ * Here we hash the content to provide a key to ensure React creates new DOM elements when the content changes instead of trying to reconcile with MathJax modifications.
+ */
+const MathJaxSafeMessage: React.FC<{
+  message: Message
+  useMathJax: boolean
+  className: string
+}> = ({ message, useMathJax, className }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const messageContent =
+    typeof message.content === "string" ? message.content : ""
+
+  const contentKey = useMemo(() => {
+    const hash = messageContent.slice(0, 100) + messageContent.length
+    return `msg-${message.id || "no-id"}-${hash.replace(/[^a-zA-Z0-9]/g, "")}`
+  }, [message.id, messageContent])
+
+  return (
+    <Message className={className} ref={containerRef}>
+      <VisuallyHidden as={message.role === "user" ? "h5" : "h6"}>
+        {message.role === "user" ? "You said: " : "Assistant said: "}
+      </VisuallyHidden>
+      {/* Force React to create a completely new subtree by using a unique key */}
+      <div key={contentKey} style={{ isolation: "isolate" }}>
+        {useMathJax ? (
+          <Markdown enableMathjax={true}>
+            {replaceMathjax(messageContent)}
+          </Markdown>
+        ) : (
+          <Markdown>{messageContent}</Markdown>
+        )}
+      </div>
+    </Message>
   )
 }
 
@@ -262,6 +313,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   scrollElement,
   ref,
   useMathJax = false,
+  mathJaxConfig,
   onSubmit,
   problemSetListUrl,
   problemSetInitialMessages,
@@ -331,7 +383,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
         ])
       }
     }
-  }, [problemSetListResponse])
+  }, [problemSetListResponse, problemSetEmptyMessages, setMessages])
 
   useEffect(() => {
     if (
@@ -433,19 +485,19 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 ) : null
               }
             />
-            <ConditionalMathJaxWrapper useMathJax={useMathJax}>
+            <ConditionalMathJaxWrapper
+              useMathJax={useMathJax}
+              config={mathJaxConfig}
+            >
               <MessagesContainer
                 className={classes.messagesContainer}
                 externalScroll={externalScroll}
                 ref={messagesContainerRef}
               >
-                {messages.map((m: Message, i) => {
-                  // Our Markdown+Mathjax has issues when rendering streaming display math
-                  // Force a re-render of the last (streaming) message when it's done loading.
-                  const key =
-                    i === messages.length - 1 && isLoading
-                      ? `isLoading-${m.id}`
-                      : m.id
+                {messages.map((m: Message, index: number) => {
+                  // Use stable keys based on message ID to maintain component identity
+                  // The MathJaxSafeMessage component handles DOM reconciliation issues internally
+                  const key = m.id || `message-${index}`
                   return (
                     <MessageRow
                       key={key}
@@ -455,20 +507,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         [classes.messageRowAssistant]: m.role === "assistant",
                       })}
                     >
-                      <Message className={classes.message}>
-                        <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
-                          {m.role === "user"
-                            ? "You said: "
-                            : "Assistant said: "}
-                        </VisuallyHidden>
-                        {useMathJax ? (
-                          <Markdown enableMathjax={true}>
-                            {replaceMathjax(m.content)}
-                          </Markdown>
-                        ) : (
-                          <Markdown>{m.content}</Markdown>
-                        )}
-                      </Message>
+                      <MathJaxSafeMessage
+                        message={m}
+                        useMathJax={useMathJax}
+                        className={classes.message}
+                      />
                     </MessageRow>
                   )
                 })}

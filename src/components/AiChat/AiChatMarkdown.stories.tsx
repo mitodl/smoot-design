@@ -9,7 +9,6 @@ const TEST_API_STREAMING_MATH = "http://localhost:4567/streaming-math"
 
 const Container = styled.div({
   width: "100%",
-  height: "500px",
 })
 
 const meta: Meta<typeof AiChat> = {
@@ -21,7 +20,7 @@ const meta: Meta<typeof AiChat> = {
   render: (args) => <AiChat {...args} />,
   decorators: (Story, context) => {
     return (
-      <Container>
+      <Container style={{ height: context.parameters.height || "500px" }}>
         <Story key={String(context.args.entryScreenEnabled)} />
       </Container>
     )
@@ -123,6 +122,12 @@ def f(x):
   },
 }
 
+/**
+ * Shows MathJax rendering of inline and block math.
+ *
+ * We set startup.typeset to false as by default MathJax will typeset math anywhere on the page and outside of our components - the following should not appear typeset:
+ * \\(x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\)
+ */
 export const Math: Story = {
   args: {
     requestOpts: { apiUrl: TEST_API_STREAMING },
@@ -177,7 +182,34 @@ Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
   },
 }
 
-export const MathWithExtensionPackage: Story = {
+/**
+ * MathJax lazy loads packages for macros not included in its base package as it encounters them.
+ *
+ * The assistant response to prompts below includes some of these.
+ *
+ * - \boldsymbol - the boldsymbol package is autoloaded, however we have seen timing issues where the response is not typeset if the package does not load in time. As a result we have included it in the MathJax config to preload.
+ *
+ * - ams - the AMS package is included in the base MathJax package (https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js).
+ *
+ * - physics - the physics package is not autoloaded and will _not_ render by default. If we want to render physics symbols, we will need to include it in the MathJax config.
+ *
+ * `mathJaxConfig` is available as a prop. To load the physics package, we can set:
+ *
+ * ```tsx
+ * mathJaxConfig: {
+ *   loader: { load: ["[tex]/physics"] },
+ *   tex: { packages: { "[+]": ["physics"] } },
+ * }
+ * ```
+ *
+ * Note that this does not demo alongside other stories as  multiple <MathJaxContext> instances on the page share a single state.
+ *
+ * See https://docs.mathjax.org/en/latest/input/tex/macros/index.html
+ */
+export const MathWithExtensionPackages: Story = {
+  parameters: {
+    height: "800px",
+  },
   args: {
     requestOpts: { apiUrl: TEST_API_STREAMING_MATH },
     entryScreenEnabled: false,
@@ -186,7 +218,7 @@ export const MathWithExtensionPackage: Story = {
       {
         role: "assistant",
         content:
-          "Ask me something and I'll respond with math that includes TeX symbols that require an extension package to load (\\boldsymbol)",
+          "Ask me something and I'll respond with math that includes TeX symbols that are not in the base MathJax package",
       },
     ],
     useMathJax: true,

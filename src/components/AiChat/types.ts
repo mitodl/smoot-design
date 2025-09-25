@@ -1,6 +1,7 @@
 // Some of these are based on (compatible, but simplified / restricted) versions of @ai-sdk/react types.
 
 import { RefAttributes } from "react"
+import { type MathJax3Config } from "better-react-mathjax"
 
 type Role = "assistant" | "user"
 
@@ -116,6 +117,12 @@ type AiChatDisplayProps = {
    * Defaults to false.
    */
   useMathJax?: boolean
+
+  /**
+   * Ovverrides the default MathJax configuration.
+   */
+  mathJaxConfig?: MathJax3Config
+
   /**
    * If true, the chat input will be autofocused on load.
    * Defaults to true.
