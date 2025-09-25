@@ -30,7 +30,18 @@ const ConditionalMathJaxWrapper: React.FC<{
   if (!useMathJax) {
     return <>{children}</>
   }
-  return <MathJaxContext>{children}</MathJaxContext>
+  return (
+    <MathJaxContext
+      config={{
+        loader: { load: ["[tex]/boldsymbol"] },
+        tex: {
+          packages: { "[+]": ["boldsymbol"] },
+        },
+      }}
+    >
+      {children}
+    </MathJaxContext>
+  )
 }
 
 const classes = {
@@ -291,7 +302,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   useEffect(() => {
     if (!showEntryScreen) {
-      promptInputRef.current?.querySelector("input")?.focus()
+      promptInputRef.current
+        ?.querySelector("input")
+        ?.focus({ preventScroll: true })
     }
   }, [showEntryScreen])
 

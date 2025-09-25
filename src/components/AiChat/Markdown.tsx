@@ -9,6 +9,7 @@ type MarkdownProps = {
   children?: string
   enableMathjax?: boolean
 }
+
 const Markdown: React.FC<MarkdownProps> = ({ children, enableMathjax }) => {
   const remarkPlugins = enableMathjax
     ? [remarkMath, remarkSupersub]

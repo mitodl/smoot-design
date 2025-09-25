@@ -5,6 +5,7 @@ import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TEST_API_STREAMING_MATH = "http://localhost:4567/streaming-math"
 
 const Container = styled.div({
   width: "100%",
@@ -139,7 +140,53 @@ $$
 x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
+Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.
+`,
+      },
+    ],
+    useMathJax: true,
+  },
+}
+
+/**
+ * Ensures that LaTeX delimiters `\\(...\\)` and `\\[...\\]`  are rendered correctly.
+ *
+ * better-react-mathjax expects TeX delimiters `$...$` or `$$...$$`, though the LLMs may produce LaTeX delimiters despite instruction.
+ *
+ */
+export const MathLatexDelimiters: Story = {
+  args: {
+    requestOpts: { apiUrl: TEST_API_STREAMING },
+    entryScreenEnabled: false,
+    conversationStarters: [],
+    initialMessages: [
+      {
+        role: "assistant",
+        content: `Some inline math: \\(x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\)
+
+And some block math:
+
+\\[
+x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
+\\]
+
 Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
+      },
+    ],
+    useMathJax: true,
+  },
+}
+
+export const MathWithExtensionPackage: Story = {
+  args: {
+    requestOpts: { apiUrl: TEST_API_STREAMING_MATH },
+    entryScreenEnabled: false,
+    conversationStarters: [],
+    initialMessages: [
+      {
+        role: "assistant",
+        content:
+          "Ask me something and I'll respond with math that includes TeX symbols that require an extension package to load (\\boldsymbol)",
       },
     ],
     useMathJax: true,

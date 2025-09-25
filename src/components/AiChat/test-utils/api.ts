@@ -82,6 +82,23 @@ $$
 x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 `,
+  `Great question! Let's start by understanding what the problem is asking. You need to prove that the Adaptive Lasso is equivalent to a robust regression problem with a specific perturbation in the data matrix.
+
+To begin, consider the two expressions given in the problem:
+
+1. The Adaptive Lasso objective:
+   $$\\min_{\\boldsymbol{\\beta}} \\| \\mathbf{y} - \\mathbf{X} \\boldsymbol{\\beta} \\|_2 + \\lambda \\| \\mathbf{W}\\boldsymbol{\\beta}\\|_1$$
+
+2. The robust regression problem:
+   $$\\min_{\\boldsymbol{\\beta}} \\max_{ \\mathbf{\\Delta} \\in \\mathcal{U}} \\| \\mathbf{y} - (\\mathbf{X} + \\mathbf{\\Delta} )\\boldsymbol{\\beta} \\|_2$$
+
+The goal is to show that these two are equivalent.
+
+Start by thinking about what the perturbation $\\mathbf{\\Delta}$ represents in the context of the robust regression problem. How does it relate to the weights $\\mathbf{W}$ in the Adaptive Lasso? What role does the uncertainty set $\\mathcal{U}$ play in this equivalence?
+
+Once you have a sense of these relationships, consider how you might manipulate the expressions to show they are equivalent. What properties of norms and perturbations can you use to bridge the gap between these two formulations?
+
+Feel free to share your thoughts or any initial ideas you have!`,
 ]
 
 const rand = (min: number, max: number) => {
@@ -89,9 +106,10 @@ const rand = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const getReadableStream = () => {
+const getReadableStream = (index?: number) => {
   let timerId: NodeJS.Timeout
-  const response = SAMPLE_RESPONSES[rand(0, SAMPLE_RESPONSES.length - 1)]
+  const response =
+    SAMPLE_RESPONSES[index ?? rand(0, SAMPLE_RESPONSES.length - 1)]
   const chunks: string[] = response.split(" ").reduce((acc, word) => {
     const last = acc[acc.length - 1]
     if (acc.length === 0) {
@@ -143,6 +161,15 @@ const handlers = [
       }
     }
 
+    return new HttpResponse(body, {
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
+  }),
+  http.post("http://localhost:4567/streaming-math", async () => {
+    await delay(600)
+    const body = getReadableStream(4)
     return new HttpResponse(body, {
       headers: {
         "Content-Type": "text/plain",
