@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
@@ -21,7 +21,8 @@ import EllipsisIcon from "./EllipsisIcon"
 import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
 import { useFetch } from "./utils"
 import { SelectChangeEvent } from "@mui/material/Select"
-import { type MathJax3Config, MathJaxContext } from "better-react-mathjax"
+import type { MathJax3Config } from "better-react-mathjax"
+import { MathJaxContext } from "better-react-mathjax"
 import deepmerge from "@mui/utils/deepmerge"
 
 const ConditionalMathJaxWrapper: React.FC<{
@@ -32,6 +33,7 @@ const ConditionalMathJaxWrapper: React.FC<{
   if (!useMathJax) {
     return <>{children}</>
   }
+
   return (
     <MathJaxContext
       config={deepmerge(
@@ -49,49 +51,6 @@ const ConditionalMathJaxWrapper: React.FC<{
     >
       {children}
     </MathJaxContext>
-  )
-}
-
-/**
- * Component that provides isolation between React and MathJax DOM manipulation
- *
- * Seeing errors e.g. Error: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
- *
- * MathJax manipulates the DOM directly, and when React tries to reconcile during updates during streaming, it encounters DOM nodes that MathJax has modified or replaced.
- *
- * Here we hash the content to provide a key to ensure React creates new DOM elements when the content changes instead of trying to reconcile with MathJax modifications.
- */
-const MathJaxSafeMessage: React.FC<{
-  message: Message
-  useMathJax: boolean
-  className: string
-}> = ({ message, useMathJax, className }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const messageContent =
-    typeof message.content === "string" ? message.content : ""
-
-  const contentKey = useMemo(() => {
-    const hash = messageContent.slice(0, 100) + messageContent.length
-    return `msg-${message.id || "no-id"}-${hash.replace(/[^a-zA-Z0-9]/g, "")}`
-  }, [message.id, messageContent])
-
-  return (
-    <Message className={className} ref={containerRef}>
-      <VisuallyHidden as={message.role === "user" ? "h5" : "h6"}>
-        {message.role === "user" ? "You said: " : "Assistant said: "}
-      </VisuallyHidden>
-      {/* Force React to create a completely new subtree by using a unique key */}
-      <div key={contentKey} style={{ isolation: "isolate" }}>
-        {useMathJax ? (
-          <Markdown enableMathjax={true}>
-            {replaceMathjax(messageContent)}
-          </Markdown>
-        ) : (
-          <Markdown>{messageContent}</Markdown>
-        )}
-      </div>
-    </Message>
   )
 }
 
@@ -494,24 +453,29 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 externalScroll={externalScroll}
                 ref={messagesContainerRef}
               >
-                {messages.map((m: Message, index: number) => {
-                  // Use stable keys based on message ID to maintain component identity
-                  // The MathJaxSafeMessage component handles DOM reconciliation issues internally
-                  const key = m.id || `message-${index}`
+                {messages.map((message: Message, index: number) => {
                   return (
                     <MessageRow
-                      key={key}
-                      data-chat-role={m.role}
+                      key={index}
+                      data-chat-role={message.role}
                       className={classNames(classes.messageRow, {
-                        [classes.messageRowUser]: m.role === "user",
-                        [classes.messageRowAssistant]: m.role === "assistant",
+                        [classes.messageRowUser]: message.role === "user",
+                        [classes.messageRowAssistant]:
+                          message.role === "assistant",
                       })}
                     >
-                      <MathJaxSafeMessage
-                        message={m}
-                        useMathJax={useMathJax}
-                        className={classes.message}
-                      />
+                      <Message className={className}>
+                        <VisuallyHidden
+                          as={message.role === "user" ? "h5" : "h6"}
+                        >
+                          {message.role === "user"
+                            ? "You said: "
+                            : "Assistant said: "}
+                        </VisuallyHidden>
+                        <Markdown useMathJax={useMathJax}>
+                          {message.content}
+                        </Markdown>
+                      </Message>
                     </MessageRow>
                   )
                 })}
@@ -639,21 +603,4 @@ const AiChat: FC<AiChatProps> = ({
   )
 }
 
-// react-markdown expects Mathjax delimiters to be $...$ or $$...$$
-// the prompt for the tutorbot asks for Mathjax tags with $ format but
-// the LLM does not get it right all the time
-// this function replaces the Mathjax tags with the correct format
-// eventually we will probably be able to remove this as LLMs get better
-function replaceMathjax(inputString: string): string {
-  // Replace instances of \(...\) and \[...\] Mathjax tags with $...$
-  // and $$...$$ tags.
-  const INLINE_MATH_REGEX = /\\\((.*?)\\\)/g
-  const DISPLAY_MATH_REGEX = /\\\[(([\s\S]*?))\\\]/g
-  inputString = inputString.replace(
-    INLINE_MATH_REGEX,
-    (_match, p1) => `$${p1}$`,
-  )
-  return inputString.replace(DISPLAY_MATH_REGEX, (_match, p1) => `$$${p1}$$`)
-}
-
-export { AiChatDisplay, AiChat, replaceMathjax }
+export { AiChatDisplay, AiChat }

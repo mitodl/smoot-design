@@ -2,6 +2,7 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import { AiDrawer } from "./AiDrawer"
 import type { AiDrawerProps, AiDrawerSettings } from "./AiDrawer"
+import { contentHash } from "../../utils/string"
 
 type AiDrawerInitMessage = {
   type: "smoot-design::ai-drawer-open" | "smoot-design::tutor-drawer-open" // ("smoot-design::tutor-drawer-open" is legacy)
@@ -16,12 +17,7 @@ type AiDrawerInitMessage = {
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
-  let hash = 5381
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) + hash + str.charCodeAt(i)
-    hash = hash & hash
-  }
-  return Math.abs(hash).toString(36)
+  return contentHash(str)
 }
 
 type AiDrawerManagerProps = {
