@@ -78,3 +78,4 @@ function replaceMathjax(inputString: string): string {
 }
 
 export default Markdown
+export { replaceMathjax }

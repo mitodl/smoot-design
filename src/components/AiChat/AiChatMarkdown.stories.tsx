@@ -213,7 +213,7 @@ Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
  * }
  * ```
  *
- * Note that this does not demo alongside other stories as multiple \<MathJaxContext\> instances on the page share a single state.
+ * Note that multiple \<MathJaxContext\> instances on the page share a single state. If they have different configs, only the first is applied.
  *
  * See [https://docs.mathjax.org/en/latest/input/tex/macros/index.html](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
  */

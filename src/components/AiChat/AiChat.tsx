@@ -279,7 +279,6 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   problemSetEmptyMessages,
   ...others // Could contain data attributes
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const promptInputRef = useRef<HTMLDivElement>(null)
@@ -390,7 +389,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const externalScroll = !!scrollElement
 
   return (
-    <Container className={className} ref={containerRef}>
+    <Container className={className}>
       {showEntryScreen ? (
         <EntryScreen
           className={classes.entryScreenContainer}
@@ -464,7 +463,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                           message.role === "assistant",
                       })}
                     >
-                      <Message className={className}>
+                      <Message className={classes.message}>
                         <VisuallyHidden
                           as={message.role === "user" ? "h5" : "h6"}
                         >
