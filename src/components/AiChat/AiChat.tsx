@@ -21,16 +21,37 @@ import EllipsisIcon from "./EllipsisIcon"
 import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
 import { useFetch } from "./utils"
 import { SelectChangeEvent } from "@mui/material/Select"
+import type { MathJax3Config } from "better-react-mathjax"
 import { MathJaxContext } from "better-react-mathjax"
+import deepmerge from "@mui/utils/deepmerge"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
+  config?: MathJax3Config
   children: React.ReactNode
-}> = ({ useMathJax, children }) => {
+}> = ({ useMathJax, config = {}, children }) => {
   if (!useMathJax) {
     return <>{children}</>
   }
-  return <MathJaxContext>{children}</MathJaxContext>
+
+  return (
+    <MathJaxContext
+      config={deepmerge(
+        {
+          startup: {
+            typeset: false,
+          },
+          loader: { load: ["[tex]/boldsymbol"] },
+          tex: {
+            packages: { "[+]": ["boldsymbol"] },
+          },
+        },
+        config,
+      )}
+    >
+      {children}
+    </MathJaxContext>
+  )
 }
 
 const classes = {
@@ -251,13 +272,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   scrollElement,
   ref,
   useMathJax = false,
+  mathJaxConfig,
   onSubmit,
   problemSetListUrl,
   problemSetInitialMessages,
   problemSetEmptyMessages,
   ...others // Could contain data attributes
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const promptInputRef = useRef<HTMLDivElement>(null)
@@ -291,7 +312,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
   useEffect(() => {
     if (!showEntryScreen) {
-      promptInputRef.current?.querySelector("input")?.focus()
+      promptInputRef.current
+        ?.querySelector("input")
+        ?.focus({ preventScroll: true })
     }
   }, [showEntryScreen])
 
@@ -318,7 +341,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
         ])
       }
     }
-  }, [problemSetListResponse])
+  }, [problemSetListResponse, problemSetEmptyMessages, setMessages])
 
   useEffect(() => {
     if (
@@ -366,7 +389,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const externalScroll = !!scrollElement
 
   return (
-    <Container className={className} ref={containerRef}>
+    <Container className={className}>
       {showEntryScreen ? (
         <EntryScreen
           className={classes.entryScreenContainer}
@@ -420,41 +443,37 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 ) : null
               }
             />
-            <ConditionalMathJaxWrapper useMathJax={useMathJax}>
+            <ConditionalMathJaxWrapper
+              useMathJax={useMathJax}
+              config={mathJaxConfig}
+            >
               <MessagesContainer
                 className={classes.messagesContainer}
                 externalScroll={externalScroll}
                 ref={messagesContainerRef}
               >
-                {messages.map((m: Message, i) => {
-                  // Our Markdown+Mathjax has issues when rendering streaming display math
-                  // Force a re-render of the last (streaming) message when it's done loading.
-                  const key =
-                    i === messages.length - 1 && isLoading
-                      ? `isLoading-${m.id}`
-                      : m.id
+                {messages.map((message: Message, index: number) => {
                   return (
                     <MessageRow
-                      key={key}
-                      data-chat-role={m.role}
+                      key={index}
+                      data-chat-role={message.role}
                       className={classNames(classes.messageRow, {
-                        [classes.messageRowUser]: m.role === "user",
-                        [classes.messageRowAssistant]: m.role === "assistant",
+                        [classes.messageRowUser]: message.role === "user",
+                        [classes.messageRowAssistant]:
+                          message.role === "assistant",
                       })}
                     >
                       <Message className={classes.message}>
-                        <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
-                          {m.role === "user"
+                        <VisuallyHidden
+                          as={message.role === "user" ? "h5" : "h6"}
+                        >
+                          {message.role === "user"
                             ? "You said: "
                             : "Assistant said: "}
                         </VisuallyHidden>
-                        {useMathJax ? (
-                          <Markdown enableMathjax={true}>
-                            {replaceMathjax(m.content)}
-                          </Markdown>
-                        ) : (
-                          <Markdown>{m.content}</Markdown>
-                        )}
+                        <Markdown useMathJax={useMathJax}>
+                          {message.content}
+                        </Markdown>
                       </Message>
                     </MessageRow>
                   )
@@ -583,21 +602,4 @@ const AiChat: FC<AiChatProps> = ({
   )
 }
 
-// react-markdown expects Mathjax delimiters to be $...$ or $$...$$
-// the prompt for the tutorbot asks for Mathjax tags with $ format but
-// the LLM does not get it right all the time
-// this function replaces the Mathjax tags with the correct format
-// eventually we will probably be able to remove this as LLMs get better
-function replaceMathjax(inputString: string): string {
-  // Replace instances of \(...\) and \[...\] Mathjax tags with $...$
-  // and $$...$$ tags.
-  const INLINE_MATH_REGEX = /\\\((.*?)\\\)/g
-  const DISPLAY_MATH_REGEX = /\\\[(([\s\S]*?))\\\]/g
-  inputString = inputString.replace(
-    INLINE_MATH_REGEX,
-    (_match, p1) => `$${p1}$`,
-  )
-  return inputString.replace(DISPLAY_MATH_REGEX, (_match, p1) => `$$${p1}$$`)
-}
-
-export { AiChatDisplay, AiChat, replaceMathjax }
+export { AiChatDisplay, AiChat }

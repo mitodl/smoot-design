@@ -2,7 +2,8 @@
 /* eslint-disable testing-library/await-async-utils */
 import { render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
-import { AiChat, replaceMathjax } from "./AiChat"
+import { AiChat } from "./AiChat"
+import { replaceMathjax } from "./Markdown"
 import { ThemeProvider } from "../ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { AiChatProps } from "./types"
