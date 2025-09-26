@@ -1,7 +1,7 @@
 // Some of these are based on (compatible, but simplified / restricted) versions of @ai-sdk/react types.
 
 import { RefAttributes } from "react"
-import { type MathJax3Config } from "better-react-mathjax"
+import type { MathJax3Config } from "better-react-mathjax"
 
 type Role = "assistant" | "user"
 
@@ -119,7 +119,7 @@ type AiChatDisplayProps = {
   useMathJax?: boolean
 
   /**
-   * Ovverrides the default MathJax configuration.
+   * Overrides the default MathJax configuration.
    */
   mathJaxConfig?: MathJax3Config
 

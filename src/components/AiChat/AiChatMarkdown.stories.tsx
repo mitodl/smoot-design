@@ -202,6 +202,7 @@ Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
  * | `boldsymbol` | no                   | yes                     |
  * | `physics`    | no                   | no                      |
  *
+ * See [https://docs.mathjax.org/en/latest/input/tex/macros/index.html](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
  *
  * Therefore, we explicitly include boldsymbol in the `loader` configuration
  * to force it to be loaded up front.
@@ -215,7 +216,6 @@ Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
  *
  * Note that multiple \<MathJaxContext\> instances on the page share a single state. If they have different configs, only the first is applied.
  *
- * See [https://docs.mathjax.org/en/latest/input/tex/macros/index.html](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
  */
 export const MathWithExtensionPackages: Story = {
   parameters: {
