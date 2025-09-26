@@ -183,17 +183,28 @@ Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
 }
 
 /**
- * MathJax lazy loads packages for macros not included in its base package as it encounters them.
+ * > **⚠ NOTE:** Although the `boldsymbol` package is lazily loaded by default,
+ * > we have found that on slow networks a race condition can occur resulting in
+ * > un-rendered boldsymbol commands. This behavior can be reproduced by removing
+ * > the `loader` configuration that explicitly loads the `boldsymbol` package
+ * > and using a throttled network connection.
  *
- * The assistant response below includes some of these.
+ * This story demonstrates math rendering of LaTeX commands from specialized
+ * packages. MathJax includes some packages in its base configuration, loads
+ * some packages lazily on demand ("autoloads"), and requires some packages to
+ * be explicitly loaded.
  *
- * - `\boldsymbol` - the boldsymbol package is autoloaded, however we have seen timing issues where the response is not typeset if the package does not load in time. As a result we have included it in the MathJax config to preload.
+ * The responses here demonstrate commands from the following packages:
  *
- * - `ams` - the AMS package is included in the base MathJax package ([https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js](https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js)).
+ * | Package    | Included by default? | Lazy loaded by default? |
+ * |------------|----------------------|-------------------------|
+ * | `ams`        | yes                  | n/a                     |
+ * | `boldsymbol` | no                   | yes                     |
+ * | `physics`    | no                   | no                      |
  *
- * - `physics` - the physics package is not autoloaded and will _not_ render by default. If we want to render physics symbols, we will need to include it in the MathJax config.
  *
- * `mathJaxConfig` is available as a prop. To load the physics package, we can set:
+ * Therefore, we explicitly include boldsymbol in the `loader` configuration
+ * to force it to be loaded up front.
  *
  * ```tsx
  * mathJaxConfig: {
