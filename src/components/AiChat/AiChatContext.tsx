@@ -1,9 +1,10 @@
 import * as React from "react"
 import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
-import { useMemo, createContext, useState } from "react"
+import { useMemo, createContext, useState, useCallback } from "react"
 import retryingFetch from "../../utils/retryingFetch"
 import { getCookie } from "../../utils/getCookie"
+import { extractCommentsData } from "./utils"
 
 const identity = <T,>(x: T): T => x
 
@@ -50,6 +51,10 @@ type AiChatContextResult = UseChatHelpers & {
   initialMessages: AiChatMessage[] | null
   additionalBody?: Record<string, string>
   setAdditionalBody?: (body: Record<string, string>) => void
+  submitFeedback?: (
+    messageId: string,
+    feedback: "like" | "dislike" | "",
+  ) => void
 }
 const AiChatContext = createContext<AiChatContextResult | null>(null)
 
@@ -106,11 +111,37 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
     return unparsed.map((m) => {
       if (m.role === "assistant" && !initial?.includes(m.id)) {
         const content = parseContent ? parseContent(m.content) : m.content
-        return { ...m, content }
+        const data = extractCommentsData(content)
+
+        return {
+          ...m,
+          content,
+          data,
+        }
       }
       return m
     })
   }, [parseContent, unparsed, initialMessages])
+
+  const submitFeedback = useCallback(
+    (messageId: string, rating: "like" | "dislike" | "") => {
+      const message = messages.find((m) => m.id === messageId) as AiChatMessage
+      const data = message?.data
+      if (!data?.thread_id || !data?.checkpoint_pk) {
+        return
+      }
+      const host = new URL(requestOpts.apiUrl).origin
+      const url = `${host}/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rating }),
+      })
+    },
+    [requestOpts.apiUrl, messages],
+  )
 
   return (
     <AiChatContext.Provider
@@ -124,6 +155,7 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         setMessages,
         additionalBody,
         setAdditionalBody,
+        submitFeedback,
         ...others,
       }}
     >

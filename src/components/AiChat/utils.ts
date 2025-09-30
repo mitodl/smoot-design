@@ -75,4 +75,38 @@ const useFetch = <T>(url: string | undefined) => {
   return { response, loading }
 }
 
-export { useAiChat, useFetch }
+/**
+ * Extracts comments from content and parses any that contain valid JSON.
+ */
+const extractCommentsData = (content: string): AiChatMessage["data"] => {
+  const commentRegex = /<!--\s*(.*?)\s*-->/g
+  const comments: string[] = []
+  let data = {}
+
+  let match
+  while ((match = commentRegex.exec(content)) !== null) {
+    comments.push(match[1].trim())
+  }
+
+  for (const comment of comments) {
+    try {
+      const parsed = JSON.parse(comment)
+      if (
+        typeof parsed === "object" &&
+        parsed !== null &&
+        !Array.isArray(parsed)
+      ) {
+        data = {
+          ...data,
+          ...parsed,
+        }
+      }
+    } catch {
+      continue
+    }
+  }
+
+  return data
+}
+
+export { useAiChat, useFetch, extractCommentsData }

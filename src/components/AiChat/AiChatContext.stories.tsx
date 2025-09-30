@@ -24,8 +24,9 @@ const STARTERS = [
 
 const Container = styled.div({
   width: "100%",
-  height: "400px",
+  height: "700px",
   position: "relative",
+  fontFamily: "neue-haas-grotesk-text, sans-serif",
 })
 
 const MessageCounter = () => {
@@ -35,6 +36,31 @@ const MessageCounter = () => {
     <Typography variant="subtitle1">
       Message count: {messages.length} (Provided by <code>AiChatContext</code>)
     </Typography>
+  )
+}
+
+const LastMessageData = () => {
+  const { messages } = useAiChat()
+
+  const lastMessage = messages[messages.length - 1]
+
+  if (!lastMessage) return null
+
+  const { data } = lastMessage
+
+  if (!data) return null
+
+  return (
+    <>
+      <Typography variant="subtitle1">Last message data:</Typography>
+      <ul>
+        {Object.entries(data).map(([key, value]) => (
+          <li key={key}>
+            <strong>{key}</strong>: {value.toString()}
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }
 
@@ -56,6 +82,7 @@ const meta: Meta<typeof AiChatProvider> = {
     return (
       <AiChatProvider {...args}>
         <MessageCounter />
+        <LastMessageData />
         <Container>
           <AiChatDisplay
             entryScreenEnabled={false}

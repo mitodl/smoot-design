@@ -3,12 +3,18 @@
 import { RefAttributes } from "react"
 import type { MathJax3Config } from "better-react-mathjax"
 
-type Role = "assistant" | "user"
+type Role = "assistant" | "user" | "data" | "system"
+
+type MessageData = {
+  checkpoint_pk?: string
+  thread_id?: string
+}
 
 type AiChatMessage = {
   id: string
   content: string
   role: Role
+  data?: MessageData
 }
 
 type RequestOpts = {
