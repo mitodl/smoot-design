@@ -131,7 +131,11 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         return
       }
       const host = new URL(requestOpts.apiUrl).origin
-      const url = `${host}/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+      const url =
+        requestOpts.feedbackApiUrl
+          ?.replace(":threadId", data.thread_id)
+          .replace(":checkpointPk", data.checkpoint_pk) ||
+        `${host}/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
       fetch(url, {
         method: "POST",
         headers: {
@@ -140,7 +144,7 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         body: JSON.stringify({ rating }),
       })
     },
-    [requestOpts.apiUrl, messages],
+    [requestOpts.apiUrl, requestOpts.feedbackApiUrl, messages],
   )
 
   return (

@@ -319,6 +319,12 @@ const handlers = [
       return HttpResponse.json({ message: "Feedback received" })
     },
   ),
+  http.post(
+    "http://localhost:4567/feedback/:threadId/:checkpointPk",
+    async ({ params }) => {
+      return HttpResponse.json({ message: "Feedback received", ...params })
+    },
+  ),
 ]
 
 export { handlers }

@@ -8,6 +8,8 @@ import { handlers } from "./test-utils/api"
 import Typography from "@mui/material/Typography"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TEST_API_FEEDBACK =
+  "http://localhost:4567/feedback/:threadId/:checkpointPk"
 
 const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
   {
@@ -121,3 +123,18 @@ export default meta
 type Story = StoryObj<typeof AiChatProvider>
 
 export const StreamingResponses: Story = {}
+
+/**
+ * Here we provide the feedback API URL for the like/dislike buttons.
+ *
+ * The URL should include substitution strings for the `:threadId` and `:checkpointPk`,
+ * e.g. http://localhost:4567/feedback/:threadId/:checkpointPk
+ */
+export const JsonResponses: Story = {
+  args: {
+    requestOpts: {
+      apiUrl: TEST_API_STREAMING,
+      feedbackApiUrl: TEST_API_FEEDBACK,
+    },
+  },
+}

@@ -25,6 +25,19 @@ type RequestOpts = {
    *
    * JSON.stringify is applied to the return value.
    */
+
+  /**
+   * URL for the like/dislike feedback endpoint.
+   *
+   * The URL should include the following substitution strings:
+   * - :threadId
+   * - :checkpointPk
+   * e.g. "http://localhost:4567/feedback/:threadId/:checkpointPk"
+   *
+   * If not provided, provided, defaults to the apiUrl origin + "/api/v0/chat_sessions/{thread_id}/messages/{checkpoint_pk}/rate/"
+   */
+  feedbackApiUrl?: string
+
   transformBody?: (
     messages: AiChatMessage[],
     body?: Record<string, string>,
