@@ -34,7 +34,7 @@ type RequestOpts = {
    * - :checkpointPk
    * e.g. "http://localhost:4567/feedback/:threadId/:checkpointPk"
    *
-   * If not provided, provided, defaults to the apiUrl origin + "/api/v0/chat_sessions/{thread_id}/messages/{checkpoint_pk}/rate/"
+   * If not provided, defaults to the apiUrl origin + "/api/v0/chat_sessions/{thread_id}/messages/{checkpoint_pk}/rate/"
    */
   feedbackApiUrl?: string
 

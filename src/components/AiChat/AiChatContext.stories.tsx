@@ -58,7 +58,7 @@ const LastMessageData = () => {
       <ul>
         {Object.entries(data).map(([key, value]) => (
           <li key={key}>
-            <strong>{key}</strong>: {value.toString()}
+            <strong>{key}</strong>: {value}
           </li>
         ))}
       </ul>
@@ -130,7 +130,7 @@ export const StreamingResponses: Story = {}
  * The URL should include substitution strings for the `:threadId` and `:checkpointPk`,
  * e.g. http://localhost:4567/feedback/:threadId/:checkpointPk
  */
-export const JsonResponses: Story = {
+export const FeedbackAPIUrl: Story = {
   args: {
     requestOpts: {
       apiUrl: TEST_API_STREAMING,

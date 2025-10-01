@@ -315,14 +315,24 @@ const handlers = [
   }),
   http.post(
     "http://localhost:4567/ai/api/v0/chat_sessions/:threadId/messages/:checkpointPk/rate/",
-    async ({ params }) => {
-      return HttpResponse.json({ message: "Feedback received", ...params })
+    async ({ params, request }) => {
+      const body = await request.json()
+      return HttpResponse.json({
+        message: "Feedback received",
+        ...(body as Record<string, string>),
+        ...params,
+      })
     },
   ),
   http.post(
     "http://localhost:4567/feedback/:threadId/:checkpointPk",
-    async ({ params }) => {
-      return HttpResponse.json({ message: "Feedback received", ...params })
+    async ({ params, request }) => {
+      const body = await request.json()
+      return HttpResponse.json({
+        message: "Feedback received",
+        ...(body as Record<string, string>),
+        ...params,
+      })
     },
   ),
 ]
