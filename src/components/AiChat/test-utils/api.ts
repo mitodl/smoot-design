@@ -315,8 +315,8 @@ const handlers = [
   }),
   http.post(
     "http://localhost:4567/ai/api/v0/chat_sessions/:threadId/messages/:checkpointPk/rate/",
-    async () => {
-      return HttpResponse.json({ message: "Feedback received" })
+    async ({ params }) => {
+      return HttpResponse.json({ message: "Feedback received", ...params })
     },
   ),
   http.post(

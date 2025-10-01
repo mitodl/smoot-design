@@ -32,6 +32,7 @@ import type { MathJax3Config } from "better-react-mathjax"
 import { MathJaxContext } from "better-react-mathjax"
 import deepmerge from "@mui/utils/deepmerge"
 import { ActionButton } from "../Button/ActionButton"
+import { Tooltip } from "../Tooltip/Tooltip"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
@@ -272,12 +273,16 @@ const StyledEllipsisIcon = styled(EllipsisIcon)(({ theme }) => ({
 const FeedbackRowContainer = styled.div({
   display: "flex",
   gap: "4px",
-  marginTop: "16px",
+  margin: "16px 0 10px 0",
 })
 
 const FeedbackButton = styled(ActionButton)(({ theme }) => ({
+  borderRadius: "8px",
+  ":hover": {
+    backgroundColor: theme.custom.colors.lightGray1,
+  },
   svg: {
-    fill: theme.custom.colors.silverGrayDark,
+    fill: theme.custom.colors.darkGray1,
   },
 }))
 
@@ -304,22 +309,26 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
 
   return (
     <FeedbackRowContainer>
-      <FeedbackButton
-        variant="text"
-        size="small"
-        onClick={onFeedback("like")}
-        aria-label="Like"
-      >
-        {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
-      </FeedbackButton>
-      <FeedbackButton
-        variant="text"
-        size="small"
-        onClick={onFeedback("dislike")}
-        aria-label="Dislike"
-      >
-        {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
-      </FeedbackButton>
+      <Tooltip title="Like">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("like")}
+          aria-label="Like"
+        >
+          {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
+        </FeedbackButton>
+      </Tooltip>
+      <Tooltip title="Dislike">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("dislike")}
+          aria-label="Dislike"
+        >
+          {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
+        </FeedbackButton>
+      </Tooltip>
     </FeedbackRowContainer>
   )
 }
