@@ -278,8 +278,8 @@ const FeedbackRowContainer = styled.div({
 
 const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   borderRadius: "8px",
-  ":hover": {
-    backgroundColor: theme.custom.colors.lightGray1,
+  ":hover:not(:disabled)": {
+    backgroundColor: theme.custom.colors.lightGray2,
   },
   svg: {
     fill: theme.custom.colors.darkGray1,
@@ -309,22 +309,22 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
 
   return (
     <FeedbackRowContainer>
-      <Tooltip title="Like">
+      <Tooltip title="Good response">
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("like")}
-          aria-label="Like"
+          aria-label="Good response"
         >
           {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
         </FeedbackButton>
       </Tooltip>
-      <Tooltip title="Dislike">
+      <Tooltip title="Bad response">
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("dislike")}
-          aria-label="Dislike"
+          aria-label="Bad response"
         >
           {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
         </FeedbackButton>
