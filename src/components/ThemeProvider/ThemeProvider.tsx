@@ -76,7 +76,7 @@ const defaultThemeOptions: ThemeOptions = {
  * for more.
  */
 const createTheme = (options?: ThemeOptions): Theme => {
-  return muiCreateTheme(deepmerge(defaultThemeOptions, options))
+  return muiCreateTheme(deepmerge(defaultThemeOptions, options || {}))
 }
 
 const defaultTheme = createTheme()
@@ -98,5 +98,5 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({
   return <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
 }
 
-export { ThemeProvider, createTheme }
+export { ThemeProvider, createTheme, defaultThemeOptions }
 export type { ThemeProviderProps, Theme }
