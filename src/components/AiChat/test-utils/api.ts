@@ -16,6 +16,8 @@ x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
 <!-- Comment! -->
+
+<!-- {"checkpoint_pk": 240, "thread_id": "d769e326d95248508d4abc8a8ad1696b"} -->
 `,
   `
 To understand global warming, I recommend the following resources from MIT:
@@ -35,6 +37,8 @@ x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
 <!-- Comment! -->
+
+<!-- {"checkpoint_pk": 241, "thread_id": "d769e326d95248508d4abc8a8ad1696b"} -->
 `,
   `
 Here are some courses on linear algebra that you can explore:
@@ -57,6 +61,8 @@ x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
 <!-- Comment! -->
+
+<!-- {"checkpoint_pk": 243, "thread_id": "d769e326d95248508d4abc8a8ad1696b"} -->
 `,
   `Here are some courses on quantum computing that offer certificates:
 
@@ -81,6 +87,8 @@ And some block math:
 $$
 x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
+
+<!-- {"checkpoint_pk": 244, "thread_id": "d769e326d95248508d4abc8a8ad1696b"} -->
 `,
   `Great question! Let's start by understanding what the problem is asking. You need to prove that the Adaptive Lasso is equivalent to a robust regression problem with a specific perturbation in the data matrix.
 
@@ -220,6 +228,8 @@ $$\\norm{\\vb{v}} \\quad \\text{norm}$$
 $$\\order{x^2} \\quad \\text{order notation}$$
 $$\\eval{f(x)}_{x=0} \\quad \\text{evaluated at}$$
 $$\\qty(\\frac{\\partial f}{\\partial x})_{y} \\quad \\text{quantity with subscript}$$
+
+<!-- {"checkpoint_pk": 245, "thread_id": "d769e326d95248508d4abc8a8ad1696b"} -->
 `,
 ]
 
@@ -303,6 +313,28 @@ const handlers = [
     await delay(800)
     return HttpResponse.json({ message })
   }),
+  http.post(
+    "http://localhost:4567/ai/api/v0/chat_sessions/:threadId/messages/:checkpointPk/rate/",
+    async ({ params, request }) => {
+      const body = await request.json()
+      return HttpResponse.json({
+        message: "Feedback received",
+        ...(body as Record<string, string>),
+        ...params,
+      })
+    },
+  ),
+  http.post(
+    "http://localhost:4567/feedback/:threadId/:checkpointPk",
+    async ({ params, request }) => {
+      const body = await request.json()
+      return HttpResponse.json({
+        message: "Feedback received",
+        ...(body as Record<string, string>),
+        ...params,
+      })
+    },
+  ),
 ]
 
 export { handlers }

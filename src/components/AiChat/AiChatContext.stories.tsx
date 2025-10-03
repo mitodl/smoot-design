@@ -8,6 +8,8 @@ import { handlers } from "./test-utils/api"
 import Typography from "@mui/material/Typography"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TEST_API_FEEDBACK =
+  "http://localhost:4567/feedback/:threadId/:checkpointPk"
 
 const INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
   {
@@ -24,8 +26,9 @@ const STARTERS = [
 
 const Container = styled.div({
   width: "100%",
-  height: "400px",
+  height: "700px",
   position: "relative",
+  fontFamily: "neue-haas-grotesk-text, sans-serif",
 })
 
 const MessageCounter = () => {
@@ -35,6 +38,31 @@ const MessageCounter = () => {
     <Typography variant="subtitle1">
       Message count: {messages.length} (Provided by <code>AiChatContext</code>)
     </Typography>
+  )
+}
+
+const LastMessageData = () => {
+  const { messages } = useAiChat()
+
+  const lastMessage = messages[messages.length - 1]
+
+  if (!lastMessage) return null
+
+  const { data } = lastMessage
+
+  if (!data) return null
+
+  return (
+    <>
+      <Typography variant="subtitle1">Last message data:</Typography>
+      <ul>
+        {Object.entries(data).map(([key, value]) => (
+          <li key={key}>
+            <strong>{key}</strong>: {value}
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }
 
@@ -56,6 +84,7 @@ const meta: Meta<typeof AiChatProvider> = {
     return (
       <AiChatProvider {...args}>
         <MessageCounter />
+        <LastMessageData />
         <Container>
           <AiChatDisplay
             entryScreenEnabled={false}
@@ -94,3 +123,18 @@ export default meta
 type Story = StoryObj<typeof AiChatProvider>
 
 export const StreamingResponses: Story = {}
+
+/**
+ * Here we provide the feedback API URL for the like/dislike buttons.
+ *
+ * The URL should include substitution strings for the `:threadId` and `:checkpointPk`,
+ * e.g. http://localhost:4567/feedback/:threadId/:checkpointPk
+ */
+export const FeedbackAPIUrl: Story = {
+  args: {
+    requestOpts: {
+      apiUrl: TEST_API_STREAMING,
+      feedbackApiUrl: TEST_API_FEEDBACK,
+    },
+  },
+}

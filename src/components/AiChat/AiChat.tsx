@@ -1,12 +1,19 @@
 import * as React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import classNames from "classnames"
-import { RiSendPlaneFill, RiStopFill } from "@remixicon/react"
+import {
+  RiSendPlaneFill,
+  RiStopFill,
+  RiThumbUpLine,
+  RiThumbDownLine,
+  RiThumbUpFill,
+  RiThumbDownFill,
+} from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
-import type { AiChatDisplayProps, AiChatProps } from "./types"
+import type { AiChatDisplayProps, AiChatMessage, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
@@ -24,6 +31,8 @@ import { SelectChangeEvent } from "@mui/material/Select"
 import type { MathJax3Config } from "better-react-mathjax"
 import { MathJaxContext } from "better-react-mathjax"
 import deepmerge from "@mui/utils/deepmerge"
+import { ActionButton } from "../Button/ActionButton"
+import { Tooltip } from "../Tooltip/Tooltip"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
@@ -261,6 +270,71 @@ const StyledEllipsisIcon = styled(EllipsisIcon)(({ theme }) => ({
   height: "24px",
 }))
 
+const FeedbackRowContainer = styled.div({
+  display: "flex",
+  gap: "4px",
+  margin: "16px 0 10px 0",
+})
+
+const FeedbackButton = styled(ActionButton)(({ theme }) => ({
+  borderRadius: "8px",
+  ":hover:not(:disabled)": {
+    backgroundColor: theme.custom.colors.lightGray2,
+  },
+  svg: {
+    fill: theme.custom.colors.darkGray1,
+  },
+}))
+
+const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
+  const { submitFeedback } = useAiChat()
+  const [feedback, setFeedback] = useState<"like" | "dislike" | "">("")
+
+  const onFeedback = useCallback(
+    (newFeedback: "like" | "dislike") => () => {
+      if (feedback === newFeedback) {
+        setFeedback("")
+        submitFeedback?.(message.id, "")
+      } else {
+        setFeedback(newFeedback)
+        submitFeedback?.(message.id, newFeedback)
+      }
+    },
+    [message.id, feedback, submitFeedback],
+  )
+
+  if (!message.data?.checkpoint_pk || !message.data?.thread_id) {
+    return null
+  }
+
+  return (
+    <FeedbackRowContainer>
+      <Tooltip title="Good response">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("like")}
+          aria-label="Good response"
+          aria-pressed={feedback === "like"}
+        >
+          {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
+        </FeedbackButton>
+      </Tooltip>
+      <Tooltip title="Bad response">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("dislike")}
+          aria-label="Bad response"
+          aria-pressed={feedback === "dislike"}
+        >
+          {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
+        </FeedbackButton>
+      </Tooltip>
+    </FeedbackRowContainer>
+  )
+}
+
 const AiChatDisplay: FC<AiChatDisplayProps> = ({
   conversationStarters,
   askTimTitle,
@@ -474,6 +548,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         <Markdown useMathJax={useMathJax}>
                           {message.content}
                         </Markdown>
+                        <FeedbackButtons message={message as AiChatMessage} />
                       </Message>
                     </MessageRow>
                   )

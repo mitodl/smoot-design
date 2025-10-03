@@ -1,9 +1,10 @@
 import * as React from "react"
 import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
-import { useMemo, createContext, useState } from "react"
+import { useMemo, createContext, useState, useCallback } from "react"
 import retryingFetch from "../../utils/retryingFetch"
 import { getCookie } from "../../utils/getCookie"
+import { extractCommentsData } from "./utils"
 
 const identity = <T,>(x: T): T => x
 
@@ -46,10 +47,15 @@ const getFetcher: (
  * All of `@ai-sdk/react`'s [`useChat`](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)
  * results, plus the initial messages.
  */
-type AiChatContextResult = UseChatHelpers & {
+type AiChatContextResult = Omit<UseChatHelpers, "messages"> & {
+  messages: AiChatMessage[]
   initialMessages: AiChatMessage[] | null
   additionalBody?: Record<string, string>
   setAdditionalBody?: (body: Record<string, string>) => void
+  submitFeedback?: (
+    messageId: string,
+    feedback: "like" | "dislike" | "",
+  ) => void
 }
 const AiChatContext = createContext<AiChatContextResult | null>(null)
 
@@ -103,14 +109,44 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
 
   const messages = useMemo(() => {
     const initial = initialMessages?.map((m) => m.id)
-    return unparsed.map((m) => {
+    return unparsed.map(({ data, ...m }): AiChatMessage => {
       if (m.role === "assistant" && !initial?.includes(m.id)) {
         const content = parseContent ? parseContent(m.content) : m.content
-        return { ...m, content }
+        const data = extractCommentsData(content)
+        return {
+          ...m,
+          content,
+          data,
+        }
       }
       return m
     })
   }, [parseContent, unparsed, initialMessages])
+
+  const submitFeedback = useCallback(
+    (messageId: string, rating: "like" | "dislike" | "") => {
+      const message = messages.find((m) => m.id === messageId)
+      const data = message?.data
+      if (!data?.thread_id || !data?.checkpoint_pk) {
+        return
+      }
+      const { origin } = new URL(requestOpts.apiUrl)
+      const url =
+        requestOpts.feedbackApiUrl
+          ?.replace(":threadId", data.thread_id)
+          .replace(":checkpointPk", data.checkpoint_pk) ||
+        `${origin}/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ rating }),
+        credentials: "include",
+      })
+    },
+    [requestOpts.apiUrl, requestOpts.feedbackApiUrl, messages],
+  )
 
   return (
     <AiChatContext.Provider
@@ -124,6 +160,7 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         setMessages,
         additionalBody,
         setAdditionalBody,
+        submitFeedback,
         ...others,
       }}
     >

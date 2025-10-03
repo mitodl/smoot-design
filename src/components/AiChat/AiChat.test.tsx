@@ -19,6 +19,18 @@ const server = setupServer(
     counter()
     return HttpResponse.text(`AI Response ${count}`)
   }),
+  http.post(
+    "http://localhost:4567/ai/api/v0/chat_sessions/:threadId/messages/:checkpointPk/rate/",
+    async () => {
+      return HttpResponse.json({ message: "Feedback received" })
+    },
+  ),
+  http.post(
+    "http://localhost:4567/feedback/:threadId/:checkpointPk",
+    async () => {
+      return HttpResponse.json({ message: "Feedback received" })
+    },
+  ),
 )
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
@@ -291,6 +303,7 @@ describe("AiChat", () => {
   })
 
   test("csrfCookieName and csrfHeaderName are used to set CSRF token if provided", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
     const csrfCookieName = "my-csrf-cookie"
     const csrfHeaderName = "My-Csrf-Header"
     document.cookie = `${csrfCookieName}=test-csrf-token`
@@ -304,12 +317,68 @@ describe("AiChat", () => {
 
     await user.click(getConversationStarters()[0])
 
-    expect(window.fetch).toHaveBeenCalledWith(
+    expect(mockFetch).toHaveBeenCalledWith(
       API_URL,
       expect.objectContaining({
         headers: expect.objectContaining({
           [csrfHeaderName]: "test-csrf-token",
         }),
+      }),
+    )
+  })
+
+  test("User feedback calls the correct endpoint with data values from response comment", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    const { initialMessages } = setup({
+      requestOpts: { apiUrl: API_URL },
+    })
+
+    server.use(
+      http.post(API_URL, async () => {
+        return HttpResponse.text(`Here is a response.
+
+<!-- {"checkpoint_pk": 123, "thread_id": "f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->`)
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, initialMessages.length + 2)
+    await user.click(screen.getByRole("button", { name: "Good response" }))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:4567/ai/api/v0/chat_sessions/f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1/messages/123/rate/",
+      expect.objectContaining({
+        body: JSON.stringify({ rating: "like" }),
+      }),
+    )
+  })
+
+  test("User feedback calls the correct endpoint when supplied", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    const { initialMessages } = setup({
+      requestOpts: {
+        apiUrl: API_URL,
+        feedbackApiUrl:
+          "http://localhost:4567/feedback/:threadId/:checkpointPk",
+      },
+    })
+
+    server.use(
+      http.post(API_URL, async () => {
+        return HttpResponse.text(`Here is a response.
+
+<!-- {"checkpoint_pk": 123, "thread_id": "f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->`)
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, initialMessages.length + 2)
+    await user.click(screen.getByRole("button", { name: "Bad response" }))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:4567/feedback/f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1/123",
+      expect.objectContaining({
+        body: JSON.stringify({ rating: "dislike" }),
       }),
     )
   })

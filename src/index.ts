@@ -74,6 +74,9 @@ export {
   TabButtonList,
 } from "./components/TabButtons/TabButtonList"
 
+export { Tooltip } from "./components/Tooltip/Tooltip"
+export type { TooltipProps } from "./components/Tooltip/Tooltip"
+
 export { VERSION } from "./VERSION"
 
 export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
