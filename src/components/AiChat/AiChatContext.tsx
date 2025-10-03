@@ -142,6 +142,7 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ rating }),
+        credentials: "include",
       })
     },
     [requestOpts.apiUrl, requestOpts.feedbackApiUrl, messages],
