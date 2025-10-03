@@ -315,6 +315,7 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
           size="small"
           onClick={onFeedback("like")}
           aria-label="Good response"
+          aria-pressed={feedback === "like"}
         >
           {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
         </FeedbackButton>
@@ -325,6 +326,7 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
           size="small"
           onClick={onFeedback("dislike")}
           aria-label="Bad response"
+          aria-pressed={feedback === "dislike"}
         >
           {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
         </FeedbackButton>
