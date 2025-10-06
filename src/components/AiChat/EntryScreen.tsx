@@ -139,6 +139,8 @@ const EntryScreen = ({
       <StyledInput
         fullWidth
         size="chat"
+        multiline
+        maxRows={20}
         name="prompt"
         onChange={onPromptChange}
         inputProps={{

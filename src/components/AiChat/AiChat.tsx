@@ -610,6 +610,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 <Input
                   ref={promptInputRef}
                   fullWidth
+                  multiline
+                  maxRows={20}
                   size="chat"
                   className={classes.input}
                   placeholder={placeholder}
@@ -617,6 +619,15 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   sx={{ flex: 1 }}
                   value={input}
                   onChange={handleInputChange}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault()
+                      if (input.trim() && !isLoading) {
+                        const form = event.currentTarget.closest("form")
+                        form?.requestSubmit()
+                      }
+                    }
+                  }}
                   inputProps={{
                     "aria-label": "Ask a question",
                   }}
