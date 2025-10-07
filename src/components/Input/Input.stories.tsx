@@ -10,6 +10,17 @@ import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 import Typography from "@mui/material/Typography"
 
+const StatefulInput = (props: InputProps) => {
+  const [value, setValue] = React.useState(props.value || "")
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value)
+    props.onChange?.(event)
+  }
+
+  return <Input {...props} value={value} onChange={handleChange} />
+}
+
 const SIZES = enumValues<NonNullable<InputProps["size"]>>({
   small: true,
   medium: true,
@@ -76,10 +87,10 @@ export const Sizes: Story = {
   render: (args) => {
     return (
       <Stack direction="row" gap={1}>
-        <Input size="small" {...args} />
-        <Input size="medium" {...args} />
-        <Input size="large" {...args} />
-        <Input size="hero" {...args} />
+        <StatefulInput size="small" {...args} />
+        <StatefulInput size="medium" {...args} />
+        <StatefulInput size="large" {...args} />
+        <StatefulInput size="hero" {...args} />
       </Stack>
     )
   },
@@ -112,7 +123,7 @@ export const Adornments: Story = {
           SIZES.map((size) => {
             return (
               <Grid size={{ xs: 3 }} key={`${i}-${size}`}>
-                <Input {...args} size={size} {...props} />
+                <StatefulInput {...args} size={size} {...props} />
               </Grid>
             )
           }),
@@ -123,6 +134,45 @@ export const Adornments: Story = {
   argTypes: {
     startAdornment: { table: { disable: true } },
     endAdornment: { table: { disable: true } },
+  },
+}
+
+export const Multiline: Story = {
+  render: (args) => {
+    return (
+      <Stack direction="column" gap={1}>
+        <StatefulInput
+          size="small"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="medium"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="large"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="hero"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="chat"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+      </Stack>
+    )
   },
 }
 
@@ -159,19 +209,19 @@ export const StatesAndParentStyleResistance: Story = {
             <Typography>Placeholder</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input {...args} value="" />
+            <StatefulInput {...args} value="" />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <Typography>Default</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input {...args} />
+            <StatefulInput {...args} />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <Typography>Initially Focused</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input
+            <StatefulInput
               // This is a story just demonstrating the autofocus prop
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
@@ -182,19 +232,19 @@ export const StatesAndParentStyleResistance: Story = {
             <Typography>Error</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input {...args} error />
+            <StatefulInput {...args} error />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <Typography>Disabled</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input {...args} disabled />
+            <StatefulInput {...args} disabled />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <Typography>Password</Typography>
           </Grid>
           <Grid size={{ xs: 8 }}>
-            <Input {...args} type="password" />
+            <StatefulInput {...args} type="password" />
           </Grid>
         </Grid>
       </PageStyles>

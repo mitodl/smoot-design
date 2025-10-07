@@ -135,6 +135,51 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
         width: "72px",
       },
     },
+    multiline && {
+      ".Mit-AdornmentButton": {
+        alignSelf: "flex-end",
+      },
+    },
+    (multiline && !size) ||
+      (size === "small" && {
+        ".Mit-AdornmentButton": {
+          padding: "8px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      }),
+    multiline &&
+      size === "medium" && {
+        ".Mit-AdornmentButton": {
+          padding: "10px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "large" && {
+        ".Mit-AdornmentButton": {
+          padding: "12px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "hero" && {
+        ".Mit-AdornmentButton": {
+          padding: "24px",
+          margin: "8px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "chat" && {
+        ".Mit-AdornmentButton": {
+          padding: "10px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      },
   ])
 
 /**
