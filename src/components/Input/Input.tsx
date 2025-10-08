@@ -176,7 +176,7 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
       size === "chat" && {
         ".Mit-AdornmentButton": {
           padding: "10px",
-          margin: "4px",
+          margin: "8px",
           borderRadius: "4px",
         },
       },

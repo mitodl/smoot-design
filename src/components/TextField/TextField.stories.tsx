@@ -157,6 +157,7 @@ export const Multiline: Story = {
     return (
       <StatefulTextField
         {...args}
+        value={"Help text the quick brown fox jumps over the lazy dog."}
         multiline
         endAdornment={ADORNMENTS.SearchIcon}
       />
