@@ -130,12 +130,27 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
       if (!data?.thread_id || !data?.checkpoint_pk) {
         return
       }
-      const { origin } = new URL(requestOpts.apiUrl)
-      const url =
-        requestOpts.feedbackApiUrl
-          ?.replace(":threadId", data.thread_id)
-          .replace(":checkpointPk", data.checkpoint_pk) ||
-        `${origin}/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+
+      let url
+      if (requestOpts.feedbackApiUrl) {
+        url = requestOpts.feedbackApiUrl
+          .replace(":threadId", data.thread_id)
+          .replace(":checkpointPk", data.checkpoint_pk)
+      } else {
+        const path = `/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+        try {
+          const { origin } = new URL(requestOpts.apiUrl)
+          url = `${origin}${path}`
+        } catch (error) {
+          console.warn(
+            "Expected an absolute apiUrl to construct the feedbackApiUrl where not provided",
+            requestOpts.apiUrl,
+            error,
+          )
+          url = path
+        }
+      }
+
       fetch(url, {
         method: "POST",
         headers: {
