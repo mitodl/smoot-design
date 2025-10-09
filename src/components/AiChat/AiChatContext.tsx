@@ -151,16 +151,26 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         }
       }
 
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      const { csrfCookieName, csrfHeaderName } = requestOpts
+      if (csrfCookieName && csrfHeaderName) {
+        const csrfToken = getCookie(csrfCookieName)
+        if (csrfToken) {
+          headers[csrfHeaderName] = csrfToken
+        }
+      }
+
       fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({ rating }),
         credentials: "include",
       })
     },
-    [requestOpts.apiUrl, requestOpts.feedbackApiUrl, messages],
+    [requestOpts, messages],
   )
 
   return (
