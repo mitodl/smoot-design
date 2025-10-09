@@ -139,6 +139,8 @@ const EntryScreen = ({
       <StyledInput
         fullWidth
         size="chat"
+        multiline
+        maxRows={20}
         name="prompt"
         onChange={onPromptChange}
         inputProps={{
@@ -150,6 +152,13 @@ const EntryScreen = ({
           </AdornmentButton>
         }
         responsive
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault()
+            const form = event.currentTarget.closest("form")
+            form?.requestSubmit()
+          }
+        }}
       />
       <Starters>
         {conversationStarters?.map(({ content }, index) => (

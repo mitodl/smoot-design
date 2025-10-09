@@ -423,7 +423,7 @@ describe("AiDrawerManager", () => {
       },
     )
 
-    await user.keyboard("{Escape}")
+    await user.click(screen.getByRole("button", { name: "Close" }))
     assertTrackingEvent({
       event_type: `${eventPrefix}.${TrackingEventType.Close}`,
       event_data: { blockUsageKey },

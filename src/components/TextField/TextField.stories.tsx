@@ -9,6 +9,17 @@ import { RiSearchLine, RiCalendarLine, RiCloseLine } from "@remixicon/react"
 import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 
+const StatefulTextField = (props: TextFieldProps) => {
+  const [value, setValue] = React.useState(props.value || "")
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value)
+    props.onChange?.(event)
+  }
+
+  return <TextField {...props} value={value} onChange={handleChange} />
+}
+
 const SIZES = enumValues<NonNullable<TextFieldProps["size"]>>({
   small: true,
   medium: true,
@@ -81,7 +92,7 @@ type Story = StoryObj<typeof TextField>
 
 export const Simple: Story = {
   render: (args) => {
-    return <TextField {...args} />
+    return <StatefulTextField {...args} />
   },
 }
 
@@ -89,10 +100,10 @@ export const Sizes: Story = {
   render: (args) => {
     return (
       <Stack direction="row" gap={1}>
-        <TextField {...args} size="small" />
-        <TextField {...args} size="medium" />
-        <TextField {...args} size="large" />
-        <TextField {...args} size="hero" />
+        <StatefulTextField {...args} size="small" />
+        <StatefulTextField {...args} size="medium" />
+        <StatefulTextField {...args} size="large" />
+        <StatefulTextField {...args} size="hero" />
       </Stack>
     )
   },
@@ -103,8 +114,8 @@ export const Widths: Story = {
   render: (args) => {
     return (
       <Stack direction="column" gap={1}>
-        <TextField {...args} label="default" />
-        <TextField {...args} label="fullWidth" fullWidth />
+        <StatefulTextField {...args} label="default" />
+        <StatefulTextField {...args} label="fullWidth" fullWidth />
       </Stack>
     )
   },
@@ -127,7 +138,7 @@ export const Adornments: Story = {
           SIZES.map((size) => {
             return (
               <Grid item xs={6} key={`${i}-${size}`}>
-                <TextField {...args} size={size} {...props} />
+                <StatefulTextField {...args} size={size} {...props} />
               </Grid>
             )
           }),
@@ -141,6 +152,19 @@ export const Adornments: Story = {
   },
 }
 
+export const Multiline: Story = {
+  render: (args) => {
+    return (
+      <StatefulTextField
+        {...args}
+        value={"Help text the quick brown fox jumps over the lazy dog."}
+        multiline
+        endAdornment={ADORNMENTS.SearchIcon}
+      />
+    )
+  },
+}
+
 export const States: Story = {
   render: (args) => {
     return (
@@ -149,31 +173,31 @@ export const States: Story = {
           Placeholder
         </Grid>
         <Grid item xs={8}>
-          <TextField {...args} value="" />
+          <StatefulTextField {...args} value="" />
         </Grid>
         <Grid item xs={4}>
           Default
         </Grid>
         <Grid item xs={8}>
-          <TextField {...args} />
+          <StatefulTextField {...args} />
         </Grid>
         <Grid item xs={4}>
           Required
         </Grid>
         <Grid item xs={8}>
-          <TextField required {...args} />
+          <StatefulTextField required {...args} />
         </Grid>
         <Grid item xs={4}>
           Error
         </Grid>
         <Grid item xs={8}>
-          <TextField {...args} error />
+          <StatefulTextField {...args} error />
         </Grid>
         <Grid item xs={4}>
           Disabled
         </Grid>
         <Grid item xs={8}>
-          <TextField {...args} disabled />
+          <StatefulTextField {...args} disabled />
         </Grid>
       </Grid>
     )

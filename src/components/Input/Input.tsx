@@ -83,6 +83,13 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
       !multiline && {
         height: "56px",
       },
+    size === "chat" &&
+      multiline && {
+        "& textarea": {
+          paddingTop: "16px",
+          paddingBottom: "16px",
+        },
+      },
     size === "hero" &&
       !multiline && {
         height: "72px",
@@ -128,6 +135,51 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
         width: "72px",
       },
     },
+    multiline && {
+      ".Mit-AdornmentButton": {
+        alignSelf: "flex-end",
+      },
+    },
+    (multiline && !size) ||
+      (size === "small" && {
+        ".Mit-AdornmentButton": {
+          padding: "8px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      }),
+    multiline &&
+      size === "medium" && {
+        ".Mit-AdornmentButton": {
+          padding: "10px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "large" && {
+        ".Mit-AdornmentButton": {
+          padding: "12px",
+          margin: "4px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "hero" && {
+        ".Mit-AdornmentButton": {
+          padding: "24px",
+          margin: "8px",
+          borderRadius: "4px",
+        },
+      },
+    multiline &&
+      size === "chat" && {
+        ".Mit-AdornmentButton": {
+          padding: "10px",
+          margin: "8px",
+          borderRadius: "4px",
+        },
+      },
   ])
 
 /**
@@ -245,6 +297,7 @@ const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
   flexShrink: 0,
   justifyContent: "center",
   alignItems: "center",
+  alignSelf: "stretch",
   // background and border
   border: "none",
   background: "transparent",
@@ -270,7 +323,6 @@ const AdornmentButtonStyled = styled.button(({ theme, disabled }) => ({
   ".MuiInputBase-root.Mui-disabled &": {
     color: "inherit",
   },
-  height: "100%",
 }))
 
 const noFocus: React.MouseEventHandler = (e) => e.preventDefault()

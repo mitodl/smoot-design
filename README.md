@@ -1,6 +1,14 @@
-# smoot-design
+# @mitodl/smoot-design
 
 Design system components for MITODL Projects
+
+![NPM Version](https://img.shields.io/npm/v/@mitodl/smoot-design)
+
+![NPM Last Update](https://img.shields.io/npm/last-update/@mitodl/smoot-design?label=npm+last+update)
+
+![NPM Unpacked Size](https://img.shields.io/npm/unpacked-size/@mitodl/smoot-design)
+
+![GitHub branch status](https://img.shields.io/github/checks-status/mitodl/smoot-design/main)
 
 ## Development and Release
 
