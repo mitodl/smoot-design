@@ -46,8 +46,6 @@ const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
   ({ content, ...others }, ref) => {
     const [screen, setScreen] = useState<0 | 1>(0)
 
-    useEffect(() => setScreen(0), [content])
-
     const handleClick = () => {
       setScreen((current) => (current === 0 ? 1 : 0))
     }
@@ -126,7 +124,11 @@ export const FlashcardsScreen = ({
         role="region"
         aria-label={`Flashcard ${cardIndex + 1} of ${flashcards.length}`}
       >
-        <Flashcard ref={flashcardRef} content={flashcards[cardIndex]} />
+        <Flashcard
+          key={`flashcard-${cardIndex}`}
+          ref={flashcardRef}
+          content={flashcards[cardIndex]}
+        />
       </div>
       <Navigation>
         <ActionButton
