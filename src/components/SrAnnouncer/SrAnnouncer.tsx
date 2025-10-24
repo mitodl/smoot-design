@@ -49,7 +49,7 @@ const SrAnnouncer: React.FC<SrAnnouncerProps> = ({
     "SrAnnouncer: loadingMessages changed (by ===) unexpectedly. This may interfere with loading message visibility",
   )
 
-  useEffect(() => {
+  React.useLayoutEffect(() => {
     setLoadingMsgIndex(-1)
   }, [isLoading, loadingMessages])
 
