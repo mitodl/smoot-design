@@ -1,8 +1,9 @@
 import * as React from "react"
 import styled from "@emotion/styled"
+import type { CSSObject } from "@emotion/react"
 import { css } from "@emotion/react"
 import { pxToRem } from "../ThemeProvider/typography"
-import type { Theme, ThemeOptions } from "@mui/material/styles"
+import type { Theme } from "@mui/material/styles"
 import CircularProgress from "@mui/material/CircularProgress"
 import {
   LinkAdapter,
@@ -34,6 +35,11 @@ type ButtonStyleProps = {
    */
   responsive?: boolean
   color?: "secondary"
+  /**
+   * Style overrides that will be applied with high specificity.
+   * Use this for intentional style customizations.
+   */
+  sx?: CSSObject
 }
 
 const styleProps: Record<string, boolean> = {
@@ -44,12 +50,13 @@ const styleProps: Record<string, boolean> = {
   endIcon: true,
   responsive: true,
   color: true,
+  sx: true,
 } satisfies Record<keyof ButtonStyleProps, boolean>
 
 const shouldForwardButtonProp = (prop: string) => !styleProps[prop]
 
 const DEFAULT_PROPS: Required<
-  Omit<ButtonStyleProps, "startIcon" | "endIcon" | "color">
+  Omit<ButtonStyleProps, "startIcon" | "endIcon" | "color" | "sx">
 > = {
   variant: "primary",
   size: "medium",
@@ -73,63 +80,40 @@ const sizeStyles = (
   size: ButtonSize,
   hasBorder: boolean,
   theme: Theme,
-): Partial<ThemeOptions["typography"]>[] => {
+): CSSObject => {
   const paddingAdjust = hasBorder ? BORDER_WIDTHS[size] : 0
-  return [
-    {
-      boxSizing: "border-box",
-      borderWidth: BORDER_WIDTHS[size],
-    },
-    size === "large" && {
+
+  let sizeStyles = {}
+  if (size === "large") {
+    sizeStyles = {
       padding: `${14 - paddingAdjust}px 24px`,
       ...theme.typography.buttonLarge,
-    },
-    size === "medium" && {
+    }
+  } else if (size === "medium") {
+    sizeStyles = {
       padding: `${11 - paddingAdjust}px 16px`,
       ...theme.typography.button,
-    },
-    size === "small" && {
+    }
+  } else if (size === "small") {
+    sizeStyles = {
       padding: `${8 - paddingAdjust}px 12px`,
       ...theme.typography.buttonSmall,
-    },
-  ]
+    }
+  }
+
+  return {
+    boxSizing: "border-box",
+    borderWidth: BORDER_WIDTHS[size],
+    ...sizeStyles,
+  }
 }
 
-const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
-  const { size, variant, edge, theme, color, responsive } = {
-    ...DEFAULT_PROPS,
-    ...props,
-  }
-  const { colors } = theme.custom
-  const hasBorder = variant === "secondary" || variant === "bordered"
-  return css([
-    {
-      color: theme.palette.text.primary,
-      textAlign: "center",
-      // display
-      display: "inline-flex",
-      justifyContent: "center",
-      alignItems: "center",
-      // transitions
-      transition: `background ${theme.transitions.duration.short}ms`,
-      // cursor
-      cursor: "pointer",
-      ":disabled": {
-        cursor: "default",
-      },
-      minWidth: "100px",
-    },
-    ...sizeStyles(size, hasBorder, theme),
-    // responsive
-    responsive && {
-      [theme.breakpoints.down("sm")]: sizeStyles(
-        RESPONSIVE_SIZES[size],
-        hasBorder,
-        theme,
-      ),
-    },
-    // variant
-    variant === "primary" && {
+const variantStyles = (
+  variant: ButtonVariant,
+  colors: Theme["custom"]["colors"],
+) => {
+  if (variant === "primary") {
+    return {
       backgroundColor: colors.mitRed,
       color: colors.white,
       border: "none",
@@ -144,8 +128,9 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: colors.silverGray,
         boxShadow: "none",
       },
-    },
-    variant === "secondary" && {
+    }
+  } else if (variant === "secondary") {
+    return {
       color: colors.red,
       backgroundColor: "transparent",
       borderColor: "currentcolor",
@@ -157,8 +142,9 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
       ":disabled": {
         color: colors.silverGray,
       },
-    },
-    variant === "text" && {
+    }
+  } else if (variant === "text") {
+    return {
       backgroundColor: "transparent",
       borderStyle: "none",
       color: colors.darkGray2,
@@ -169,8 +155,9 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
       ":disabled": {
         color: colors.silverGray,
       },
-    },
-    variant === "bordered" && {
+    }
+  } else if (variant === "bordered") {
+    return {
       backgroundColor: colors.white,
       color: colors.silverGrayDark,
       border: `1px solid ${colors.silverGrayLight}`,
@@ -183,8 +170,9 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         border: `1px solid ${colors.lightGray2}`,
         color: colors.silverGrayDark,
       },
-    },
-    variant === "tertiary" && {
+    }
+  } else if (variant === "tertiary") {
+    return {
       color: colors.darkGray2,
       border: "none",
       backgroundColor: colors.lightGray2,
@@ -195,24 +183,95 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: colors.lightGray2,
         color: colors.silverGrayLight,
       },
-    },
-    // edge
-    edge === "rounded" && {
+    }
+  }
+  return {}
+}
+
+const edgeStyles = (edge: ButtonEdge) => {
+  if (edge === "rounded") {
+    return {
       borderRadius: "4px",
-    },
-    edge === "circular" && {
+    }
+  } else if (edge === "circular") {
+    return {
       // Pill-shaped buttons... Overlapping border radius get clipped to pill.
       borderRadius: "100vh",
-    },
-    // color
-    color === "secondary" && {
-      color: theme.custom.colors.silverGray,
-      borderColor: theme.custom.colors.silverGray,
+    }
+  }
+  return {}
+}
+
+const colorOverrideStyles = (
+  color: ButtonStyleProps["color"],
+  colors: Theme["custom"]["colors"],
+) => {
+  if (color === "secondary") {
+    return {
+      color: colors.silverGray,
+      borderColor: colors.silverGray,
       ":hover:not(:disabled)": {
-        backgroundColor: theme.custom.colors.lightGray1,
+        backgroundColor: colors.lightGray1,
       },
+    }
+  }
+  return {}
+}
+
+const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
+  const { size, variant, edge, theme, color, responsive, sx } = {
+    ...DEFAULT_PROPS,
+    ...props,
+  }
+  const { colors } = theme.custom
+  const hasBorder = variant === "secondary" || variant === "bordered"
+
+  const resetStyles: CSSObject = {
+    backgroundImage: "none",
+    textTransform: "none",
+    letterSpacing: "normal",
+    textDecoration: "none",
+    textShadow: "none",
+  }
+
+  const styles = css({
+    color: theme.palette.text.primary,
+    textAlign: "center",
+    // display
+    display: "inline-flex",
+    justifyContent: "center",
+    alignItems: "center",
+    // transitions
+    transition: `background ${theme.transitions.duration.short}ms`,
+    // cursor
+    cursor: "pointer",
+    ":disabled": {
+      cursor: "default",
     },
-  ])
+    minWidth: "100px",
+    ...sizeStyles(size, hasBorder, theme),
+    // responsive
+    ...(responsive && {
+      [theme.breakpoints.down("sm")]: sizeStyles(
+        RESPONSIVE_SIZES[size],
+        hasBorder,
+        theme,
+      ),
+    }),
+    ...variantStyles(variant, colors),
+    ...edgeStyles(edge),
+    ...colorOverrideStyles(color, theme.custom.colors),
+    ...resetStyles,
+    // Apply sx overrides last so they take precedence
+    ...sx,
+  })
+
+  return css`
+    // increase specificity to resist accidental override from parent page styles
+    && {
+      ${styles}
+    }
+  `
 }
 
 const ButtonRoot = styled("button", {

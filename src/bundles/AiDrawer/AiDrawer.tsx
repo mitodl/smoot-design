@@ -20,6 +20,7 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
+import { withStyleOverrides } from "../../utils/styles"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
@@ -78,15 +79,17 @@ const Title = styled.div(({ theme }) => ({
   },
 }))
 
-const CloseButton = styled(ActionButton)(({ theme }) => ({
-  backgroundColor: theme.custom.colors.lightGray2,
-  "&&:hover": {
-    backgroundColor: theme.custom.colors.red,
-    color: theme.custom.colors.white,
-  },
-  zIndex: 3,
-  flexShrink: 0,
-}))
+const CloseButton = styled(ActionButton)(({ theme }) =>
+  withStyleOverrides({
+    backgroundColor: theme.custom.colors.lightGray2,
+    "&&:hover": {
+      backgroundColor: theme.custom.colors.red,
+      color: theme.custom.colors.white,
+    },
+    zIndex: 3,
+    flexShrink: 0,
+  }),
+)
 
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   padding: "0 0 16px",
