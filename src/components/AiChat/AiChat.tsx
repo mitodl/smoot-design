@@ -32,6 +32,7 @@ import type { MathJax3Config } from "better-react-mathjax"
 import { MathJaxContext } from "better-react-mathjax"
 import deepmerge from "@mui/utils/deepmerge"
 import { ActionButton } from "../Button/ActionButton"
+import { withStyleOverrides } from "../../utils/styles"
 import { Tooltip } from "../Tooltip/Tooltip"
 
 const ConditionalMathJaxWrapper: React.FC<{
@@ -276,15 +277,17 @@ const FeedbackRowContainer = styled.div({
   margin: "16px 0 10px 0",
 })
 
-const FeedbackButton = styled(ActionButton)(({ theme }) => ({
-  borderRadius: "8px",
-  ":hover:not(:disabled)": {
-    backgroundColor: theme.custom.colors.lightGray2,
-  },
-  svg: {
-    fill: theme.custom.colors.darkGray1,
-  },
-}))
+const FeedbackButton = styled(ActionButton)(({ theme }) =>
+  withStyleOverrides({
+    borderRadius: "8px",
+    ":hover:not(:disabled)": {
+      backgroundColor: theme.custom.colors.lightGray2,
+    },
+    svg: {
+      fill: theme.custom.colors.darkGray1,
+    },
+  }),
+)
 
 const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
   const { submitFeedback } = useAiChat()
