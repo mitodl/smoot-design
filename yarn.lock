@@ -2809,7 +2809,7 @@ __metadata:
     eslint-plugin-mdx: "npm:^3.0.0"
     eslint-plugin-react: "npm:^7.34.3"
     eslint-plugin-react-hooks: "npm:^5.0.0"
-    eslint-plugin-storybook: "npm:9.1.13"
+    eslint-plugin-storybook: "npm:9.1.16"
     eslint-plugin-styled-components-a11y: "npm:^2.1.35"
     eslint-plugin-testing-library: "npm:^7.0.0"
     jest: "npm:^30.0.0"
@@ -8579,15 +8579,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:9.1.13":
-  version: 9.1.13
-  resolution: "eslint-plugin-storybook@npm:9.1.13"
+"eslint-plugin-storybook@npm:9.1.16":
+  version: 9.1.16
+  resolution: "eslint-plugin-storybook@npm:9.1.16"
   dependencies:
     "@typescript-eslint/utils": "npm:^8.8.1"
   peerDependencies:
     eslint: ">=8"
-    storybook: ^9.1.13
-  checksum: 10/c42247cf4b5118b4dcff529f6fda72fb26fc39e5a62158b456b27b89489176fb0ff04ea19a5bf31f40bea7bdd4cd5e83b6d908351c7808ce74aef34aa6347560
+    storybook: ^9.1.16
+  checksum: 10/3142e70ee2a8cead5c891b76861914dc5e675d85be758171e4c63db912351e57da0ce4cbccf5a3cf7aaf9cf8fc2f40cf6110ef9a459d0c61cef287b82570e88b
   languageName: node
   linkType: hard
 
