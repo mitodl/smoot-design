@@ -3,7 +3,7 @@ name: Publish Storybook
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: [main, cc/initial]
+    branches: [main, cc/page-debugging]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,8 +21,8 @@ jobs:
           cache: yarn
           cache-dependency-path: yarn.lock
 
-      - name: Install dependencies
-        run: yarn install
+      - name: Install dependencies & Initialize
+        run: yarn install --immutable && yarn msw init
 
       - name: Build Storybook
         run: yarn build-storybook
