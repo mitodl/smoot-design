@@ -52,10 +52,6 @@ const ConflictingPageStyles = styled.div(`
   input:disabled {
     background-image: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
   }
-
-  .MuiInputBase-input {
-    background: red;
-  }
 `)
 
 /**
@@ -63,8 +59,7 @@ const ConflictingPageStyles = styled.div(`
  */
 export const Default: Story = {
   render: () => (
-    <>
-      <ConflictingPageStyles />
+    <ConflictingPageStyles>
       <StyleIsolation>
         <Grid container spacing={2}>
           <Grid>
@@ -75,7 +70,7 @@ export const Default: Story = {
           </Grid>
         </Grid>
       </StyleIsolation>
-    </>
+    </ConflictingPageStyles>
   ),
 }
 
@@ -84,8 +79,7 @@ export const Default: Story = {
  */
 export const MultipleComponents: Story = {
   render: () => (
-    <>
-      <ConflictingPageStyles />
+    <ConflictingPageStyles>
       <StyleIsolation>
         <Grid container spacing={2} direction="column">
           <Grid container spacing={2}>
@@ -104,7 +98,7 @@ export const MultipleComponents: Story = {
           </Grid>
         </Grid>
       </StyleIsolation>
-    </>
+    </ConflictingPageStyles>
   ),
 }
 
@@ -234,8 +228,7 @@ export const IntentionalOverrides: Story = {
     }))
 
     return (
-      <>
-        <ConflictingPageStyles />
+      <ConflictingPageStyles>
         <Grid container spacing={3} direction="column">
           <Grid>
             <h3>Default Components (Protected):</h3>
@@ -313,7 +306,7 @@ export const IntentionalOverrides: Story = {
             </StyleIsolation>
           </Grid>
         </Grid>
-      </>
+      </ConflictingPageStyles>
     )
   },
 }
@@ -351,8 +344,7 @@ export const ComplexParentSelectors: Story = {
     `)
 
     return (
-      <>
-        <ComplexParentStyles />
+      <ComplexParentStyles>
         <form>
           <Grid container spacing={2} direction="column">
             <Grid>
@@ -371,7 +363,7 @@ export const ComplexParentSelectors: Story = {
             </Grid>
           </Grid>
         </form>
-      </>
+      </ComplexParentStyles>
     )
   },
 }
@@ -417,8 +409,7 @@ export const OverridesWithCustomResets: Story = {
     }))
 
     return (
-      <>
-        <ConflictingPageStyles />
+      <ConflictingPageStyles>
         <StyleIsolation
           customResets={{
             button: {
@@ -457,7 +448,7 @@ export const OverridesWithCustomResets: Story = {
             </Grid>
           </Grid>
         </StyleIsolation>
-      </>
+      </ConflictingPageStyles>
     )
   },
 }

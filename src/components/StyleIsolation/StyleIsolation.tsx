@@ -12,12 +12,12 @@ const StyleIsolationContext = React.createContext<string | null>(null)
 /**
  * Hook to wrap styles with StyleIsolation className for correct specificity.
  * When a component is inside StyleIsolation, this wraps styles with the isolation
- * className selector to override StyleIsolation's reset specificity (0,1,1).
+ * className selector to override StyleIsolation's reset specificity (0,2,1).
  *
  * When isolationClassName is available, styles are wrapped as:
- * `.css-abc123 && { ...styles }` (specificity: 0,2,0)
+ * `.css-abc123 && { ...styles }` (specificity: 0,3,0)
  *
- * This ensures component styles (0,2,0) override StyleIsolation's resets (0,1,1).
+ * This ensures component styles (0,3,0) override StyleIsolation's resets (0,2,1).
  * When isolationClassName is null/undefined, styles are returned as-is.
  *
  * This is used internally by components like Button to ensure their styles
@@ -140,7 +140,7 @@ const StyleIsolationRoot = styled.div<{
      *
      * Note: This is primarily for layout/positioning isolation, but complements
      * contain: "style" for comprehensive isolation. The real protection against
-     * parent CSS comes from the &&& high-specificity selectors below.
+     * parent CSS comes from the && high-specificity selectors below.
      */
     isolation: "isolate",
   }
@@ -148,15 +148,15 @@ const StyleIsolationRoot = styled.div<{
   // Build high-specificity resets for common elements
   // Based on common conflicts from MITx Online and similar LMS CSS files
   const commonResets: CSSObject = {
-    // Use & to create selectors with moderate specificity
-    // This generates .css-abc123 button
-    // Specificity: 0,1,1 (1 class + 1 element)
+    // Use && to create selectors with higher specificity
+    // This generates .css-abc123.css-abc123 button
+    // Specificity: 0,2,1 (2 classes + 1 element)
     // This will override:
-    // - form input[type="button"] (0,1,2) - ties, but comes later so wins
+    // - form input[type="button"] (0,1,2) - higher specificity wins
     // - Most common parent page selectors
-    // Components use .css-abc123 && (0,2,0) via useStyleIsolation to override these resets
-    // Consumers can use &&& (0,3,0) to override component styles
-    "&": {
+    // Components use .css-abc123 && (0,3,0) via useStyleIsolation to override these resets
+    // Consumers can use &&& (0,4,0) to override component styles
+    "&&": {
       "button, input[type='button']": {
         backgroundImage: "unset",
         textTransform: "unset",
@@ -266,7 +266,8 @@ const StyleIsolationRoot = styled.div<{
     ? Object.entries(customResets).reduce(
         (acc, [selector, styles]) => {
           // Apply moderate specificity to custom selectors
-          // Components use .css-abc123 && (0,2,0) via useStyleIsolation to override
+          // Note: Custom resets use & (0,1,1) while common resets use && (0,2,1)
+          // Components use .css-abc123 && (0,3,0) via useStyleIsolation to override
           acc[`& ${selector}`] = styles
           return acc
         },
