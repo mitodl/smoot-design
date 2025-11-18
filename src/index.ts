@@ -80,5 +80,3 @@ export type { TooltipProps } from "./components/Tooltip/Tooltip"
 export { VERSION } from "./VERSION"
 
 export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
-
-export { withStyleOverrides } from "./utils/styles"

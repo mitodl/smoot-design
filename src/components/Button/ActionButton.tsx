@@ -9,13 +9,12 @@ import {
 } from "./Button"
 import type { ButtonStyleProps, ButtonSize } from "./Button"
 import type { LinkAdapterPropsOverrides } from "../LinkAdapter/LinkAdapter"
-import { withStyleOverrides } from "../../utils/styles"
 
 type ActionButtonStyleProps = Omit<ButtonStyleProps, "startIcon" | "endIcon">
 type ActionButtonProps = ActionButtonStyleProps & React.ComponentProps<"button">
 
-const actionStyles = (size: ButtonSize) =>
-  withStyleOverrides({
+const actionStyles = (size: ButtonSize) => {
+  return {
     minWidth: "auto",
     padding: 0,
     height: {
@@ -39,8 +38,8 @@ const actionStyles = (size: ButtonSize) =>
         }[size],
       ),
     },
-  })
-
+  }
+}
 /**
  * A button that should contain a remixicon icon and nothing else.
  * See [ActionButton docs](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-actionbutton--docs).

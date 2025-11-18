@@ -8,7 +8,6 @@ import { Button, ButtonLink } from "../Button/Button"
 import type { ButtonLinkProps, ButtonProps } from "../Button/Button"
 import { css } from "@emotion/react"
 import type { Theme } from "@mui/material/styles"
-import { withStyleOverrides } from "../../utils/styles"
 
 const defaultTabListProps = {
   variant: "scrollable",
@@ -62,18 +61,16 @@ const TabButtonList: React.FC<TabButtonListProps> = styled(
 }))
 
 const tabStyles = ({ theme }: { theme: Theme }) =>
-  css(
-    withStyleOverrides({
-      minWidth: "auto",
-      ":focus-visible": {
-        outlineOffset: "-1px",
-      },
-      '&[aria-selected="true"]': {
-        backgroundColor: theme.custom.colors.white,
-        borderColor: theme.custom.colors.darkGray2,
-      },
-    }),
-  )
+  css({
+    minWidth: "auto",
+    ":focus-visible": {
+      outlineOffset: "-1px",
+    },
+    '&[aria-selected="true"]': {
+      backgroundColor: theme.custom.colors.white,
+      borderColor: theme.custom.colors.darkGray2,
+    },
+  })
 
 const TabButtonStyled = styled(Button)(tabStyles)
 const TabLinkStyled = styled(ButtonLink)(tabStyles)

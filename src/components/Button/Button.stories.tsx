@@ -1,5 +1,4 @@
 import * as React from "react"
-import styled from "@emotion/styled"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Button, ButtonLink, ButtonLoadingIcon } from "./Button"
 import type { ButtonProps } from "./Button"
@@ -306,34 +305,4 @@ export const Showcase: Story = {
   args: {
     children: "Click me",
   },
-}
-
-const ConflictingPageStyles = styled.div(`
-  button {
-    border: 1px solid red;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 0 0 #fff;
-    color: aqua;
-    display: inline-block;
-    font-size: inherit;
-    font-weight: bold;
-    background-color: blue;
-    background-image: linear-gradient(red, blue);
-    padding: 7px 18px;
-    text-decoration: none;
-    text-shadow: 0 1px 0 green;
-    background-clip: padding-box;
-    font-size: 0.8125em
-  }
-`)
-
-export const PageStyleResistance: Story = {
-  ...Showcase,
-  decorators: [
-    (Story) => (
-      <ConflictingPageStyles>
-        <Story />
-      </ConflictingPageStyles>
-    ),
-  ],
 }

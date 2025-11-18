@@ -1,5 +1,4 @@
 import * as React from "react"
-import styled from "@emotion/styled"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { ActionButton, ActionButtonLink, DEFAULT_PROPS } from "./ActionButton"
 import type { ActionButtonProps } from "./ActionButton"
@@ -10,6 +9,7 @@ import {
   RiDeleteBinLine,
   RiTestTubeLine,
 } from "@remixicon/react"
+
 import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 
@@ -193,39 +193,4 @@ export const Showcase: Story = {
       )}
     </Grid>
   ),
-}
-
-const ConflictingPageStyles = styled.div(`
-  button {
-    border: 1px solid red;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 0 0 #fff;
-    color: aqua;
-    display: inline-block;
-    font-size: inherit;
-    font-weight: bold;
-    background-color: blue;
-    background-image: linear-gradient(red, blue);
-    padding: 7px 18px;
-    text-decoration: none;
-    text-shadow: 0 1px 0 green;
-    background-clip: padding-box;
-    font-size: 0.8125em
-  }
-`)
-
-/**
- * Tests that the ActionButton component maintains its intended styling
- * with potentially conflicting buttons styles from the parent
- * page in a consuming application.
- */
-export const PageStyleResistance: Story = {
-  ...Showcase,
-  decorators: [
-    (Story) => (
-      <ConflictingPageStyles>
-        <Story />
-      </ConflictingPageStyles>
-    ),
-  ],
 }
