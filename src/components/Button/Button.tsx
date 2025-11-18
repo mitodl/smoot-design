@@ -8,6 +8,7 @@ import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
 } from "../LinkAdapter/LinkAdapter"
+import { useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 
 type ButtonVariant = "primary" | "secondary" | "tertiary" | "text" | "bordered"
 type ButtonSize = "small" | "medium" | "large"
@@ -95,13 +96,18 @@ const sizeStyles = (
   ]
 }
 
-const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
+const buttonStyles = (
+  props: ButtonStyleProps & {
+    theme: Theme
+  },
+) => {
   const { size, variant, edge, theme, color, responsive } = {
     ...DEFAULT_PROPS,
     ...props,
   }
   const { colors } = theme.custom
   const hasBorder = variant === "secondary" || variant === "bordered"
+
   return css([
     {
       color: theme.palette.text.primary,
@@ -212,15 +218,69 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: theme.custom.colors.lightGray1,
       },
     },
+    // Use && to ensure Button styles override StyleIsolation resets
+    // StyleIsolation uses & (0,1,1) to reset properties to "unset"
+    // We use && (0,2,0) to override those resets, keeping other styles
+    // (like color, padding, fontSize) at normal specificity so consumers can override
+    // them with styled(Button) using &&& (0,3,0) if needed
+    {
+      // Override StyleIsolation resets for properties it unsets
+      backgroundImage: "none",
+      textTransform: "none",
+      letterSpacing: "normal",
+      textDecoration: "none",
+      textShadow: "none",
+      // Re-apply background/border/boxShadow that StyleIsolation resets
+      // These must match the variant styles above to override the reset
+      ...(variant === "primary" && {
+        backgroundColor: colors.mitRed,
+        border: "none",
+        boxShadow:
+          "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
+      }),
+      ...(variant === "secondary" && {
+        backgroundColor: "transparent",
+        border: "none", // borderColor/borderStyle from variant styles above still apply
+      }),
+      ...(variant === "text" && {
+        backgroundColor: "transparent",
+        border: "none",
+      }),
+      ...(variant === "bordered" && {
+        backgroundColor: colors.white,
+        border: `1px solid ${colors.silverGrayLight}`,
+      }),
+      ...(variant === "tertiary" && {
+        backgroundColor: colors.lightGray2,
+        border: "none",
+      }),
+      // Override hover state resets from StyleIsolation
+      ":hover:not(:disabled)": {
+        backgroundImage: "none",
+        textTransform: "none",
+        textDecoration: "none",
+        textShadow: "none",
+        // Let the variant hover styles above handle background/border/boxShadow
+      },
+      // Override active/focus state resets from StyleIsolation
+      ":active:not(:disabled), :focus:not(:disabled)": {
+        backgroundImage: "none",
+        textTransform: "none",
+        textDecoration: "none",
+        textShadow: "none",
+        // Let the variant hover styles above handle background/border/boxShadow
+      },
+    },
   ])
 }
 
 const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>(buttonStyles)
+})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
+
 const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>(buttonStyles)
+})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
 
 const iconSizeStyles = (size: ButtonSize) => ({
   "& > *": {

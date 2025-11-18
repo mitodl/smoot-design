@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Home</title>
+    <style>
+      .app-frame {
+        width: 600px;
+        max-width: 50vw;
+        height: 400px;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://du11hjcvx0uqb.cloudfront.net/dist/brandable_css/new_styles_normal_contrast/bundles/common-b1f4c00140.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-main-v1.74535dae9600.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-course.53e9aeb4ede6.css"
+    />
+  </head>
+  <body>
+    <iframe class="app-frame" src="./iframe.html"></iframe>
+  </body>
+  <script type="module">
+    import * as aiDrawerManager from "./static/bundles/aiDrawerManager.es.js"
+    /**
+     * Accepts options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-ai-aidrawermanager--docs
+     */
+    aiDrawerManager.init({
+      messageOrigin: window.location.origin, // iframe is served in same origin for this demo,
+      transformBody: (messages) => ({
+        message: messages[messages.length - 1].content,
+      }),
+      className: "ai-chat",
+    })
+  </script>
+</html>
