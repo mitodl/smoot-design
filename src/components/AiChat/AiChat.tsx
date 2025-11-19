@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useEffect, useRef, useState, useCallback } from "react"
 import type { FC } from "react"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 import Typography from "@mui/material/Typography"
 import classNames from "classnames"
 import {

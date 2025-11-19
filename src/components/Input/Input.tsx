@@ -1,11 +1,12 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { default as emotionStyled } from "@emotion/styled"
+import { styled, useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 import { css } from "@emotion/react"
 import InputBase from "@mui/material/InputBase"
 import type { InputBaseProps } from "@mui/material/InputBase"
 import type { Theme } from "@mui/material/styles"
 import classnames from "classnames"
-import { useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 
 type Size = "small" | "medium" | "large" | "chat" | "hero"
 type CustomInputProps = {
@@ -262,7 +263,7 @@ const noForward = Object.keys({
  * - [Smoot Design Input Documentation](https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-input--docs)
  * - [InputBase Documentation](https://mui.com/api/input-base/)
  */
-const Input: React.FC<InputProps> = styled(InputBase, {
+const Input: React.FC<InputProps> = emotionStyled(InputBase, {
   shouldForwardProp: (prop) => !noForward.includes(prop),
 })<InputProps>(({ theme, size = defaultProps.size, multiline, responsive }) => [
   useStyleIsolation(baseInputStyles(theme)),

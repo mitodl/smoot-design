@@ -1,4 +1,5 @@
 import * as React from "react"
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import styled from "@emotion/styled"
 import { pxToRem } from "../ThemeProvider/typography"
 import {

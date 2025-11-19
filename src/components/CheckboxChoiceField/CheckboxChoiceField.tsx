@@ -2,7 +2,7 @@ import * as React from "react"
 import { Checkbox, CheckboxProps } from "../Checkbox/Checkbox"
 import FormControl from "@mui/material/FormControl"
 import FormLabel from "@mui/material/FormLabel"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 
 type CheckboxChoice = Omit<CheckboxProps, "name" | "onChange" | "checked"> & {
   value: string

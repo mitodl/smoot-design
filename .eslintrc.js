@@ -94,6 +94,32 @@ module.exports = {
         "testing-library/no-node-access": "off",
       },
     },
+    {
+      files: ["./**/*.stories.{ts,tsx}"],
+      rules: {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            paths: [
+              {
+                name: "@faker-js/faker",
+                message: "Please use @faker-js/faker/locale/en instead.",
+                allowTypeImports: true,
+              },
+              {
+                name: "@mui/material",
+                message: "Please use @mui/material/<COMPONENT_NAME> instead.",
+                allowTypeImports: true,
+              },
+              // Note: @emotion/styled restrictions are not applied to story files
+            ],
+            patterns: [
+              // Note: @emotion/styled pattern restrictions are not applied to story files
+            ],
+          },
+        ],
+      },
+    },
   ],
 }
 
@@ -137,9 +163,25 @@ function restrictedImports({ paths = [], patterns = [] } = {}) {
             message: "Please use @mui/material/<COMPONENT_NAME> instead.",
             allowTypeImports: true,
           },
+          {
+            name: "@emotion/styled",
+            importNames: ["styled"],
+            message:
+              "Do not import 'styled' from @emotion/styled. Use 'styled' from '../StyleIsolation/StyleIsolation' (or relative path to StyleIsolation) instead. For components that need shouldForwardProp, use 'import { default as emotionStyled } from \"@emotion/styled\"'.",
+            allowTypeImports: true,
+          },
           ...paths,
         ],
-        patterns: [...patterns],
+        patterns: [
+          {
+            group: ["@emotion/styled"],
+            importNames: ["default"],
+            message:
+              "Do not use default import from @emotion/styled as 'styled'. Use 'styled' from '../StyleIsolation/StyleIsolation' instead. For components that need shouldForwardProp, use 'import { default as emotionStyled } from \"@emotion/styled\"'.",
+            allowTypeImports: true,
+          },
+          ...patterns,
+        ],
       },
     ],
   }

@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useTheme } from "@emotion/react"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 
 const PlainLink = styled.a({
   color: "inherit",

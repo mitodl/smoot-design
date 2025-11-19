@@ -1,5 +1,5 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 import { default as MuiTooltip } from "@mui/material/Tooltip"
 import type { TooltipProps } from "@mui/material/Tooltip"
 

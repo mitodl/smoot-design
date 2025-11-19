@@ -1,6 +1,6 @@
 import MuiMenuItem from "@mui/material/MenuItem"
 import type { MenuItemProps as MuiMenuItemProps } from "@mui/material/MenuItem"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 
 type MenuItemProps = MuiMenuItemProps & {
   size?: "small" | "medium" | "large"

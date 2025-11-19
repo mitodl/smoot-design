@@ -1,5 +1,5 @@
 import * as React from "react"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 import Typography from "@mui/material/Typography"
 import { RiSparkling2Line } from "@remixicon/react"
 

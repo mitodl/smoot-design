@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs"
 import { http, HttpResponse } from "msw"
 import { AiChat } from "./AiChat"
 import type { AiChatProps } from "./types"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 import { handlers } from "./test-utils/api"
 import { FC, useEffect, useRef, useState } from "react"
 

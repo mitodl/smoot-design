@@ -1,6 +1,7 @@
 import * as React from "react"
-import styled from "@emotion/styled"
-import { css } from "@emotion/react"
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { default as emotionStyled } from "@emotion/styled"
+import { styled, useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
 import CircularProgress from "@mui/material/CircularProgress"
@@ -8,7 +9,6 @@ import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
 } from "../LinkAdapter/LinkAdapter"
-import { useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 
 type ButtonVariant = "primary" | "secondary" | "tertiary" | "text" | "bordered"
 type ButtonSize = "small" | "medium" | "large"
@@ -108,7 +108,7 @@ const buttonStyles = (
   const { colors } = theme.custom
   const hasBorder = variant === "secondary" || variant === "bordered"
 
-  return css([
+  return [
     {
       color: theme.palette.text.primary,
       textAlign: "center",
@@ -218,65 +218,14 @@ const buttonStyles = (
         backgroundColor: theme.custom.colors.lightGray1,
       },
     },
-    {
-      // Override StyleIsolation resets for properties it unsets
-      // backgroundImage: "none",
-      // textTransform: "none",
-      // letterSpacing: "normal",
-      // textDecoration: "none",
-      // textShadow: "none",
-      // Re-apply background/border/boxShadow that StyleIsolation resets
-      // ...(variant === "primary" && {
-      //   backgroundColor: colors.mitRed,
-      //   border: "none",
-      //   boxShadow:
-      //     "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
-      // }),
-      // ...(variant === "secondary" && {
-      //   backgroundColor: "transparent",
-      //   border: "none", // borderColor/borderStyle from variant styles above still apply
-      // }),
-      // ...(variant === "text" && {
-      //   backgroundColor: "transparent",
-      //   border: "none",
-      // }),
-      // ...(variant === "bordered" && {
-      //   backgroundColor: colors.white,
-      //   border: `1px solid ${colors.silverGrayLight}`,
-      // }),
-      // ...(variant === "tertiary" && {
-      //   backgroundColor: colors.lightGray2,
-      //   border: "none",
-      // }),
-      // Override hover state resets from StyleIsolation
-      ":hover:not(:disabled)": {
-        // backgroundImage: "none",
-        // textTransform: "none",
-        // textDecoration: "none",
-        // textShadow: "none",
-      },
-      // Override active/focus state resets from StyleIsolation
-      ":active:not(:disabled), :focus:not(:disabled)": {
-        // backgroundImage: "none",
-        // textTransform: "none",
-        // textDecoration: "none",
-        // textShadow: "none",
-      },
-    },
-  ])
+  ]
 }
 
-const ButtonRoot = styled("button", {
+const ButtonRoot = emotionStyled("button", {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>((props) => {
-  console.log(
-    "useStyleIsolation(buttonStyles(props))",
-    useStyleIsolation(buttonStyles(props)),
-  )
-  return useStyleIsolation(buttonStyles(props))
-})
+})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
 
-const ButtonLinkRoot = styled(LinkAdapter, {
+const ButtonLinkRoot = emotionStyled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
 

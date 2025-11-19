@@ -8,7 +8,7 @@ import InputBase from "@mui/material/InputBase"
 import type { InputBaseProps } from "@mui/material/InputBase"
 import { FormFieldWrapper } from "../FormHelpers/FormHelpers"
 import type { FormFieldWrapperProps } from "../FormHelpers/FormHelpers"
-import styled from "@emotion/styled"
+import { styled } from "../StyleIsolation/StyleIsolation"
 import { RiArrowDownSLine } from "@remixicon/react"
 import { baseInputStyles } from "../Input/Input"
 

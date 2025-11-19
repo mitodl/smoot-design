@@ -1,7 +1,10 @@
 // @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
-import styled from "@emotion/styled"
+import {
+  styled,
+  StyleIsolation,
+} from "../../components/StyleIsolation/StyleIsolation"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { RiCloseLine, RiSparkling2Line } from "@remixicon/react"
@@ -20,7 +23,6 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
-import { StyleIsolation } from "../../components/StyleIsolation/StyleIsolation"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
