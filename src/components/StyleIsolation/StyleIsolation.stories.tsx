@@ -2,7 +2,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Button } from "../Button/Button"
 import { Input } from "../Input/Input"
-import { StyleIsolation } from "./StyleIsolation"
+import { StyleIsolation, useStyleIsolation } from "./StyleIsolation"
 import styled from "@emotion/styled"
 import { ActionButton } from "../Button/ActionButton"
 import { RiArrowRightLine } from "@remixicon/react"
@@ -198,34 +198,39 @@ export const StyledContainer: Story = {
 
 /**
  * StyleIsolation protects components while still allowing intentional overrides
- * using Emotion's styled() function. The styled() overrides take precedence
- * because they have higher specificity than the StyleIsolation resets.
+ * using Emotion's styled() function with the useStyleIsolation hook.
+ * The hook wraps styles with higher specificity (0,4,0) to override
+ * StyleIsolation's resets (0,2,1).
  */
 export const IntentionalOverrides: Story = {
   render: () => {
-    // Create styled versions of Button with intentional overrides
-    const StyledPrimaryButton = styled(Button)(({ theme }) => ({
-      backgroundColor: theme.custom.colors.darkGray1,
-      color: theme.custom.colors.white,
-      borderRadius: "8px",
-      padding: "16px 32px",
-      fontSize: "18px",
-      ...theme.typography.subtitle1,
-      "&:hover:not(:disabled)": {
-        backgroundColor: theme.custom.colors.darkGray2,
-        transform: "scale(1.05)",
-        transition: "transform 0.2s ease",
-      },
-    }))
+    // Create styled versions of Button with intentional overrides using useStyleIsolation
+    const StyledPrimaryButton = styled(Button)(({ theme }) =>
+      useStyleIsolation({
+        backgroundColor: theme.custom.colors.darkGray1,
+        color: theme.custom.colors.white,
+        borderRadius: "8px",
+        padding: "16px 32px",
+        fontSize: "18px",
+        ...theme.typography.subtitle1,
+        "&:hover:not(:disabled)": {
+          backgroundColor: theme.custom.colors.darkGray2,
+          transform: "scale(1.05)",
+          transition: "transform 0.2s ease",
+        },
+      }),
+    )
 
-    const StyledSecondaryButton = styled(Button)(({ theme }) => ({
-      border: `2px solid ${theme.custom.colors.mitRed}`,
-      borderRadius: "20px",
-      padding: "12px 24px",
-      ...theme.typography.body1,
-      textTransform: "uppercase",
-      letterSpacing: "1px",
-    }))
+    const StyledSecondaryButton = styled(Button)(({ theme }) =>
+      useStyleIsolation({
+        border: `2px solid ${theme.custom.colors.mitRed}`,
+        borderRadius: "20px",
+        padding: "12px 24px",
+        ...theme.typography.body1,
+        textTransform: "uppercase",
+        letterSpacing: "1px",
+      }),
+    )
 
     return (
       <ConflictingPageStyles>
@@ -317,9 +322,9 @@ export const IntentionalOverrides: Story = {
  */
 /**
  * Tests specificity against complex parent selectors like form button[type="button"].
- * StyleIsolation uses & button (0,1,1) which will override form button[type="button"] (0,1,2)
- * due to source order (later styles win when specificity ties).
- * Component styles use .css-abc123 && (0,2,0) to override StyleIsolation's resets.
+ * StyleIsolation uses && button (0,2,1) which will override form button[type="button"] (0,1,2)
+ * due to higher specificity.
+ * Component styles use .css-abc123 &&& (0,4,0) to override StyleIsolation's resets.
  */
 export const ComplexParentSelectors: Story = {
   render: () => {
@@ -353,9 +358,9 @@ export const ComplexParentSelectors: Story = {
             </Grid>
             <Grid>
               <p>
-                With StyleIsolation (& button = 0,1,1 overrides form
-                button[type="button"] = 0,1,2 via source order; component uses
-                .css-abc123 && = 0,2,0 to override resets):
+                With StyleIsolation (&& button = 0,2,1 overrides form
+                button[type="button"] = 0,1,2 via higher specificity; component
+                uses .css-abc123 &&& = 0,4,0 to override resets):
               </p>
               <StyleIsolation>
                 <Button variant="primary">Protected Button Component</Button>
@@ -370,9 +375,9 @@ export const ComplexParentSelectors: Story = {
 
 export const OverridesWithCustomResets: Story = {
   render: () => {
-    // Styled button WITHOUT &&& - won't override custom reset
+    // Styled button WITHOUT &&&& - won't override custom reset
     // Custom reset uses: & button = .css-abc123 button (0,1,1 specificity)
-    // Component's useStyleIsolation uses: .css-abc123 && (0,2,0 specificity)
+    // Component's useStyleIsolation uses: .css-abc123 &&& (0,4,0 specificity)
     // Normal styled component styles have (0,0,0) specificity, which is lower than both
     const WeakOverrideButton = styled(Button)({
       backgroundColor: "#10b981",
@@ -382,16 +387,16 @@ export const OverridesWithCustomResets: Story = {
       padding: "20px 40px",
     })
 
-    // Styled button WITH &&& (3 ampersands) - will override custom reset
+    // Styled button WITH &&&& (4 ampersands) - will override custom reset
     // Custom reset: & button = .css-abc123 button (0,1,1 specificity)
-    // Component's useStyleIsolation uses: .css-abc123 && (0,2,0 specificity)
-    // Using &&& gives us 0,3,0 (3 classes) which is higher specificity than both 0,1,1 and 0,2,0
+    // Component's useStyleIsolation uses: .css-abc123 &&& (0,4,0 specificity)
+    // Using &&&& gives us 0,5,0 (5 classes) which is higher specificity than both 0,1,1 and 0,4,0
     // This ensures our styled component styles win over the custom reset
     const StrongOverrideButton = styled(Button)(({ theme }) => ({
-      // Use &&& (3 ampersands) to exceed custom reset's & button (0,1,1) and
-      // component's useStyleIsolation .css-abc123 && (0,2,0)
-      // This gives us 0,3,0 which is higher specificity
-      "&&&": {
+      // Use &&&& (4 ampersands) to exceed custom reset's & button (0,1,1) and
+      // component's useStyleIsolation .css-abc123 &&& (0,4,0)
+      // This gives us 0,5,0 which is higher specificity
+      "&&&&": {
         backgroundColor: "#10b981",
         color: "white",
         border: "3px solid #059669",
@@ -401,7 +406,7 @@ export const OverridesWithCustomResets: Story = {
         ...theme.typography.subtitle1,
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
       },
-      "&&&:hover:not(:disabled)": {
+      "&&&&:hover:not(:disabled)": {
         backgroundColor: "#059669",
         transform: "translateY(-2px)",
         boxShadow: "0 6px 12px rgba(0, 0, 0, 0.15)",
@@ -430,20 +435,20 @@ export const OverridesWithCustomResets: Story = {
             </Grid>
             <Grid>
               <p>
-                Styled WITHOUT &&& - custom reset wins (transparent bg, small
+                Styled WITHOUT &&&& - custom reset wins (transparent bg, small
                 padding):
               </p>
               <WeakOverrideButton variant="primary">
-                Weak Override (No &&&)
+                Weak Override (No &&&&)
               </WeakOverrideButton>
             </Grid>
             <Grid>
               <p>
-                Styled WITH &&& (3 ampersands) - override takes precedence
+                Styled WITH &&&& (4 ampersands) - override takes precedence
                 (green bg, large padding):
               </p>
               <StrongOverrideButton variant="primary">
-                Strong Override (With &&&)
+                Strong Override (With &&&&)
               </StrongOverrideButton>
             </Grid>
           </Grid>

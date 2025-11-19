@@ -218,57 +218,49 @@ const buttonStyles = (
         backgroundColor: theme.custom.colors.lightGray1,
       },
     },
-    // Use && to ensure Button styles override StyleIsolation resets
-    // StyleIsolation uses & (0,1,1) to reset properties to "unset"
-    // We use && (0,2,0) to override those resets, keeping other styles
-    // (like color, padding, fontSize) at normal specificity so consumers can override
-    // them with styled(Button) using &&& (0,3,0) if needed
     {
       // Override StyleIsolation resets for properties it unsets
-      backgroundImage: "none",
-      textTransform: "none",
-      letterSpacing: "normal",
-      textDecoration: "none",
-      textShadow: "none",
+      // backgroundImage: "none",
+      // textTransform: "none",
+      // letterSpacing: "normal",
+      // textDecoration: "none",
+      // textShadow: "none",
       // Re-apply background/border/boxShadow that StyleIsolation resets
-      // These must match the variant styles above to override the reset
-      ...(variant === "primary" && {
-        backgroundColor: colors.mitRed,
-        border: "none",
-        boxShadow:
-          "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
-      }),
-      ...(variant === "secondary" && {
-        backgroundColor: "transparent",
-        border: "none", // borderColor/borderStyle from variant styles above still apply
-      }),
-      ...(variant === "text" && {
-        backgroundColor: "transparent",
-        border: "none",
-      }),
-      ...(variant === "bordered" && {
-        backgroundColor: colors.white,
-        border: `1px solid ${colors.silverGrayLight}`,
-      }),
-      ...(variant === "tertiary" && {
-        backgroundColor: colors.lightGray2,
-        border: "none",
-      }),
+      // ...(variant === "primary" && {
+      //   backgroundColor: colors.mitRed,
+      //   border: "none",
+      //   boxShadow:
+      //     "0px 2px 4px 0px rgba(37, 38, 43, 0.10), 0px 3px 8px 0px rgba(37, 38, 43, 0.12)",
+      // }),
+      // ...(variant === "secondary" && {
+      //   backgroundColor: "transparent",
+      //   border: "none", // borderColor/borderStyle from variant styles above still apply
+      // }),
+      // ...(variant === "text" && {
+      //   backgroundColor: "transparent",
+      //   border: "none",
+      // }),
+      // ...(variant === "bordered" && {
+      //   backgroundColor: colors.white,
+      //   border: `1px solid ${colors.silverGrayLight}`,
+      // }),
+      // ...(variant === "tertiary" && {
+      //   backgroundColor: colors.lightGray2,
+      //   border: "none",
+      // }),
       // Override hover state resets from StyleIsolation
       ":hover:not(:disabled)": {
-        backgroundImage: "none",
-        textTransform: "none",
-        textDecoration: "none",
-        textShadow: "none",
-        // Let the variant hover styles above handle background/border/boxShadow
+        // backgroundImage: "none",
+        // textTransform: "none",
+        // textDecoration: "none",
+        // textShadow: "none",
       },
       // Override active/focus state resets from StyleIsolation
       ":active:not(:disabled), :focus:not(:disabled)": {
-        backgroundImage: "none",
-        textTransform: "none",
-        textDecoration: "none",
-        textShadow: "none",
-        // Let the variant hover styles above handle background/border/boxShadow
+        // backgroundImage: "none",
+        // textTransform: "none",
+        // textDecoration: "none",
+        // textShadow: "none",
       },
     },
   ])
@@ -276,7 +268,13 @@ const buttonStyles = (
 
 const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
+})<ButtonStyleProps>((props) => {
+  console.log(
+    "useStyleIsolation(buttonStyles(props))",
+    useStyleIsolation(buttonStyles(props)),
+  )
+  return useStyleIsolation(buttonStyles(props))
+})
 
 const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
