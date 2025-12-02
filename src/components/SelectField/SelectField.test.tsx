@@ -1,5 +1,9 @@
 import * as React from "react"
-import { render, screen } from "@testing-library/react"
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { Select, SelectField } from "./SelectField"
 import type { SelectFieldProps, SelectProps } from "./SelectField"
@@ -81,6 +85,10 @@ describe("Select", () => {
 
     // close it
     await user.keyboard("{Escape}")
+    const menu = getMenu()
+    if (menu) {
+      await waitForElementToBeRemoved(menu)
+    }
     expect(getMenu()).toBe(null)
     expect(document.activeElement).toBe(select)
 

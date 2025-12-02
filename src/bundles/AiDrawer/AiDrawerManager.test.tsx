@@ -19,6 +19,13 @@ jest.mock("../../components/AiChat/Markdown", () => {
   }
 })
 
+jest.mock("react-markdown", () => {
+  return {
+    __esModule: true,
+    default: ({ children }: { children: string }) => <div>{children}</div>,
+  }
+})
+
 jest.mock("better-react-mathjax", () => ({
   MathJaxContext: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
