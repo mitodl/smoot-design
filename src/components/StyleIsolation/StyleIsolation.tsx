@@ -3,6 +3,8 @@ import styled from "@emotion/styled"
 import type { CSSObject } from "@emotion/react"
 import { CacheProvider } from "@emotion/react"
 import createCache from "@emotion/cache"
+// stylis is provided by @emotion/cache and we can ensure version match with transitive dependency
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { prefixer } from "stylis"
 import {
   increaseSpecificity,
