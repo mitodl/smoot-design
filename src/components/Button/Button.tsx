@@ -1,7 +1,5 @@
 import * as React from "react"
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { default as emotionStyled } from "@emotion/styled"
-import { styled, useStyleIsolation } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
 import CircularProgress from "@mui/material/CircularProgress"
@@ -221,13 +219,13 @@ const buttonStyles = (
   ]
 }
 
-const ButtonRoot = emotionStyled("button", {
+const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
+})<ButtonStyleProps>(buttonStyles)
 
-const ButtonLinkRoot = emotionStyled(LinkAdapter, {
+const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
-})<ButtonStyleProps>((props) => useStyleIsolation(buttonStyles(props)))
+})<ButtonStyleProps>(buttonStyles)
 
 const iconSizeStyles = (size: ButtonSize) => ({
   "& > *": {

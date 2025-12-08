@@ -1,5 +1,4 @@
 import * as React from "react"
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import styled from "@emotion/styled"
 import { pxToRem } from "../ThemeProvider/typography"
 import {
@@ -10,7 +9,6 @@ import {
 } from "./Button"
 import type { ButtonStyleProps, ButtonSize } from "./Button"
 import type { LinkAdapterPropsOverrides } from "../LinkAdapter/LinkAdapter"
-import { useStyleIsolation } from "../StyleIsolation/StyleIsolation"
 
 type ActionButtonStyleProps = Omit<ButtonStyleProps, "startIcon" | "endIcon">
 type ActionButtonProps = ActionButtonStyleProps & React.ComponentProps<"button">
@@ -58,11 +56,9 @@ const ActionButton = styled(
   ),
 )(({ size = DEFAULT_PROPS.size, responsive, theme }) => {
   return [
-    useStyleIsolation(actionStyles(size)),
+    actionStyles(size),
     responsive && {
-      [theme.breakpoints.down("sm")]: useStyleIsolation(
-        actionStyles(RESPONSIVE_SIZES[size]),
-      ),
+      [theme.breakpoints.down("sm")]: actionStyles(RESPONSIVE_SIZES[size]),
     },
   ]
 })

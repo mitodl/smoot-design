@@ -1,10 +1,8 @@
 // @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
-import {
-  styled,
-  StyleIsolation,
-} from "../../components/StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
+import { StyleIsolation } from "../../components/StyleIsolation/StyleIsolation"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { RiCloseLine, RiSparkling2Line } from "@remixicon/react"

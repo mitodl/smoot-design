@@ -2,7 +2,7 @@ import { ActionButton } from "../../components/Button/ActionButton"
 import Typography from "@mui/material/Typography"
 import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
-import { styled } from "../../components/StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import { RiArrowRightLine, RiArrowLeftLine } from "@remixicon/react"
 
 export type Flashcard = {

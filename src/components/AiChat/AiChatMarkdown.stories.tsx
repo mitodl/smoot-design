@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { AiChat } from "./AiChat"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"

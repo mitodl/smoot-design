@@ -1,7 +1,7 @@
 "use client"
 
 export { css, Global } from "@emotion/react"
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+
 export { default as styled } from "@emotion/styled"
 
 export { Alert } from "./components/Alert/Alert"
@@ -62,11 +62,7 @@ export type {
 export { SrAnnouncer } from "./components/SrAnnouncer/SrAnnouncer"
 export type { SrAnnouncerProps } from "./components/SrAnnouncer/SrAnnouncer"
 
-export {
-  StyleIsolation,
-  useStyleIsolation,
-  styled as styledWithIsolation,
-} from "./components/StyleIsolation/StyleIsolation"
+export { StyleIsolation } from "./components/StyleIsolation/StyleIsolation"
 export type { StyleIsolationProps } from "./components/StyleIsolation/StyleIsolation"
 
 export {

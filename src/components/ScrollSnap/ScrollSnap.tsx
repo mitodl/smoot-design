@@ -1,5 +1,5 @@
 import { composeRefs } from "../../utils/composeRefs"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import * as React from "react"
 
 /**

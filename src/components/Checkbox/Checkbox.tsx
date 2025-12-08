@@ -1,5 +1,5 @@
 import * as React from "react"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import { css } from "@emotion/react"
 import type { Theme } from "@mui/material/styles"
 

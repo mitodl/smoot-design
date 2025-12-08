@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography"
 import { AdornmentButton, Input } from "../Input/Input"
 import TimLogo from "./TimLogo"
 import { useState } from "react"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 
 const Container = styled.form(({ theme }) => ({
   display: "flex",

@@ -1,7 +1,7 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { SrAnnouncer } from "./SrAnnouncer"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 
 const Container = styled.div<{ forceVisible?: boolean }>(({ forceVisible }) => [
   forceVisible && {

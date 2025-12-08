@@ -1,4 +1,4 @@
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 
 /**
  * VisuallyHidden is a utility component that hides its children from sighted

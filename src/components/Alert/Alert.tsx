@@ -2,7 +2,7 @@
 
 import * as React from "react"
 
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 import { default as MuiAlert } from "@mui/material/Alert"
 import type { AlertColor } from "@mui/material/Alert"
 import { Theme } from "@emotion/react"

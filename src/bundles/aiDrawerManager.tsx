@@ -6,8 +6,7 @@ import {
   ThemeProvider,
   createTheme,
 } from "../components/ThemeProvider/ThemeProvider"
-import { CacheProvider } from "@emotion/react"
-import createCache from "@emotion/cache"
+import { StyleIsolation } from "../components/StyleIsolation/StyleIsolation"
 
 /**
  * Renders the AiDrawerManager to the page.
@@ -17,11 +16,6 @@ const init = (opts: AiDrawerManagerProps) => {
   document.body.appendChild(container)
   container.id = "smoot-chat-drawer-root"
 
-  const cache = createCache({
-    key: "css",
-    prepend: true,
-    container: container,
-  })
   const theme = createTheme({
     components: {
       MuiPopover: { defaultProps: { container: container } },
@@ -30,11 +24,11 @@ const init = (opts: AiDrawerManagerProps) => {
     },
   })
   createRoot(container).render(
-    <CacheProvider value={cache}>
+    <StyleIsolation>
       <ThemeProvider theme={theme}>
         <AiDrawerManager {...opts} />
       </ThemeProvider>
-    </CacheProvider>,
+    </StyleIsolation>,
   )
 
   // Ensure mathjax context menu is rendered above the drawer

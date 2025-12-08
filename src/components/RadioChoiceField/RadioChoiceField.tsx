@@ -5,7 +5,7 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
 import type { RadioGroupProps } from "@mui/material/RadioGroup"
-import { styled } from "../StyleIsolation/StyleIsolation"
+import styled from "@emotion/styled"
 
 const RadioGroupStyled = styled(RadioGroup)(({ theme }) => ({
   display: "flex",
