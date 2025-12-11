@@ -1,8 +1,6 @@
-// @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
-import { StyleIsolation } from "../../components/StyleIsolation/StyleIsolation"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { RiCloseLine, RiSparkling2Line } from "@remixicon/react"
@@ -424,107 +422,105 @@ const AiDrawer: FC<AiDrawerProps> = ({
       aria-modal="true"
       keepMounted
     >
-      <StyleIsolation>
-        <Header>
-          <Title>
-            {title ? <RiSparkling2Line /> : null}
-            <Typography variant="body1" component="h1">
-              {title?.includes("AskTIM") ? (
-                <>
-                  Ask<strong>TIM</strong>
-                  {title.replace("AskTIM", "")}
-                </>
-              ) : (
-                title
-              )}
-            </Typography>
-          </Title>
-          <CloseButton
-            variant="text"
-            size="medium"
-            onClick={handleClose}
-            aria-label="Close"
+      <Header>
+        <Title>
+          {title ? <RiSparkling2Line /> : null}
+          <Typography variant="body1" component="h1">
+            {title?.includes("AskTIM") ? (
+              <>
+                Ask<strong>TIM</strong>
+                {title.replace("AskTIM", "")}
+              </>
+            ) : (
+              title
+            )}
+          </Typography>
+        </Title>
+        <CloseButton
+          variant="text"
+          size="medium"
+          onClick={handleClose}
+          aria-label="Close"
+        >
+          <RiCloseLine />
+        </CloseButton>
+      </Header>
+      {blockType === "problem" ? (
+        <ChatComponent
+          settings={chat}
+          transformBody={transformBody}
+          fetchOpts={fetchOpts}
+          scrollElement={scrollElement}
+          entryScreenEnabled={chat?.entryScreenEnabled ?? false}
+          entryScreenTitle={chat.entryScreenTitle}
+          initialMessages={
+            chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
+          }
+          hasTabs={hasTabs}
+          needsMathJax={true}
+          onTrackingEvent={onTrackingEvent}
+        />
+      ) : null}
+      {blockType === "video" ? (
+        <TabContext value={tab}>
+          <StyledTabButtonList
+            styleVariant="chat"
+            onChange={(e, tab) => {
+              setTab(tab)
+              onTrackingEvent?.({
+                type: TrackingEventType.TabChange,
+                data: {
+                  value: tab,
+                },
+              })
+            }}
           >
-            <RiCloseLine />
-          </CloseButton>
-        </Header>
-        {blockType === "problem" ? (
-          <ChatComponent
-            settings={chat}
-            transformBody={transformBody}
-            fetchOpts={fetchOpts}
-            scrollElement={scrollElement}
-            entryScreenEnabled={chat?.entryScreenEnabled ?? false}
-            entryScreenTitle={chat.entryScreenTitle}
-            initialMessages={
-              chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
-            }
-            hasTabs={hasTabs}
-            needsMathJax={true}
-            onTrackingEvent={onTrackingEvent}
-          />
-        ) : null}
-        {blockType === "video" ? (
-          <TabContext value={tab}>
-            <StyledTabButtonList
-              styleVariant="chat"
-              onChange={(e, tab) => {
-                setTab(tab)
-                onTrackingEvent?.({
-                  type: TrackingEventType.TabChange,
-                  data: {
-                    value: tab,
-                  },
-                })
-              }}
-            >
-              <TabButton value="chat" label="Chat" />
-              {response?.flashcards?.length ? (
-                <TabButton
-                  value="flashcards"
-                  label="Flashcards"
-                  onMouseDown={handleMouseDown}
-                  onFocus={handleFocus}
-                />
-              ) : null}
-              <TabButton value="summary" label="Summary" />
-            </StyledTabButtonList>
-            <StyledTabPanel value="chat" keepMounted>
-              <ChatComponent
-                settings={chat}
-                transformBody={transformBody}
-                fetchOpts={fetchOpts}
-                scrollElement={scrollElement}
-                entryScreenEnabled={chat?.entryScreenEnabled ?? true}
-                entryScreenTitle={
-                  chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
-                }
-                conversationStarters={conversationStarters}
-                initialMessages={chat.initialMessages}
-                hasTabs={hasTabs}
-                needsMathJax={false}
-                onTrackingEvent={onTrackingEvent}
+            <TabButton value="chat" label="Chat" />
+            {response?.flashcards?.length ? (
+              <TabButton
+                value="flashcards"
+                label="Flashcards"
+                onMouseDown={handleMouseDown}
+                onFocus={handleFocus}
+              />
+            ) : null}
+            <TabButton value="summary" label="Summary" />
+          </StyledTabButtonList>
+          <StyledTabPanel value="chat" keepMounted>
+            <ChatComponent
+              settings={chat}
+              transformBody={transformBody}
+              fetchOpts={fetchOpts}
+              scrollElement={scrollElement}
+              entryScreenEnabled={chat?.entryScreenEnabled ?? true}
+              entryScreenTitle={
+                chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
+              }
+              conversationStarters={conversationStarters}
+              initialMessages={chat.initialMessages}
+              hasTabs={hasTabs}
+              needsMathJax={false}
+              onTrackingEvent={onTrackingEvent}
+            />
+          </StyledTabPanel>
+          {response?.flashcards?.length ? (
+            <StyledTabPanel value="flashcards">
+              <FlashcardsScreen
+                flashcards={response?.flashcards}
+                wasKeyboardFocus={_wasKeyboardFocus}
               />
             </StyledTabPanel>
-            {response?.flashcards?.length ? (
-              <StyledTabPanel value="flashcards">
-                <FlashcardsScreen
-                  flashcards={response?.flashcards}
-                  wasKeyboardFocus={_wasKeyboardFocus}
-                />
-              </StyledTabPanel>
-            ) : null}
-            <StyledTabPanel value="summary">
-              <Typography variant="h4" component="h4"></Typography>
-              <StyledHTML>
-                <Markdown rehypePlugins={[rehypeRaw]}>
-                  {response?.summary ?? ""}
-                </Markdown>
-              </StyledHTML>
-            </StyledTabPanel>
-          </TabContext>
-        ) : null}
-      </StyleIsolation>
+          ) : null}
+          <StyledTabPanel value="summary">
+            <Typography variant="h4" component="h4"></Typography>
+            <StyledHTML>
+              <Markdown rehypePlugins={[rehypeRaw]}>
+                {response?.summary ?? ""}
+              </Markdown>
+            </StyledHTML>
+          </StyledTabPanel>
+        </TabContext>
+      ) : null}
     </Drawer>
   )
 }

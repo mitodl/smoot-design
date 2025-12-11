@@ -24,33 +24,24 @@ type Story = StoryObj<typeof StyleIsolation>
  */
 const ConflictingPageStyles = styled.div(`
   button {
-    border: 1px solid red;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 0 0 #fff;
-    color: aqua;
-    display: inline-block;
-    font-size: inherit;
-    font-weight: bold;
-    background-color: blue;
-    background-image: linear-gradient(red, blue);
-    padding: 7px 18px;
+    border: 2px solid blue;
+    background-color: aqua;
+    color: blue;
     text-decoration: none;
-    text-shadow: 0 1px 0 green;
-    background-clip: padding-box;
-    font-size: 0.8125em;
+    :hover:not(:disabled) {
+      background-color: blue;
+      color: aqua;
+    }
   }
 
   input, textarea {
     background-color: red;
     border: 2px solid blue;
+    color: blue;
   }
 
   input[type="text"] {
     background: red;
-  }
-
-  input:disabled {
-    background-image: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
   }
 `)
 
@@ -128,10 +119,10 @@ export const PageStyleResistance: Story = {
               </Grid>
             </Grid>
             <Grid>
-              <Input placeholder="Affected Input" />
+              <Input value="Affected Input" />
             </Grid>
             <Grid>
-              <Input placeholder="Affected Multiline Input" multiline />
+              <Input value="Affected Multiline Input" multiline />
             </Grid>
           </Grid>
         </Grid>
@@ -179,8 +170,7 @@ export const ComplexParentSelectors: Story = {
       button {
         background-color: red;
         border: 3px solid orange;
-        padding: 30px;
-        font-size: 30px;
+        color: green;
       }
 
       button[type="button"] {
@@ -203,12 +193,7 @@ export const ComplexParentSelectors: Story = {
               <Button variant="primary">Affected Button Component</Button>
             </Grid>
             <Grid>
-              <p>
-                With StyleIsolation (&&& button = 0,6,1 after plugin overrides
-                form button[type="button"] = 0,1,2 via higher specificity;
-                component uses .Mit-isolated.Mit-isolated.Mit-isolated
-                .css-xyz789 = 0,4,0 to override resets):
-              </p>
+              <p>With StyleIsolation:</p>
               <StyleIsolation>
                 <Button variant="primary">Protected Button Component</Button>
               </StyleIsolation>
@@ -223,33 +208,17 @@ export const ComplexParentSelectors: Story = {
 /**
  * Demonstrates styled component overrides with custom resets.
  *
- * When using StyleIsolation with customResets, styled components need sufficient
- * specificity to override both the custom reset and the component's own styles.
- *
- * - Default reset uses: `button` → After Stylis plugin: `.Mit-isolated.Mit-isolated.Mit-isolated button` (0,3,1)
- * - Custom reset uses: `& button` (1 ampersand) = `.css-abc123 button` → After plugin: `.Mit-isolated.Mit-isolated.Mit-isolated .css-abc123 button` (0,4,1)
- * - Component styles get: `.Mit-isolated.Mit-isolated.Mit-isolated .css-xyz789` (0,4,0 specificity)
- * - Using `&&` (2 ampersands) in styled components gives us `.Mit-isolated.Mit-isolated.Mit-isolated .css-xyz789.css-xyz789` (0,5,0 specificity)
- *   which is higher than component styles (0,4,0) and custom reset (0,4,1) for class-based properties
+ * Custom resets get increased specificity through StyleIsolation's Stylis plugin,
+ * but styled components can still override them with their own increased specificity.
  */
 export const OverridesWithCustomResets: Story = {
   render: () => {
-    // Styled button - won't override custom reset
-    // Normal styled component styles have (0,0,0) specificity, which is lower than both
-    const WeakOverrideButton = styled(Button)({
-      backgroundColor: "#10b981",
-      border: "3px solid #059669",
-    })
-
-    // Styled button with "&&": (2 ampersands) - will override custom reset
-    const StrongOverrideButton = styled(Button)({
-      "&&": {
-        backgroundColor: "#10b981",
-        border: "3px solid #059669",
-      },
-      "&&:hover:not(:disabled)": {
-        backgroundColor: "#059669",
-        border: "3px solid #10b981",
+    const OverrideButton = styled(Button)({
+      backgroundColor: "green",
+      border: "2px solid green",
+      ":hover:not(:disabled)": {
+        backgroundColor: "lightgreen",
+        color: "darkgreen",
       },
     })
 
@@ -259,33 +228,28 @@ export const OverridesWithCustomResets: Story = {
           customResets={{
             button: {
               backgroundColor: "orange",
-              border: "10px solid blue",
+              border: "2px solid blue",
+              color: "blue",
+              padding: "10px",
+              cursor: "pointer",
             },
           }}
         >
           <Grid container spacing={2} direction="column">
             <Grid>
-              <p>
-                Custom reset applies to default Button (orange bg, blue border):
-              </p>
-              <Button variant="primary">Default Button</Button>
+              <p>Custom reset applies to default elements:</p>
+              <button>Default Button</button>
             </Grid>
             <Grid>
               <p>
-                Styled WITHOUT && - custom reset wins (orange bg, blue border):
+                Custom resets will not override Smoot Design components (unless
+                specificity increased in the customResets)
               </p>
-              <WeakOverrideButton variant="primary">
-                Weak Override (No &&)
-              </WeakOverrideButton>
+              <Button variant="primary">Smoot Button</Button>
             </Grid>
             <Grid>
-              <p>
-                Styled WITH && (2 ampersands) - override takes precedence (green
-                bg, green border):
-              </p>
-              <StrongOverrideButton variant="primary">
-                Strong Override (With &&)
-              </StrongOverrideButton>
+              <p>Smoot Design components can be styled to override:</p>
+              <OverrideButton variant="primary">Styled Override</OverrideButton>
             </Grid>
           </Grid>
         </StyleIsolation>

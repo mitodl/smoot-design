@@ -107,15 +107,15 @@ const StyleIsolationRoot = styled.div<{
   }
 
   // Build resets for common elements
-  // Based on common conflicts from MITx Online and similar LMS CSS files
   const resets: CSSObject = {
-    // The Stylis plugin will automatically prepend .Mit-isolated.Mit-isolated.Mit-isolated
-    // to all selectors, resulting in:
-    // .Mit-isolated.Mit-isolated.Mit-isolated button (0,3,1)
-    // Component styles will also get the plugin treatment, resulting in:
-    // .css-abc123, .Mit-isolated.Mit-isolated.Mit-isolated .css-abc123 button (0,5,1)
-    // This ensures component styles (0,5,1) override parent page styles but
-    // can still be overridden by the resets if needed
+    /* The Stylis plugin will automatically prepend .Mit-isolated.Mit-isolated.Mit-isolated
+     * to all selectors, resulting in:
+     * .Mit-isolated.Mit-isolated.Mit-isolated button (0,3,1)
+     * Component styles will also get the plugin treatment, resulting in:
+     * .css-abc123, .Mit-isolated.Mit-isolated.Mit-isolated .css-abc123 button (0,5,1)
+     * This ensures component styles (0,5,1) override parent page styles but
+     * can still be overridden by the resets if needed.
+     */
     "button, input[type='button']": {
       backgroundImage: "unset",
       textTransform: "unset",
@@ -229,42 +229,42 @@ const StyleIsolationRoot = styled.div<{
   }
 })
 
-const StyleIsolation: React.FC<StyleIsolationProps> = ({
-  children,
-  className,
-  customResets,
-}) => {
-  // Create an Emotion cache with the Stylis plugin that increases specificity
-  // for all styles within the isolation container.
-  // Include prefixer to preserve Emotion's default vendor prefixing behavior.
-  const cache = React.useMemo(
-    () =>
-      createCache({
-        key: "mit-isolated",
-        stylisPlugins: [prefixer, increaseSpecificity],
-      }),
-    [],
-  )
+const StyleIsolation = React.forwardRef<HTMLDivElement, StyleIsolationProps>(
+  ({ children, className, customResets }, ref) => {
+    /* Create an Emotion cache with the Stylis plugin that increases specificity
+     * for all styles within the isolation container.
+     * Include prefixer to preserve Emotion's default vendor prefixing behavior.
+     */
+    const cache = React.useMemo(
+      () =>
+        createCache({
+          key: "mit-isolated",
+          stylisPlugins: [prefixer, increaseSpecificity],
+        }),
+      [],
+    )
 
-  const combinedClassName = React.useMemo(() => {
-    const classes = [ISOLATION_CLASS_NAME]
-    if (className) {
-      classes.push(className)
-    }
-    return classes.join(" ")
-  }, [className])
+    const combinedClassName = React.useMemo(() => {
+      const classes = [ISOLATION_CLASS_NAME]
+      if (className) {
+        classes.push(className)
+      }
+      return classes.join(" ")
+    }, [className])
 
-  return (
-    <CacheProvider value={cache}>
-      <StyleIsolationRoot
-        className={combinedClassName}
-        customResets={customResets}
-      >
-        {children}
-      </StyleIsolationRoot>
-    </CacheProvider>
-  )
-}
+    return (
+      <CacheProvider value={cache}>
+        <StyleIsolationRoot
+          ref={ref}
+          className={combinedClassName}
+          customResets={customResets}
+        >
+          {children}
+        </StyleIsolationRoot>
+      </CacheProvider>
+    )
+  },
+)
 
 StyleIsolation.displayName = "StyleIsolation"
 
