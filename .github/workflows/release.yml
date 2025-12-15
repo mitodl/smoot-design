@@ -1,4 +1,4 @@
-name: Release Switch
+name: Releases (Semantic & Pre-release)
 run-name: "Release: ${{ inputs.release-type }}"
 on:
   workflow_dispatch:

@@ -14,15 +14,15 @@ Design system components for MITODL Projects
 
 All PR titles and commits to `main` should use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format. During release, the types of commits included since the last release inform what sort of version bump should be made. For example, bugfixes yield a new patch version, whereas breaking changes trigger a major version bump.
 
-To trigger a release, run the "Release" github action. Using [semantic-release](https://semantic-release.gitbook.io/semantic-release), this action will:
+To trigger a release, use the "Releases (Semantic & Pre-release)" github action (`release.md`). This action will will perform a semantic release or pre-release based on `release-type` input.
+
+**Pre-releases:** The action will (1) publish the latest commit on specified branch to NPM, with a version `v0.0.0-<git-short-sha>`, e.g., `v0.0.0-7bc0c0f`; and (2) leave a comment on the branch's PR indicating releaseed version number, if such a PR is open.
+
+**Semantic Release:** The action will:
 
 1. Inspect the commit history since previous release for [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) an
 2. Determine whether the version bump should be major, minor, or patch based on commit types. Breaking changes (e.g., `feat!: remove Button variant 'outlined'`) will result in major version bumps.
 3. Publish the package to NPM and the repository's [Github Releases](https://github.com/mitodl/smoot-design/releases).
-
-### Pre-releases
-
-You can manually trigger the Prerelease github action to create a pre-release. This will (1) publish the latest commit on specified branch to NPM, with a version `v0.0.0-<git-short-sha>`, e.g., `v0.0.0-7bc0c0f`.
 
 ## Installation
 
