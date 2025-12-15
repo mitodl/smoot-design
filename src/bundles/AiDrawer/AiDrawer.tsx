@@ -2,7 +2,7 @@
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
-import Markdown from "react-markdown"
+import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { RiCloseLine, RiSparkling2Line } from "@remixicon/react"
 import Drawer from "@mui/material/Drawer"
@@ -515,9 +515,9 @@ const AiDrawer: FC<AiDrawerProps> = ({
           <StyledTabPanel value="summary">
             <Typography variant="h4" component="h4"></Typography>
             <StyledHTML>
-              <Markdown rehypePlugins={[rehypeRaw]}>
+              <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                 {response?.summary ?? ""}
-              </Markdown>
+              </ReactMarkdown>
             </StyledHTML>
           </StyledTabPanel>
         </TabContext>
