@@ -9,27 +9,74 @@ import {
 import { CacheProvider } from "@emotion/react"
 import createCache from "@emotion/cache"
 
-/**
- * Renders the AiDrawerManager to the page.
- */
-const init = (opts: AiDrawerManagerProps) => {
-  const container = document.createElement("div")
-  document.body.appendChild(container)
-  container.id = "smoot-chat-drawer-root"
+type InitOptions = {
+  container?: HTMLElement
+}
+
+type InitReturn = {
+  unmount: () => void
+  container: HTMLElement
+}
+
+export type { InitOptions, InitReturn }
+
+const safeRemoveElement = (element: HTMLElement | null | undefined): void => {
+  if (!element?.parentNode) {
+    return
+  }
+
+  try {
+    element.parentNode.removeChild(element)
+  } catch {
+    // Swallow removal errors; element/parent may already be gone in host DOM
+  }
+}
+
+const init = (
+  opts: AiDrawerManagerProps,
+  initOpts?: InitOptions,
+): InitReturn => {
+  const providedContainer = initOpts?.container
+  const isSlotVariant = opts.variant === "slot"
+  if (isSlotVariant && !providedContainer) {
+    throw new Error(
+      'Container is required for "slot" variant. Provide container in initOpts.',
+    )
+  }
+
+  const containerCreatedByInit = !providedContainer
+  let reactContainer: HTMLElement, container: HTMLElement
+
+  if (!providedContainer) {
+    container = document.createElement("div")
+    reactContainer = container
+    document.body.appendChild(container)
+  } else {
+    container = providedContainer
+    reactContainer = document.createElement("div")
+    reactContainer.style.width = "100%"
+    // Height controlled by parent container
+    container.appendChild(reactContainer)
+  }
+
+  if (!container.id) {
+    container.id = "smoot-chat-drawer-root"
+  }
 
   const cache = createCache({
     key: "css",
     prepend: true,
-    container: container,
+    container: reactContainer,
   })
   const theme = createTheme({
     components: {
-      MuiPopover: { defaultProps: { container: container } },
-      MuiPopper: { defaultProps: { container: container } },
-      MuiModal: { defaultProps: { container: container } },
+      MuiPopover: { defaultProps: { container: reactContainer } },
+      MuiPopper: { defaultProps: { container: reactContainer } },
+      MuiModal: { defaultProps: { container: reactContainer } },
     },
   })
-  createRoot(container).render(
+  const root = createRoot(reactContainer)
+  root.render(
     <CacheProvider value={cache}>
       <ThemeProvider theme={theme}>
         <AiDrawerManager {...opts} />
@@ -37,8 +84,6 @@ const init = (opts: AiDrawerManagerProps) => {
     </CacheProvider>,
   )
 
-  // Ensure mathjax context menu is rendered above the drawer
-  // Mathjax context menu is appended to end of body.
   const style = document.createElement("style")
   style.textContent = `
     .CtxtMenu_MenuFrame {
@@ -46,6 +91,31 @@ const init = (opts: AiDrawerManagerProps) => {
     }
   `
   document.head.appendChild(style)
+
+  return {
+    unmount: () => {
+      try {
+        root.unmount()
+      } catch {
+        // Swallow unmount errors; root may already have been torn down
+      }
+
+      try {
+        if (reactContainer !== container) {
+          safeRemoveElement(reactContainer)
+        }
+
+        if (containerCreatedByInit) {
+          safeRemoveElement(container)
+        }
+
+        safeRemoveElement(style)
+      } catch {
+        // Swallow cleanup errors so calling code can safely invoke unmount()
+      }
+    },
+    container,
+  }
 }
 
 export { init }
