@@ -1,4 +1,4 @@
-name: Reusable Pre-release
+name: 🔒 internal/reusable-pre-release
 on:
   workflow_call:
 
