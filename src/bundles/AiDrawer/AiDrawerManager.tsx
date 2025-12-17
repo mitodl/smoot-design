@@ -82,19 +82,28 @@ const AiDrawerManager = ({
         event.data.payload.chat.chatId = event.data.payload.chat.chatId || key
 
         // For slot variant: clear all existing drawers before opening the new one
-        // For drawer variant: allow multiple drawers to be open simultaneously
-        setDrawerStates((prev) => {
-          if (variant === "slot") {
-            return {
-              [key]: { key, open: true, payload: event.data.payload },
-            }
-          }
-          // For drawer variant: add or update the new drawer, keep existing ones
-          return {
-            ...prev,
+        if (variant === "slot") {
+          setDrawerStates({
             [key]: { key, open: true, payload: event.data.payload },
-          }
-        })
+          })
+        } else {
+          setDrawerStates((prev) => ({
+            ...prev,
+            [key]: { key, open: false, payload: event.data.payload },
+          }))
+          requestAnimationFrame(() => {
+            setDrawerStates((prev) => ({
+              ...prev,
+              [key]: { ...prev[key], open: true },
+            }))
+          })
+        }
+      }
+
+      if (event.data.type === "smoot-design::ai-drawer-close") {
+        if (variant === "slot") {
+          setDrawerStates({})
+        }
       }
     }
     window.addEventListener("message", cb)
