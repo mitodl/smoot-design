@@ -8,6 +8,17 @@ import { ActionButton } from "../Button/ActionButton"
 import { RiArrowRightLine } from "@remixicon/react"
 import Grid from "@mui/material/Grid2"
 
+/**
+ * `StyleIsolation` is a best-effort attempt to ensure Smoot Design component
+ * styles are not overridden by conflicting page styles. In general, its use
+ * should not be necessary. However, in some host environments, such as OpenEdx
+ * LMS, global styles may conflict with our component styles.
+ *
+ * When Smoot Design components are used inside StyleIsolation:
+ * - relatively high-priority CSS resets are applied to to Smoot Design components
+ *  to neutralize conflicting parent styles.
+ * - Smoot Design component styles have increased specificity to override
+ */
 const meta: Meta<typeof StyleIsolation> = {
   title: "smoot-design/StyleIsolation",
   component: StyleIsolation,
