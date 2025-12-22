@@ -159,9 +159,21 @@ export const PageStyleResistance: Story = {
 
 /**
  * Tests specificity against complex parent selectors like form button[type="button"].
- * StyleIsolation applies resets with e.g. &&& button (3 ampersands) ie. .Mit-isolated.Mit-isolated.Mit-isolated .css-abc123.css-abc123.css-abc123 button (0,6,1)
- * which will override form button[type="button"] (0,1,2).
- * Component styles use .Mit-isolated.Mit-isolated.Mit-isolated .css-xyz789 (0,4,0) to override StyleIsolation's resets.
+ *
+ * StyleIsolation applies resets with e.g. `.mit-isolated-rvau6k.mit-isolated-rvau6k.mit-isolated-rvau6k button` (0,3,1)
+ * which will override e.g. `.some-class button` (0, 1, 1) and `form button[type="button"]` (0,1,2).
+ *
+ * Component styles use e.g. `.mit-isolated.mit-isolated.mit-isolated .mit-isolated-rggkxd` (0,4,0)
+ * to override StyleIsolation's resets and reasonably ensure no conflicts with page styles.
+ *
+ * Note:
+ * CSS specificity is calculated as (A, B, C):
+ * - A = number of ID selectors.
+ * - B = number of class selectors, attribute selectors, and pseudo-classes.
+ * - C = number of element selectors and pseudo-elements.
+ *
+ * The winning selector is the one with the highest A, followed by B, then C, like number systems where
+ * A is the most significant digit, ie. (1,0,0) > (0,9,9).
  */
 export const ComplexParentSelectors: Story = {
   render: () => {

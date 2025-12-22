@@ -9,6 +9,7 @@ import { prefixer } from "stylis"
 import {
   increaseSpecificity,
   ISOLATION_CLASS_NAME,
+  SPECIFICITY_INCREASE,
 } from "./increaseSpecificityPlugin"
 
 type StyleIsolationProps = {
@@ -108,14 +109,6 @@ const StyleIsolationRoot = styled.div<{
 
   // Build resets for common elements
   const resets: CSSObject = {
-    /* The Stylis plugin will automatically prepend .Mit-isolated.Mit-isolated.Mit-isolated
-     * to all selectors, resulting in:
-     * .Mit-isolated.Mit-isolated.Mit-isolated button (0,3,1)
-     * Component styles will also get the plugin treatment, resulting in:
-     * .css-abc123, .Mit-isolated.Mit-isolated.Mit-isolated .css-abc123 button (0,5,1)
-     * This ensures component styles (0,5,1) override parent page styles but
-     * can still be overridden by the resets if needed.
-     */
     "button, input[type='button']": {
       backgroundImage: "unset",
       textTransform: "unset",
@@ -223,9 +216,11 @@ const StyleIsolationRoot = styled.div<{
   }
 
   return {
-    ...baseStyles,
-    ...resets,
-    ...sx,
+    ["&".repeat(SPECIFICITY_INCREASE)]: {
+      ...baseStyles,
+      ...resets,
+      ...sx,
+    },
   }
 })
 
@@ -244,19 +239,15 @@ const StyleIsolation = React.forwardRef<HTMLDivElement, StyleIsolationProps>(
       [],
     )
 
-    const combinedClassName = React.useMemo(() => {
-      const classes = [ISOLATION_CLASS_NAME]
-      if (className) {
-        classes.push(className)
-      }
-      return classes.join(" ")
-    }, [className])
-
     return (
       <CacheProvider value={cache}>
         <StyleIsolationRoot
           ref={ref}
-          className={combinedClassName}
+          className={
+            className
+              ? `${ISOLATION_CLASS_NAME} ${className}`
+              : ISOLATION_CLASS_NAME
+          }
           customResets={customResets}
         >
           {children}

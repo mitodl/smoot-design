@@ -7,7 +7,7 @@ export const SPECIFICITY_INCREASE = 3
  * The Stylis plugin automatically increases specificity for all styles
  * within elements with this class name.
  */
-export const ISOLATION_CLASS_NAME = "Mit-isolated"
+export const ISOLATION_CLASS_NAME = "mit-isolated"
 
 /**
  * Stylis plugin that increases CSS specificity by prepending a scope selector
@@ -16,7 +16,7 @@ export const ISOLATION_CLASS_NAME = "Mit-isolated"
  * This automatically increases specificity for all styles within the scope,
  * ensuring they override conflicting parent page styles.
  *
- * @param scope - The CSS class selector to use as the scope (e.g., ".Mit-isolated")
+ * @param scope - The CSS class selector to use as the scope (e.g., ".mit-isolated")
  * @returns A Stylis plugin function
  */
 export const increaseSpecificity: StylisPlugin = (element: StylisElement) => {
