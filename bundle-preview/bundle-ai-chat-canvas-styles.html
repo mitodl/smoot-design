@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chat - Canvas Styles Isolation</title>
+    <link
+      rel="stylesheet"
+      href="https://du11hjcvx0uqb.cloudfront.net/dist/brandable_css/new_styles_normal_contrast/bundles/common-b1f4c00140.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-main-v1.74535dae9600.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-course.53e9aeb4ede6.css"
+    />
+  </head>
+  <body>
+    <div id="ai-chat-container"></div>
+    <script type="module">
+      import * as aiChat from "./static/bundles/aiChat.es.js"
+
+      const requestOpts = {
+        apiUrl: "https://api.rc.learn.mit.edu/ai/http/demo_canvas_tutor_agent/",
+        transformBody: (messages, { problem_set_title }) => {
+          const body = {
+            message: messages[messages.length - 1].content,
+            run_readable_id: "14566-kaleba:20211202+canvas",
+            problem_set_title: problem_set_title || "Deliverable 6 - 15.060",
+          }
+          return body
+        },
+      }
+
+      aiChat.init(
+        {
+          requestOpts,
+          entryScreenEnabled: false,
+          initialMessages: [
+            {
+              role: "assistant",
+              content:
+                "This page applies page styles from Canvas to demonstrate style isolation. How can I help you today?",
+            },
+          ],
+        },
+        {
+          container: document.getElementById("ai-chat-container"),
+        },
+      )
+    </script>
+  </body>
+</html>

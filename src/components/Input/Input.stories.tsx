@@ -1,6 +1,5 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
-import styled from "@emotion/styled"
 import { Input, AdornmentButton } from "./Input"
 import type { InputProps } from "./Input"
 import Stack from "@mui/material/Stack"
@@ -8,7 +7,6 @@ import Grid from "@mui/material/Grid2"
 import { RiCalendarLine, RiCloseLine, RiSearchLine } from "@remixicon/react"
 import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
-import Typography from "@mui/material/Typography"
 
 const StatefulInput = (props: InputProps) => {
   const [value, setValue] = React.useState(props.value || "")
@@ -178,91 +176,5 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
         />
       </Stack>
     )
-  },
-}
-
-const PageStyles = styled.div(`
-  input {
-    background-color: red;
-    border: 2px solid blue;
-  }
-
-  input[type="text"] {
-    background: red;
-  }
-
-  input:disabled {
-    background-image: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
-  }
-
-  .MuiInputBase-input {
-    background: red;
-  }
-`)
-
-/**
- * Tests that the Input component maintains its intended styling across all states
- * even when parent page styles attempt to override it. The PageStyles wrapper
- * includes potentially conflicting CSS that might exist in a consuming application.
- */
-export const StatesAndParentStyleResistance: Story = {
-  render: (args) => {
-    return (
-      <PageStyles>
-        <Grid container spacing={2} alignItems="center" maxWidth="400px">
-          <Grid size={{ xs: 4 }}>
-            <Typography>Placeholder</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput {...args} value="" />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Typography>Default</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput {...args} />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Typography>Initially Focused</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput
-              // This is a story just demonstrating the autofocus prop
-              // eslint-disable-next-line jsx-a11y/no-autofocus
-              autoFocus
-              {...args}
-            />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Typography>Error</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput {...args} error />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Typography>Disabled</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput {...args} disabled />
-          </Grid>
-          <Grid size={{ xs: 4 }}>
-            <Typography>Password</Typography>
-          </Grid>
-          <Grid size={{ xs: 8 }}>
-            <StatefulInput {...args} type="password" />
-          </Grid>
-        </Grid>
-      </PageStyles>
-    )
-  },
-  args: {
-    placeholder: "This is placeholder text.",
-    value: "Some value",
-  },
-  argTypes: {
-    placeholder: { table: { disable: true } },
-    value: { table: { disable: true } },
-    error: { table: { disable: true } },
-    disabled: { table: { disable: true } },
   },
 }

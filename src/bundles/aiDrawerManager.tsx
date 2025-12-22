@@ -6,8 +6,7 @@ import {
   ThemeProvider,
   createTheme,
 } from "../components/ThemeProvider/ThemeProvider"
-import { CacheProvider } from "@emotion/react"
-import createCache from "@emotion/cache"
+import { StyleIsolation } from "../components/StyleIsolation/StyleIsolation"
 
 type InitOptions = {
   container?: HTMLElement
@@ -63,25 +62,48 @@ const init = (
     container.id = "smoot-chat-drawer-root"
   }
 
-  const cache = createCache({
-    key: "css",
-    prepend: true,
-    container: reactContainer,
-  })
+  /* MUI's Drawer renders via a portal (React's createPortal() API), so its content isn't a DOM
+   * descendant of StyleIsolationRoot. The increaseSpecificity plugin relies on DOM hierarchy,
+   * so those selectors don't match portaled content. The Emotion cache from CacheProvider still
+   * works (React context), but the CSS class-based selectors fail.
+   *
+   * Store the StyleIsolation root element in an object so the portal container function
+   * can access the current value. This ensures portaled Drawer content is rendered
+   * within the StyleIsolation DOM tree, so CSS specificity selectors work correctly.
+   */
+  const isolationRoot = { element: null as HTMLElement | null }
+
   const theme = createTheme({
     components: {
-      MuiPopover: { defaultProps: { container: reactContainer } },
-      MuiPopper: { defaultProps: { container: reactContainer } },
-      MuiModal: { defaultProps: { container: reactContainer } },
+      MuiPopover: {
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
+      },
+      MuiPopper: {
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
+      },
+      MuiModal: {
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
+      },
     },
   })
+
+  const isolationRootRef = (element: HTMLDivElement | null) => {
+    isolationRoot.element = element
+  }
+
   const root = createRoot(reactContainer)
   root.render(
-    <CacheProvider value={cache}>
+    <StyleIsolation ref={isolationRootRef}>
       <ThemeProvider theme={theme}>
         <AiDrawerManager {...opts} />
       </ThemeProvider>
-    </CacheProvider>,
+    </StyleIsolation>,
   )
 
   const style = document.createElement("style")

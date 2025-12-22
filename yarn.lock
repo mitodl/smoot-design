@@ -2854,6 +2854,7 @@ __metadata:
     "@types/lodash": "npm:^4.17.13"
     "@types/react": "npm:^19.0.8"
     "@types/react-dom": "npm:^19.0.0"
+    "@types/stylis": "npm:^4"
     "@typescript-eslint/eslint-plugin": "npm:^8.13.0"
     "@typescript-eslint/typescript-estree": "npm:^8.13.0"
     better-react-mathjax: "npm:^2.3.0"
@@ -5121,6 +5122,13 @@ __metadata:
   version: 2.0.6
   resolution: "@types/statuses@npm:2.0.6"
   checksum: 10/dadfbb4f32a16d3106a8e2a957dab17b1ae99fc4788e1fd96aeaf82355e3b2b069d5ea0f5fb887efa830def033828955a5bbdfd35454ba2088822537aed9e5db
+  languageName: node
+  linkType: hard
+
+"@types/stylis@npm:^4":
+  version: 4.2.7
+  resolution: "@types/stylis@npm:4.2.7"
+  checksum: 10/068c7fd64ee2e1649b06615da57c76dd9f5be1836e310ebf94aa08193c3544d48944079ce6e94ba89b72b716944f217234a86fecc28185246c1787f02ad0eae1
   languageName: node
   linkType: hard
 
