@@ -76,13 +76,19 @@ const init = (
   const theme = createTheme({
     components: {
       MuiPopover: {
-        defaultProps: { container: () => isolationRoot.element || container },
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
       },
       MuiPopper: {
-        defaultProps: { container: () => isolationRoot.element || container },
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
       },
       MuiModal: {
-        defaultProps: { container: () => isolationRoot.element || container },
+        defaultProps: {
+          container: () => isolationRoot.element || reactContainer,
+        },
       },
     },
   })
