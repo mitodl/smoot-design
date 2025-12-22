@@ -39,7 +39,7 @@ type AiDrawerManagerProps = {
   getTrackingClient?: () => {
     post: (url: string, data: Record<string, unknown>) => void
   }
-} & Pick<AiDrawerProps, "className" | "transformBody" | "fetchOpts">
+} & Pick<AiDrawerProps, "className" | "transformBody" | "fetchOpts" | "variant">
 
 const AiDrawerManager = ({
   className,
@@ -47,7 +47,7 @@ const AiDrawerManager = ({
   transformBody,
   fetchOpts,
   getTrackingClient,
-  target,
+  variant,
 }: AiDrawerManagerProps) => {
   const [drawerStates, setDrawerStates] = useState<
     Record<
@@ -81,31 +81,47 @@ const AiDrawerManager = ({
 
         event.data.payload.chat.chatId = event.data.payload.chat.chatId || key
 
-        setDrawerStates((prev) => ({
-          ...prev,
-          [key]: { key, open: false, payload: event.data.payload },
-        }))
-        requestAnimationFrame(() => {
+        // For slot variant: clear all existing drawers before opening the new one
+        if (variant === "slot") {
+          setDrawerStates({
+            [key]: { key, open: true, payload: event.data.payload },
+          })
+        } else {
           setDrawerStates((prev) => ({
             ...prev,
-            [key]: { ...prev[key], open: true },
+            [key]: { key, open: false, payload: event.data.payload },
           }))
-        })
+          requestAnimationFrame(() => {
+            setDrawerStates((prev) => ({
+              ...prev,
+              [key]: { ...prev[key], open: true },
+            }))
+          })
+        }
+      }
+
+      if (event.data.type === "smoot-design::ai-drawer-close") {
+        if (variant === "slot") {
+          setDrawerStates({})
+        }
       }
     }
     window.addEventListener("message", cb)
     return () => {
       window.removeEventListener("message", cb)
     }
-  }, [messageOrigin, target])
+  }, [messageOrigin, variant])
 
-  if (Object.values(drawerStates).length === 0) {
-    return <div data-testid="ai-drawer-manager-waiting"></div>
+  const drawersToRender = Object.values(drawerStates)
+
+  // Return marker element when no drawers (for bundled consumers to detect initialization)
+  if (drawersToRender.length === 0) {
+    return <div data-testid="ai-drawer-manager-waiting" />
   }
 
   return (
     <>
-      {Object.values(drawerStates).map(({ key, open, payload }) => {
+      {drawersToRender.map(({ key, open, payload }) => {
         const { trackingUrl, ...settings } = payload
         return (
           <AiDrawer
@@ -115,13 +131,22 @@ const AiDrawerManager = ({
             fetchOpts={fetchOpts}
             settings={settings}
             open={open}
+            variant={variant}
             onClose={() => {
-              setDrawerStates((prev) => ({
-                ...prev,
-                [key]: { ...prev[key], open: false },
-              }))
+              setDrawerStates((prev) => {
+                if (variant === "slot") {
+                  // Remove closed drawer from state in slot variant
+                  const { [key]: _, ...rest } = prev
+                  return rest
+                }
+                // For drawer variant: keep drawer in state but mark as closed
+                return {
+                  ...prev,
+                  [key]: { ...prev[key], open: false },
+                }
+              })
             }}
-            onTrackingEvent={async (event) => {
+            onTrackingEvent={(event) => {
               if (trackingUrl) {
                 const trackingClient = getTrackingClient?.()
                 if (!trackingClient) {
