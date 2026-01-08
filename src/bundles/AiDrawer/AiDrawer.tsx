@@ -1,4 +1,3 @@
-// @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
