@@ -71,13 +71,16 @@ const Starters = styled.div(({ theme }) => ({
   display: "flex",
   gap: "16px",
   width: "100%",
+  maxWidth: "900px",
+  flexWrap: "wrap",
   [theme.breakpoints.down("sm")]: {
     flexDirection: "column",
   },
 }))
 
 const Starter = styled.button(({ theme }) => ({
-  flex: 1,
+  flex: "1 1 calc(33.333% - 11px)",
+  minWidth: "200px",
   display: "flex",
   alignItems: "center",
   borderRadius: "8px",
@@ -87,6 +90,8 @@ const Starter = styled.button(({ theme }) => ({
   backgroundColor: "transparent",
   textAlign: "left",
   [theme.breakpoints.down("sm")]: {
+    flex: "1 1 100%",
+    minWidth: "auto",
     padding: "12px 36px",
   },
   ":hover": {
