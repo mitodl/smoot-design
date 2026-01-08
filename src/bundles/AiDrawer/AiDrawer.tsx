@@ -107,8 +107,11 @@ const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(
   ({ hasTabs, theme }) => ({
     ".MitAiChat--entryScreenContainer": {
       padding: hasTabs ? "114px 0 24px" : "168px 32px 24px",
+      maxWidth: "1000px",
+      margin: "0 auto",
       [theme.breakpoints.down("md")]: {
         padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+        maxWidth: "100%",
       },
     },
     ".MitAiChat--chatScreenContainer": {
