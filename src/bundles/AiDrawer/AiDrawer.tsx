@@ -102,25 +102,42 @@ const StyledTabPanel = styled(TabPanel)({
   position: "relative",
 })
 
-const StyledAiChat = styled(AiChat)<{ hasTabs: boolean }>(
-  ({ hasTabs, theme }) => ({
-    ".MitAiChat--entryScreenContainer": {
-      padding: hasTabs ? "114px 0 24px" : "168px 32px 24px",
-      [theme.breakpoints.down("md")]: {
-        padding: hasTabs ? "114px 0 24px" : "168px 16px 24px",
+const StyledAiChat = styled(AiChat)<{
+  hasTabs: boolean
+  variant: "drawer" | "slot"
+}>(({ hasTabs, variant, theme }) => ({
+  ".MitAiChat--entryScreenContainer": {
+    padding:
+      hasTabs && variant === "slot"
+        ? "24px 0 24px"
+        : hasTabs
+          ? "114px 0 24px"
+          : "168px 32px 24px",
+    ...(hasTabs && variant === "slot" && { justifyContent: "center" }),
+    [theme.breakpoints.down("md")]: {
+      padding:
+        hasTabs && variant === "slot"
+          ? "24px 0 24px"
+          : hasTabs
+            ? "114px 0 24px"
+            : "168px 16px 24px",
+    },
+  },
+  ".MitAiChat--chatScreenContainer": {
+    padding: hasTabs ? 0 : "0 32px",
+    [theme.breakpoints.down("md")]: {
+      padding: hasTabs ? 0 : "0 16px",
+    },
+  },
+  ".MitAiChat--messagesContainer": {
+    paddingTop: hasTabs ? "8px" : "88px",
+    ...(variant === "slot" && {
+      "> .MitAiChat--messageRowAssistant:first-child": {
+        marginTop: 0,
       },
-    },
-    ".MitAiChat--chatScreenContainer": {
-      padding: hasTabs ? 0 : "0 32px",
-      [theme.breakpoints.down("md")]: {
-        padding: hasTabs ? 0 : "0 16px",
-      },
-    },
-    ".MitAiChat--messagesContainer": {
-      paddingTop: hasTabs ? "8px" : "88px",
-    },
-  }),
-)
+    }),
+  },
+}))
 
 const StyledHTML = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
@@ -271,6 +288,7 @@ const ChatComponent = ({
   initialMessages,
   hasTabs,
   needsMathJax,
+  variant,
   onTrackingEvent,
 }: {
   settings: AiDrawerSettings["chat"]
@@ -283,6 +301,7 @@ const ChatComponent = ({
   initialMessages?: AiChatProps["initialMessages"]
   hasTabs: boolean
   needsMathJax: boolean
+  variant: "drawer" | "slot"
   onTrackingEvent?: TrackingEventHandler
 }) => {
   if (!settings) return null
@@ -311,6 +330,7 @@ const ChatComponent = ({
           }),
       }}
       hasTabs={hasTabs}
+      variant={variant}
       useMathJax={needsMathJax}
       onSubmit={(message, meta) => {
         onTrackingEvent?.({
@@ -460,6 +480,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           }
           hasTabs={hasTabs}
           needsMathJax={true}
+          variant={variant}
           onTrackingEvent={onTrackingEvent}
         />
       ) : null}
@@ -502,6 +523,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
               needsMathJax={false}
+              variant={variant}
               onTrackingEvent={onTrackingEvent}
             />
           </StyledTabPanel>
