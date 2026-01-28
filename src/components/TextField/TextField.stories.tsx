@@ -137,7 +137,7 @@ export const Adornments: Story = {
         {Object.values(adornments).flatMap((props, i) =>
           SIZES.map((size) => {
             return (
-              <Grid item xs={6} key={`${i}-${size}`}>
+              <Grid size={{ xs: 6 }} key={`${i}-${size}`}>
                 <StatefulTextField {...args} size={size} {...props} />
               </Grid>
             )
@@ -169,34 +169,24 @@ export const States: Story = {
   render: (args) => {
     return (
       <Grid container spacing={2} alignItems="top" maxWidth="400px">
-        <Grid item xs={4}>
-          Placeholder
-        </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 4 }}>Placeholder</Grid>
+        <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} value="" />
         </Grid>
-        <Grid item xs={4}>
-          Default
-        </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 4 }}>Default</Grid>
+        <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} />
         </Grid>
-        <Grid item xs={4}>
-          Required
-        </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 4 }}>Required</Grid>
+        <Grid size={{ xs: 8 }}>
           <StatefulTextField required {...args} />
         </Grid>
-        <Grid item xs={4}>
-          Error
-        </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 4 }}>Error</Grid>
+        <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} error />
         </Grid>
-        <Grid item xs={4}>
-          Disabled
-        </Grid>
-        <Grid item xs={8}>
+        <Grid size={{ xs: 4 }}>Disabled</Grid>
+        <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} disabled />
         </Grid>
       </Grid>

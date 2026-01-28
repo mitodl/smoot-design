@@ -2,7 +2,7 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Button, ButtonLink, ButtonLoadingIcon } from "./Button"
 import type { ButtonProps } from "./Button"
-import Grid from "@mui/material/Grid2"
+import Grid from "@mui/material/Grid"
 import Stack from "@mui/material/Stack"
 import {
   RiArrowLeftLine,

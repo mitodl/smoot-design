@@ -6,7 +6,7 @@ import { Input } from "../Input/Input"
 import { StyleIsolation } from "./StyleIsolation"
 import { ActionButton } from "../Button/ActionButton"
 import { RiArrowRightLine } from "@remixicon/react"
-import Grid from "@mui/material/Grid2"
+import Grid from "@mui/material/Grid"
 
 /**
  * `StyleIsolation` is a best-effort attempt to ensure Smoot Design component
