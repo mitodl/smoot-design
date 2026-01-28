@@ -1,6 +1,5 @@
 import * as React from "react"
 import styled from "@emotion/styled"
-import { css } from "@emotion/react"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
 import CircularProgress from "@mui/material/CircularProgress"
@@ -95,14 +94,19 @@ const sizeStyles = (
   ]
 }
 
-const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
+const buttonStyles = (
+  props: ButtonStyleProps & {
+    theme: Theme
+  },
+) => {
   const { size, variant, edge, theme, color, responsive } = {
     ...DEFAULT_PROPS,
     ...props,
   }
   const { colors } = theme.custom
   const hasBorder = variant === "secondary" || variant === "bordered"
-  return css([
+
+  return [
     {
       color: theme.palette.text.primary,
       textAlign: "center",
@@ -212,12 +216,13 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: theme.custom.colors.lightGray1,
       },
     },
-  ])
+  ]
 }
 
 const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
+
 const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
