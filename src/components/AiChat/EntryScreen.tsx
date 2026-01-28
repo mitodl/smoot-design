@@ -1,10 +1,10 @@
 import * as React from "react"
 import { RiSparkling2Line, RiSendPlaneFill } from "@remixicon/react"
-import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import { AdornmentButton, Input } from "../Input/Input"
 import TimLogo from "./TimLogo"
 import { useState } from "react"
+import styled from "@emotion/styled"
 
 const Container = styled.form(({ theme }) => ({
   display: "flex",

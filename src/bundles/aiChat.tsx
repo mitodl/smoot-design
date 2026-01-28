@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client"
 import { AiChat } from "../components/AiChat/AiChat"
 import { ThemeProvider } from "../components/ThemeProvider/ThemeProvider"
 import type { AiChatProps } from "../ai"
+import { StyleIsolation } from "../components/StyleIsolation/StyleIsolation"
 
 const createAndAppend = () => {
   const newContainer = document.createElement("div")
@@ -19,7 +20,9 @@ const init = (props: AiChatProps, { container }: InitOptions) => {
   const root = createRoot(rootEl)
   root.render(
     <ThemeProvider>
-      <AiChat {...props} />
+      <StyleIsolation>
+        <AiChat {...props} />
+      </StyleIsolation>
     </ThemeProvider>,
   )
 }

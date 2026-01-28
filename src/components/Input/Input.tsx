@@ -244,20 +244,6 @@ const baseInputStyles = (theme: Theme) => ({
       paddingRight: "8px",
     },
   },
-  /* Override potentially conflicting styles from parent page to reasonable specificity
-   * - Will override .class1 .class2 input
-   * - Will override .class1 input[type="text"]
-   * - Will override .class1 input:focus
-   * - Will override .class1 input:active
-   * - May not override .class1 .class2 input:focus (equal specificity)
-   * - May not override .class1 .class2 input[type="text"] (equal specificity)
-   * - Will not override .class1 .class2 input:active[type="text"]
-   */
-  "&&& input": {
-    background: "unset",
-    border: "unset",
-    boxShadow: "unset",
-  },
 })
 
 const noForward = Object.keys({

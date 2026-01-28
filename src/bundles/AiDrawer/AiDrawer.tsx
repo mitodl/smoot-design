@@ -1,4 +1,3 @@
-// @format
 import * as React from "react"
 import { FC, useEffect, useState, useRef, useMemo } from "react"
 import styled from "@emotion/styled"
@@ -149,6 +148,19 @@ const StyledHTML = styled.div(({ theme }) => ({
   },
 }))
 
+const SlotContainer = styled.div(({ theme }) => ({
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: theme.custom.colors.white,
+  position: "relative",
+  boxSizing: "border-box",
+  padding: "0 32px",
+  [theme.breakpoints.down("md")]: {
+    padding: "0 16px",
+  },
+}))
+
 const identity = <T,>(x: T): T => x
 
 type AiDrawerProps = {
@@ -175,6 +187,14 @@ type AiDrawerProps = {
   open?: boolean
   onClose?: () => void
   onTrackingEvent?: TrackingEventHandler
+  /**
+   * Rendering variant:
+   * - "drawer" (default): Renders as Material-UI Drawer overlay that slides in from the side
+   * - "slot": Renders as a regular div container for placement in slots/containers
+   *
+   * @default "drawer"
+   */
+  variant?: "drawer" | "slot"
 }
 
 const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
@@ -340,6 +360,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   open,
   onClose,
   onTrackingEvent,
+  variant = "drawer",
 }: AiDrawerProps) => {
   const [tab, setTab] = useState("chat")
   const { response } = useContentFetch(settings?.summary?.apiUrl)
@@ -400,29 +421,9 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { title, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
-  return (
-    <Drawer
-      data-smoot-version={VERSION}
-      className={className}
-      PaperProps={{
-        ref: paperRefCallback,
-        sx: {
-          width: "900px",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          padding: {
-            xs: "0 16px",
-            md: "0 32px",
-          },
-        },
-      }}
-      anchor="right"
-      open={open}
-      onClose={handleClose}
-      role="dialog"
-      aria-modal="true"
-      keepMounted
-    >
+  // Shared content component
+  const drawerContent = (
+    <>
       <Header>
         <Title>
           {title ? <RiSparkling2Line /> : null}
@@ -522,6 +523,50 @@ const AiDrawer: FC<AiDrawerProps> = ({
           </StyledTabPanel>
         </TabContext>
       ) : null}
+    </>
+  )
+
+  // Slot variant: render as regular div container
+  if (variant === "slot") {
+    if (!open) {
+      return null
+    }
+    return (
+      <SlotContainer
+        className={className}
+        data-smoot-version={VERSION}
+        ref={paperRefCallback}
+      >
+        {drawerContent}
+      </SlotContainer>
+    )
+  }
+
+  // Drawer mode: render as Material-UI Drawer (default, backward compatible)
+  return (
+    <Drawer
+      data-smoot-version={VERSION}
+      className={className}
+      PaperProps={{
+        ref: paperRefCallback,
+        sx: {
+          width: "900px",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          padding: {
+            xs: "0 16px",
+            md: "0 32px",
+          },
+        },
+      }}
+      anchor="right"
+      open={open}
+      onClose={handleClose}
+      role="dialog"
+      aria-modal="true"
+      keepMounted
+    >
+      {drawerContent}
     </Drawer>
   )
 }
