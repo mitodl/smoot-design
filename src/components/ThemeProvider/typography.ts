@@ -63,7 +63,7 @@ const globalSettings: ThemeOptions["typography"] = {
     fontWeight: fontWeights.text.medium,
     fontStyle: "normal",
     fontSize: pxToRem(18),
-    lineHeight: pxToRem(22),
+    lineHeight: pxToRem(26),
   },
   subtitle1: {
     fontFamily: "neue-haas-grotesk-text, sans-serif",

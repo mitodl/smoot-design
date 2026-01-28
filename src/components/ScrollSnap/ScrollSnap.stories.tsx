@@ -1,5 +1,5 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { ScrollSnap } from "./ScrollSnap"
 import styled from "@emotion/styled"
 import { faker } from "@faker-js/faker/locale/en"

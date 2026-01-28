@@ -1,13 +1,23 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Input, AdornmentButton } from "./Input"
 import type { InputProps } from "./Input"
 import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid"
 import { RiCalendarLine, RiCloseLine, RiSearchLine } from "@remixicon/react"
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
-import Typography from "@mui/material/Typography"
+
+const StatefulInput = (props: InputProps) => {
+  const [value, setValue] = React.useState(props.value || "")
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(event.target.value)
+    props.onChange?.(event)
+  }
+
+  return <Input {...props} value={value} onChange={handleChange} />
+}
 
 const SIZES = enumValues<NonNullable<InputProps["size"]>>({
   small: true,
@@ -75,10 +85,10 @@ export const Sizes: Story = {
   render: (args) => {
     return (
       <Stack direction="row" gap={1}>
-        <Input size="small" {...args} />
-        <Input size="medium" {...args} />
-        <Input size="large" {...args} />
-        <Input size="hero" {...args} />
+        <StatefulInput size="small" {...args} />
+        <StatefulInput size="medium" {...args} />
+        <StatefulInput size="large" {...args} />
+        <StatefulInput size="hero" {...args} />
       </Stack>
     )
   },
@@ -111,7 +121,7 @@ export const Adornments: Story = {
           SIZES.map((size) => {
             return (
               <Grid size={{ xs: 3 }} key={`${i}-${size}`}>
-                <Input {...args} size={size} {...props} />
+                <StatefulInput {...args} size={size} {...props} />
               </Grid>
             )
           }),
@@ -125,56 +135,46 @@ export const Adornments: Story = {
   },
 }
 
-export const States: Story = {
+export const Multiline: Story = {
   render: (args) => {
     return (
-      <Grid container spacing={2} alignItems="center" maxWidth="400px">
-        <Grid size={{ xs: 4 }}>
-          <Typography>Placeholder</Typography>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Input {...args} value="" />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <Typography>Default</Typography>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Input {...args} />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <Typography>Initially Focused</Typography>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Input
-            // This is a story just demonstrating the autofocus prop
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
-            {...args}
-          />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <Typography>Error</Typography>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Input {...args} error />
-        </Grid>
-        <Grid size={{ xs: 4 }}>
-          <Typography>Disabled</Typography>
-        </Grid>
-        <Grid size={{ xs: 8 }}>
-          <Input {...args} disabled />
-        </Grid>
-      </Grid>
+      <Stack direction="column" gap={1}>
+        <StatefulInput
+          size="small"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="medium"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="large"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="hero"
+          {...args}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+        <StatefulInput
+          size="chat"
+          {...args}
+          value={`Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`}
+          multiline
+          endAdornment={ADORNMENTS.SearchIcon}
+        />
+      </Stack>
     )
-  },
-  args: {
-    placeholder: "This is placeholder text.",
-    value: "Some value",
-  },
-  argTypes: {
-    placeholder: { table: { disable: true } },
-    value: { table: { disable: true } },
-    error: { table: { disable: true } },
-    disabled: { table: { disable: true } },
   },
 }

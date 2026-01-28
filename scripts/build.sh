@@ -7,4 +7,6 @@ rm -rf dist &&
 	npm run build:esm &&
 	npm run build:cjs &&
 	npm run build:type-augmentation &&
-	npm run build:bundles
+	npm run build:bundles &&
+	npm run build:bundles:legacy &&
+	npm run build:bundles:aiChat

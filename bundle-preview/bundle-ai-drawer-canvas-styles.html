@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <title>Home</title>
-    <script src="./static/bundles/aiDrawerManager.umd.js"></script>
     <style>
       .app-frame {
         width: 600px;
@@ -11,12 +10,24 @@
         height: 400px;
       }
     </style>
+    <link
+      rel="stylesheet"
+      href="https://du11hjcvx0uqb.cloudfront.net/dist/brandable_css/new_styles_normal_contrast/bundles/common-b1f4c00140.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-main-v1.74535dae9600.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://courses.learn.mit.edu/static/mitxonline/css/lms-course.53e9aeb4ede6.css"
+    />
   </head>
-
   <body>
     <iframe class="app-frame" src="./iframe.html"></iframe>
   </body>
-  <script>
+  <script type="module">
+    import * as aiDrawerManager from "./static/bundles/aiDrawerManager.es.js"
     /**
      * Accepts options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-ai-aidrawermanager--docs
      */

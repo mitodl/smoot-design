@@ -37,17 +37,22 @@ const AskTimTitle = styled.div(({ theme }) => ({
     width: "24px",
     height: "24px",
   },
+  "&& p": {
+    margin: 0,
+  },
 }))
 
 type ChatTitleProps = {
   askTimTitle?: string
   externalScroll?: boolean
+  control?: React.ReactNode
   className?: string
 }
 
 const ChatTitle = ({
   askTimTitle,
   externalScroll,
+  control,
   className,
 }: ChatTitleProps) => {
   if (!askTimTitle) return null
@@ -60,6 +65,7 @@ const ChatTitle = ({
           {askTimTitle}
         </Typography>
       </AskTimTitle>
+      {control}
     </Container>
   )
 }

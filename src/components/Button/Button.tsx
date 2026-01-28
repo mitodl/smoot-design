@@ -1,8 +1,8 @@
 import * as React from "react"
 import styled from "@emotion/styled"
-import { css } from "@emotion/react"
 import { pxToRem } from "../ThemeProvider/typography"
 import type { Theme, ThemeOptions } from "@mui/material/styles"
+import CircularProgress from "@mui/material/CircularProgress"
 import {
   LinkAdapter,
   LinkAdapterPropsOverrides,
@@ -94,14 +94,19 @@ const sizeStyles = (
   ]
 }
 
-const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
+const buttonStyles = (
+  props: ButtonStyleProps & {
+    theme: Theme
+  },
+) => {
   const { size, variant, edge, theme, color, responsive } = {
     ...DEFAULT_PROPS,
     ...props,
   }
   const { colors } = theme.custom
   const hasBorder = variant === "secondary" || variant === "bordered"
-  return css([
+
+  return [
     {
       color: theme.palette.text.primary,
       textAlign: "center",
@@ -211,18 +216,36 @@ const buttonStyles = (props: ButtonStyleProps & { theme: Theme }) => {
         backgroundColor: theme.custom.colors.lightGray1,
       },
     },
-  ])
+  ]
 }
 
 const ButtonRoot = styled("button", {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
+
 const ButtonLinkRoot = styled(LinkAdapter, {
   shouldForwardProp: shouldForwardButtonProp,
 })<ButtonStyleProps>(buttonStyles)
 
-const IconContainer = styled.span<{ side: "start" | "end"; size: ButtonSize }>(
-  ({ size, side }) => [
+const iconSizeStyles = (size: ButtonSize) => ({
+  "& > *": {
+    width: "1em",
+    height: "1em",
+    fontSize: pxToRem(
+      {
+        small: 16,
+        medium: 20,
+        large: 24,
+      }[size],
+    ),
+  },
+})
+const IconContainer = styled.span<{
+  side: "start" | "end"
+  size: ButtonSize
+  responsive?: boolean
+}>(({ theme, responsive, side, size }) => {
+  return [
     {
       height: "1em",
       display: "flex",
@@ -241,36 +264,27 @@ const IconContainer = styled.span<{ side: "start" | "end"; size: ButtonSize }>(
       marginLeft: "8px",
       marginRight: "-4px",
     },
-    {
-      "& svg, & .MuiSvgIcon-root": {
-        width: "1em",
-        height: "1em",
-        fontSize: pxToRem(
-          {
-            small: 16,
-            medium: 20,
-            large: 24,
-          }[size],
-        ),
-      },
+    iconSizeStyles(size),
+    responsive && {
+      [theme.breakpoints.down("sm")]: iconSizeStyles(RESPONSIVE_SIZES[size]),
     },
-  ],
-)
+  ]
+})
 
 const ButtonInner: React.FC<
   ButtonStyleProps & { children?: React.ReactNode }
 > = (props) => {
-  const { children, size = DEFAULT_PROPS.size } = props
+  const { children, size = DEFAULT_PROPS.size, responsive } = props
   return (
     <>
       {props.startIcon ? (
-        <IconContainer size={size} side="start">
+        <IconContainer responsive={responsive} size={size} side="start">
           {props.startIcon}
         </IconContainer>
       ) : null}
       {children}
       {props.endIcon ? (
-        <IconContainer size={size} side="end">
+        <IconContainer responsive={responsive} size={size} side="end">
           {props.endIcon}
         </IconContainer>
       ) : null}
@@ -318,6 +332,25 @@ const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
 
 ButtonLink.displayName = "ButtonLink"
 
+/**
+ * A loading spinner sized for our buttons; use it as the `startIcon` or `endIcon` prop.
+ */
+const ButtonLoadingIcon: React.FC = () => {
+  return (
+    <CircularProgress
+      color="inherit"
+      size="1em"
+      /**
+       * MUI's spinner's viewbox is 44x44, so when we resize this, it ends up being
+       * 5.5 * (24/44) = 3.0px
+       * 5.5 * (20/44) = 2.5px
+       * 5.5 * (16/44) = 2.0px
+       */
+      thickness={5.5}
+    />
+  )
+}
+
 export {
   Button,
   ButtonLink,
@@ -325,6 +358,7 @@ export {
   DEFAULT_PROPS,
   ButtonLinkRoot,
   RESPONSIVE_SIZES,
+  ButtonLoadingIcon,
 }
 
 export type { ButtonProps, ButtonLinkProps, ButtonStyleProps, ButtonSize }

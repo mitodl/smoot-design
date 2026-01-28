@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div id="ai-chat-container"></div>
+    <script type="module">
+      import * as aiChat from "./static/bundles/aiChat.es.js"
+
+      const requestOpts = {
+        apiUrl: "https://api.rc.learn.mit.edu/ai/http/demo_canvas_tutor_agent/",
+        transformBody: (messages, { problem_set_title }) => {
+          const body = {
+            message: messages[messages.length - 1].content,
+            run_readable_id: "14566-kaleba:20211202+canvas",
+            problem_set_title: problem_set_title || "Deliverable 6 - 15.060",
+          }
+          return body
+        },
+      }
+
+      aiChat.init(
+        {
+          requestOpts,
+          entryScreenEnabled: false,
+          askTimTitle: "About this Course",
+          initialMessages: [
+            {
+              role: "assistant",
+              content: "How can I help you today?",
+            },
+            {
+              role: "user",
+              content:
+                "Can you explain the Fourier Transform and show me the formula for transforming a continuous function?",
+            },
+            {
+              role: "assistant",
+              content:
+                "The Fourier Transform is a powerful mathematical tool that decomposes a function into its constituent frequencies. It transforms a function from the time domain to the frequency domain.\n\nFor a continuous function f(t), the Fourier Transform F(ω) is defined as:\n\n$$F(\\omega) = \\int_{-\\infty}^{\\infty} f(t) e^{-i\\omega t} dt$$\n\nWhere:\n- F(ω) is the Fourier transform of f(t)\n- ω is the angular frequency\n- i is the imaginary unit\n- The integral is taken over all time\n\nThe inverse Fourier Transform allows us to recover the original function:\n\n$$f(t) = \\frac{1}{2\\pi} \\int_{-\\infty}^{\\infty} F(\\omega) e^{i\\omega t} d\\omega$$\n\nThis transformation is fundamental in signal processing, physics, and engineering for analyzing periodic and non-periodic signals.",
+            },
+          ],
+          useMathJax: true,
+          problemSetListUrl:
+            "https://api.rc.learn.mit.edu/ai/api/v0/problem_set_list/?run_readable_id=14566-kaleba%3A20211202%2Bcanvas",
+          problemSetInitialMessages: [
+            {
+              role: "assistant",
+              content: "Can I help you with any of the problems in <title>?",
+            },
+          ],
+        },
+        {
+          container: document.getElementById("ai-chat-container"),
+        },
+      )
+    </script>
+  </body>
+</html>
