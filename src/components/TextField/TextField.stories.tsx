@@ -169,33 +169,23 @@ export const States: Story = {
   render: (args) => {
     return (
       <Grid container spacing={2} alignItems="top" maxWidth="400px">
-        <Grid size={{ xs: 4 }}>
-          Placeholder
-        </Grid>
+        <Grid size={{ xs: 4 }}>Placeholder</Grid>
         <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} value="" />
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          Default
-        </Grid>
+        <Grid size={{ xs: 4 }}>Default</Grid>
         <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} />
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          Required
-        </Grid>
+        <Grid size={{ xs: 4 }}>Required</Grid>
         <Grid size={{ xs: 8 }}>
           <StatefulTextField required {...args} />
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          Error
-        </Grid>
+        <Grid size={{ xs: 4 }}>Error</Grid>
         <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} error />
         </Grid>
-        <Grid size={{ xs: 4 }}>
-          Disabled
-        </Grid>
+        <Grid size={{ xs: 4 }}>Disabled</Grid>
         <Grid size={{ xs: 8 }}>
           <StatefulTextField {...args} disabled />
         </Grid>

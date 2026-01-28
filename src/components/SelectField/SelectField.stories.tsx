@@ -88,9 +88,7 @@ export const States: Story = {
       <Grid container spacing={2} alignItems="top" maxWidth="400px">
         {STATES.map(({ label, extraProps }) => (
           <>
-            <Grid size={{ xs: 4 }}>
-              {label}
-            </Grid>
+            <Grid size={{ xs: 4 }}>{label}</Grid>
             <Grid size={{ xs: 8 }}>
               <SelectField {...props} {...extraProps}>
                 {ITEMS.map((item) => (
