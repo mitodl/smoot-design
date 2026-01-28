@@ -16,7 +16,7 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
     "build:bundles": "vite build",
     "build:bundles:legacy": "vite build --config vite.config.legacy.mts",
     "build:bundles:aiChat": "vite build --config vite.config.aiChat.mts",
