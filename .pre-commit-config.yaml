@@ -6,6 +6,7 @@ ci:
     # Because these are local hooks it seems like they won't easily run in pre-commit CI
     - eslint
     - prettier
+  autoupdate_commit_msg: "chore(deps): [pre-commit.ci] pre-commit autoupdate"
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
