@@ -13,7 +13,7 @@ const DEFAULT_SIZE = "medium"
 const MenuItem: StyledComponent<
   MuiMenuItemProps & { size?: "small" | "medium" | "large" },
   React.DetailedHTMLProps<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>,
-  {}
+  object
 > = styled(MuiMenuItem)<MenuItemProps>(({ theme, size = DEFAULT_SIZE }) => [
   {
     padding: "8px 12px",

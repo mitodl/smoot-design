@@ -1,7 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { ThemeProvider, createTheme } from "./ThemeProvider"
-import type { ComponentProps } from "react"
 import { ButtonLink } from "../Button/Button"
 
 const CustomLinkAdapater = React.forwardRef<

@@ -2,7 +2,6 @@ import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { useArgs } from "storybook/preview-api"
 import { RadioChoiceField } from "./RadioChoiceField"
-import type { ComponentProps } from "react"
 
 const meta: Meta<typeof RadioChoiceField> = {
   title: "smoot-design/RadioChoiceField",

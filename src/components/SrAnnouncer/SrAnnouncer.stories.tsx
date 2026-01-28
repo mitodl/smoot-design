@@ -1,6 +1,5 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/nextjs"
-import type { Decorator } from "@storybook/react"
+import type { Decorator, Meta, StoryObj } from "@storybook/nextjs"
 import { SrAnnouncer } from "./SrAnnouncer"
 import styled from "@emotion/styled"
 

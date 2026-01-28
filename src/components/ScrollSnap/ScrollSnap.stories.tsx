@@ -1,7 +1,6 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { ScrollSnap } from "./ScrollSnap"
-import type { ComponentProps } from "react"
 import styled from "@emotion/styled"
 import { faker } from "@faker-js/faker/locale/en"
 import { useInterval } from "../../utils/useInterval"
