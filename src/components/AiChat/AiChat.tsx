@@ -380,10 +380,6 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   const [messagesContainerElement, setMessagesContainerElement] =
     useState<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    setMessagesContainerElement(messagesContainerRef.current)
-  }, [])
-
   useScrollSnap({
     scrollElement: scrollElement || messagesContainerElement,
     contentElement: scrollElement ? messagesContainerElement : null,
@@ -525,7 +521,10 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               <MessagesContainer
                 className={classes.messagesContainer}
                 externalScroll={externalScroll}
-                ref={messagesContainerRef}
+                ref={(el) => {
+                  messagesContainerRef.current = el
+                  setMessagesContainerElement(el)
+                }}
               >
                 {messages.map((message: Message, index: number) => {
                   return (
