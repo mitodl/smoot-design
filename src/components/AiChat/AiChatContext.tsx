@@ -1,29 +1,44 @@
 import * as React from "react"
 import { useChat, UseChatHelpers } from "@ai-sdk/react"
 import type { RequestOpts, AiChatMessage, AiChatContextProps } from "./types"
-import { useMemo, createContext } from "react"
+import { useMemo, createContext, useState, useCallback } from "react"
 import retryingFetch from "../../utils/retryingFetch"
+import { getCookie } from "../../utils/getCookie"
+import { extractCommentsData } from "./utils"
 
 const identity = <T,>(x: T): T => x
 
-const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
-  (requestOpts: RequestOpts) => async (url, opts) => {
+const getFetcher: (
+  requestOpts: RequestOpts,
+  additionalBody: Record<string, string>,
+) => typeof fetch =
+  (requestOpts: RequestOpts, additionalBody: Record<string, string> = {}) =>
+  async (url, opts) => {
     if (typeof opts?.body !== "string") {
       console.error("Unexpected body type.")
       return retryingFetch(url, opts)
     }
-    const messages: AiChatMessage[] = JSON.parse(opts?.body).messages
+    const parsedBody = JSON.parse(opts?.body)
+    const messages: AiChatMessage[] = parsedBody.messages
     const transformBody: RequestOpts["transformBody"] =
       requestOpts.transformBody ?? identity
     const options: RequestInit = {
       ...opts,
-      body: JSON.stringify(transformBody(messages)),
+      body: JSON.stringify(transformBody(messages, additionalBody)),
       ...requestOpts.fetchOpts,
       headers: {
         ...opts?.headers,
         "Content-Type": "application/json",
         ...requestOpts.fetchOpts?.headers,
       },
+    }
+
+    const { csrfCookieName, csrfHeaderName } = requestOpts
+    if (csrfCookieName && csrfHeaderName) {
+      options.headers = {
+        ...options.headers,
+        [csrfHeaderName]: getCookie(csrfCookieName) ?? "",
+      }
     }
     return retryingFetch(url, options)
   }
@@ -32,8 +47,15 @@ const getFetcher: (requestOpts: RequestOpts) => typeof fetch =
  * All of `@ai-sdk/react`'s [`useChat`](https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat)
  * results, plus the initial messages.
  */
-type AiChatContextResult = UseChatHelpers & {
+type AiChatContextResult = Omit<UseChatHelpers, "messages"> & {
+  messages: AiChatMessage[]
   initialMessages: AiChatMessage[] | null
+  additionalBody?: Record<string, string>
+  setAdditionalBody?: (body: Record<string, string>) => void
+  submitFeedback?: (
+    messageId: string,
+    feedback: "like" | "dislike" | "",
+  ) => void
 }
 const AiChatContext = createContext<AiChatContextResult | null>(null)
 
@@ -57,8 +79,19 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
     )
   }, [_initialMessages])
 
-  const fetcher = useMemo(() => getFetcher(requestOpts), [requestOpts])
-  const { messages: unparsed, ...others } = useChat({
+  const [additionalBody, setAdditionalBody] = useState<Record<string, string>>(
+    {},
+  )
+
+  const fetcher = useMemo(
+    () => getFetcher(requestOpts, additionalBody),
+    [requestOpts, additionalBody],
+  )
+  const {
+    messages: unparsed,
+    setMessages,
+    ...others
+  } = useChat({
     api: requestOpts.apiUrl,
     streamProtocol: "text",
     fetch: fetcher,
@@ -76,14 +109,69 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
 
   const messages = useMemo(() => {
     const initial = initialMessages?.map((m) => m.id)
-    return unparsed.map((m) => {
+    return unparsed.map(({ data, ...m }): AiChatMessage => {
       if (m.role === "assistant" && !initial?.includes(m.id)) {
         const content = parseContent ? parseContent(m.content) : m.content
-        return { ...m, content }
+        const data = extractCommentsData(content)
+        return {
+          ...m,
+          content,
+          data,
+        }
       }
       return m
     })
   }, [parseContent, unparsed, initialMessages])
+
+  const submitFeedback = useCallback(
+    (messageId: string, rating: "like" | "dislike" | "") => {
+      const message = messages.find((m) => m.id === messageId)
+      const data = message?.data
+      if (!data?.thread_id || !data?.checkpoint_pk) {
+        return
+      }
+
+      let url
+      if (requestOpts.feedbackApiUrl) {
+        url = requestOpts.feedbackApiUrl
+          .replace(":threadId", data.thread_id)
+          .replace(":checkpointPk", data.checkpoint_pk)
+      } else {
+        const path = `/ai/api/v0/chat_sessions/${data.thread_id}/messages/${data.checkpoint_pk}/rate/`
+        try {
+          const { origin } = new URL(requestOpts.apiUrl)
+          url = `${origin}${path}`
+        } catch (error) {
+          console.warn(
+            "Expected an absolute apiUrl to construct the feedbackApiUrl where not provided",
+            requestOpts.apiUrl,
+            error,
+          )
+          url = path
+        }
+      }
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      }
+
+      const { csrfCookieName, csrfHeaderName } = requestOpts
+      if (csrfCookieName && csrfHeaderName) {
+        const csrfToken = getCookie(csrfCookieName)
+        if (csrfToken) {
+          headers[csrfHeaderName] = csrfToken
+        }
+      }
+
+      fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ rating }),
+        credentials: "include",
+      })
+    },
+    [requestOpts, messages],
+  )
 
   return (
     <AiChatContext.Provider
@@ -91,7 +179,15 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
        * Ensure that child state is reset when chatId changes.
        */
       key={chatId}
-      value={{ initialMessages, messages, ...others }}
+      value={{
+        initialMessages,
+        messages,
+        setMessages,
+        additionalBody,
+        setAdditionalBody,
+        submitFeedback,
+        ...others,
+      }}
     >
       {children}
     </AiChatContext.Provider>

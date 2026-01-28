@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Home</title>
+    <style>
+      .app-frame {
+        width: 600px;
+        max-width: 50vw;
+        height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe class="app-frame" src="./iframe.html"></iframe>
+  </body>
+  <script type="module">
+    import * as aiDrawerManager from "./static/bundles/aiDrawerManager.es.js"
+    /**
+     * Accepts options of https://mitodl.github.io/smoot-design/?path=/docs/smoot-design-ai-aidrawermanager--docs
+     */
+    aiDrawerManager.init({
+      messageOrigin: window.location.origin, // iframe is served in same origin for this demo,
+      transformBody: (messages) => ({
+        message: messages[messages.length - 1].content,
+      }),
+      className: "ai-chat",
+    })
+  </script>
+</html>

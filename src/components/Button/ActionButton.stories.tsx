@@ -1,8 +1,8 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { ActionButton, ActionButtonLink, DEFAULT_PROPS } from "./ActionButton"
 import type { ActionButtonProps } from "./ActionButton"
-import Grid from "@mui/material/Grid2"
+import Grid from "@mui/material/Grid"
 import Stack from "@mui/material/Stack"
 import {
   RiArrowLeftLine,
@@ -10,7 +10,7 @@ import {
   RiTestTubeLine,
 } from "@remixicon/react"
 
-import { fn } from "@storybook/test"
+import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
 
 const ICONS = {

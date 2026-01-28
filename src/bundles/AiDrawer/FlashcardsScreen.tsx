@@ -12,8 +12,9 @@ export type Flashcard = {
 
 const Container = styled.div``
 
-const FlashcardContainer = styled.div(({ theme }) => ({
+const FlashcardContainer = styled.button(({ theme }) => ({
   display: "flex",
+  width: "100%",
   height: 300,
   padding: 40,
   flexDirection: "column",
@@ -25,6 +26,7 @@ const FlashcardContainer = styled.div(({ theme }) => ({
   marginTop: "8px",
   cursor: "pointer",
   textAlign: "center",
+  background: "none",
 }))
 
 const Navigation = styled.div({
@@ -40,35 +42,39 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const Flashcard = React.forwardRef<
-  HTMLDivElement,
-  { content: Flashcard; "aria-label": string }
->(({ content, "aria-label": ariaLabel }, ref) => {
-  const [screen, setScreen] = useState<0 | 1>(0)
+const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
+  ({ content, ...others }, ref) => {
+    const [screen, setScreen] = useState<0 | 1>(0)
 
-  useEffect(() => setScreen(0), [content])
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      setScreen(screen === 0 ? 1 : 0)
+    const handleClick = () => {
+      setScreen((current) => (current === 0 ? 1 : 0))
     }
-  }
 
-  return (
-    <FlashcardContainer
-      ref={ref}
-      onClick={() => setScreen(screen === 0 ? 1 : 0)}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      aria-label={ariaLabel}
-      role="button"
-    >
-      <Typography variant="h5">
-        {screen === 0 ? `Q: ${content.question}` : `Answer: ${content.answer}`}
-      </Typography>
-    </FlashcardContainer>
-  )
-})
+    return (
+      <FlashcardContainer
+        ref={ref}
+        type="button"
+        onClick={handleClick}
+        tabIndex={0}
+        {...others}
+      >
+        <Typography variant="h5">
+          {screen === 0 ? (
+            <>
+              <span aria-label="Question:">Q: </span>
+              {content.question}
+            </>
+          ) : (
+            <>
+              <span>Answer: </span>
+              {content.answer}
+            </>
+          )}
+        </Typography>
+      </FlashcardContainer>
+    )
+  },
+)
 
 Flashcard.displayName = "Flashcard"
 
@@ -76,12 +82,12 @@ export const FlashcardsScreen = ({
   flashcards,
   wasKeyboardFocus,
 }: {
-  flashcards?: Flashcard[]
+  flashcards: Flashcard[]
   wasKeyboardFocus: boolean
 }) => {
   const [cardIndex, setCardIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const flashcardRef = useRef<HTMLDivElement>(null)
+  const flashcardRef = useRef<HTMLButtonElement>(null)
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -112,17 +118,18 @@ export const FlashcardsScreen = ({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
 
-  if (!flashcards?.length) {
-    return null
-  }
-
   return (
     <Container ref={containerRef}>
-      <Flashcard
-        ref={flashcardRef}
-        content={flashcards[cardIndex]}
+      <div
+        role="region"
         aria-label={`Flashcard ${cardIndex + 1} of ${flashcards.length}`}
-      />
+      >
+        <Flashcard
+          key={`flashcard-${cardIndex}`}
+          ref={flashcardRef}
+          content={flashcards[cardIndex]}
+        />
+      </div>
       <Navigation>
         <ActionButton
           onClick={() => setCardIndex(cardIndex - 1)}
@@ -134,7 +141,8 @@ export const FlashcardsScreen = ({
         >
           <RiArrowLeftLine aria-hidden />
         </ActionButton>
-        <Page>
+        {/* Hide the index count here. It's used as a region label above. */}
+        <Page aria-hidden>
           {cardIndex + 1} / {flashcards.length}
         </Page>
         <ActionButton

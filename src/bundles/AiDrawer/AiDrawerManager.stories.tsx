@@ -1,15 +1,15 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import invariant from "tiny-invariant"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
 import { AiDrawerManager } from "./AiDrawerManager"
-import { AiDrawerInitMessage } from "./AiDrawer"
-import { MathJaxContext } from "better-react-mathjax"
+import type { AiDrawerInitMessage } from "./AiDrawerManager"
 
 type InitPayload = AiDrawerInitMessage["payload"]
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TRACKING_EVENTS_ENDPOINT = "http://localhost:4567/tracking-events"
 const CONTENT_FILE_URL =
   "http://localhost:4567/api/v1/contentfiles/?edx_module_id=1"
 
@@ -83,7 +83,9 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockUsageKey: "problem-frame",
           title: "AskTIM for help with Problem: Derivatives 1.1",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             initialMessages: INITIAL_MESSAGES,
@@ -95,7 +97,9 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockUsageKey: "problem-frame-default",
           title: "AskTIM for help with Problem: Derivatives 1.1",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             conversationStarters: STARTERS,
@@ -106,6 +110,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "problem",
+          blockUsageKey: "problem-frame-entry",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             initialMessages: INITIAL_MESSAGES,
@@ -123,6 +129,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
+          blockUsageKey: "video-frame",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
             conversationStarters: STARTERS,
@@ -142,7 +150,8 @@ const meta: Meta<typeof AiDrawerManager> = {
       <IFrame
         payload={{
           blockType: "video",
-          target: "starters-frame",
+          blockUsageKey: "video-frame-flashcard",
+          trackingUrl: TRACKING_EVENTS_ENDPOINT,
           chat: {
             apiUrl: TEST_API_STREAMING,
           },
@@ -151,9 +160,7 @@ const meta: Meta<typeof AiDrawerManager> = {
           },
         }}
       />
-      <MathJaxContext>
-        <AiDrawerManager messageOrigin="http://localhost:6006" />
-      </MathJaxContext>
+      <AiDrawerManager messageOrigin="http://localhost:6006" />
     </div>
   ),
 }
@@ -171,6 +178,9 @@ export const AiDrawerManagerStory: Story = {
       handlers: [
         http.get(CONTENT_FILE_URL, () => {
           return HttpResponse.json(sampleResponse)
+        }),
+        http.post(TRACKING_EVENTS_ENDPOINT, () => {
+          return HttpResponse.json({ success: true })
         }),
         ...handlers,
       ],

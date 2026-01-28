@@ -1,15 +1,14 @@
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { AiChat } from "./AiChat"
 import styled from "@emotion/styled"
 import { handlers } from "./test-utils/api"
-import { MathJaxContext } from "better-react-mathjax"
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
+const TEST_API_STREAMING_MATH = "http://localhost:4567/streaming-math"
 
 const Container = styled.div({
   width: "100%",
-  height: "500px",
 })
 
 const meta: Meta<typeof AiChat> = {
@@ -21,11 +20,9 @@ const meta: Meta<typeof AiChat> = {
   render: (args) => <AiChat {...args} />,
   decorators: (Story, context) => {
     return (
-      <MathJaxContext>
-        <Container>
-          <Story key={String(context.args.entryScreenEnabled)} />
-        </Container>
-      </MathJaxContext>
+      <Container style={{ height: context.parameters.height || "500px" }}>
+        <Story key={String(context.args.entryScreenEnabled)} />
+      </Container>
     )
   },
   args: {
@@ -125,6 +122,12 @@ def f(x):
   },
 }
 
+/**
+ * Shows MathJax rendering of inline and block math.
+ *
+ * We set `startup.typeset` to false in the MathJax config as by default MathJax will typeset math anywhere on the page and outside of our components - the following should not appear typeset:
+ * \\(x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\)
+ */
 export const Math: Story = {
   args: {
     requestOpts: { apiUrl: TEST_API_STREAMING },
@@ -142,7 +145,91 @@ $$
 x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
 $$
 
+Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.
+`,
+      },
+    ],
+    useMathJax: true,
+  },
+}
+
+/**
+ * Ensures that LaTeX delimiters `\\(...\\)` and `\\[...\\]`  are rendered correctly.
+ *
+ * better-react-mathjax expects TeX delimiters `$...$` or `$$...$$`, though the LLMs may produce LaTeX delimiters despite instruction.
+ *
+ */
+export const MathLatexDelimiters: Story = {
+  args: {
+    requestOpts: { apiUrl: TEST_API_STREAMING },
+    entryScreenEnabled: false,
+    conversationStarters: [],
+    initialMessages: [
+      {
+        role: "assistant",
+        content: `Some inline math: \\(x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}\\)
+
+And some block math:
+
+\\[
+x = \\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}
+\\]
+
 Math is rendered using MathJax only if the \`useMathJax\` prop is set to true.`,
+      },
+    ],
+    useMathJax: true,
+  },
+}
+
+/**
+ * > **⚠ NOTE:** Although the `boldsymbol` package is lazily loaded by default,
+ * > we have found that on slow networks a race condition can occur resulting in
+ * > un-rendered boldsymbol commands. This behavior can be reproduced by removing
+ * > the `loader` configuration that explicitly loads the `boldsymbol` package
+ * > and using a throttled network connection.
+ *
+ * This story demonstrates math rendering of LaTeX commands from specialized
+ * packages. MathJax includes some packages in its base configuration, loads
+ * some packages lazily on demand ("autoloads"), and requires some packages to
+ * be explicitly loaded.
+ *
+ * The responses here demonstrate commands from the following packages:
+ *
+ * | Package    | Included by default? | Lazy loaded by default? |
+ * |------------|----------------------|-------------------------|
+ * | `ams`        | yes                  | n/a                     |
+ * | `boldsymbol` | no                   | yes                     |
+ * | `physics`    | no                   | no                      |
+ *
+ * See [https://docs.mathjax.org/en/latest/input/tex/macros/index.html](https://docs.mathjax.org/en/latest/input/tex/macros/index.html)
+ *
+ * Therefore, we explicitly include boldsymbol in the `loader` configuration
+ * to force it to be loaded up front.
+ *
+ * ```tsx
+ * mathJaxConfig: {
+ *   loader: { load: ["[tex]/physics"] },
+ *   tex: { packages: { "[+]": ["physics"] } },
+ * }
+ * ```
+ *
+ * Note that multiple \<MathJaxContext\> instances on the page share a single state. If they have different configs, only the first is applied.
+ *
+ */
+export const MathWithExtensionPackages: Story = {
+  parameters: {
+    height: "800px",
+  },
+  args: {
+    requestOpts: { apiUrl: TEST_API_STREAMING_MATH },
+    entryScreenEnabled: false,
+    conversationStarters: [],
+    initialMessages: [
+      {
+        role: "assistant",
+        content:
+          "Ask me something and I'll respond with math that includes TeX symbols that are not in the base MathJax package",
       },
     ],
     useMathJax: true,

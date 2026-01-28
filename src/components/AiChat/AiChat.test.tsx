@@ -1,7 +1,8 @@
 // This was giving false positives
 import { render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
-import { AiChat, replaceMathjax } from "./AiChat"
+import { AiChat } from "./AiChat"
+import { replaceMathjax } from "./Markdown"
 import { ThemeProvider } from "../ThemeProvider/ThemeProvider"
 import * as React from "react"
 import { AiChatProps } from "./types"
@@ -17,6 +18,18 @@ const server = setupServer(
     counter()
     return HttpResponse.text(`AI Response ${count}`)
   }),
+  http.post(
+    "http://localhost:4567/ai/api/v0/chat_sessions/:threadId/messages/:checkpointPk/rate/",
+    async () => {
+      return HttpResponse.json({ message: "Feedback received" })
+    },
+  ),
+  http.post(
+    "http://localhost:4567/feedback/:threadId/:checkpointPk",
+    async () => {
+      return HttpResponse.json({ message: "Feedback received" })
+    },
+  ),
 )
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
@@ -60,6 +73,8 @@ describe("AiChat", () => {
     global.ResizeObserver = jest
       .fn()
       .mockImplementation(() => MockObserverInstance)
+
+    document.cookie = ""
   })
 
   const setup = (props: Partial<AiChatProps> = {}) => {
@@ -70,6 +85,7 @@ describe("AiChat", () => {
       { content: faker.lorem.sentence() },
       { content: faker.lorem.sentence() },
     ]
+    const onSubmit = jest.fn()
     const view = render(
       <AiChat
         data-testid="ai-chat"
@@ -78,6 +94,7 @@ describe("AiChat", () => {
         requestOpts={{ apiUrl: API_URL }}
         placeholder="Type a message..."
         entryScreenEnabled={false}
+        onSubmit={onSubmit}
         {...props}
       />,
       { wrapper: ThemeProvider },
@@ -91,16 +108,17 @@ describe("AiChat", () => {
           conversationStarters={conversationStarters}
           requestOpts={{ apiUrl: API_URL }}
           entryScreenEnabled={false}
+          onSubmit={onSubmit}
           {...newProps}
         />,
       )
     }
 
-    return { initialMessages, conversationStarters, rerender }
+    return { initialMessages, conversationStarters, rerender, onSubmit }
   }
 
   test("Clicking conversation starters and sending chats", async () => {
-    const { initialMessages, conversationStarters } = setup()
+    const { initialMessages, conversationStarters, onSubmit } = setup()
 
     const scrollBy = jest.spyOn(HTMLElement.prototype, "scrollBy")
 
@@ -117,6 +135,10 @@ describe("AiChat", () => {
 
     await user.click(starterEls[chosen])
     expect(scrollBy).toHaveBeenCalled()
+    expect(onSubmit).toHaveBeenCalledWith(
+      conversationStarters[chosen].content,
+      { source: "conversation-starter" },
+    )
     scrollBy.mockReset()
 
     const messageEls = await whenCount(getMessages, 3)
@@ -135,6 +157,7 @@ describe("AiChat", () => {
     const afterSending = await whenCount(getMessages, 5)
     expect(afterSending[3]).toHaveTextContent("User message")
     expect(afterSending[4]).toHaveTextContent("AI Response 1")
+    expect(onSubmit).toHaveBeenCalledWith("User message", { source: "input" })
   })
 
   test("Messages persist if chat has same chatId", async () => {
@@ -168,10 +191,13 @@ describe("AiChat", () => {
     await user.paste("User message")
     await user.click(screen.getByRole("button", { name: "Send" }))
 
-    expect(transformBody).toHaveBeenCalledWith([
-      expect.objectContaining(initialMessages[0]),
-      expect.objectContaining({ content: "User message", role: "user" }),
-    ])
+    expect(transformBody).toHaveBeenCalledWith(
+      [
+        expect.objectContaining(initialMessages[0]),
+        expect.objectContaining({ content: "User message", role: "user" }),
+      ],
+      {},
+    )
     expect(mockFetch).toHaveBeenCalledTimes(1)
     expect(mockFetch).toHaveBeenCalledWith(
       API_URL,
@@ -243,7 +269,7 @@ describe("AiChat", () => {
   })
 
   test("User can submit a prompt from the entry screen", async () => {
-    setup({
+    const { onSubmit } = setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
       initialMessages: [],
@@ -253,13 +279,14 @@ describe("AiChat", () => {
     await user.click(screen.getByRole("textbox"))
     await user.paste("User message")
     await user.click(screen.getByRole("button", { name: "Send" }))
+    expect(onSubmit).toHaveBeenCalledWith("User message", { source: "input" })
 
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("User message")
   })
 
   test("User can click starter on the entry screen to submit a prompt", async () => {
-    setup({
+    const { onSubmit } = setup({
       entryScreenEnabled: true,
       entryScreenTitle: "Entry Screen Title",
       initialMessages: [],
@@ -267,9 +294,92 @@ describe("AiChat", () => {
     })
 
     await user.click(screen.getByRole("button", { name: "Starter 1" }))
-
+    expect(onSubmit).toHaveBeenCalledWith("Starter 1", {
+      source: "conversation-starter",
+    })
     const messages = getMessages()
     expect(messages[0]).toHaveTextContent("Starter 1")
+  })
+
+  test("csrfCookieName and csrfHeaderName are used to set CSRF token if provided", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    const csrfCookieName = "my-csrf-cookie"
+    const csrfHeaderName = "My-Csrf-Header"
+    document.cookie = `${csrfCookieName}=test-csrf-token`
+    setup({
+      requestOpts: {
+        apiUrl: API_URL,
+        csrfCookieName,
+        csrfHeaderName,
+      },
+    })
+
+    await user.click(getConversationStarters()[0])
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      API_URL,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          [csrfHeaderName]: "test-csrf-token",
+        }),
+      }),
+    )
+  })
+
+  test("User feedback calls the correct endpoint with data values from response comment", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    const { initialMessages } = setup({
+      requestOpts: { apiUrl: API_URL },
+    })
+
+    server.use(
+      http.post(API_URL, async () => {
+        return HttpResponse.text(`Here is a response.
+
+<!-- {"checkpoint_pk": 123, "thread_id": "f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->`)
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, initialMessages.length + 2)
+    await user.click(screen.getByRole("button", { name: "Good response" }))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:4567/ai/api/v0/chat_sessions/f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1/messages/123/rate/",
+      expect.objectContaining({
+        body: JSON.stringify({ rating: "like" }),
+      }),
+    )
+  })
+
+  test("User feedback calls the correct endpoint when supplied", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    const { initialMessages } = setup({
+      requestOpts: {
+        apiUrl: API_URL,
+        feedbackApiUrl:
+          "http://localhost:4567/feedback/:threadId/:checkpointPk",
+      },
+    })
+
+    server.use(
+      http.post(API_URL, async () => {
+        return HttpResponse.text(`Here is a response.
+
+<!-- {"checkpoint_pk": 123, "thread_id": "f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->`)
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, initialMessages.length + 2)
+    await user.click(screen.getByRole("button", { name: "Bad response" }))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:4567/feedback/f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1/123",
+      expect.objectContaining({
+        body: JSON.stringify({ rating: "dislike" }),
+      }),
+    )
   })
 })
 

@@ -1,19 +1,16 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
-import type { Meta, StoryObj } from "@storybook/react"
+import type { Meta, StoryObj } from "@storybook/nextjs"
 import { http, HttpResponse } from "msw"
 import { handlers } from "../../components/AiChat/test-utils/api"
-import { AiDrawer, AiDrawerInitMessage } from "./AiDrawer"
-import { MathJaxContext } from "better-react-mathjax"
+import { AiDrawer, AiDrawerSettings } from "./AiDrawer"
 import Button from "@mui/material/Button"
-
-type InitPayload = AiDrawerInitMessage["payload"]
 
 const TEST_API_STREAMING = "http://localhost:4567/streaming"
 const CONTENT_FILE_URL =
   "http://localhost:4567/api/v1/contentfiles/?edx_module_id=1"
 
-const INITIAL_MESSAGES: InitPayload["chat"]["initialMessages"] = [
+const INITIAL_MESSAGES: AiDrawerSettings["chat"]["initialMessages"] = [
   {
     content: "Hi! What are you interested in learning about?",
     role: "assistant",
@@ -29,7 +26,7 @@ const STARTERS = [
 const meta: Meta<typeof AiDrawer> = {
   title: "smoot-design/AI/AiDrawer",
   component: AiDrawer,
-  render: ({ payload }) => {
+  render: ({ settings }) => {
     const [open, setOpen] = React.useState(false)
     return (
       <>
@@ -37,16 +34,21 @@ const meta: Meta<typeof AiDrawer> = {
           Open Drawer
         </Button>
         <p>Message data:</p>
-        <pre>{JSON.stringify({ payload }, null, 2)}</pre>
-        <MathJaxContext>
-          <AiDrawer
-            payload={payload}
-            open={open}
-            onClose={() => setOpen(false)}
-          />
-        </MathJaxContext>
+        <pre>{JSON.stringify({ settings }, null, 2)}</pre>
+        <AiDrawer
+          settings={settings}
+          open={open}
+          onClose={() => setOpen(false)}
+        />
       </>
     )
+  },
+  argTypes: {
+    settings: {
+      // JSON controls break form submission via keyboard. See
+      // https://github.com/storybookjs/storybook/issues/31881
+      control: false,
+    },
   },
 }
 
@@ -56,9 +58,8 @@ type Story = StoryObj<typeof AiDrawer>
 
 export const ProblemStory: Story = {
   args: {
-    payload: {
+    settings: {
       blockType: "problem",
-      target: "problem-frame",
       title: "AskTIM for help with Problem: Derivatives 1.1",
       chat: {
         apiUrl: TEST_API_STREAMING,
@@ -71,9 +72,9 @@ export const ProblemStory: Story = {
 
 export const ProblemDefaultInitialMessagesStory: Story = {
   args: {
-    payload: {
+    settings: {
       blockType: "problem",
-      target: "problem-frame-default-initial-messages",
+
       title: "AskTIM for help with Problem: Derivatives 1.1",
       chat: {
         apiUrl: TEST_API_STREAMING,
@@ -85,9 +86,8 @@ export const ProblemDefaultInitialMessagesStory: Story = {
 
 export const EntryScreenStory: Story = {
   args: {
-    payload: {
+    settings: {
       blockType: "problem",
-      target: "entry-screen-frame",
       chat: {
         apiUrl: TEST_API_STREAMING,
         initialMessages: INITIAL_MESSAGES,
@@ -104,9 +104,8 @@ export const EntryScreenStory: Story = {
  */
 export const VideoStory: Story = {
   args: {
-    payload: {
+    settings: {
       blockType: "video",
-      target: "video-frame",
       chat: {
         apiUrl: TEST_API_STREAMING,
         conversationStarters: STARTERS,
@@ -134,9 +133,8 @@ export const VideoStory: Story = {
  */
 export const FlashcardConversationStartersStory: Story = {
   args: {
-    payload: {
+    settings: {
       blockType: "video",
-      target: "starters-frame",
       chat: {
         apiUrl: TEST_API_STREAMING,
       },

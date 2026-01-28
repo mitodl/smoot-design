@@ -1,13 +1,20 @@
 // Some of these are based on (compatible, but simplified / restricted) versions of @ai-sdk/react types.
 
 import { RefAttributes } from "react"
+import type { MathJax3Config } from "better-react-mathjax"
 
-type Role = "assistant" | "user"
+type Role = "assistant" | "user" | "data" | "system"
+
+type MessageData = {
+  checkpoint_pk?: string
+  thread_id?: string
+}
 
 type AiChatMessage = {
   id: string
   content: string
   role: Role
+  data?: MessageData
 }
 
 type RequestOpts = {
@@ -18,12 +25,36 @@ type RequestOpts = {
    *
    * JSON.stringify is applied to the return value.
    */
-  transformBody?: (messages: AiChatMessage[]) => unknown
+
+  /**
+   * URL for the like/dislike feedback endpoint.
+   *
+   * The URL should include the following substitution strings:
+   * - :threadId
+   * - :checkpointPk
+   * e.g. "http://localhost:4567/feedback/:threadId/:checkpointPk"
+   *
+   * If not provided, defaults to the apiUrl origin + "/api/v0/chat_sessions/{thread_id}/messages/{checkpoint_pk}/rate/"
+   */
+  feedbackApiUrl?: string
+
+  transformBody?: (
+    messages: AiChatMessage[],
+    body?: Record<string, string>,
+  ) => unknown
   /**
    * Extra options to pass to fetch.
    */
   fetchOpts?: RequestInit
   onFinish?: (message: AiChatMessage) => void
+  /**
+   * Cookie name from which to read CSRF token.
+   */
+  csrfCookieName?: string
+  /**
+   * Header name to which to write CSRF token.
+   */
+  csrfHeaderName?: string
 }
 
 type AiChatContextProps = {
@@ -44,6 +75,9 @@ type AiChatContextProps = {
   initialMessages?: Omit<AiChatMessage, "id">[]
 
   children?: React.ReactNode
+
+  additionalBody?: Record<string, string>
+  setAdditionalBody?: (body: Record<string, string>) => void
 }
 
 type AiChatDisplayProps = {
@@ -98,15 +132,47 @@ type AiChatDisplayProps = {
   scrollElement?: HTMLElement | null
 
   /**
-   * If true, the chat will display math equations using MathJax.
+   * If true, the chat will display math equations using MathJax..
    * Defaults to false.
    */
   useMathJax?: boolean
+
+  /**
+   * Overrides the default MathJax configuration.
+   */
+  mathJaxConfig?: MathJax3Config
+
   /**
    * If true, the chat input will be autofocused on load.
    * Defaults to true.
    */
   autofocus?: boolean
+
+  /**
+   * URL to fetch problem set list for dropdown.
+   *
+   * The problem set selection is passed as the second argument to the `transformBody` function
+   * provided as `{ problem_set_title: string }`.
+   */
+  problemSetListUrl?: string
+
+  /**
+   * Initial messages to display on problem set selection.
+   * Occurrences of "<title>" in the content will be replaced with the problem set title.
+   */
+  problemSetInitialMessages?: Omit<AiChatMessage, "id">[]
+
+  /**
+   * Initial messages to display on problem set selection if no problem sets are available.
+   */
+  problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
+
+  onSubmit?: (
+    messageText: string,
+    meta: {
+      source: "input" | "conversation-starter"
+    },
+  ) => void
 } & RefAttributes<HTMLDivElement>
 
 type AiChatProps = AiChatContextProps & AiChatDisplayProps

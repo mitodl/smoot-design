@@ -1,12 +1,19 @@
 import * as React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import type { FC } from "react"
 import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import classNames from "classnames"
-import { RiSendPlaneFill, RiStopFill } from "@remixicon/react"
+import {
+  RiSendPlaneFill,
+  RiStopFill,
+  RiThumbUpLine,
+  RiThumbDownLine,
+  RiThumbUpFill,
+  RiThumbDownFill,
+} from "@remixicon/react"
 import { Input, AdornmentButton } from "../Input/Input"
-import type { AiChatDisplayProps, AiChatProps } from "./types"
+import type { AiChatDisplayProps, AiChatMessage, AiChatProps } from "./types"
 import { EntryScreen } from "./EntryScreen"
 import { ScrollSnap } from "../ScrollSnap/ScrollSnap"
 import { SrAnnouncer } from "../SrAnnouncer/SrAnnouncer"
@@ -18,6 +25,43 @@ import { useScrollSnap } from "../ScrollSnap/useScrollSnap"
 import type { Message } from "@ai-sdk/react"
 import Markdown from "./Markdown"
 import EllipsisIcon from "./EllipsisIcon"
+import { SimpleSelectField } from "../SimpleSelect/SimpleSelect"
+import { useFetch } from "./utils"
+import { SelectChangeEvent } from "@mui/material/Select"
+import type { MathJax3Config } from "better-react-mathjax"
+import { MathJaxContext } from "better-react-mathjax"
+import deepmerge from "@mui/utils/deepmerge"
+import { ActionButton } from "../Button/ActionButton"
+import { Tooltip } from "../Tooltip/Tooltip"
+
+const ConditionalMathJaxWrapper: React.FC<{
+  useMathJax: boolean
+  config?: MathJax3Config
+  children: React.ReactNode
+}> = ({ useMathJax, config = {}, children }) => {
+  if (!useMathJax) {
+    return <>{children}</>
+  }
+
+  return (
+    <MathJaxContext
+      config={deepmerge(
+        {
+          startup: {
+            typeset: false,
+          },
+          loader: { load: ["[tex]/boldsymbol"] },
+          tex: {
+            packages: { "[+]": ["boldsymbol"] },
+          },
+        },
+        config,
+      )}
+    >
+      {children}
+    </MathJaxContext>
+  )
+}
 
 const classes = {
   root: "MitAiChat--root",
@@ -68,6 +112,16 @@ const ChatContainer = styled.div<{ externalScroll: boolean }>(
     flexDirection: "column",
   }),
 )
+
+const AssignmentSelect = styled(SimpleSelectField)({
+  width: "295px",
+  "> div": {
+    width: "inherit",
+  },
+  label: {
+    display: "none",
+  },
+})
 
 const MessagesContainer = styled(ScrollSnap)<{ externalScroll: boolean }>(
   ({ externalScroll }) => ({
@@ -150,6 +204,10 @@ const Message = styled.div(({ theme }) => ({
     borderRadius: "8px 0px 8px 8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
+  "a:has(sup)": {
+    textDecoration: "none",
+    fontSize: "0.83em",
+  },
 }))
 
 const StarterContainer = styled.div({
@@ -212,6 +270,71 @@ const StyledEllipsisIcon = styled(EllipsisIcon)(({ theme }) => ({
   height: "24px",
 }))
 
+const FeedbackRowContainer = styled.div({
+  display: "flex",
+  gap: "4px",
+  margin: "16px 0 10px 0",
+})
+
+const FeedbackButton = styled(ActionButton)(({ theme }) => ({
+  borderRadius: "8px",
+  ":hover:not(:disabled)": {
+    backgroundColor: theme.custom.colors.lightGray2,
+  },
+  svg: {
+    fill: theme.custom.colors.darkGray1,
+  },
+}))
+
+const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
+  const { submitFeedback } = useAiChat()
+  const [feedback, setFeedback] = useState<"like" | "dislike" | "">("")
+
+  const onFeedback = useCallback(
+    (newFeedback: "like" | "dislike") => () => {
+      if (feedback === newFeedback) {
+        setFeedback("")
+        submitFeedback?.(message.id, "")
+      } else {
+        setFeedback(newFeedback)
+        submitFeedback?.(message.id, newFeedback)
+      }
+    },
+    [message.id, feedback, submitFeedback],
+  )
+
+  if (!message.data?.checkpoint_pk || !message.data?.thread_id) {
+    return null
+  }
+
+  return (
+    <FeedbackRowContainer>
+      <Tooltip title="Good response">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("like")}
+          aria-label="Good response"
+          aria-pressed={feedback === "like"}
+        >
+          {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
+        </FeedbackButton>
+      </Tooltip>
+      <Tooltip title="Bad response">
+        <FeedbackButton
+          variant="text"
+          size="small"
+          onClick={onFeedback("dislike")}
+          aria-label="Bad response"
+          aria-pressed={feedback === "dislike"}
+        >
+          {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
+        </FeedbackButton>
+      </Tooltip>
+    </FeedbackRowContainer>
+  )
+}
+
 const AiChatDisplay: FC<AiChatDisplayProps> = ({
   conversationStarters,
   askTimTitle,
@@ -223,12 +346,20 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   scrollElement,
   ref,
   useMathJax = false,
+  mathJaxConfig,
+  onSubmit,
+  problemSetListUrl,
+  problemSetInitialMessages,
+  problemSetEmptyMessages,
   ...others // Could contain data attributes
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const promptInputRef = useRef<HTMLDivElement>(null)
+  const { response: problemSetListResponse } = useFetch<{
+    problem_set_titles: string[]
+  }>(problemSetListUrl)
+  const [needsProblemSet, setNeedsProblemSet] = useState(!!problemSetListUrl)
 
   const {
     messages,
@@ -241,30 +372,58 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     error,
     initialMessages,
     status,
+    additionalBody,
+    setMessages,
+    setAdditionalBody,
   } = useAiChat()
 
+  const [messagesContainerElement, setMessagesContainerElement] =
+    useState<HTMLDivElement | null>(null)
+
   useScrollSnap({
-    scrollElement: scrollElement || messagesContainerRef.current,
-    contentElement: scrollElement ? messagesContainerRef.current : null,
+    scrollElement: scrollElement || messagesContainerElement,
+    contentElement: scrollElement ? messagesContainerElement : null,
     threshold: 200,
   })
 
-  const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
+  const showEntryScreen =
+    entryScreenEnabled &&
+    !messages.some(
+      (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
+    )
+
   useEffect(() => {
     if (!showEntryScreen) {
-      promptInputRef.current?.querySelector("input")?.focus()
+      promptInputRef.current
+        ?.querySelector("input")
+        ?.focus({ preventScroll: true })
     }
   }, [showEntryScreen])
 
   useEffect(() => {
     if (
-      messages.some(
-        (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
-      )
+      problemSetListResponse &&
+      !problemSetListResponse.problem_set_titles?.length
     ) {
-      setShowEntryScreen(false)
+      if (problemSetEmptyMessages) {
+        setMessages(
+          problemSetEmptyMessages.map((message, i) => ({
+            id: `initial-${i}`,
+            ...message,
+          })),
+        )
+      } else {
+        setMessages([
+          {
+            id: "initial-0",
+            role: "assistant",
+            content:
+              "Hi! It looks like there are no assignments available right now. I'm here to help when there is an assignment ready to start.",
+          },
+        ])
+      }
     }
-  }, [messages, status])
+  }, [problemSetListResponse, problemSetEmptyMessages, setMessages])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
@@ -280,23 +439,40 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     })
   }
 
+  const onProblemSetChange = (event: SelectChangeEvent<string | string[]>) => {
+    if (problemSetInitialMessages) {
+      setMessages(
+        problemSetInitialMessages.map((message, i) => ({
+          content: message.content?.replace(
+            "<title>",
+            event.target.value as string,
+          ),
+          role: message.role,
+          id: `initial-${i}`,
+        })),
+      )
+    }
+    setNeedsProblemSet(!event.target.value)
+    setAdditionalBody?.({ problem_set_title: event.target.value as string })
+  }
+
   const lastMsg = messages[messages.length - 1]
 
   const externalScroll = !!scrollElement
 
   return (
-    <Container className={className} ref={containerRef}>
+    <Container className={className}>
       {showEntryScreen ? (
         <EntryScreen
           className={classes.entryScreenContainer}
           title={entryScreenTitle}
           conversationStarters={conversationStarters}
-          onPromptSubmit={(prompt) => {
+          onPromptSubmit={(prompt, meta) => {
             if (prompt.trim() === "") {
               return
             }
-            setShowEntryScreen(false)
             append({ role: "user", content: prompt })
+            onSubmit?.(prompt, meta)
           }}
         />
       ) : (
@@ -315,78 +491,107 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               askTimTitle={askTimTitle}
               externalScroll={externalScroll}
               className={classNames(className, classes.title)}
+              control={
+                problemSetListResponse?.problem_set_titles?.length ? (
+                  <AssignmentSelect
+                    label="Assignments"
+                    options={[
+                      {
+                        value: "",
+                        label: "Select an assignment",
+                        disabled: true,
+                      },
+                      ...problemSetListResponse.problem_set_titles.map(
+                        (title) => ({
+                          value: title,
+                          label: title,
+                        }),
+                      ),
+                    ]}
+                    value={additionalBody?.problem_set_title ?? ""}
+                    onChange={onProblemSetChange}
+                  />
+                ) : null
+              }
             />
-            <MessagesContainer
-              className={classes.messagesContainer}
-              externalScroll={externalScroll}
-              ref={messagesContainerRef}
+            <ConditionalMathJaxWrapper
+              useMathJax={useMathJax}
+              config={mathJaxConfig}
             >
-              {messages.map((m: Message, i) => {
-                // Our Markdown+Mathjax has issues when rendering streaming display math
-                // Force a re-render of the last (streaming) message when it's done loading.
-                const key =
-                  i === messages.length - 1 && isLoading
-                    ? `isLoading-${m.id}`
-                    : m.id
-                return (
-                  <MessageRow
-                    key={key}
-                    data-chat-role={m.role}
-                    className={classNames(classes.messageRow, {
-                      [classes.messageRowUser]: m.role === "user",
-                      [classes.messageRowAssistant]: m.role === "assistant",
-                    })}
-                  >
-                    <Message className={classes.message}>
-                      <VisuallyHidden as={m.role === "user" ? "h5" : "h6"}>
-                        {m.role === "user" ? "You said: " : "Assistant said: "}
-                      </VisuallyHidden>
-                      {useMathJax ? (
-                        <Markdown enableMathjax={true}>
-                          {replaceMathjax(m.content)}
+              <MessagesContainer
+                className={classes.messagesContainer}
+                externalScroll={externalScroll}
+                ref={(el) => {
+                  messagesContainerRef.current = el
+                  setMessagesContainerElement(el)
+                }}
+              >
+                {messages.map((message: Message, index: number) => {
+                  return (
+                    <MessageRow
+                      key={index}
+                      data-chat-role={message.role}
+                      className={classNames(classes.messageRow, {
+                        [classes.messageRowUser]: message.role === "user",
+                        [classes.messageRowAssistant]:
+                          message.role === "assistant",
+                      })}
+                    >
+                      <Message className={classes.message}>
+                        <VisuallyHidden
+                          as={message.role === "user" ? "h5" : "h6"}
+                        >
+                          {message.role === "user"
+                            ? "You said: "
+                            : "Assistant said: "}
+                        </VisuallyHidden>
+                        <Markdown useMathJax={useMathJax}>
+                          {message.content}
                         </Markdown>
-                      ) : (
-                        <Markdown>{m.content}</Markdown>
-                      )}
+                        <FeedbackButtons message={message as AiChatMessage} />
+                      </Message>
+                    </MessageRow>
+                  )
+                })}
+                {showStarters ? (
+                  <StarterContainer>
+                    {conversationStarters?.map((m) => (
+                      <Starter
+                        className={classes.conversationStarter}
+                        key={m.content}
+                        onClick={() => {
+                          scrollToBottom()
+                          append({ role: "user", content: m.content })
+                          onSubmit?.(m.content, {
+                            source: "conversation-starter",
+                          })
+                        }}
+                      >
+                        {m.content}
+                      </Starter>
+                    ))}
+                  </StarterContainer>
+                ) : null}
+                {waiting ? (
+                  <MessageRow
+                    className={classNames(
+                      classes.messageRow,
+                      classes.messageRowAssistant,
+                    )}
+                    key={"loading"}
+                  >
+                    <Message>
+                      <StyledEllipsisIcon />
                     </Message>
                   </MessageRow>
-                )
-              })}
-              {showStarters ? (
-                <StarterContainer>
-                  {conversationStarters?.map((m) => (
-                    <Starter
-                      className={classes.conversationStarter}
-                      key={m.content}
-                      onClick={() => {
-                        scrollToBottom()
-                        append({ role: "user", content: m.content })
-                      }}
-                    >
-                      {m.content}
-                    </Starter>
-                  ))}
-                </StarterContainer>
-              ) : null}
-              {waiting ? (
-                <MessageRow
-                  className={classNames(
-                    classes.messageRow,
-                    classes.messageRowAssistant,
-                  )}
-                  key={"loading"}
-                >
-                  <Message>
-                    <StyledEllipsisIcon />
-                  </Message>
-                </MessageRow>
-              ) : null}
-              {error ? (
-                <Alert severity="error" closable>
-                  An unexpected error has occurred.
-                </Alert>
-              ) : null}
-            </MessagesContainer>
+                ) : null}
+                {error ? (
+                  <Alert severity="error" closable>
+                    An unexpected error has occurred.
+                  </Alert>
+                ) : null}
+              </MessagesContainer>
+            </ConditionalMathJaxWrapper>
             <BottomSection
               externalScroll={externalScroll}
               className={classes.bottomSection}
@@ -396,15 +601,17 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   e.preventDefault()
                   if (isLoading && stoppable) {
                     stop()
-                  } else {
-                    scrollToBottom()
-                    handleSubmit(e)
                   }
+                  scrollToBottom()
+                  handleSubmit(e)
+                  onSubmit?.(input, { source: "input" })
                 }}
               >
                 <Input
                   ref={promptInputRef}
                   fullWidth
+                  multiline
+                  maxRows={20}
                   size="chat"
                   className={classes.input}
                   placeholder={placeholder}
@@ -412,30 +619,33 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   sx={{ flex: 1 }}
                   value={input}
                   onChange={handleInputChange}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault()
+                      if (input.trim() && !isLoading) {
+                        const form = event.currentTarget.closest("form")
+                        form?.requestSubmit()
+                      }
+                    }
+                  }}
                   inputProps={{
                     "aria-label": "Ask a question",
                   }}
+                  disabled={needsProblemSet}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton
                         aria-label="Stop"
-                        onClick={stop}
+                        type="submit"
                         disabled={!stoppable}
                       >
                         <StyledStopButton />
                       </AdornmentButton>
                     ) : (
                       <AdornmentButton
-                        aria-label="Send"
                         type="submit"
-                        onClick={(e) => {
-                          if (input.trim() === "") {
-                            e.preventDefault()
-                            return
-                          }
-                          scrollToBottom()
-                          handleSubmit(e)
-                        }}
+                        aria-label="Send"
+                        disabled={needsProblemSet}
                       >
                         <StyledSendButton />
                       </AdornmentButton>
@@ -478,21 +688,4 @@ const AiChat: FC<AiChatProps> = ({
   )
 }
 
-// react-markdown expects Mathjax delimiters to be $...$ or $$...$$
-// the prompt for the tutorbot asks for Mathjax tags with $ format but
-// the LLM does not get it right all the time
-// this function replaces the Mathjax tags with the correct format
-// eventually we will probably be able to remove this as LLMs get better
-function replaceMathjax(inputString: string): string {
-  // Replace instances of \(...\) and \[...\] Mathjax tags with $...$
-  // and $$...$$ tags.
-  const INLINE_MATH_REGEX = /\\\((.*?)\\\)/g
-  const DISPLAY_MATH_REGEX = /\\\[(([\s\S]*?))\\\]/g
-  inputString = inputString.replace(
-    INLINE_MATH_REGEX,
-    (_match, p1) => `$${p1}$`,
-  )
-  return inputString.replace(DISPLAY_MATH_REGEX, (_match, p1) => `$$${p1}$$`)
-}
-
-export { AiChatDisplay, AiChat, replaceMathjax }
+export { AiChatDisplay, AiChat }

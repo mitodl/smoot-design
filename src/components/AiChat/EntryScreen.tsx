@@ -1,12 +1,12 @@
 import * as React from "react"
 import { RiSparkling2Line, RiSendPlaneFill } from "@remixicon/react"
-import styled from "@emotion/styled"
 import Typography from "@mui/material/Typography"
 import { AdornmentButton, Input } from "../Input/Input"
 import TimLogo from "./TimLogo"
 import { useState } from "react"
+import styled from "@emotion/styled"
 
-const Container = styled.div(({ theme }) => ({
+const Container = styled.form(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -100,7 +100,13 @@ const Starter = styled.button(({ theme }) => ({
 type EntryScreenProps = {
   title?: string
   conversationStarters?: { content: string }[]
-  onPromptSubmit: (prompt: string) => void
+  onPromptSubmit: (
+    prompt: string,
+    meta: {
+      source: "input" | "conversation-starter"
+    },
+  ) => void
+  onStarterClick?: (content: string) => void
   className?: string
 }
 
@@ -116,16 +122,15 @@ const EntryScreen = ({
     setPrompt(e.target.value)
   }
 
-  const onPromptKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === "Enter" && prompt) {
-      onPromptSubmit(prompt)
-    } else {
-      setPrompt(prompt)
-    }
-  }
-
   return (
-    <Container className={className} data-testid="ai-chat-entry-screen">
+    <Container
+      className={className}
+      data-testid="ai-chat-entry-screen"
+      onSubmit={(e) => {
+        e.preventDefault()
+        onPromptSubmit(prompt, { source: "input" })
+      }}
+    >
       <TimLogoBox>
         <RiSparkling2Line />
         <StyledTimLogo />
@@ -134,32 +139,35 @@ const EntryScreen = ({
       <StyledInput
         fullWidth
         size="chat"
+        multiline
+        maxRows={20}
+        name="prompt"
         onChange={onPromptChange}
-        onKeyDown={onPromptKeyDown}
         inputProps={{
           "aria-label": "Ask a question",
         }}
         endAdornment={
-          <AdornmentButton
-            aria-label="Send"
-            onClick={() => onPromptSubmit(prompt)}
-          >
+          <AdornmentButton type="submit" aria-label="Send">
             <SendIcon />
           </AdornmentButton>
         }
         responsive
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault()
+            const form = event.currentTarget.closest("form")
+            form?.requestSubmit()
+          }
+        }}
       />
       <Starters>
         {conversationStarters?.map(({ content }, index) => (
           <Starter
             key={index}
-            onClick={() => onPromptSubmit(content)}
+            onClick={() =>
+              onPromptSubmit(content, { source: "conversation-starter" })
+            }
             tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                onPromptSubmit(content)
-              }
-            }}
           >
             <Typography variant="body2">{content}</Typography>
           </Starter>
