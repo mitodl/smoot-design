@@ -92,7 +92,7 @@
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/addon-links": "^9.0.13",
     "@storybook/addon-onboarding": "^9.0.13",
-    "@storybook/addon-webpack5-compiler-swc": "^3.0.0",
+    "@storybook/addon-webpack5-compiler-swc": "^4.0.0",
     "@storybook/blocks": "^8.6.14",
     "@storybook/nextjs": "^9.0.13",
     "@storybook/react-webpack5": "^9.0.13",
