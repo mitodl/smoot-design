@@ -377,13 +377,21 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     setAdditionalBody,
   } = useAiChat()
 
+  const [messagesContainerElement, setMessagesContainerElement] =
+    useState<HTMLDivElement | null>(null)
+
   useScrollSnap({
-    scrollElement: scrollElement || messagesContainerRef.current,
-    contentElement: scrollElement ? messagesContainerRef.current : null,
+    scrollElement: scrollElement || messagesContainerElement,
+    contentElement: scrollElement ? messagesContainerElement : null,
     threshold: 200,
   })
 
-  const [showEntryScreen, setShowEntryScreen] = useState(entryScreenEnabled)
+  const showEntryScreen =
+    entryScreenEnabled &&
+    !messages.some(
+      (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
+    )
+
   useEffect(() => {
     if (!showEntryScreen) {
       promptInputRef.current
@@ -416,16 +424,6 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
       }
     }
   }, [problemSetListResponse, problemSetEmptyMessages, setMessages])
-
-  useEffect(() => {
-    if (
-      messages.some(
-        (m) => m.role === "user" || ["submitted", "streaming"].includes(status),
-      )
-    ) {
-      setShowEntryScreen(false)
-    }
-  }, [messages, status])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
@@ -473,7 +471,6 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
             if (prompt.trim() === "") {
               return
             }
-            setShowEntryScreen(false)
             append({ role: "user", content: prompt })
             onSubmit?.(prompt, meta)
           }}
@@ -524,7 +521,10 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               <MessagesContainer
                 className={classes.messagesContainer}
                 externalScroll={externalScroll}
-                ref={messagesContainerRef}
+                ref={(el) => {
+                  messagesContainerRef.current = el
+                  setMessagesContainerElement(el)
+                }}
               >
                 {messages.map((message: Message, index: number) => {
                   return (
