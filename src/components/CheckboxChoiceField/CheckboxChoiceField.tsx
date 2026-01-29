@@ -64,13 +64,16 @@ const CheckboxChoiceField: React.FC<CheckboxChoiceFieldProps> = ({
   const _Container = vertical ? VerticalContainer : Container
   const handleChange: CheckboxProps["onChange"] = (event) => {
     const fieldset = event.target.closest("fieldset")
-    const checked =
+    const allCheckboxes =
       fieldset?.querySelectorAll<HTMLInputElement>(
-        "input[type='checkbox']:checked",
+        'input[type="checkbox"]',
       ) || []
+    const checked = Array.from(allCheckboxes).filter(
+      (input) => input.checked,
+    )
     onChange?.(
       event,
-      Array.from(checked).map((input) => input.value),
+      checked.map((input) => input.value),
     )
   }
 
