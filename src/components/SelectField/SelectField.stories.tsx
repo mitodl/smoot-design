@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { SelectField } from "./SelectField"
@@ -41,28 +40,30 @@ const ITEMS = [
 
 type Story = StoryObj<typeof SelectField>
 
+const RenderSizes = (args: Story["args"]) => {
+  const [value, setValue] = React.useState("")
+  const onChange: SelectFieldProps["onChange"] = (event, node) => {
+    setValue(event.target.value as string)
+    args?.onChange?.(event, node)
+  }
+  const props = { ...args, value, onChange } as SelectFieldProps
+  return (
+    <Stack direction="column" gap={2}>
+      {SIZES.map((size) => (
+        <SelectField key={size} {...props} size={size}>
+          {ITEMS.map((item) => (
+            <MenuItem key={item.props.value} {...item.props} size={size}>
+              {item.label}
+            </MenuItem>
+          ))}
+        </SelectField>
+      ))}
+    </Stack>
+  )
+}
+
 export const Sizes: Story = {
-  render: (args) => {
-    const [value, setValue] = React.useState("")
-    const onChange: SelectFieldProps["onChange"] = (event, node) => {
-      setValue(event.target.value as string)
-      args.onChange?.(event, node)
-    }
-    const props = { ...args, value, onChange }
-    return (
-      <Stack direction="column" gap={2}>
-        {SIZES.map((size) => (
-          <SelectField key={size} {...props} size={size}>
-            {ITEMS.map((item) => (
-              <MenuItem key={item.props.value} {...item.props} size={size}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </SelectField>
-        ))}
-      </Stack>
-    )
-  },
+  render: (args) => <RenderSizes {...args} />,
 }
 
 const STATES = [
@@ -72,41 +73,43 @@ const STATES = [
   { label: "Error", extraProps: { error: true } },
   { label: "Disabled", extraProps: { disabled: true } },
 ]
+const RenderStates = (args: Story["args"]) => {
+  const [value, setValue] = React.useState("")
+  const onChange: SelectFieldProps["onChange"] = (event, node) => {
+    setValue(event.target.value as string)
+    args?.onChange?.(event, node)
+  }
+  const props = {
+    ...args,
+    value,
+    onChange,
+  } as SelectFieldProps
+  return (
+    <Grid container spacing={2} alignItems="top" maxWidth="400px">
+      {STATES.map(({ label, extraProps }) => (
+        <React.Fragment key={label}>
+          <Grid size={{ xs: 4 }}>{label}</Grid>
+          <Grid size={{ xs: 8 }}>
+            <SelectField {...props} {...extraProps}>
+              {ITEMS.map((item) => (
+                <MenuItem
+                  key={item.props.value}
+                  {...item.props}
+                  size={args?.size}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </SelectField>
+          </Grid>
+        </React.Fragment>
+      ))}
+    </Grid>
+  )
+}
+
 export const States: Story = {
-  render: (args) => {
-    const [value, setValue] = React.useState("")
-    const onChange: SelectFieldProps["onChange"] = (event, node) => {
-      setValue(event.target.value as string)
-      args.onChange?.(event, node)
-    }
-    const props = {
-      ...args,
-      value,
-      onChange,
-    }
-    return (
-      <Grid container spacing={2} alignItems="top" maxWidth="400px">
-        {STATES.map(({ label, extraProps }) => (
-          <>
-            <Grid size={{ xs: 4 }}>{label}</Grid>
-            <Grid size={{ xs: 8 }}>
-              <SelectField {...props} {...extraProps}>
-                {ITEMS.map((item) => (
-                  <MenuItem
-                    key={item.props.value}
-                    {...item.props}
-                    size={args.size}
-                  >
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </SelectField>
-            </Grid>
-          </>
-        ))}
-      </Grid>
-    )
-  },
+  render: (args) => <RenderStates {...args} />,
   argTypes: {
     value: { table: { disable: true } },
     error: { table: { disable: true } },
