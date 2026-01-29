@@ -60,7 +60,6 @@ const meta: Meta<typeof ThemeProvider> = {
     },
   },
   id: "smoot-design/ThemeProvider",
-
 }
 
 type Story = StoryObj<typeof ThemeProvider>

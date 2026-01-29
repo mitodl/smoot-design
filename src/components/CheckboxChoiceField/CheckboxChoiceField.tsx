@@ -65,12 +65,9 @@ const CheckboxChoiceField: React.FC<CheckboxChoiceFieldProps> = ({
   const handleChange: CheckboxProps["onChange"] = (event) => {
     const fieldset = event.target.closest("fieldset")
     const allCheckboxes =
-      fieldset?.querySelectorAll<HTMLInputElement>(
-        'input[type="checkbox"]',
-      ) || []
-    const checked = Array.from(allCheckboxes).filter(
-      (input) => input.checked,
-    )
+      fieldset?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]') ||
+      []
+    const checked = Array.from(allCheckboxes).filter((input) => input.checked)
     onChange?.(
       event,
       checked.map((input) => input.value),

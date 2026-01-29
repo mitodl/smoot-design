@@ -21,10 +21,7 @@ const RenderTabButtonList = ({ count, ...others }: StoryProps) => {
     <Container maxWidth="sm">
       <TabContext value={value}>
         <Stack direction="row">
-          <TabButtonList
-            {...others}
-            onChange={(_event, val) => setValue(val)}
-          >
+          <TabButtonList {...others} onChange={(_event, val) => setValue(val)}>
             {Array(count)
               .fill(null)
               .map((_, i) => (
@@ -65,10 +62,7 @@ const RenderButtonTabsChatVariant = ({ count, ...others }: StoryProps) => {
     <Container maxWidth="sm">
       <TabContext value={value}>
         <Stack direction="row">
-          <TabButtonList
-            {...others}
-            onChange={(_event, val) => setValue(val)}
-          >
+          <TabButtonList {...others} onChange={(_event, val) => setValue(val)}>
             {Array(count)
               .fill(null)
               .map((_, i) => (
