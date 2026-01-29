@@ -110,8 +110,8 @@ export default defineConfig([
             "**/*.stories.tsx",
             "**/*.mdx",
             "vite.config.mts",
-            "**/eslint.config.ts",
             ".storybook/**",
+            "eslint.config.ts",
           ],
         },
       ],
@@ -150,14 +150,6 @@ export default defineConfig([
     },
     rules: {
       "testing-library/no-node-access": "off",
-    },
-  },
-
-  // Config files can import from devDependencies
-  {
-    files: ["**/*.config.{js,mjs,cjs,ts,mts}"],
-    rules: {
-      "import/no-extraneous-dependencies": "off",
     },
   },
 ])

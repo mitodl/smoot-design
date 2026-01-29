@@ -19,7 +19,7 @@ const childCheckboxStyles = (theme: Theme) => ({
     marginRight: 0,
     height: "24px",
     width: "24px",
-    appearance: "none",
+    appearance: "none" as const,
     backgroundImage: `url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0H17C17.5523 0 18 0.44772 18 1V17C18 17.5523 17.5523 18 17 18H1C0.44772 18 0 17.5523 0 17V1C0 0.44772 0.44772 0 1 0ZM2 2V16H16V2H2Z' fill='${encodeURIComponent(theme.custom.colors.silverGrayLight)}'/%3E%3C/svg%3E%0A")`,
     backgroundRepeat: "no-repeat",
     backgroundPosition: "3px 3px",
@@ -47,7 +47,7 @@ const childCheckboxStyles = (theme: Theme) => ({
   },
 })
 
-const Container = styled.div<{ theme?: Theme }>(({ theme }) => [
+const Container = styled.div(({ theme }) => [
   {
     height: 24,
     "& label": {
