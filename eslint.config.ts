@@ -1,12 +1,13 @@
 import { FlatCompat } from "@eslint/eslintrc"
 import path from "path"
 import { fileURLToPath } from "url"
-import styledComponentsA11y from "eslint-plugin-styled-components-a11y"
-import importPlugin from "eslint-plugin-import"
+import { defineConfig } from "eslint/config"
+import styledA11y from "eslint-plugin-styled-components-a11y"
+import * as importPlugin from "eslint-plugin-import"
 import * as mdxPlugin from "eslint-plugin-mdx"
 import testingLibraryPlugin from "eslint-plugin-testing-library"
 import typescriptEslint from "@typescript-eslint/eslint-plugin"
-import jsxA11yPlugin from "eslint-plugin-jsx-a11y"
+import jsxA11y from "eslint-plugin-jsx-a11y"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -46,26 +47,24 @@ const restrictedImports = ({ paths = [], patterns = [] } = {}) => ({
   ],
 })
 
-export default [
-  // Global ignores
+export default defineConfig([
   {
     ignores: ["**/build/**"],
   },
 
-  // Convert legacy configs to flat config - apply to all files
   ...compat.extends("eslint-config-mitodl"),
   ...compat.extends("eslint-config-prettier"),
 
-  // Base configuration for all files
+  jsxA11y.flatConfigs.recommended,
+  styledA11y.flatConfigs.recommended,
+
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     plugins: {
       "@typescript-eslint": typescriptEslint,
-      "styled-components-a11y": styledComponentsA11y,
       import: importPlugin,
       mdx: mdxPlugin,
       "testing-library": testingLibraryPlugin,
-      "jsx-a11y": jsxA11yPlugin,
     },
     settings: {
       "jsx-a11y": {
@@ -82,10 +81,6 @@ export default [
     rules: {
       ...restrictedImports(),
       "react/display-name": [2, {}],
-      // This rule is disabled in the default a11y config, but unclear why.
-      // It does catch useful errors, e.g., buttons with no text or label.
-      // If it proves to be flaky, we can find other ways to check for this.
-      // We need both rules below. One for normal elements, one for styled
       "jsx-a11y/control-has-associated-label": ["error"],
       "styled-components-a11y/control-has-associated-label": ["error"],
       "jsx-a11y/anchor-has-content": ["error"],
@@ -115,6 +110,7 @@ export default [
             "**/*.stories.tsx",
             "**/*.mdx",
             "vite.config.mts",
+            "**/eslint.config.ts",
             ".storybook/**",
           ],
         },
@@ -156,4 +152,12 @@ export default [
       "testing-library/no-node-access": "off",
     },
   },
-]
+
+  // Config files can import from devDependencies
+  {
+    files: ["**/*.config.{js,mjs,cjs,ts,mts}"],
+    rules: {
+      "import/no-extraneous-dependencies": "off",
+    },
+  },
+])
