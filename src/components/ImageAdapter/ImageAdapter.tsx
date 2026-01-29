@@ -9,8 +9,13 @@ import { useTheme } from "@emotion/react"
  * image implementation, and use ImageAdapterPropsOverrides to provide
  * `next/image`-specific props.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface ImageAdapterPropsOverrides {}
+interface ImageAdapterPropsOverrides {
+  /**
+   * Marker property to allow module augmentation.
+   * This interface can be extended via TypeScript module augmentation.
+   */
+  _?: never
+}
 type ImageAdapterProps = React.ComponentProps<"img"> & {
   Component?: React.ElementType
 } & ImageAdapterPropsOverrides

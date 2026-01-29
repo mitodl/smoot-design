@@ -15,8 +15,13 @@ const PlainLink = styled.a({
  * Link implementation, and use LinkAdapterPropsOverrides to provide
  * `next/link`-specific props.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-interface LinkAdapterPropsOverrides {}
+interface LinkAdapterPropsOverrides {
+  /**
+   * Marker property to allow module augmentation.
+   * This interface can be extended via TypeScript module augmentation.
+   */
+  _?: never
+}
 type LinkAdapterProps = React.ComponentProps<"a"> & {
   Component?: React.ElementType
 } & LinkAdapterPropsOverrides
