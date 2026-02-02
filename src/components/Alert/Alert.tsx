@@ -61,6 +61,7 @@ type AlertProps = {
   closable?: boolean
   className?: string
   severity?: AlertColor
+  onClose?: (event?: React.SyntheticEvent) => void
   /**
    * Alert Content
    */
@@ -73,11 +74,13 @@ const Alert: React.FC<AlertProps> = ({
   closable,
   children,
   className,
+  onClose,
 }) => {
   const [_visible, setVisible] = React.useState(visible)
   const id = React.useId()
-  const onCloseClick = () => {
+  const onCloseClick = (event?: React.SyntheticEvent) => {
     setVisible(false)
+    onClose?.(event)
   }
 
   React.useEffect(() => {
