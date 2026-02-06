@@ -17,7 +17,7 @@ export const Basic: Story = {
     severity: "info",
   },
   render: (args) => (
-    <Alert {...args}>Alert with severity "{args.severity}"</Alert>
+    <Alert {...args}>Alert with severity "{args.severity}".</Alert>
   ),
 }
 
@@ -51,6 +51,16 @@ export const Variants: Story = {
       </Alert>
       <Alert {...args} closable severity="info">
         Closable alert with severity "info"
+      </Alert>
+      <Alert {...args} severity="info">
+        Multiline Alert <br />
+        Paullum deliquit, ponderibus modulisque suis ratio utitur. Quo usque
+        tandem abutere, Catilina, patientia nostra?
+      </Alert>
+      <Alert {...args} severity="info" closable>
+        Multiline Alert <br />
+        Paullum deliquit, ponderibus modulisque suis ratio utitur. Quo usque
+        tandem abutere, Catilina, patientia nostra?
       </Alert>
       <Alert {...args} severity="success">
         Alert with severity "success"
