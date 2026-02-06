@@ -95,13 +95,7 @@ const AlertStyled = styled(MuiAlert)<AlertStyleProps>(({ theme, severity }) => {
       display: "flex",
       alignItems: "center",
     },
-    button: {
-      padding: 0,
-      ":hover": {
-        margin: 0,
-        background: "none",
-      },
-    },
+    boxShadow: "0 4px 8px 0 rgba(19, 20, 21, 0.08)",
   }
 })
 
