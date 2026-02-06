@@ -99,13 +99,7 @@ const AlertStyled = styled(MuiAlert)<AlertStyleProps>(({ theme, severity }) => {
   }
 })
 
-const SEVERITY_LABEL = {
-  info: "Information",
-  success: "Success",
-  warning: "Warning",
-  error: "Error",
-}
-const SeverityLabel = styled.span(({ theme }) => ({
+const ErrorLabel = styled.span(({ theme }) => ({
   ...theme.typography.subtitle2,
   marginRight: "8px",
 }))
@@ -129,6 +123,10 @@ type AlertProps = {
    * Alert Content
    */
   children?: React.ReactNode
+  /**
+   * An optional label to display before the alert content
+   */
+  label?: React.ReactNode
 }
 
 const Alert: React.FC<AlertProps> = ({
@@ -138,6 +136,7 @@ const Alert: React.FC<AlertProps> = ({
   children,
   className,
   onClose,
+  label,
 }) => {
   const [_visible, setVisible] = React.useState(visible)
   const id = React.useId()
@@ -175,7 +174,7 @@ const Alert: React.FC<AlertProps> = ({
         ) : null
       }
     >
-      <SeverityLabel>{SEVERITY_LABEL[severity]}</SeverityLabel>
+      {label ? <ErrorLabel>{label}</ErrorLabel> : null}
       {children}
       <Hidden id={id}>{severity} message</Hidden>
     </AlertStyled>

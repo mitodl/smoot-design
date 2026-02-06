@@ -15,6 +15,7 @@ type Story = StoryObj<typeof Alert>
 export const Basic: Story = {
   args: {
     severity: "info",
+    label: "Optional Label",
   },
   render: (args) => (
     <Alert {...args}>Alert with severity "{args.severity}".</Alert>
