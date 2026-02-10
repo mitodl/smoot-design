@@ -72,7 +72,6 @@ const AlertStyled = styled(MuiAlert)<AlertStyleProps>(({ theme, severity }) => {
     },
     ".MuiAlert-icon": {
       marginRight: 8,
-      height: 0,
       svg: {
         width: 20,
         height: 20,
