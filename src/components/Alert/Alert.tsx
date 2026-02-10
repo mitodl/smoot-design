@@ -4,30 +4,63 @@ import * as React from "react"
 
 import styled from "@emotion/styled"
 import { default as MuiAlert } from "@mui/material/Alert"
-import type { AlertColor } from "@mui/material/Alert"
+import type {
+  AlertProps as MuiAlertProps,
+  AlertColor,
+} from "@mui/material/Alert"
 import { Theme } from "@emotion/react"
+import {
+  RiInformation2Fill,
+  RiCheckboxCircleFill,
+  RiAlertFill,
+  RiErrorWarningFill,
+  RiCloseLine,
+} from "@remixicon/react"
+import { ActionButton } from "../Button/ActionButton"
+
+const withTransparency = (color: string, opacity: number) => {
+  return `color-mix(in srgb, ${color} ${opacity}%, transparent)`
+}
 
 const getColor = (theme: Theme, severity: AlertColor) => {
-  return {
-    info: theme.custom.colors.blue,
-    success: theme.custom.colors.green,
-    warning: theme.custom.colors.orange,
-    error: theme.custom.colors.lightRed,
-  }[severity]
+  const colors = {
+    info: {
+      borderColor: withTransparency(theme.custom.colors.blue, 50),
+      backgroundColor: withTransparency(theme.custom.colors.blue, 10),
+      iconFill: theme.custom.colors.blue,
+    },
+    warning: {
+      borderColor: withTransparency(theme.custom.colors.orange, 50),
+      backgroundColor: withTransparency(theme.custom.colors.orange, 15),
+      iconFill: theme.custom.colors.orange,
+    },
+    error: {
+      borderColor: withTransparency(theme.custom.colors.red, 15),
+      backgroundColor: withTransparency(theme.custom.colors.brightRed, 10),
+      iconFill: theme.custom.colors.red,
+    },
+    success: {
+      borderColor: withTransparency(theme.custom.colors.green, 20),
+      backgroundColor: withTransparency(theme.custom.colors.green, 4),
+      iconFill: theme.custom.colors.green,
+    },
+  }
+  return colors[severity]
 }
 
 type AlertStyleProps = {
   severity: AlertColor
 }
 
-const AlertStyled = styled(MuiAlert)<AlertStyleProps>(
-  ({ theme, severity }) => ({
+const AlertStyled = styled(MuiAlert)<AlertStyleProps>(({ theme, severity }) => {
+  const colors = getColor(theme, severity)
+  return {
     padding: "11px 16px",
     borderRadius: 4,
     borderWidth: 2,
     borderStyle: "solid",
-    borderColor: getColor(theme, severity),
-    background: "#FFF",
+    backgroundColor: colors.backgroundColor,
+    borderColor: colors.borderColor,
     ".MuiAlert-message": {
       ...theme.typography.body2,
       color: theme.custom.colors.darkGray2,
@@ -40,19 +73,42 @@ const AlertStyled = styled(MuiAlert)<AlertStyleProps>(
     ".MuiAlert-icon": {
       marginRight: 8,
       svg: {
+        width: 20,
+        height: 20,
+        fill: colors.iconFill,
+      },
+    },
+    ".MuiAlert-action": {
+      svg: {
         width: 16,
-        fill: getColor(theme, severity),
+        height: 16,
+        stroke: theme.custom.colors.silverGrayDark,
       },
+      /**
+       * The close button is big enough that it would normally stretch the
+       * alert, at least for single-line alerts.
+       * We don't want to stretch the alert, but we do want to keep the button
+       * large enough to be easily clickable.
+       */
+      height: "20px",
+      display: "flex",
+      alignItems: "center",
     },
-    button: {
-      padding: 0,
-      ":hover": {
-        margin: 0,
-        background: "none",
-      },
-    },
-  }),
-)
+    boxShadow: "0 4px 8px 0 rgba(19, 20, 21, 0.08)",
+  }
+})
+
+const ErrorLabel = styled.span(({ theme }) => ({
+  ...theme.typography.subtitle2,
+  marginRight: "8px",
+}))
+
+const ICON_MAPPING: MuiAlertProps["iconMapping"] = {
+  info: <RiInformation2Fill />,
+  success: <RiCheckboxCircleFill />,
+  warning: <RiAlertFill />,
+  error: <RiErrorWarningFill />,
+}
 
 const Hidden = styled.span({ display: "none" })
 
@@ -66,6 +122,10 @@ type AlertProps = {
    * Alert Content
    */
   children?: React.ReactNode
+  /**
+   * An optional label to display before the alert content
+   */
+  label?: React.ReactNode
 }
 
 const Alert: React.FC<AlertProps> = ({
@@ -75,6 +135,7 @@ const Alert: React.FC<AlertProps> = ({
   children,
   className,
   onClose,
+  label,
 }) => {
   const [_visible, setVisible] = React.useState(visible)
   const id = React.useId()
@@ -98,7 +159,21 @@ const Alert: React.FC<AlertProps> = ({
       role="alert"
       aria-describedby={id}
       className={className}
+      iconMapping={ICON_MAPPING}
+      action={
+        closable ? (
+          <ActionButton
+            size="small"
+            variant="text"
+            aria-label="Dismiss"
+            onClick={onCloseClick}
+          >
+            <RiCloseLine />
+          </ActionButton>
+        ) : null
+      }
     >
+      {label ? <ErrorLabel>{label}</ErrorLabel> : null}
       {children}
       <Hidden id={id}>{severity} message</Hidden>
     </AlertStyled>
