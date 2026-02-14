@@ -22,7 +22,7 @@ const BREAKPOINTS = {
   values: {
     xs: 0,
     sm: 768,
-    md: 900,
+    md: 1024,
     lg: 1272 + 48,
     xl: 1536,
   },
