@@ -21,7 +21,7 @@ const custom: ThemeOptions["custom"] = {
 const BREAKPOINTS = {
   values: {
     xs: 0,
-    sm: 600,
+    sm: 768,
     md: 900,
     lg: 1272 + 48,
     xl: 1536,
