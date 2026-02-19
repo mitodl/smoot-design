@@ -113,7 +113,19 @@ const StyledAiChat = styled(AiChat)<{
         : hasTabs
           ? "114px 0 24px"
           : "168px 32px 24px",
-    ...(hasTabs && variant === "slot" && { justifyContent: "center" }),
+    ...(hasTabs &&
+      variant === "slot" && {
+        overflowY: "auto",
+        "> *": {
+          flexShrink: 0,
+        },
+        "> :first-child": {
+          marginTop: "auto",
+        },
+        "> :last-child": {
+          marginBottom: "auto",
+        },
+      }),
     [theme.breakpoints.down("md")]: {
       padding:
         hasTabs && variant === "slot"
