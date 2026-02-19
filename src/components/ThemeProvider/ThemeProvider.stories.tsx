@@ -6,18 +6,36 @@ import { ButtonLink } from "../Button/Button"
 const CustomLinkAdapater = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentProps<"a">
->((props, ref) => (
-  // eslint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-  <a
-    ref={ref}
-    onClick={(e) => {
+>((props, ref) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    alert(`Custom link to: ${e.currentTarget.href}. (Preventing Navigation.)`)
+    props.onClick?.(e)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault()
       alert(`Custom link to: ${e.currentTarget.href}. (Preventing Navigation.)`)
-    }}
-    data-custom="theme-default"
-    {...props}
-  />
-))
+    }
+    props.onKeyDown?.(e)
+  }
+
+  const { onClick, onKeyDown, ...restProps } = props
+
+  return (
+    // eslint-disable-next-line jsx-a11y/anchor-has-content
+    <a
+      ref={ref}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      data-custom="theme-default"
+      {...restProps}
+    />
+  )
+})
 CustomLinkAdapater.displayName = "CustomLinkAdapter"
 
 const customTheme = createTheme({

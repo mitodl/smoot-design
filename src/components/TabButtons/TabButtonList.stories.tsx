@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import { useState } from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
@@ -14,6 +13,106 @@ import Container from "@mui/material/Container"
 
 type StoryProps = TabButtonListProps & {
   count: number
+}
+
+const RenderTabButtonList = ({ count, ...others }: StoryProps) => {
+  const [value, setValue] = React.useState("tab1")
+  return (
+    <Container maxWidth="sm">
+      <TabContext value={value}>
+        <Stack direction="row">
+          <TabButtonList {...others} onChange={(_event, val) => setValue(val)}>
+            {Array(count)
+              .fill(null)
+              .map((_, i) => (
+                <TabButton
+                  key={`tab-${i}`}
+                  value={`tab${i + 1}`}
+                  label={`Tab ${i + 1}`}
+                />
+              ))}
+          </TabButtonList>
+
+          <Stack
+            direction="row"
+            justifyContent="end"
+            sx={{ paddingLeft: "16px" }}
+          >
+            <Button>Other UI</Button>
+          </Stack>
+        </Stack>
+        {Array(count)
+          .fill(null)
+          .map((_, i) => (
+            <TabPanel key={`tab-${i}`} value={`tab${i + 1}`}>
+              <Typography variant="h4" component="h4">
+                Header {i + 1}
+              </Typography>
+              {faker.lorem.paragraphs(2)}
+            </TabPanel>
+          ))}
+      </TabContext>
+    </Container>
+  )
+}
+
+const RenderButtonTabsChatVariant = ({ count, ...others }: StoryProps) => {
+  const [value, setValue] = React.useState("tab1")
+  return (
+    <Container maxWidth="sm">
+      <TabContext value={value}>
+        <Stack direction="row">
+          <TabButtonList {...others} onChange={(_event, val) => setValue(val)}>
+            {Array(count)
+              .fill(null)
+              .map((_, i) => (
+                <TabButton
+                  key={`tab-${i}`}
+                  value={`tab${i + 1}`}
+                  label={`Tab ${i + 1}`}
+                />
+              ))}
+          </TabButtonList>
+        </Stack>
+        {Array(count)
+          .fill(null)
+          .map((_, i) => (
+            <TabPanel key={`tab-${i}`} value={`tab${i + 1}`}>
+              <Typography variant="h4" component="h4">
+                Header {i + 1}
+              </Typography>
+              {faker.lorem.paragraphs(2)}
+            </TabPanel>
+          ))}
+      </TabContext>
+    </Container>
+  )
+}
+
+const RenderLinkTabs = () => {
+  const [hash, setHash] = useState(() => window.location.hash)
+
+  React.useEffect(() => {
+    const handler = () => setHash(window.location.hash)
+    window.addEventListener("hashchange", handler)
+    return () => {
+      window.removeEventListener("hashchange", handler)
+    }
+  }, [])
+
+  return (
+    <div>
+      Current Location:
+      <pre>{hash}</pre>
+      <TabContext value={hash!}>
+        <TabButtonList>
+          <TabButtonLink value="#link1" href="#link1" label="Tab 1" />
+          <TabButtonLink value="#link2" href="#link2" label="Tab 2" />
+          <TabButtonLink value="#link3" href="#link3" label="Tab 3" />
+        </TabButtonList>
+      </TabContext>
+    </div>
+  )
 }
 
 const meta: Meta<StoryProps> = {
@@ -39,49 +138,9 @@ const meta: Meta<StoryProps> = {
     allowScrollButtonsMobile: true,
     scrollButtons: "auto",
   },
-  render: ({ count, ...others }) => {
-    const [value, setValue] = React.useState("tab1")
-    return (
-      <Container maxWidth="sm">
-        <TabContext value={value}>
-          <Stack direction="row">
-            <TabButtonList
-              {...others}
-              onChange={(_event, val) => setValue(val)}
-            >
-              {Array(count)
-                .fill(null)
-                .map((_, i) => (
-                  <TabButton
-                    key={`tab-${i}`}
-                    value={`tab${i + 1}`}
-                    label={`Tab ${i + 1}`}
-                  />
-                ))}
-            </TabButtonList>
-
-            <Stack
-              direction="row"
-              justifyContent="end"
-              sx={{ paddingLeft: "16px" }}
-            >
-              <Button>Other UI</Button>
-            </Stack>
-          </Stack>
-          {Array(count)
-            .fill(null)
-            .map((_, i) => (
-              <TabPanel key={`tab-${i}`} value={`tab${i + 1}`}>
-                <Typography variant="h4" component="h4">
-                  Header {i + 1}
-                </Typography>
-                {faker.lorem.paragraphs(2)}
-              </TabPanel>
-            ))}
-        </TabContext>
-      </Container>
-    )
-  },
+  render: ({ count, ...others }) => (
+    <RenderTabButtonList count={count} {...others} />
+  ),
 }
 
 export default meta
@@ -102,41 +161,9 @@ export const ButtonTabsChatVariant: Story = {
     variant: "fullWidth",
     visibleScrollbar: false,
   },
-  render: ({ count, ...others }) => {
-    const [value, setValue] = React.useState("tab1")
-    return (
-      <Container maxWidth="sm">
-        <TabContext value={value}>
-          <Stack direction="row">
-            <TabButtonList
-              {...others}
-              onChange={(_event, val) => setValue(val)}
-            >
-              {Array(count)
-                .fill(null)
-                .map((_, i) => (
-                  <TabButton
-                    key={`tab-${i}`}
-                    value={`tab${i + 1}`}
-                    label={`Tab ${i + 1}`}
-                  />
-                ))}
-            </TabButtonList>
-          </Stack>
-          {Array(count)
-            .fill(null)
-            .map((_, i) => (
-              <TabPanel key={`tab-${i}`} value={`tab${i + 1}`}>
-                <Typography variant="h4" component="h4">
-                  Header {i + 1}
-                </Typography>
-                {faker.lorem.paragraphs(2)}
-              </TabPanel>
-            ))}
-        </TabContext>
-      </Container>
-    )
-  },
+  render: ({ count, ...others }) => (
+    <RenderButtonTabsChatVariant count={count} {...others} />
+  ),
 }
 
 /**
@@ -160,29 +187,5 @@ export const LinkTabs: Story = {
       },
     },
   },
-  render: () => {
-    const [hash, setHash] = useState(() => window.location.hash)
-
-    React.useEffect(() => {
-      const handler = () => setHash(window.location.hash)
-      window.addEventListener("hashchange", handler)
-      return () => {
-        window.removeEventListener("hashchange", handler)
-      }
-    }, [])
-
-    return (
-      <div>
-        Current Location:
-        <pre>{hash}</pre>
-        <TabContext value={hash!}>
-          <TabButtonList>
-            <TabButtonLink value="#link1" href="#link1" label="Tab 1" />
-            <TabButtonLink value="#link2" href="#link2" label="Tab 2" />
-            <TabButtonLink value="#link3" href="#link3" label="Tab 3" />
-          </TabButtonList>
-        </TabContext>
-      </div>
-    )
-  },
+  render: () => <RenderLinkTabs />,
 }

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { http, HttpResponse } from "msw"
@@ -23,26 +22,37 @@ const STARTERS = [
   { content: "I am curious about AI applications for business" },
 ]
 
+const RenderAiDrawer = ({
+  settings,
+}: {
+  settings: AiDrawerSettings | undefined
+}) => {
+  const [open, setOpen] = React.useState(false)
+  if (!settings) {
+    return <div>Settings are required</div>
+  }
+  return (
+    <>
+      <Button variant="outlined" onClick={() => setOpen(true)}>
+        Open Drawer
+      </Button>
+      <p>Message data:</p>
+      <pre>{JSON.stringify({ settings }, null, 2)}</pre>
+      <AiDrawer
+        settings={settings}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}
+
 const meta: Meta<typeof AiDrawer> = {
   title: "smoot-design/AI/AiDrawer",
   component: AiDrawer,
-  render: ({ settings }) => {
-    const [open, setOpen] = React.useState(false)
-    return (
-      <>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
-          Open Drawer
-        </Button>
-        <p>Message data:</p>
-        <pre>{JSON.stringify({ settings }, null, 2)}</pre>
-        <AiDrawer
-          settings={settings}
-          open={open}
-          onClose={() => setOpen(false)}
-        />
-      </>
-    )
-  },
+  render: ({ settings }) => (
+    <RenderAiDrawer settings={settings as AiDrawerSettings | undefined} />
+  ),
   argTypes: {
     settings: {
       // JSON controls break form submission via keyboard. See

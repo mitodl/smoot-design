@@ -1,5 +1,4 @@
 // This was giving false positives
-/* eslint-disable testing-library/await-async-utils */
 import { render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { AiChat } from "./AiChat"
