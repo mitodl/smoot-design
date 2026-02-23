@@ -33,6 +33,10 @@ import { MathJaxContext } from "better-react-mathjax"
 import deepmerge from "@mui/utils/deepmerge"
 import { ActionButton } from "../Button/ActionButton"
 import { Tooltip } from "../Tooltip/Tooltip"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../bundles/AiDrawer/TranslationContext"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
@@ -288,6 +292,7 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
 
 const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
   const { submitFeedback } = useAiChat()
+  const { t } = useTranslation()
   const [feedback, setFeedback] = useState<"like" | "dislike" | "">("")
 
   const onFeedback = useCallback(
@@ -309,23 +314,23 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
 
   return (
     <FeedbackRowContainer>
-      <Tooltip title="Good response">
+      <Tooltip title={t(TRANSLATION_KEYS.feedbackGood)}>
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("like")}
-          aria-label="Good response"
+          aria-label={t(TRANSLATION_KEYS.feedbackGood)}
           aria-pressed={feedback === "like"}
         >
           {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
         </FeedbackButton>
       </Tooltip>
-      <Tooltip title="Bad response">
+      <Tooltip title={t(TRANSLATION_KEYS.feedbackBad)}>
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("dislike")}
-          aria-label="Bad response"
+          aria-label={t(TRANSLATION_KEYS.feedbackBad)}
           aria-pressed={feedback === "dislike"}
         >
           {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
@@ -353,6 +358,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   problemSetEmptyMessages,
   ...others // Could contain data attributes
 }) => {
+  const { t } = useTranslation()
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const chatScreenRef = useRef<HTMLDivElement>(null)
   const promptInputRef = useRef<HTMLDivElement>(null)
@@ -417,8 +423,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
           {
             id: "initial-0",
             role: "assistant",
-            content:
-              "Hi! It looks like there are no assignments available right now. I'm here to help when there is an assignment ready to start.",
+            content: t(TRANSLATION_KEYS.noAssignmentsMessage),
           },
         ])
       }
@@ -494,11 +499,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               control={
                 problemSetListResponse?.problem_set_titles?.length ? (
                   <AssignmentSelect
-                    label="Assignments"
+                    label={t(TRANSLATION_KEYS.assignmentsLabel)}
                     options={[
                       {
                         value: "",
-                        label: "Select an assignment",
+                        label: t(TRANSLATION_KEYS.selectAssignment),
                         disabled: true,
                       },
                       ...problemSetListResponse.problem_set_titles.map(
@@ -542,8 +547,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                           as={message.role === "user" ? "h5" : "h6"}
                         >
                           {message.role === "user"
-                            ? "You said: "
-                            : "Assistant said: "}
+                            ? t(TRANSLATION_KEYS.srYouSaid)
+                            : t(TRANSLATION_KEYS.srAssistantSaid)}
                         </VisuallyHidden>
                         <Markdown useMathJax={useMathJax}>
                           {message.content}
@@ -587,7 +592,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 ) : null}
                 {error ? (
                   <Alert severity="error" closable>
-                    An unexpected error has occurred.
+                    {t(TRANSLATION_KEYS.errorGeneric)}
                   </Alert>
                 ) : null}
               </MessagesContainer>
@@ -614,7 +619,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   maxRows={20}
                   size="chat"
                   className={classes.input}
-                  placeholder={placeholder}
+                  placeholder={placeholder || t(TRANSLATION_KEYS.askQuestion)}
                   name="message"
                   sx={{ flex: 1 }}
                   value={input}
@@ -629,13 +634,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     }
                   }}
                   inputProps={{
-                    "aria-label": "Ask a question",
+                    "aria-label": t(TRANSLATION_KEYS.askQuestion),
                   }}
                   disabled={needsProblemSet}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton
-                        aria-label="Stop"
+                        aria-label={t(TRANSLATION_KEYS.stop)}
                         type="submit"
                         disabled={!stoppable}
                       >
@@ -644,7 +649,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     ) : (
                       <AdornmentButton
                         type="submit"
-                        aria-label="Send"
+                        aria-label={t(TRANSLATION_KEYS.send)}
                         disabled={needsProblemSet}
                       >
                         <StyledSendButton />
@@ -654,7 +659,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 />
               </form>
               <Disclaimer variant="body3">
-                AI-generated content may be incorrect.
+                {t(TRANSLATION_KEYS.disclaimer)}
               </Disclaimer>
             </BottomSection>
             <SrAnnouncer

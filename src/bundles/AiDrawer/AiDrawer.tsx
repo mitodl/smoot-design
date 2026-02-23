@@ -19,6 +19,7 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
+import { useTranslation, TRANSLATION_KEYS } from "./TranslationContext"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
@@ -269,25 +270,6 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
-const DEFAULT_PROBLEM_INITIAL_MESSAGES: AiChatProps["initialMessages"] = [
-  {
-    role: "assistant",
-    content:
-      "Let's try to work on this problem together. It would be great to hear how you're thinking about solving it. Can you walk me through the approach you're considering?",
-  },
-]
-
-const DEFAULT_VIDEO_ENTRY_SCREEN_TITLE =
-  "What do you want to know about this video?"
-
-const DEFAULT_VIDEO_STARTERS = [
-  { content: "What are the most important concepts introduced in the video?" },
-  {
-    content:
-      "What examples are used to illustrate concepts covered in the video?",
-  },
-  { content: "What are the key terms introduced in this video?" },
-]
 
 const ChatComponent = ({
   settings,
@@ -394,7 +376,29 @@ const AiDrawer: FC<AiDrawerProps> = ({
   onTrackingEvent,
   variant = "drawer",
 }: AiDrawerProps) => {
+  const { t } = useTranslation()
   const [tab, setTab] = useState("chat")
+
+  const defaultProblemInitialMessages = useMemo<
+    AiChatProps["initialMessages"]
+  >(
+    () => [
+      {
+        role: "assistant",
+        content: t(TRANSLATION_KEYS.problemInitialMessage),
+      },
+    ],
+    [t],
+  )
+
+  const defaultVideoStarters = useMemo(
+    () => [
+      { content: t(TRANSLATION_KEYS.videoStarterConcepts) },
+      { content: t(TRANSLATION_KEYS.videoStarterExamples) },
+      { content: t(TRANSLATION_KEYS.videoStarterKeyTerms) },
+    ],
+    [t],
+  )
   const { response } = useContentFetch(settings?.summary?.apiUrl)
 
   const [_wasKeyboardFocus, setWasKeyboardFocus] = useState(false)
@@ -438,9 +442,9 @@ const AiDrawer: FC<AiDrawerProps> = ({
         ? randomItems(response.flashcards, 3).map((flashcard) => ({
             content: flashcard.question,
           }))
-        : DEFAULT_VIDEO_STARTERS)
+        : defaultVideoStarters)
     )
-  }, [settings, response])
+  }, [settings, response, defaultVideoStarters])
 
   useOnDrawerOpened(open, () => {
     onTrackingEvent?.({ type: TrackingEventType.Open })
@@ -474,7 +478,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           variant="text"
           size="medium"
           onClick={handleClose}
-          aria-label="Close"
+          aria-label={t(TRANSLATION_KEYS.ariaClose)}
         >
           <RiCloseLine />
         </CloseButton>
@@ -488,7 +492,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
           entryScreenTitle={chat.entryScreenTitle}
           initialMessages={
-            chat.initialMessages || DEFAULT_PROBLEM_INITIAL_MESSAGES
+            chat.initialMessages || defaultProblemInitialMessages
           }
           hasTabs={hasTabs}
           needsMathJax={true}
@@ -510,16 +514,16 @@ const AiDrawer: FC<AiDrawerProps> = ({
               })
             }}
           >
-            <TabButton value="chat" label="Chat" />
+            <TabButton value="chat" label={t(TRANSLATION_KEYS.tabLabelChat)} />
             {response?.flashcards?.length ? (
               <TabButton
                 value="flashcards"
-                label="Flashcards"
+                label={t(TRANSLATION_KEYS.tabLabelFlashcards)}
                 onMouseDown={handleMouseDown}
                 onFocus={handleFocus}
               />
             ) : null}
-            <TabButton value="summary" label="Summary" />
+            <TabButton value="summary" label={t(TRANSLATION_KEYS.tabLabelSummary)} />
           </StyledTabButtonList>
           <StyledTabPanel value="chat" keepMounted>
             <ChatComponent
@@ -529,7 +533,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
               scrollElement={scrollElement}
               entryScreenEnabled={chat?.entryScreenEnabled ?? true}
               entryScreenTitle={
-                chat.entryScreenTitle ?? DEFAULT_VIDEO_ENTRY_SCREEN_TITLE
+                chat.entryScreenTitle ??
+                t(TRANSLATION_KEYS.videoEntryScreenTitle)
               }
               conversationStarters={conversationStarters}
               initialMessages={chat.initialMessages}

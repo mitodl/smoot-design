@@ -5,6 +5,10 @@ import { AdornmentButton, Input } from "../Input/Input"
 import TimLogo from "./TimLogo"
 import { useState } from "react"
 import styled from "@emotion/styled"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../bundles/AiDrawer/TranslationContext"
 
 const Container = styled.form(({ theme }) => ({
   display: "flex",
@@ -116,6 +120,7 @@ const EntryScreen = ({
   className,
   onPromptSubmit,
 }: EntryScreenProps) => {
+  const { t } = useTranslation()
   const [prompt, setPrompt] = useState("")
 
   const onPromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,10 +149,10 @@ const EntryScreen = ({
         name="prompt"
         onChange={onPromptChange}
         inputProps={{
-          "aria-label": "Ask a question",
+          "aria-label": t(TRANSLATION_KEYS.askQuestion),
         }}
         endAdornment={
-          <AdornmentButton type="submit" aria-label="Send">
+          <AdornmentButton type="submit" aria-label={t(TRANSLATION_KEYS.send)}>
             <SendIcon />
           </AdornmentButton>
         }

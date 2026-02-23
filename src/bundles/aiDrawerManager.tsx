@@ -7,9 +7,20 @@ import {
   createTheme,
 } from "../components/ThemeProvider/ThemeProvider"
 import { StyleIsolation } from "../components/StyleIsolation/StyleIsolation"
+import { TranslationProvider } from "./AiDrawer/TranslationContext"
+import type { TranslationsInput } from "./AiDrawer/TranslationContext"
 
 type InitOptions = {
   container?: HTMLElement
+}
+
+/**
+ * Options accepted by `init()`. Extends the AiDrawerManager component props
+ * with `translations`, which is consumed by the TranslationProvider wrapper
+ * rather than by the component itself.
+ */
+type AiDrawerManagerInitOpts = AiDrawerManagerProps & {
+  translations?: TranslationsInput | null
 }
 
 type InitReturn = {
@@ -17,7 +28,7 @@ type InitReturn = {
   container: HTMLElement
 }
 
-export type { InitOptions, InitReturn }
+export type { InitOptions, InitReturn, AiDrawerManagerInitOpts }
 
 const safeRemoveElement = (element: HTMLElement | null | undefined): void => {
   if (!element?.parentNode) {
@@ -32,9 +43,11 @@ const safeRemoveElement = (element: HTMLElement | null | undefined): void => {
 }
 
 const init = (
-  opts: AiDrawerManagerProps,
+  opts: AiDrawerManagerInitOpts,
   initOpts?: InitOptions,
 ): InitReturn => {
+  const { translations, ...managerProps } = opts
+
   const providedContainer = initOpts?.container
   const isSlotVariant = opts.variant === "slot"
   if (isSlotVariant && !providedContainer) {
@@ -101,7 +114,9 @@ const init = (
   root.render(
     <StyleIsolation ref={isolationRootRef}>
       <ThemeProvider theme={theme}>
-        <AiDrawerManager {...opts} />
+        <TranslationProvider translations={translations ?? null}>
+          <AiDrawerManager {...managerProps} />
+        </TranslationProvider>
       </ThemeProvider>
     </StyleIsolation>,
   )
