@@ -63,7 +63,9 @@ const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
         <Typography variant="h5">
           {screen === 0 ? (
             <>
-              <span>{t(TRANSLATION_KEYS.flashcardQuestion)}</span>
+              <span aria-label={t(TRANSLATION_KEYS.flashcardQuestionAria)}>
+                {t(TRANSLATION_KEYS.flashcardQuestion)}
+              </span>
               {content.question}
             </>
           ) : (
