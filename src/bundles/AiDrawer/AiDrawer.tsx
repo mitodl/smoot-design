@@ -270,7 +270,6 @@ const useContentFetch = (contentUrl: string | undefined) => {
   return { response, loading }
 }
 
-
 const ChatComponent = ({
   settings,
   transformBody,
@@ -379,9 +378,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { t } = useTranslation()
   const [tab, setTab] = useState("chat")
 
-  const defaultProblemInitialMessages = useMemo<
-    AiChatProps["initialMessages"]
-  >(
+  const defaultProblemInitialMessages = useMemo<AiChatProps["initialMessages"]>(
     () => [
       {
         role: "assistant",
@@ -523,7 +520,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
                 onFocus={handleFocus}
               />
             ) : null}
-            <TabButton value="summary" label={t(TRANSLATION_KEYS.tabLabelSummary)} />
+            <TabButton
+              value="summary"
+              label={t(TRANSLATION_KEYS.tabLabelSummary)}
+            />
           </StyledTabButtonList>
           <StyledTabPanel value="chat" keepMounted>
             <ChatComponent

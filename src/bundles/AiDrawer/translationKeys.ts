@@ -32,7 +32,8 @@ export const TRANSLATION_KEYS = {
   videoStarterKeyTerms: "videoStarterKeyTerms",
 } as const
 
-export type TranslationKey = (typeof TRANSLATION_KEYS)[keyof typeof TRANSLATION_KEYS]
+export type TranslationKey =
+  (typeof TRANSLATION_KEYS)[keyof typeof TRANSLATION_KEYS]
 
 export const DEFAULT_TRANSLATIONS: Record<TranslationKey, string> = {
   [TRANSLATION_KEYS.feedbackGood]: "Good response",
