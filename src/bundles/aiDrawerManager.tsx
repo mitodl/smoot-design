@@ -7,8 +7,8 @@ import {
   createTheme,
 } from "../components/ThemeProvider/ThemeProvider"
 import { StyleIsolation } from "../components/StyleIsolation/StyleIsolation"
-import { TranslationProvider } from "./AiDrawer/TranslationContext"
-import type { TranslationsInput } from "./AiDrawer/TranslationContext"
+import { TranslationProvider } from "../contexts/TranslationContext"
+import type { TranslationsInput } from "../contexts/TranslationContext"
 
 type InitOptions = {
   container?: HTMLElement

@@ -8,7 +8,7 @@ import styled from "@emotion/styled"
 import {
   useTranslation,
   TRANSLATION_KEYS,
-} from "../../bundles/AiDrawer/TranslationContext"
+} from "../../contexts/TranslationContext"
 
 const Container = styled.form(({ theme }) => ({
   display: "flex",
@@ -149,10 +149,10 @@ const EntryScreen = ({
         name="prompt"
         onChange={onPromptChange}
         inputProps={{
-          "aria-label": t(TRANSLATION_KEYS.askQuestion),
+          "aria-label": t(TRANSLATION_KEYS.aiChat.askQuestion),
         }}
         endAdornment={
-          <AdornmentButton type="submit" aria-label={t(TRANSLATION_KEYS.send)}>
+          <AdornmentButton type="submit" aria-label={t(TRANSLATION_KEYS.aiChat.send)}>
             <SendIcon />
           </AdornmentButton>
         }

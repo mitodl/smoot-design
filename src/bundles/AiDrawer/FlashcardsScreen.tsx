@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
 import { RiArrowRightLine, RiArrowLeftLine } from "@remixicon/react"
-import { useTranslation, TRANSLATION_KEYS } from "./TranslationContext"
+import { useTranslation, TRANSLATION_KEYS } from "../../contexts/TranslationContext"
 
 export type Flashcard = {
   question: string
@@ -63,14 +63,14 @@ const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
         <Typography variant="h5">
           {screen === 0 ? (
             <>
-              <span aria-label={t(TRANSLATION_KEYS.flashcardQuestionAria)}>
-                {t(TRANSLATION_KEYS.flashcardQuestion)}
+              <span aria-label={t(TRANSLATION_KEYS.flashcards.questionAria)}>
+                {t(TRANSLATION_KEYS.flashcards.question)}
               </span>
               {content.question}
             </>
           ) : (
             <>
-              <span>{t(TRANSLATION_KEYS.flashcardAnswer)}</span>
+              <span>{t(TRANSLATION_KEYS.flashcards.answer)}</span>
               {content.answer}
             </>
           )}
@@ -127,7 +127,7 @@ export const FlashcardsScreen = ({
     <Container ref={containerRef}>
       <div
         role="region"
-        aria-label={t(TRANSLATION_KEYS.flashcardCount, {
+        aria-label={t(TRANSLATION_KEYS.flashcards.count, {
           index: cardIndex + 1,
           total: flashcards.length,
         })}
@@ -145,7 +145,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label={t(TRANSLATION_KEYS.flashcardPrevious)}
+          aria-label={t(TRANSLATION_KEYS.flashcards.previous)}
         >
           <RiArrowLeftLine aria-hidden />
         </ActionButton>
@@ -159,7 +159,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label={t(TRANSLATION_KEYS.flashcardNext)}
+          aria-label={t(TRANSLATION_KEYS.flashcards.next)}
         >
           <RiArrowRightLine aria-hidden />
         </ActionButton>

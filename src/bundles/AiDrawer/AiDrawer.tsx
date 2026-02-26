@@ -19,7 +19,7 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
-import { useTranslation, TRANSLATION_KEYS } from "./TranslationContext"
+import { useTranslation, TRANSLATION_KEYS } from "../../contexts/TranslationContext"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
@@ -382,7 +382,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
     () => [
       {
         role: "assistant",
-        content: t(TRANSLATION_KEYS.problemInitialMessage),
+        content: t(TRANSLATION_KEYS.entryScreen.problemInitialMessage),
       },
     ],
     [t],
@@ -390,9 +390,9 @@ const AiDrawer: FC<AiDrawerProps> = ({
 
   const defaultVideoStarters = useMemo(
     () => [
-      { content: t(TRANSLATION_KEYS.videoStarterConcepts) },
-      { content: t(TRANSLATION_KEYS.videoStarterExamples) },
-      { content: t(TRANSLATION_KEYS.videoStarterKeyTerms) },
+      { content: t(TRANSLATION_KEYS.entryScreen.videoStarterConcepts) },
+      { content: t(TRANSLATION_KEYS.entryScreen.videoStarterExamples) },
+      { content: t(TRANSLATION_KEYS.entryScreen.videoStarterKeyTerms) },
     ],
     [t],
   )
@@ -475,7 +475,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           variant="text"
           size="medium"
           onClick={handleClose}
-          aria-label={t(TRANSLATION_KEYS.ariaClose)}
+          aria-label={t(TRANSLATION_KEYS.aiDrawer.ariaClose)}
         >
           <RiCloseLine />
         </CloseButton>
@@ -511,18 +511,18 @@ const AiDrawer: FC<AiDrawerProps> = ({
               })
             }}
           >
-            <TabButton value="chat" label={t(TRANSLATION_KEYS.tabLabelChat)} />
+            <TabButton value="chat" label={t(TRANSLATION_KEYS.aiDrawer.tabLabelChat)} />
             {response?.flashcards?.length ? (
               <TabButton
                 value="flashcards"
-                label={t(TRANSLATION_KEYS.tabLabelFlashcards)}
+                label={t(TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards)}
                 onMouseDown={handleMouseDown}
                 onFocus={handleFocus}
               />
             ) : null}
             <TabButton
               value="summary"
-              label={t(TRANSLATION_KEYS.tabLabelSummary)}
+              label={t(TRANSLATION_KEYS.aiDrawer.tabLabelSummary)}
             />
           </StyledTabButtonList>
           <StyledTabPanel value="chat" keepMounted>
@@ -534,7 +534,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               entryScreenEnabled={chat?.entryScreenEnabled ?? true}
               entryScreenTitle={
                 chat.entryScreenTitle ??
-                t(TRANSLATION_KEYS.videoEntryScreenTitle)
+                t(TRANSLATION_KEYS.aiDrawer.videoEntryScreenTitle)
               }
               conversationStarters={conversationStarters}
               initialMessages={chat.initialMessages}

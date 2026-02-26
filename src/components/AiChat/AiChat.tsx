@@ -36,7 +36,7 @@ import { Tooltip } from "../Tooltip/Tooltip"
 import {
   useTranslation,
   TRANSLATION_KEYS,
-} from "../../bundles/AiDrawer/TranslationContext"
+} from "../../contexts/TranslationContext"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
@@ -314,23 +314,23 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
 
   return (
     <FeedbackRowContainer>
-      <Tooltip title={t(TRANSLATION_KEYS.feedbackGood)}>
+      <Tooltip title={t(TRANSLATION_KEYS.aiChat.feedbackGood)}>
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("like")}
-          aria-label={t(TRANSLATION_KEYS.feedbackGood)}
+          aria-label={t(TRANSLATION_KEYS.aiChat.feedbackGood)}
           aria-pressed={feedback === "like"}
         >
           {feedback === "like" ? <RiThumbUpFill /> : <RiThumbUpLine />}
         </FeedbackButton>
       </Tooltip>
-      <Tooltip title={t(TRANSLATION_KEYS.feedbackBad)}>
+      <Tooltip title={t(TRANSLATION_KEYS.aiChat.feedbackBad)}>
         <FeedbackButton
           variant="text"
           size="small"
           onClick={onFeedback("dislike")}
-          aria-label={t(TRANSLATION_KEYS.feedbackBad)}
+          aria-label={t(TRANSLATION_KEYS.aiChat.feedbackBad)}
           aria-pressed={feedback === "dislike"}
         >
           {feedback === "dislike" ? <RiThumbDownFill /> : <RiThumbDownLine />}
@@ -423,12 +423,12 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
           {
             id: "initial-0",
             role: "assistant",
-            content: t(TRANSLATION_KEYS.noAssignmentsMessage),
+            content: t(TRANSLATION_KEYS.aiChat.noAssignmentsMessage),
           },
         ])
       }
     }
-  }, [problemSetListResponse, problemSetEmptyMessages, setMessages])
+  }, [problemSetListResponse, problemSetEmptyMessages, setMessages, t])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
@@ -499,11 +499,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               control={
                 problemSetListResponse?.problem_set_titles?.length ? (
                   <AssignmentSelect
-                    label={t(TRANSLATION_KEYS.assignmentsLabel)}
+                    label={t(TRANSLATION_KEYS.aiChat.assignmentsLabel)}
                     options={[
                       {
                         value: "",
-                        label: t(TRANSLATION_KEYS.selectAssignment),
+                        label: t(TRANSLATION_KEYS.aiChat.selectAssignment),
                         disabled: true,
                       },
                       ...problemSetListResponse.problem_set_titles.map(
@@ -547,8 +547,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                           as={message.role === "user" ? "h5" : "h6"}
                         >
                           {message.role === "user"
-                            ? t(TRANSLATION_KEYS.srYouSaid)
-                            : t(TRANSLATION_KEYS.srAssistantSaid)}
+                            ? t(TRANSLATION_KEYS.aiChat.srYouSaid)
+                            : t(TRANSLATION_KEYS.aiChat.srAssistantSaid)}
                         </VisuallyHidden>
                         <Markdown useMathJax={useMathJax}>
                           {message.content}
@@ -592,7 +592,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 ) : null}
                 {error ? (
                   <Alert severity="error" closable>
-                    {t(TRANSLATION_KEYS.errorGeneric)}
+                    {t(TRANSLATION_KEYS.aiChat.errorGeneric)}
                   </Alert>
                 ) : null}
               </MessagesContainer>
@@ -619,7 +619,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   maxRows={20}
                   size="chat"
                   className={classes.input}
-                  placeholder={placeholder || t(TRANSLATION_KEYS.askQuestion)}
+                  placeholder={placeholder || t(TRANSLATION_KEYS.aiChat.askQuestion)}
                   name="message"
                   sx={{ flex: 1 }}
                   value={input}
@@ -634,13 +634,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     }
                   }}
                   inputProps={{
-                    "aria-label": t(TRANSLATION_KEYS.askQuestion),
+                    "aria-label": t(TRANSLATION_KEYS.aiChat.askQuestion),
                   }}
                   disabled={needsProblemSet}
                   endAdornment={
                     isLoading ? (
                       <AdornmentButton
-                        aria-label={t(TRANSLATION_KEYS.stop)}
+                        aria-label={t(TRANSLATION_KEYS.aiChat.stop)}
                         type="submit"
                         disabled={!stoppable}
                       >
@@ -649,7 +649,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     ) : (
                       <AdornmentButton
                         type="submit"
-                        aria-label={t(TRANSLATION_KEYS.send)}
+                        aria-label={t(TRANSLATION_KEYS.aiChat.send)}
                         disabled={needsProblemSet}
                       >
                         <StyledSendButton />
@@ -659,7 +659,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 />
               </form>
               <Disclaimer variant="body3">
-                {t(TRANSLATION_KEYS.disclaimer)}
+                {t(TRANSLATION_KEYS.aiChat.disclaimer)}
               </Disclaimer>
             </BottomSection>
             <SrAnnouncer

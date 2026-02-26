@@ -28,10 +28,6 @@ type TranslationContextValue = {
   t: TranslationFn
 }
 
-const TranslationContext = React.createContext<TranslationContextValue | null>(
-  null,
-)
-
 const getTranslation = (
   translations: Translations,
   key: TranslationKey,
@@ -45,6 +41,15 @@ const getTranslation = (
   }
   return text
 }
+
+const defaultTranslationValue: TranslationContextValue = {
+  t: (key: TranslationKey, vars?: TranslationVars) =>
+    getTranslation(DEFAULT_TRANSLATIONS, key, vars),
+}
+
+const TranslationContext = React.createContext<TranslationContextValue>(
+  defaultTranslationValue,
+)
 
 export const TranslationProvider: React.FC<{
   translations?: TranslationsInput | null
@@ -68,14 +73,7 @@ export const TranslationProvider: React.FC<{
 }
 
 export function useTranslation(): TranslationContextValue {
-  const ctx = React.useContext(TranslationContext)
-  if (ctx) {
-    return ctx
-  }
-  return {
-    t: (key: TranslationKey, vars?: TranslationVars) =>
-      getTranslation(DEFAULT_TRANSLATIONS, key, vars),
-  }
+  return React.useContext(TranslationContext)
 }
 
 export { TRANSLATION_KEYS, DEFAULT_TRANSLATIONS }
