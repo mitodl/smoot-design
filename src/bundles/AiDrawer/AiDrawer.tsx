@@ -19,7 +19,10 @@ import { FlashcardsScreen } from "./FlashcardsScreen"
 import type { Flashcard } from "./FlashcardsScreen"
 import { VERSION } from "../../VERSION"
 import { TrackingEventType, TrackingEventHandler } from "./trackingEvents"
-import { useTranslation, TRANSLATION_KEYS } from "../../contexts/TranslationContext"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../contexts/TranslationContext"
 
 type AiDrawerSettings = {
   blockType?: "problem" | "video"
@@ -511,7 +514,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
               })
             }}
           >
-            <TabButton value="chat" label={t(TRANSLATION_KEYS.aiDrawer.tabLabelChat)} />
+            <TabButton
+              value="chat"
+              label={t(TRANSLATION_KEYS.aiDrawer.tabLabelChat)}
+            />
             {response?.flashcards?.length ? (
               <TabButton
                 value="flashcards"

@@ -152,7 +152,10 @@ const EntryScreen = ({
           "aria-label": t(TRANSLATION_KEYS.aiChat.askQuestion),
         }}
         endAdornment={
-          <AdornmentButton type="submit" aria-label={t(TRANSLATION_KEYS.aiChat.send)}>
+          <AdornmentButton
+            type="submit"
+            aria-label={t(TRANSLATION_KEYS.aiChat.send)}
+          >
             <SendIcon />
           </AdornmentButton>
         }

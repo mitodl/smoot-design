@@ -4,7 +4,10 @@ import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
 import { RiArrowRightLine, RiArrowLeftLine } from "@remixicon/react"
-import { useTranslation, TRANSLATION_KEYS } from "../../contexts/TranslationContext"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../contexts/TranslationContext"
 
 export type Flashcard = {
   question: string

@@ -619,7 +619,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                   maxRows={20}
                   size="chat"
                   className={classes.input}
-                  placeholder={placeholder || t(TRANSLATION_KEYS.aiChat.askQuestion)}
+                  placeholder={
+                    placeholder || t(TRANSLATION_KEYS.aiChat.askQuestion)
+                  }
                   name="message"
                   sx={{ flex: 1 }}
                   value={input}
