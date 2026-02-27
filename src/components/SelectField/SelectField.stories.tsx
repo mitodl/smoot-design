@@ -87,7 +87,7 @@ export const States: Story = {
     return (
       <Grid container spacing={2} alignItems="top" maxWidth="400px">
         {STATES.map(({ label, extraProps }) => (
-          <>
+          <React.Fragment key={label}>
             <Grid size={{ xs: 4 }}>{label}</Grid>
             <Grid size={{ xs: 8 }}>
               <SelectField {...props} {...extraProps}>
@@ -102,7 +102,7 @@ export const States: Story = {
                 ))}
               </SelectField>
             </Grid>
-          </>
+          </React.Fragment>
         ))}
       </Grid>
     )

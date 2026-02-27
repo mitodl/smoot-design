@@ -4,6 +4,10 @@ import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
 import { RiArrowRightLine, RiArrowLeftLine } from "@remixicon/react"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../contexts/TranslationContext"
 
 export type Flashcard = {
   question: string
@@ -44,6 +48,7 @@ const Page = styled.div(({ theme }) => ({
 
 const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
   ({ content, ...others }, ref) => {
+    const { t } = useTranslation()
     const [screen, setScreen] = useState<0 | 1>(0)
 
     const handleClick = () => {
@@ -61,12 +66,14 @@ const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
         <Typography variant="h5">
           {screen === 0 ? (
             <>
-              <span aria-label="Question:">Q: </span>
+              <span aria-label={t(TRANSLATION_KEYS.flashcards.questionAria)}>
+                {t(TRANSLATION_KEYS.flashcards.question)}
+              </span>
               {content.question}
             </>
           ) : (
             <>
-              <span>Answer: </span>
+              <span>{t(TRANSLATION_KEYS.flashcards.answer)}</span>
               {content.answer}
             </>
           )}
@@ -85,6 +92,7 @@ export const FlashcardsScreen = ({
   flashcards: Flashcard[]
   wasKeyboardFocus: boolean
 }) => {
+  const { t } = useTranslation()
   const [cardIndex, setCardIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const flashcardRef = useRef<HTMLButtonElement>(null)
@@ -122,7 +130,10 @@ export const FlashcardsScreen = ({
     <Container ref={containerRef}>
       <div
         role="region"
-        aria-label={`Flashcard ${cardIndex + 1} of ${flashcards.length}`}
+        aria-label={t(TRANSLATION_KEYS.flashcards.count, {
+          index: cardIndex + 1,
+          total: flashcards.length,
+        })}
       >
         <Flashcard
           key={`flashcard-${cardIndex}`}
@@ -137,7 +148,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label="Previous card"
+          aria-label={t(TRANSLATION_KEYS.flashcards.previous)}
         >
           <RiArrowLeftLine aria-hidden />
         </ActionButton>
@@ -151,7 +162,7 @@ export const FlashcardsScreen = ({
           variant="secondary"
           color="secondary"
           size="small"
-          aria-label="Next card"
+          aria-label={t(TRANSLATION_KEYS.flashcards.next)}
         >
           <RiArrowRightLine aria-hidden />
         </ActionButton>
