@@ -21,6 +21,7 @@ export const TRANSLATION_KEYS = {
     srAssistantSaid: "aiChat.srAssistantSaid",
     noAssignmentsMessage: "aiChat.noAssignmentsMessage",
     errorGeneric: "aiChat.errorGeneric",
+    errorHiddenResponse: "aiChat.errorHiddenResponse",
     askQuestion: "aiChat.askQuestion",
     stop: "aiChat.stop",
     send: "aiChat.send",
@@ -65,6 +66,8 @@ export const DEFAULT_TRANSLATIONS: Record<TranslationKey, string> = {
   [TRANSLATION_KEYS.aiChat.noAssignmentsMessage]:
     "Hi! It looks like there are no assignments available right now. I'm here to help when there is an assignment ready to start.",
   [TRANSLATION_KEYS.aiChat.errorGeneric]: "An unexpected error has occurred.",
+  [TRANSLATION_KEYS.aiChat.errorHiddenResponse]:
+    "Sorry, an error occurred. Please try again.",
   [TRANSLATION_KEYS.aiChat.askQuestion]: "Ask a question",
   [TRANSLATION_KEYS.aiChat.stop]: "Stop",
   [TRANSLATION_KEYS.aiChat.send]: "Send",

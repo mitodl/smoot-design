@@ -58,7 +58,7 @@ const LastMessageData = () => {
       <ul>
         {Object.entries(data).map(([key, value]) => (
           <li key={key}>
-            <strong>{key}</strong>: {value}
+            <strong>{key}</strong>: {JSON.stringify(value)}
           </li>
         ))}
       </ul>

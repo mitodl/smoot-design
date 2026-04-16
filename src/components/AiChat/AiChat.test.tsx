@@ -382,6 +382,31 @@ describe("AiChat", () => {
       }),
     )
   })
+
+  test("Displays a generic alert for hidden response errors instead of feedback controls", async () => {
+    setup()
+
+    server.use(
+      http.post(API_URL, async () => {
+        return HttpResponse.text(
+          '<!-- {"error":{"message":"An error occurred, please try again"},"checkpoint_pk":123,"thread_id":"f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->',
+        )
+      }),
+    )
+
+    await user.click(getConversationStarters()[0])
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent(
+      "Sorry, an error occurred. Please try again.",
+    )
+    expect(
+      screen.queryByRole("button", { name: "Good response" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Bad response" }),
+    ).not.toBeInTheDocument()
+  })
 })
 
 test("replaceMathjax replaces unsupported MathJax syntax", () => {
