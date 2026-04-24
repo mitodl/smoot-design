@@ -290,6 +290,16 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
+const hasMessageError = (message: AiChatMessage): boolean => {
+  const errorMessage = message.data?.error?.message
+
+  if (typeof errorMessage !== "string") {
+    return false
+  }
+
+  return errorMessage.trim().length > 0
+}
+
 const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
   const { submitFeedback } = useAiChat()
   const { t } = useTranslation()
@@ -308,7 +318,11 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
     [message.id, feedback, submitFeedback],
   )
 
-  if (!message.data?.checkpoint_pk || !message.data?.thread_id) {
+  if (
+    hasMessageError(message) ||
+    !message.data?.checkpoint_pk ||
+    !message.data?.thread_id
+  ) {
     return null
   }
 
@@ -532,6 +546,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 }}
               >
                 {messages.map((message: Message, index: number) => {
+                  const aiChatMessage = message as AiChatMessage
+                  const hasError = hasMessageError(aiChatMessage)
+
                   return (
                     <MessageRow
                       key={index}
@@ -550,10 +567,18 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             ? t(TRANSLATION_KEYS.aiChat.srYouSaid)
                             : t(TRANSLATION_KEYS.aiChat.srAssistantSaid)}
                         </VisuallyHidden>
-                        <Markdown useMathJax={useMathJax}>
-                          {message.content}
-                        </Markdown>
-                        <FeedbackButtons message={message as AiChatMessage} />
+                        {message.role === "assistant" && hasError ? (
+                          <Alert severity="error" closable>
+                            {t(TRANSLATION_KEYS.aiChat.errorHiddenResponse)}
+                          </Alert>
+                        ) : (
+                          <>
+                            <Markdown useMathJax={useMathJax}>
+                              {message.content}
+                            </Markdown>
+                            <FeedbackButtons message={aiChatMessage} />
+                          </>
+                        )}
                       </Message>
                     </MessageRow>
                   )

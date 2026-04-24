@@ -8,6 +8,9 @@ type Role = "assistant" | "user" | "data" | "system"
 type MessageData = {
   checkpoint_pk?: string
   thread_id?: string
+  error?: {
+    message?: string
+  }
 }
 
 type AiChatMessage = {
