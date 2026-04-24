@@ -290,7 +290,7 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
-const getMessageError = (message: AiChatMessage): boolean => {
+const hasMessageError = (message: AiChatMessage): boolean => {
   const errorMessage = message.data?.error?.message
 
   if (typeof errorMessage !== "string") {
@@ -319,7 +319,7 @@ const FeedbackButtons: FC<{ message: AiChatMessage }> = ({ message }) => {
   )
 
   if (
-    getMessageError(message) ||
+    hasMessageError(message) ||
     !message.data?.checkpoint_pk ||
     !message.data?.thread_id
   ) {
@@ -547,7 +547,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               >
                 {messages.map((message: Message, index: number) => {
                   const aiChatMessage = message as AiChatMessage
-                  const hasMessageError = getMessageError(aiChatMessage)
+                  const hasError = hasMessageError(aiChatMessage)
 
                   return (
                     <MessageRow
@@ -567,7 +567,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             ? t(TRANSLATION_KEYS.aiChat.srYouSaid)
                             : t(TRANSLATION_KEYS.aiChat.srAssistantSaid)}
                         </VisuallyHidden>
-                        {message.role === "assistant" && hasMessageError ? (
+                        {message.role === "assistant" && hasError ? (
                           <Alert severity="error" closable>
                             {t(TRANSLATION_KEYS.aiChat.errorHiddenResponse)}
                           </Alert>
