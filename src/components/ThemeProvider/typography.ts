@@ -60,7 +60,7 @@ const globalSettings: ThemeOptions["typography"] = {
   },
   h5: {
     fontFamily: "neue-haas-grotesk-text, sans-serif",
-    fontWeight: fontWeights.text.medium,
+    fontWeight: fontWeights.text.bold,
     fontStyle: "normal",
     fontSize: pxToRem(18),
     lineHeight: pxToRem(26),
