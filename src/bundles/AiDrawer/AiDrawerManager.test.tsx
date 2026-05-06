@@ -304,6 +304,31 @@ describe("AiDrawerManager", () => {
   )
 
   test(
+    "Flashcard next/previous buttons do not steal focus from the button that was clicked",
+    server.boundary(async () => {
+      await setup({
+        type: "smoot-design::ai-drawer-open",
+        payload: {
+          blockType: "video",
+          blockUsageKey: "test-video-focus",
+          chat: { apiUrl: TEST_API_STREAMING },
+          summary: { apiUrl: CONTENT_FILE_URL },
+        },
+      })
+
+      await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+      const nextBtn = screen.getByRole("button", { name: "Next card" })
+      await user.click(nextBtn)
+      expect(document.activeElement).toBe(nextBtn)
+
+      const prevBtn = screen.getByRole("button", { name: "Previous card" })
+      await user.click(prevBtn)
+      expect(document.activeElement).toBe(prevBtn)
+    }),
+  )
+
+  test(
     "Flashcard shows content and can be keyboard navigated and cycles",
     server.boundary(async () => {
       await setup({
@@ -322,7 +347,8 @@ describe("AiDrawerManager", () => {
 
       await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
-      screen.getByRole("button", { name: "Question: Test question 1?" })
+      const q1 = screen.getByRole("button", { name: "Question: Test question 1?" })
+      await act(() => { q1.focus() })
 
       await user.keyboard("{enter}")
 
