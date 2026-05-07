@@ -702,7 +702,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               isLoading={isLoading}
               loadingMessages={srLoadingMessages}
               message={
-                lastMsg?.role === "assistant"
+                lastMsg?.role === "assistant" && !isLoading
                   ? stripMarkdown(lastMsg.content)
                   : ""
               }
