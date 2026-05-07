@@ -401,20 +401,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
   )
   const { response } = useContentFetch(settings?.summary?.apiUrl)
 
-  const [_wasKeyboardFocus, setWasKeyboardFocus] = useState(false)
-  const mouseInteracted = useRef(false)
-
-  const handleMouseDown = () => {
-    mouseInteracted.current = true
-  }
-
-  const handleFocus = () => {
-    if (!mouseInteracted.current) {
-      setWasKeyboardFocus(true)
-    }
-    mouseInteracted.current = false
-  }
-
   const handleClose = () => {
     onClose?.()
     onTrackingEvent?.({ type: TrackingEventType.Close })
@@ -504,6 +490,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
         <TabContext value={tab}>
           <StyledTabButtonList
             styleVariant="chat"
+            selectionFollowsFocus
             onChange={(e, tab) => {
               setTab(tab)
               onTrackingEvent?.({
@@ -522,8 +509,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
               <TabButton
                 value="flashcards"
                 label={t(TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards)}
-                onMouseDown={handleMouseDown}
-                onFocus={handleFocus}
               />
             ) : null}
             <TabButton
@@ -552,10 +537,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           </StyledTabPanel>
           {response?.flashcards?.length ? (
             <StyledTabPanel value="flashcards">
-              <FlashcardsScreen
-                flashcards={response?.flashcards}
-                wasKeyboardFocus={_wasKeyboardFocus}
-              />
+              <FlashcardsScreen flashcards={response?.flashcards} />
             </StyledTabPanel>
           ) : null}
           <StyledTabPanel value="summary">

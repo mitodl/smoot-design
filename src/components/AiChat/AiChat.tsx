@@ -37,6 +37,7 @@ import {
   useTranslation,
   TRANSLATION_KEYS,
 } from "../../contexts/TranslationContext"
+import { stripMarkdown } from "../../utils/string"
 
 const ConditionalMathJaxWrapper: React.FC<{
   useMathJax: boolean
@@ -689,10 +690,22 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                 {t(TRANSLATION_KEYS.aiChat.disclaimer)}
               </Disclaimer>
             </BottomSection>
+            {/*
+             * Separate aria-live region rather than marking the main message
+             * area as live. LLM responses are streamed word-by-word; a live
+             * region on the message area would announce every token as it
+             * arrives, which is very noisy. This region only announces once
+             * streaming is complete. Raw markdown is stripped so screen
+             * readers don't read "star star bold star star".
+             */}
             <SrAnnouncer
               isLoading={isLoading}
               loadingMessages={srLoadingMessages}
-              message={lastMsg?.role === "assistant" ? lastMsg?.content : ""}
+              message={
+                lastMsg?.role === "assistant" && !isLoading
+                  ? stripMarkdown(lastMsg.content)
+                  : ""
+              }
             />
           </ChatContainer>
         </ChatScreen>
