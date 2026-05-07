@@ -46,10 +46,7 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const Flashcard = React.forwardRef<
-  HTMLButtonElement,
-  { content: Flashcard }
->(
+const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
   ({ content }, ref) => {
     const { t } = useTranslation()
     const [screen, setScreen] = useState<0 | 1>(0)
@@ -129,9 +126,7 @@ export const FlashcardsScreen = ({
           total: flashcards.length,
         })}
       >
-        <Flashcard
-          content={flashcards[cardIndex]}
-        />
+        <Flashcard content={flashcards[cardIndex]} />
       </div>
       <Navigation>
         <ActionButton

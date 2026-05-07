@@ -347,8 +347,12 @@ describe("AiDrawerManager", () => {
 
       await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
-      const q1 = screen.getByRole("button", { name: "Question: Test question 1?" })
-      await act(() => { q1.focus() })
+      const q1 = screen.getByRole("button", {
+        name: "Question: Test question 1?",
+      })
+      await act(() => {
+        q1.focus()
+      })
 
       await user.keyboard("{enter}")
 

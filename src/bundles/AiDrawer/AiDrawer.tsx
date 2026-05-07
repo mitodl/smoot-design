@@ -537,9 +537,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           </StyledTabPanel>
           {response?.flashcards?.length ? (
             <StyledTabPanel value="flashcards">
-              <FlashcardsScreen
-                flashcards={response?.flashcards}
-              />
+              <FlashcardsScreen flashcards={response?.flashcards} />
             </StyledTabPanel>
           ) : null}
           <StyledTabPanel value="summary">
