@@ -100,7 +100,6 @@ const Flashcard = ({
   )
 }
 
-
 export const FlashcardsScreen = ({
   flashcards,
 }: {
@@ -169,8 +168,10 @@ export const FlashcardsScreen = ({
   return (
     <Container>
       <SrOnly>
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
-        <div role="application" tabIndex={0} // Make the div focusable to receive keyboard events
+        {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+        <div
+          role="application"
+          tabIndex={0} // Make the div focusable to capture keyboard events
           aria-label={t(TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards)}
           onFocus={() => {
             setAppFocused(true)
@@ -179,6 +180,7 @@ export const FlashcardsScreen = ({
           onBlur={() => setAppFocused(false)}
           onKeyDown={handleKeyDown}
         />
+        {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
         <span aria-live="polite">{liveAnnouncement}</span>
       </SrOnly>
       <FlashcardPanel $focused={appFocused}>
