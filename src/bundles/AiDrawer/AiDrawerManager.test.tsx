@@ -304,7 +304,33 @@ describe("AiDrawerManager", () => {
   )
 
   test(
-    "Flashcard shows content and can be keyboard navigated and cycles",
+    "Flashcard next/previous buttons keep focus when not at boundary, and move focus to the other button when at boundary",
+    server.boundary(async () => {
+      await setup({
+        type: "smoot-design::ai-drawer-open",
+        payload: {
+          blockType: "video",
+          blockUsageKey: "test-video-focus",
+          chat: { apiUrl: TEST_API_STREAMING },
+          summary: { apiUrl: CONTENT_FILE_URL },
+        },
+      })
+
+      await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+      const nextBtn = screen.getByRole("button", { name: "Next card" })
+      await user.click(nextBtn)
+      expect(document.activeElement).toBe(nextBtn)
+
+      const prevBtn = screen.getByRole("button", { name: "Previous card" })
+      await user.click(prevBtn)
+      // Previous is now disabled (back to card 1), so focus moves to Next
+      expect(document.activeElement).toBe(nextBtn)
+    }),
+  )
+
+  test(
+    "Flashcard shows content and can be keyboard navigated",
     server.boundary(async () => {
       await setup({
         type: "smoot-design::ai-drawer-open",
@@ -322,32 +348,34 @@ describe("AiDrawerManager", () => {
 
       await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
-      screen.getByRole("button", { name: "Question: Test question 1?" })
+      const appWidget = screen.getByRole("application", { name: "Flashcards" })
+      await act(() => {
+        appWidget.focus()
+      })
 
       await user.keyboard("{enter}")
-
       screen.getByRole("button", { name: "Answer: Test answer 1" })
 
       await user.keyboard("{arrowright}")
-
       screen.getByRole("button", { name: "Question: Test question 2?" })
 
       await user.keyboard("{enter}")
-
       screen.getByRole("button", { name: "Answer: Test answer 2" })
 
       await user.keyboard("{arrowleft}")
-
       screen.getByRole("button", { name: "Question: Test question 1?" })
 
+      // ArrowLeft at first card does nothing (no wrap-around)
       await user.keyboard("{arrowleft}")
+      screen.getByRole("button", { name: "Question: Test question 1?" })
 
+      // Navigate to last card
+      await user.keyboard("{arrowright}")
+      await user.keyboard("{arrowright}")
       screen.getByRole("button", { name: "Question: Test question 3?" })
 
+      // ArrowRight at last card does nothing (no wrap-around)
       await user.keyboard("{arrowright}")
-      await user.keyboard("{arrowright}")
-      await user.keyboard("{arrowright}")
-
       screen.getByRole("button", { name: "Question: Test question 3?" })
     }),
   )
