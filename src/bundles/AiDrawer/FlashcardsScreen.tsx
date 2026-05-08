@@ -33,6 +33,16 @@ const FlashcardContainer = styled.button(({ theme }) => ({
   background: "none",
 }))
 
+const FlashcardPanel = styled.div<{ $focused: boolean }>(
+  ({ theme, $focused }) => ({
+    ...($focused && {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: 4,
+      borderRadius: 8,
+    }),
+  }),
+)
+
 const Navigation = styled.div({
   display: "flex",
   justifyContent: "space-between",
@@ -46,49 +56,50 @@ const Page = styled.div(({ theme }) => ({
   ...theme.typography.body2,
 }))
 
-const Flashcard = React.forwardRef<HTMLButtonElement, { content: Flashcard }>(
-  ({ content }, ref) => {
-    const { t } = useTranslation()
-    const [screen, setScreen] = useState<0 | 1>(0)
+const SrOnly = styled.div({
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: 0,
+})
 
-    useEffect(() => {
-      setScreen(0)
-    }, [content])
+const Flashcard = ({
+  content,
+  screen,
+  onClick,
+}: {
+  content: Flashcard
+  screen: 0 | 1
+  onClick: () => void
+}) => {
+  const { t } = useTranslation()
 
-    const handleClick = () => {
-      setScreen((current) => (current === 0 ? 1 : 0))
-    }
+  return (
+    <FlashcardContainer type="button" onClick={onClick} tabIndex={-1}>
+      <Typography variant="h5">
+        {screen === 0 ? (
+          <>
+            <span aria-label={t(TRANSLATION_KEYS.flashcards.questionAria)}>
+              {t(TRANSLATION_KEYS.flashcards.question)}
+            </span>
+            {content.question}
+          </>
+        ) : (
+          <>
+            <span>{t(TRANSLATION_KEYS.flashcards.answer)}</span>
+            {content.answer}
+          </>
+        )}
+      </Typography>
+    </FlashcardContainer>
+  )
+}
 
-    return (
-      <FlashcardContainer
-        ref={ref}
-        type="button"
-        onClick={handleClick}
-        tabIndex={0}
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <Typography variant="h5">
-          {screen === 0 ? (
-            <>
-              <span aria-label={t(TRANSLATION_KEYS.flashcards.questionAria)}>
-                {t(TRANSLATION_KEYS.flashcards.question)}
-              </span>
-              {content.question}
-            </>
-          ) : (
-            <>
-              <span>{t(TRANSLATION_KEYS.flashcards.answer)}</span>
-              {content.answer}
-            </>
-          )}
-        </Typography>
-      </FlashcardContainer>
-    )
-  },
-)
-
-Flashcard.displayName = "Flashcard"
 
 export const FlashcardsScreen = ({
   flashcards,
@@ -97,40 +108,90 @@ export const FlashcardsScreen = ({
 }) => {
   const { t } = useTranslation()
   const [cardIndex, setCardIndex] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [screen, setScreen] = useState<0 | 1>(0)
+  const [appFocused, setAppFocused] = useState(false)
+  const [liveAnnouncement, setLiveAnnouncement] = useState("")
+  const prevButtonRef = useRef<HTMLButtonElement>(null)
+  const nextButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!containerRef.current?.contains(document.activeElement)) return
-      if (e.key === "ArrowRight") {
-        e.preventDefault()
-        setCardIndex((prev) => (prev + 1) % flashcards.length)
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault()
-        setCardIndex(
-          (prev) => (prev - 1 + flashcards.length) % flashcards.length,
-        )
-      }
-    }
+    setScreen(0)
+  }, [cardIndex])
 
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [flashcards])
+  const cardAnnouncement = (index: number) =>
+    `${t(TRANSLATION_KEYS.flashcards.count, { index: index + 1, total: flashcards.length })}: ${flashcards[index].question}`
+
+  const goToPrev = () => {
+    const next = Math.max(cardIndex - 1, 0)
+    setCardIndex(next)
+    setLiveAnnouncement(cardAnnouncement(next))
+    if (next === 0) nextButtonRef.current?.focus()
+  }
+
+  const goToNext = () => {
+    const next = Math.min(cardIndex + 1, flashcards.length - 1)
+    setCardIndex(next)
+    setLiveAnnouncement(cardAnnouncement(next))
+    if (next === flashcards.length - 1) prevButtonRef.current?.focus()
+  }
+
+  const handleFlip = () => {
+    const next = screen === 0 ? 1 : 0
+    setScreen(next)
+    setLiveAnnouncement(
+      next === 0
+        ? `${t(TRANSLATION_KEYS.flashcards.questionAria)} ${flashcards[cardIndex].question}`
+        : `${t(TRANSLATION_KEYS.flashcards.answer)} ${flashcards[cardIndex].answer}`,
+    )
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault()
+      setCardIndex((prev) => {
+        const next = Math.min(prev + 1, flashcards.length - 1)
+        setLiveAnnouncement(cardAnnouncement(next))
+        return next
+      })
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault()
+      setCardIndex((prev) => {
+        const next = Math.max(prev - 1, 0)
+        setLiveAnnouncement(cardAnnouncement(next))
+        return next
+      })
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleFlip()
+    }
+  }
 
   return (
-    <Container ref={containerRef}>
-      <div
-        role="region"
-        aria-label={t(TRANSLATION_KEYS.flashcards.count, {
-          index: cardIndex + 1,
-          total: flashcards.length,
-        })}
-      >
-        <Flashcard content={flashcards[cardIndex]} />
-      </div>
+    <Container>
+      <SrOnly>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+        <div role="application" tabIndex={0} // Make the div focusable to receive keyboard events
+          aria-label={t(TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards)}
+          onFocus={() => {
+            setAppFocused(true)
+            setLiveAnnouncement(cardAnnouncement(cardIndex))
+          }}
+          onBlur={() => setAppFocused(false)}
+          onKeyDown={handleKeyDown}
+        />
+        <span aria-live="polite">{liveAnnouncement}</span>
+      </SrOnly>
+      <FlashcardPanel $focused={appFocused}>
+        <Flashcard
+          content={flashcards[cardIndex]}
+          screen={screen}
+          onClick={handleFlip}
+        />
+      </FlashcardPanel>
       <Navigation>
         <ActionButton
-          onClick={() => setCardIndex(cardIndex - 1)}
+          ref={prevButtonRef}
+          onClick={goToPrev}
           disabled={cardIndex === 0}
           variant="secondary"
           color="secondary"
@@ -139,12 +200,12 @@ export const FlashcardsScreen = ({
         >
           <RiArrowLeftLine aria-hidden />
         </ActionButton>
-        {/* Hide the index count here. It's used as a region label above. */}
         <Page aria-hidden>
           {cardIndex + 1} / {flashcards.length}
         </Page>
         <ActionButton
-          onClick={() => setCardIndex(cardIndex + 1)}
+          ref={nextButtonRef}
+          onClick={goToNext}
           disabled={cardIndex === flashcards.length - 1}
           variant="secondary"
           color="secondary"
