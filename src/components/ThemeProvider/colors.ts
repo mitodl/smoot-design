@@ -10,6 +10,7 @@ const colors = {
   silverGrayLight: "#B8C2CC",
   lightGray2: "#DDE1E6",
   lightGray1: "#F3F4F8",
+  lightGray0: "#F7F7F7",
   navGray: "#303337",
   darkPink: "#750062",
   pink: "#FF14F0",

@@ -21,6 +21,7 @@ export interface CustomTheme {
     silverGrayLight: string
     lightGray2: string
     lightGray1: string
+    lightGray0: string
     navGray: string
     darkPink: string
     pink: string
