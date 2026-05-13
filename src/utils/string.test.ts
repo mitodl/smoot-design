@@ -59,6 +59,18 @@ describe("stripMarkdown", () => {
     expect(result).toContain("code")
   })
 
+  it("removes HTML comments", () => {
+    expect(stripMarkdown('text <!-- comment --> more text')).toBe(
+      "text  more text",
+    )
+    expect(
+      stripMarkdown(
+        'Response text\n\n<!-- {"thread_id": "abc", "checkpoint_pk": 1} -->',
+      ),
+    ).toBe("Response text")
+    expect(stripMarkdown("<!-- multiline\ncomment -->text")).toBe("text")
+  })
+
   it("returns plain text unchanged", () => {
     expect(stripMarkdown("plain text with no markdown")).toBe(
       "plain text with no markdown",
