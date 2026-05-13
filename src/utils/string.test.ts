@@ -60,7 +60,7 @@ describe("stripMarkdown", () => {
   })
 
   it("removes HTML comments", () => {
-    expect(stripMarkdown('text <!-- comment --> more text')).toBe(
+    expect(stripMarkdown("text <!-- comment --> more text")).toBe(
       "text  more text",
     )
     expect(
