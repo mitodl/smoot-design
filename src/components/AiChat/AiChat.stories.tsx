@@ -321,3 +321,66 @@ export const ScrollContainer: Story = {
 
   render: (args) => <ScrollComponent {...args} />,
 }
+
+/**
+ * This story verifies that HTML comments embedded in AI responses (used as a
+ * metadata side-channel) are stripped from the screen reader announcement.
+ *
+ * The dashed yellow box at the bottom of the chat shows the exact text that
+ * would be announced to screen reader users. It should NOT contain anything
+ * from the `<!-- ... -->` comment in the assistant message.
+ */
+export const ScreenReaderAnnouncementWithHtmlComments: Story = {
+  name: "Screen Reader: HTML Comments Stripped",
+  decorators: [
+    (Story) => (
+      <>
+        {/* eslint-disable-next-line react/no-danger */}
+        <style>{`
+          [aria-live] {
+            clip-path: none !important;
+            clip: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+            position: static !important;
+            white-space: normal !important;
+            width: auto !important;
+            border: 2px dashed #e0a800 !important;
+            padding: 8px !important;
+            margin-top: 8px !important;
+            background: #fffde7 !important;
+            font-style: italic;
+            font-size: 0.875rem;
+          }
+        `}</style>
+        <p style={{ margin: "0 0 8px", fontSize: "0.875rem", color: "#555" }}>
+          The dashed yellow box below is the screen reader live region. It
+          should show the response text <strong>without</strong> the HTML
+          comment.
+        </p>
+        <Story />
+      </>
+    ),
+  ],
+  args: {
+    entryScreenEnabled: false,
+    conversationStarters: [],
+    initialMessages: [
+      {
+        role: "user",
+        content: "Explain the role of weather variables in wine pricing.",
+      },
+      {
+        role: "assistant",
+        content: `Weather variables play a crucial role as independent variables in the wine pricing model.
+
+1. **Temperature**: Higher average growing season temperatures lead to better grape quality and higher prices.
+2. **Rainfall**: Precipitation during the harvest season affects yield and concentration.
+
+Overall, weather variables provide a quantitative basis for predicting wine prices from empirical data.
+
+<!-- {"metadata": {"search_url": null}, "checkpoint_pk": 44302, "thread_id": "c58f04ccb91643bfa490bdc81e189738"} -->`,
+      },
+    ],
+  },
+}

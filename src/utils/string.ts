@@ -2,8 +2,15 @@
  * Stripping markdown for screen reader announcements.
  * Not a full parser — handles the patterns common in LLM responses.
  */
-export const stripMarkdown = (text: string): string =>
-  text
+export const stripMarkdown = (text: string): string => {
+  let sanitized = text
+  let previous: string
+  do {
+    previous = sanitized
+    sanitized = sanitized.replace(/<!--[\s\S]*?-->/g, "")
+  } while (sanitized !== previous)
+
+  return sanitized
     .replace(/```[\s\S]*?```/g, "")
     .replace(/`([^`]+)`/g, "$1")
     .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
@@ -17,6 +24,7 @@ export const stripMarkdown = (text: string): string =>
     .replace(/^>\s+/gm, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim()
+}
 
 export const contentHash = (str: string) => {
   let hash = 5381
