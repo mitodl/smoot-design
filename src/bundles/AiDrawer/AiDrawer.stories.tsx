@@ -101,6 +101,8 @@ export const EntryScreenStory: Story = {
 
 /**
  * The chat entry screen is shown by default for the video blocks Tutor drawer.
+ *
+ * The video chat renders math with MathJax, demonstrated by the initial message below.
  */
 export const VideoStory: Story = {
   args: {
@@ -109,6 +111,18 @@ export const VideoStory: Story = {
       chat: {
         apiUrl: TEST_API_STREAMING,
         conversationStarters: STARTERS,
+        initialMessages: [
+          {
+            role: "assistant",
+            content: `In the variable-angle random walk model, the mean-squared end-to-end distance of a polymer chain with $N$ monomers of length $l$ is:
+
+$$
+\\langle R^2 \\rangle = N l^2
+$$
+
+so the typical chain size scales as $\\sqrt{\\langle R^2 \\rangle} = l\\sqrt{N}$.`,
+          },
+        ],
       },
       summary: {
         apiUrl: CONTENT_FILE_URL,
