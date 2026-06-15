@@ -491,7 +491,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           <StyledTabButtonList
             styleVariant="chat"
             selectionFollowsFocus
-            onChange={(e, tab) => {
+            onChange={(_e, tab) => {
               setTab(tab)
               onTrackingEvent?.({
                 type: TrackingEventType.TabChange,
@@ -530,7 +530,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               conversationStarters={conversationStarters}
               initialMessages={chat.initialMessages}
               hasTabs={hasTabs}
-              needsMathJax={false}
+              needsMathJax={true}
               variant={variant}
               onTrackingEvent={onTrackingEvent}
             />
@@ -574,15 +574,17 @@ const AiDrawer: FC<AiDrawerProps> = ({
     <Drawer
       data-smoot-version={VERSION}
       className={className}
-      PaperProps={{
-        ref: paperRefCallback,
-        sx: {
-          width: "900px",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          padding: {
-            xs: "0 16px",
-            md: "0 32px",
+      slotProps={{
+        paper: {
+          ref: paperRefCallback,
+          sx: {
+            width: "900px",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            padding: {
+              xs: "0 16px",
+              md: "0 32px",
+            },
           },
         },
       }}
