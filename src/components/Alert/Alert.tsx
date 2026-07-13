@@ -18,30 +18,35 @@ import {
 } from "@remixicon/react"
 import { ActionButton } from "../Button/ActionButton"
 
-const withTransparency = (color: string, opacity: number) => {
-  return `color-mix(in srgb, ${color} ${opacity}%, transparent)`
+/**
+ * Mixes color with solid white so the result is opaque, rather than using
+ * CSS transparency, which would let whatever's behind the alert show
+ * through.
+ */
+const withOpaqueTint = (theme: Theme, color: string, opacity: number) => {
+  return `color-mix(in srgb, ${color} ${opacity}%, ${theme.custom.colors.white})`
 }
 
 const getColor = (theme: Theme, severity: AlertColor) => {
   const colors = {
     info: {
-      borderColor: withTransparency(theme.custom.colors.blue, 50),
-      backgroundColor: withTransparency(theme.custom.colors.blue, 10),
+      borderColor: withOpaqueTint(theme, theme.custom.colors.blue, 50),
+      backgroundColor: withOpaqueTint(theme, theme.custom.colors.blue, 10),
       iconFill: theme.custom.colors.blue,
     },
     warning: {
-      borderColor: withTransparency(theme.custom.colors.orange, 50),
-      backgroundColor: withTransparency(theme.custom.colors.orange, 15),
+      borderColor: withOpaqueTint(theme, theme.custom.colors.orange, 50),
+      backgroundColor: withOpaqueTint(theme, theme.custom.colors.orange, 15),
       iconFill: theme.custom.colors.orange,
     },
     error: {
-      borderColor: withTransparency(theme.custom.colors.red, 15),
-      backgroundColor: withTransparency(theme.custom.colors.brightRed, 10),
+      borderColor: withOpaqueTint(theme, theme.custom.colors.red, 15),
+      backgroundColor: withOpaqueTint(theme, theme.custom.colors.brightRed, 10),
       iconFill: theme.custom.colors.red,
     },
     success: {
-      borderColor: withTransparency(theme.custom.colors.green, 20),
-      backgroundColor: withTransparency(theme.custom.colors.green, 4),
+      borderColor: withOpaqueTint(theme, theme.custom.colors.green, 20),
+      backgroundColor: withOpaqueTint(theme, theme.custom.colors.green, 4),
       iconFill: theme.custom.colors.green,
     },
   }

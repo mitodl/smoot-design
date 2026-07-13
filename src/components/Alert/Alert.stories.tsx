@@ -84,3 +84,38 @@ export const Variants: Story = {
     </Stack>
   ),
 }
+
+export const OnDarkBackground: Story = {
+  argTypes: {
+    severity: {
+      table: {
+        disable: true,
+      },
+    },
+    closable: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+  render: (args) => (
+    <Stack
+      direction="column"
+      gap={2}
+      sx={{ my: 2, p: 2, backgroundColor: "#212326" }}
+    >
+      <Alert {...args} severity="info">
+        Alert with severity "info"
+      </Alert>
+      <Alert {...args} severity="success">
+        Alert with severity "success"
+      </Alert>
+      <Alert {...args} severity="warning">
+        Alert with severity "warning"
+      </Alert>
+      <Alert {...args} severity="error">
+        Alert with severity "error"
+      </Alert>
+    </Stack>
+  ),
+}
