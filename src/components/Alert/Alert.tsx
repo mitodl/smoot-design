@@ -131,6 +131,11 @@ type AlertProps = {
    * An optional label to display before the alert content
    */
   label?: React.ReactNode
+  /**
+   * If set, the alert will automatically hide itself after this many
+   * milliseconds. The timer resets whenever the alert becomes visible.
+   */
+  autoHideDuration?: number
 }
 
 const Alert: React.FC<AlertProps> = ({
@@ -141,6 +146,7 @@ const Alert: React.FC<AlertProps> = ({
   className,
   onClose,
   label,
+  autoHideDuration,
 }) => {
   const [_visible, setVisible] = React.useState(visible)
   const id = React.useId()
@@ -152,6 +158,19 @@ const Alert: React.FC<AlertProps> = ({
   React.useEffect(() => {
     setVisible(visible)
   }, [visible])
+
+  React.useEffect(() => {
+    if (!_visible || !autoHideDuration) {
+      return undefined
+    }
+    const timeoutId = setTimeout(() => {
+      setVisible(false)
+      onClose?.()
+    }, autoHideDuration)
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [_visible, autoHideDuration, onClose])
 
   if (!_visible) {
     return null

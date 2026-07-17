@@ -1,6 +1,7 @@
 import * as React from "react"
 import type { Meta, StoryObj } from "@storybook/nextjs"
 import { Alert } from "./Alert"
+import { Button } from "../Button/Button"
 import Stack from "@mui/material/Stack"
 
 const meta: Meta<typeof Alert> = {
@@ -83,6 +84,27 @@ export const Variants: Story = {
       </Alert>
     </Stack>
   ),
+}
+
+export const AutoHide: Story = {
+  args: {
+    severity: "success",
+    closable: true,
+    autoHideDuration: 5000,
+  },
+  render: (args) => {
+    const [visible, setVisible] = React.useState(false)
+    return (
+      <Stack direction="column" gap={2} alignItems="flex-start">
+        <Button onClick={() => setVisible(true)}>Show alert</Button>
+        {visible ? (
+          <Alert {...args} onClose={() => setVisible(false)}>
+            This alert will automatically hide after {args.autoHideDuration}ms.
+          </Alert>
+        ) : null}
+      </Stack>
+    )
+  },
 }
 
 export const OnDarkBackground: Story = {
