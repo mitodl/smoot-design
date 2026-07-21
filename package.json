@@ -20,6 +20,7 @@
     "build:bundles": "vite build",
     "build:bundles:legacy": "vite build --config vite.config.legacy.mts",
     "build:bundles:aiChat": "vite build --config vite.config.aiChat.mts",
+    "build:bundles:feedback": "vite build --config vite.config.feedback.mts",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
     "lint-check": "eslint src/ .storybook/",
