@@ -27,6 +27,14 @@ const openMessage = () =>
 describe("FeedbackDrawerManager", () => {
   afterEach(() => {
     jest.restoreAllMocks()
+    // jsdom persists document.cookie across tests; clear any set during a test
+    // so cookie state can't leak into later tests.
+    document.cookie.split(";").forEach((entry) => {
+      const name = entry.split("=")[0].trim()
+      if (name) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+      }
+    })
   })
 
   test("renders a waiting marker until an open message arrives", () => {
@@ -129,4 +137,143 @@ describe("FeedbackDrawerManager", () => {
     expect(screen.queryByText("How was this content?")).toBeNull()
     screen.getByTestId("feedback-drawer-manager-waiting")
   })
+
+  test("primes the CSRF cookie when missing, then POSTs with the token", async () => {
+    const PRIME_URL = "http://localhost:4567/users/me"
+    const fetchMock = jest.spyOn(global, "fetch").mockImplementation((url) => {
+      if (url === PRIME_URL) {
+        document.cookie = "csrftoken-prime=primedtok"
+        return Promise.resolve({ ok: true } as Response)
+      }
+      return Promise.resolve({ ok: true } as Response)
+    })
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfCookieName="csrftoken-prime"
+        csrfHeaderName="X-CSRFToken"
+        csrfPrimeUrl={PRIME_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    expect(fetchMock.mock.calls[0][0]).toBe(PRIME_URL)
+    expect((fetchMock.mock.calls[0][1] as RequestInit).credentials).toBe(
+      "include",
+    )
+    const [postUrl, postInit] = fetchMock.mock.calls[1]
+    expect(postUrl).toBe(SUBMIT_URL)
+    expect(
+      (postInit as RequestInit).headers as Record<string, string>,
+    ).toMatchObject({ "X-CSRFToken": "primedtok" })
+  })
+
+  test("does not prime when the CSRF cookie is already present", async () => {
+    const PRIME_URL = "http://localhost:4567/users/me"
+    document.cookie = "csrftoken-present=already"
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue({ ok: true } as Response)
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfCookieName="csrftoken-present"
+        csrfHeaderName="X-CSRFToken"
+        csrfPrimeUrl={PRIME_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][0]).toBe(SUBMIT_URL)
+  })
+
+  test("still submits if priming fails (best-effort)", async () => {
+    const PRIME_URL = "http://localhost:4567/users/me"
+    const fetchMock = jest.spyOn(global, "fetch").mockImplementation((url) => {
+      if (url === PRIME_URL) {
+        return Promise.reject(new Error("network"))
+      }
+      return Promise.resolve({ ok: true } as Response)
+    })
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfCookieName="csrftoken-fail"
+        csrfHeaderName="X-CSRFToken"
+        csrfPrimeUrl={PRIME_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    const postCall = fetchMock.mock.calls.find((c) => c[0] === SUBMIT_URL)
+    expect(postCall).toBeTruthy()
+    await screen.findByText("Thank you for your feedback!")
+  })
+
+  test("submits without a CSRF header when priming does not set the cookie", async () => {
+    const PRIME_URL = "http://localhost:4567/users/me"
+    // Prime resolves OK but never sets the cookie (e.g. non-OK upstream or a
+    // response that doesn't carry Set-Cookie): the POST must still go out,
+    // just without the token header.
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue({ ok: true } as Response)
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfCookieName="csrftoken-empty"
+        csrfHeaderName="X-CSRFToken"
+        csrfPrimeUrl={PRIME_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    expect(fetchMock.mock.calls[0][0]).toBe(PRIME_URL)
+    const postCall = fetchMock.mock.calls.find((c) => c[0] === SUBMIT_URL)
+    expect(postCall).toBeTruthy()
+    const headers = (postCall![1] as RequestInit).headers as Record<
+      string,
+      string
+    >
+    expect(headers["X-CSRFToken"]).toBeUndefined()
+    await screen.findByText("Thank you for your feedback!")
+  })
+
 })

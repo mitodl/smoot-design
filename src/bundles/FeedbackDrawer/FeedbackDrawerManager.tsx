@@ -27,6 +27,8 @@ type FeedbackDrawerManagerProps = {
   submitUrl?: string
   csrfCookieName?: string
   csrfHeaderName?: string
+  /** mit-learn @ensure_csrf_cookie endpoint the drawer primes to obtain the CSRF cookie. */
+  csrfPrimeUrl?: string
   variant?: "drawer" | "slot"
   getEnrichment?: () => FeedbackEnrichment
 }
@@ -39,6 +41,7 @@ const FeedbackDrawerManager = ({
   submitUrl,
   csrfCookieName,
   csrfHeaderName,
+  csrfPrimeUrl,
   variant = "drawer",
   getEnrichment,
 }: FeedbackDrawerManagerProps) => {
@@ -107,12 +110,21 @@ const FeedbackDrawerManager = ({
     }
     const enrich = getEnrichment?.() ?? {}
 
-    // Same auth mechanism AskTIM (AiChat) uses: session cookie + read the CSRF
-    // token from a cookie and echo it in a header, with credentials included.
+    // Same auth mechanism AskTIM (AiChat) uses: session cookie + a CSRF token
+    // read from a cookie and echoed into a header, with credentials included.
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     }
     if (csrfCookieName && csrfHeaderName) {
+      // Feedback has no AskTIM-style consumer to set the CSRF cookie, so prime
+      // it (GET the @ensure_csrf_cookie endpoint) if it's missing.
+      if (csrfPrimeUrl && !getCookie(csrfCookieName)) {
+        try {
+          await fetch(csrfPrimeUrl, { credentials: "include" })
+        } catch {
+          // best-effort
+        }
+      }
       const csrfToken = getCookie(csrfCookieName)
       if (csrfToken) {
         headers[csrfHeaderName] = csrfToken
