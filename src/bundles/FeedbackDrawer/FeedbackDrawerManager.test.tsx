@@ -275,5 +275,4 @@ describe("FeedbackDrawerManager", () => {
     expect(headers["X-CSRFToken"]).toBeUndefined()
     await screen.findByText("Thank you for your feedback!")
   })
-
 })

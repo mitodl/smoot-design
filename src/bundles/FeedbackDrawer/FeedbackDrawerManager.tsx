@@ -95,7 +95,12 @@ const FeedbackDrawerManager = ({
       }
     }
     window.addEventListener("message", cb)
-    return () => window.removeEventListener("message", cb)
+    return () => {
+      window.removeEventListener("message", cb)
+      // Cancel any pending open frame so a stale rAF can't call setOpen(true)
+      // after this effect re-runs (e.g. variant change) or the listener is torn down.
+      cancelPendingOpen()
+    }
   }, [messageOrigin, variant, handleClose, cancelPendingOpen])
 
   useEffect(() => cancelPendingOpen, [cancelPendingOpen])
