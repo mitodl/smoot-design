@@ -4,6 +4,7 @@ import { Input, AdornmentButton } from "./Input"
 import type { InputProps } from "./Input"
 import Stack from "@mui/material/Stack"
 import Grid from "@mui/material/Grid"
+import Autocomplete from "@mui/material/Autocomplete"
 import { RiCalendarLine, RiCloseLine, RiSearchLine } from "@remixicon/react"
 import { fn } from "storybook/test"
 import { enumValues } from "../../story-utils"
@@ -84,7 +85,7 @@ type Story = StoryObj<typeof Input>
 export const Sizes: Story = {
   render: (args) => {
     return (
-      <Stack direction="row" gap={1}>
+      <Stack direction="row" gap={1} alignItems="flex-start">
         <StatefulInput size="small" {...args} />
         <StatefulInput size="medium" {...args} />
         <StatefulInput size="large" {...args} />
@@ -116,7 +117,7 @@ export const Adornments: Story = {
       },
     ]
     return (
-      <Grid container maxWidth="1400px" spacing={2}>
+      <Grid container maxWidth="1400px" spacing={2} alignItems="flex-start">
         {Object.values(adornments).flatMap((props, i) =>
           SIZES.map((size) => {
             return (
@@ -127,6 +128,54 @@ export const Adornments: Story = {
           }),
         )}
       </Grid>
+    )
+  },
+  argTypes: {
+    startAdornment: { table: { disable: true } },
+    endAdornment: { table: { disable: true } },
+  },
+}
+
+/**
+ * When `Input` hosts wrapping content — such as the selected-value chips of an
+ * `<Autocomplete multiple>` — the field grows to fit rather than clipping. Each
+ * size uses `min-height` (not a fixed `height`), so single-line inputs are
+ * unchanged while multi-row content makes the box taller.
+ */
+const TOPICS = [
+  "Mathematics",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Computer Science",
+  "Economics",
+  "History",
+  "Philosophy",
+  "Linguistics",
+  "Engineering",
+]
+
+export const AutocompleteMultiple: Story = {
+  render: () => {
+    return (
+      <Stack direction="column" gap={2} maxWidth="400px">
+        {SIZES.map((size) => (
+          <Autocomplete
+            key={size}
+            multiple
+            options={TOPICS}
+            defaultValue={TOPICS.slice(0, 5)}
+            renderInput={(params) => (
+              <Input
+                {...params.InputProps}
+                inputProps={params.inputProps}
+                size={size}
+                placeholder="Topics"
+              />
+            )}
+          />
+        ))}
+      </Stack>
     )
   },
   argTypes: {
