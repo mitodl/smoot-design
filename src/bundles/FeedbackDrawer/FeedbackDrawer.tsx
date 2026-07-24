@@ -1,5 +1,5 @@
 import * as React from "react"
-import { FC, useRef, useState } from "react"
+import { FC, useEffect, useId, useRef, useState } from "react"
 import styled from "@emotion/styled"
 import Drawer from "@mui/material/Drawer"
 import {
@@ -266,6 +266,17 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     REACTIONS.find((reaction) => reaction.key === sentiment) ?? null
 
   const reactionRefs = useRef<(HTMLButtonElement | null)[]>([])
+  const successRef = useRef<HTMLDivElement | null>(null)
+  const headingId = useId()
+
+  // Move focus to the success message so screen-reader users are told the
+  // submission succeeded (role="status" alone isn't reliably announced when the
+  // node is newly rendered).
+  useEffect(() => {
+    if (status === "success") {
+      successRef.current?.focus()
+    }
+  }, [status])
 
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
@@ -326,7 +337,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       <Header>
         <Title>
           <RiMegaphoneLine aria-hidden />
-          <Heading>
+          <Heading id={headingId}>
             {subtitle ? (
               <>
                 {title} about <BlockName>{subtitle}</BlockName>
@@ -336,19 +347,21 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
             )}
           </Heading>
         </Title>
-        <CloseButton
-          variant="text"
-          size="medium"
-          onClick={handleClose}
-          aria-label="Close"
-        >
-          <RiCloseLine />
-        </CloseButton>
+        {onClose ? (
+          <CloseButton
+            variant="text"
+            size="medium"
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <RiCloseLine />
+          </CloseButton>
+        ) : null}
       </Header>
 
       <Body>
         {status === "success" ? (
-          <Success>
+          <Success ref={successRef} role="status" tabIndex={-1}>
             <RiCheckLine aria-hidden /> Thank you for your feedback!
           </Success>
         ) : (
@@ -404,6 +417,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                     variant="primary"
                     size="medium"
                     disabled={status === "submitting"}
+                    aria-busy={status === "submitting"}
                     startIcon={
                       status === "submitting" ? (
                         <ButtonLoadingIcon />
@@ -442,6 +456,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       onClose={handleClose}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={headingId}
       keepMounted
       PaperProps={{
         sx: {
