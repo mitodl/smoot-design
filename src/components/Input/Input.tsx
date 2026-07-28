@@ -69,19 +69,19 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
     },
     size === "small" &&
       !multiline && {
-        height: "32px",
+        minHeight: "32px",
       },
     size === "medium" &&
       !multiline && {
-        height: "40px",
+        minHeight: "40px",
       },
     size === "large" &&
       !multiline && {
-        height: "48px",
+        minHeight: "48px",
       },
     size === "chat" &&
       !multiline && {
-        height: "56px",
+        minHeight: "56px",
       },
     size === "chat" &&
       multiline && {
@@ -92,7 +92,7 @@ const sizeStyles = ({ size, theme, multiline }: SizeStyleProps) =>
       },
     size === "hero" &&
       !multiline && {
-        height: "72px",
+        minHeight: "72px",
       },
     size === "small" && {
       padding: "0 8px",
