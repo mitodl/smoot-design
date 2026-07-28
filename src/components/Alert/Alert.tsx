@@ -138,16 +138,19 @@ type AlertProps = {
   autoHideDuration?: number
 }
 
-const Alert: React.FC<AlertProps> = ({
-  visible = true,
-  severity = "info",
-  closable,
-  children,
-  className,
-  onClose,
-  label,
-  autoHideDuration,
-}) => {
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  {
+    visible = true,
+    severity = "info",
+    closable,
+    children,
+    className,
+    onClose,
+    label,
+    autoHideDuration,
+  },
+  ref,
+) {
   const [_visible, setVisible] = React.useState(visible)
   const id = React.useId()
   const onCloseClick = (event?: React.SyntheticEvent) => {
@@ -178,6 +181,7 @@ const Alert: React.FC<AlertProps> = ({
 
   return (
     <AlertStyled
+      ref={ref}
       severity={severity!}
       onClose={closable ? onCloseClick : undefined}
       role="alert"
@@ -202,7 +206,7 @@ const Alert: React.FC<AlertProps> = ({
       <Hidden id={id}>{severity} message</Hidden>
     </AlertStyled>
   )
-}
+})
 
 export { Alert }
 export type { AlertProps }

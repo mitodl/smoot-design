@@ -35,6 +35,12 @@ test("Hides itself after autoHideDuration elapses", () => {
   expect(screen.queryByRole("alert")).not.toBeInTheDocument()
 })
 
+test("Forwards ref to the alert element", () => {
+  const ref = React.createRef<HTMLDivElement>()
+  render(<Alert ref={ref}>Message</Alert>, { wrapper: ThemeProvider })
+  expect(ref.current).toBe(screen.getByRole("alert"))
+})
+
 test("Calls onClose when autoHideDuration elapses", () => {
   const onClose = jest.fn()
   renderAlert({ children: "Message", autoHideDuration: 3000, onClose })
