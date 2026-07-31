@@ -29,6 +29,18 @@ type FeedbackDrawerManagerProps = {
   csrfHeaderName?: string
   /** mit-learn @ensure_csrf_cookie endpoint the drawer primes to obtain the CSRF cookie. */
   csrfPrimeUrl?: string
+  /**
+   * mit-learn APISIX login route (e.g. `<mit-learn>/login`). When set, a learner
+   * with no mit-learn session is routed through a login popup before the POST, so
+   * their drafted feedback is preserved and auto-submitted once the session
+   * exists. Omit to disable the popup-login flow (the drawer then POSTs directly
+   * and surfaces any 403). Requires `csrfPrimeUrl` (the identity probe).
+   */
+  loginUrl?: string
+  /** Poll interval (ms) while waiting for the login popup to establish a session. */
+  loginPollIntervalMs?: number
+  /** Max time (ms) to wait for the login popup before giving up. */
+  loginTimeoutMs?: number
   variant?: "drawer" | "slot"
   getEnrichment?: () => FeedbackEnrichment
 }
@@ -42,6 +54,9 @@ const FeedbackDrawerManager = ({
   csrfCookieName,
   csrfHeaderName,
   csrfPrimeUrl,
+  loginUrl,
+  loginPollIntervalMs = 1000,
+  loginTimeoutMs = 30000,
   variant = "drawer",
   getEnrichment,
 }: FeedbackDrawerManagerProps) => {
@@ -105,13 +120,95 @@ const FeedbackDrawerManager = ({
 
   useEffect(() => cancelPendingOpen, [cancelPendingOpen])
 
+  // Whether the learner currently has a mit-learn session. null = unknown (not
+  // yet probed, or login not configured). Held in a ref so handleSubmit can read
+  // it synchronously and open the login popup within the click (popup-safe).
+  const isAuthenticatedRef = useRef<boolean | null>(null)
+
+  // GET the CSRF-prime endpoint (mit-learn users/me). Doubles as an identity
+  // probe: the JSON carries `is_authenticated`. Also (re)primes the CSRF cookie.
+  // Returns null when the state can't be determined.
+  const checkAuthenticated = useCallback(async (): Promise<boolean | null> => {
+    if (!csrfPrimeUrl) {
+      return null
+    }
+    try {
+      const res = await fetch(csrfPrimeUrl, { credentials: "include" })
+      if (!res.ok) {
+        return null
+      }
+      const body = (await res.json()) as { is_authenticated?: boolean }
+      return body?.is_authenticated === true
+    } catch {
+      return null
+    }
+  }, [csrfPrimeUrl])
+
+  // When login is configured, learn the session state as soon as the drawer
+  // opens — before the learner can click Submit — so the popup can be opened
+  // synchronously from that click without being blocked.
+  useEffect(() => {
+    if (!open || !loginUrl || !csrfPrimeUrl) {
+      return
+    }
+    let cancelled = false
+    checkAuthenticated().then((authed) => {
+      if (!cancelled && authed !== null) {
+        isAuthenticatedRef.current = authed
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [open, loginUrl, csrfPrimeUrl, checkAuthenticated])
+
   if (!payload) {
     return <div data-testid="feedback-drawer-manager-waiting" />
+  }
+
+  // Poll the identity probe until the login popup has established a mit-learn
+  // session (or the learner cancels / we time out). Closes the popup on success.
+  const waitForSession = async (popup: Window): Promise<void> => {
+    const deadline = Date.now() + loginTimeoutMs
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, loginPollIntervalMs))
+      const authed = await checkAuthenticated()
+      if (authed) {
+        isAuthenticatedRef.current = true
+        if (!popup.closed) {
+          popup.close()
+        }
+        return
+      }
+      if (popup.closed) {
+        throw new Error("Feedback login was cancelled")
+      }
+      if (Date.now() > deadline) {
+        popup.close()
+        throw new Error("Feedback login timed out")
+      }
+    }
   }
 
   const handleSubmit = async (data: FeedbackData) => {
     if (!submitUrl) {
       return // dev stub: no endpoint configured -> resolve to success
+    }
+    // When login is configured and the open-time probe found no mit-learn
+    // session, route the learner through a login popup before the POST so their
+    // drafted feedback is preserved and auto-submitted once the session exists.
+    // window.open must run synchronously in the click gesture (no await before
+    // it) or the browser's popup blocker kills it — hence the open-time probe.
+    if (loginUrl && isAuthenticatedRef.current === false) {
+      const popup = window.open(
+        loginUrl,
+        "ol-feedback-login",
+        "popup,width=480,height=680",
+      )
+      if (!popup) {
+        throw new Error("Feedback login popup was blocked")
+      }
+      await waitForSession(popup)
     }
     const enrich = getEnrichment?.() ?? {}
 
@@ -153,6 +250,11 @@ const FeedbackDrawerManager = ({
       }),
     })
     if (!response.ok) {
+      // A 403 means the POST was anonymous (no mit-learn session). Record that
+      // so a retry routes through the login popup; the learner's draft is kept.
+      if (response.status === 403) {
+        isAuthenticatedRef.current = false
+      }
       throw new Error(`Feedback submit failed: ${response.status}`)
     }
   }

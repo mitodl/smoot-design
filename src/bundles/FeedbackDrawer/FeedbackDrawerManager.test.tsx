@@ -275,4 +275,139 @@ describe("FeedbackDrawerManager", () => {
     expect(headers["X-CSRFToken"]).toBeUndefined()
     await screen.findByText("Thank you for your feedback!")
   })
+
+  test("opens a login popup and auto-submits once a session is established", async () => {
+    const LOGIN_URL = "http://localhost:4567/login"
+    const PRIME_URL = "http://localhost:4567/users/me"
+    let meCalls = 0
+    const fetchMock = jest.spyOn(global, "fetch").mockImplementation((url) => {
+      if (url === PRIME_URL) {
+        meCalls += 1
+        // open-time probe (call 1) is unauthenticated; once the popup logs in,
+        // the poll (call 2+) reports the session.
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ is_authenticated: meCalls > 1 }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: true } as Response)
+    })
+    const close = jest.fn()
+    const openSpy = jest
+      .spyOn(window, "open")
+      .mockReturnValue({ closed: false, close } as unknown as Window)
+
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfPrimeUrl={PRIME_URL}
+        loginUrl={LOGIN_URL}
+        loginPollIntervalMs={5}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    // Let the open-time identity probe resolve (isAuthenticatedRef -> false).
+    await act(async () => {})
+
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    // window.open runs synchronously in the click gesture (popup-blocker safe).
+    expect(openSpy).toHaveBeenCalledWith(
+      LOGIN_URL,
+      "ol-feedback-login",
+      expect.stringContaining("popup"),
+    )
+    await screen.findByText("Thank you for your feedback!")
+    expect(close).toHaveBeenCalled()
+    const postCall = fetchMock.mock.calls.find((c) => c[0] === SUBMIT_URL)
+    expect(postCall).toBeTruthy()
+  })
+
+  test("submits directly without a popup when already authenticated", async () => {
+    const LOGIN_URL = "http://localhost:4567/login"
+    const PRIME_URL = "http://localhost:4567/users/me"
+    const fetchMock = jest.spyOn(global, "fetch").mockImplementation((url) => {
+      if (url === PRIME_URL) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ is_authenticated: true }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: true } as Response)
+    })
+    const openSpy = jest.spyOn(window, "open").mockReturnValue(null)
+
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfPrimeUrl={PRIME_URL}
+        loginUrl={LOGIN_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    // Let the open-time identity probe resolve (isAuthenticatedRef -> true).
+    await act(async () => {})
+
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    expect(openSpy).not.toHaveBeenCalled()
+    const postCall = fetchMock.mock.calls.find((c) => c[0] === SUBMIT_URL)
+    expect(postCall).toBeTruthy()
+    await screen.findByText("Thank you for your feedback!")
+  })
+
+  test("surfaces an error when the login popup is blocked", async () => {
+    const LOGIN_URL = "http://localhost:4567/login"
+    const PRIME_URL = "http://localhost:4567/users/me"
+    jest.spyOn(global, "fetch").mockImplementation((url) => {
+      if (url === PRIME_URL) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ is_authenticated: false }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: true } as Response)
+    })
+    // A blocked popup returns null.
+    jest.spyOn(window, "open").mockReturnValue(null)
+
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+        csrfPrimeUrl={PRIME_URL}
+        loginUrl={LOGIN_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    // Let the open-time identity probe resolve (isAuthenticatedRef -> false).
+    await act(async () => {})
+
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+      "clear",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    await screen.findByText("Something went wrong. Please try again.")
+  })
 })
