@@ -153,7 +153,12 @@ const FeedbackDrawerManager = ({
       }),
     })
     if (!response.ok) {
-      throw new Error(`Feedback submit failed: ${response.status}`)
+      throw Object.assign(
+        new Error(`Feedback submit failed: ${response.status}`),
+        {
+          status: response.status,
+        },
+      )
     }
   }
 

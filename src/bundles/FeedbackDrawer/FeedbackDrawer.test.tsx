@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import * as React from "react"
-import { FeedbackDrawer } from "./FeedbackDrawer"
+import {
+  FeedbackDrawer,
+  RATE_LIMIT_STATUS,
+  RATE_LIMIT_MESSAGE,
+  GENERIC_ERROR_MESSAGE,
+} from "./FeedbackDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 
 const renderDrawer = (props = {}) =>
@@ -48,7 +53,19 @@ describe("FeedbackDrawer", () => {
     renderDrawer({ onSubmit })
     await user.click(screen.getByRole("radio", { name: "Not working" }))
     await user.click(screen.getByRole("button", { name: "Submit" }))
-    await screen.findByText("Something went wrong. Please try again.")
+    await screen.findByText(GENERIC_ERROR_MESSAGE)
+  })
+
+  test("shows a rate-limit message when onSubmit rejects with a 429", async () => {
+    const onSubmit = jest
+      .fn()
+      .mockRejectedValue(
+        Object.assign(new Error("throttled"), { status: RATE_LIMIT_STATUS }),
+      )
+    renderDrawer({ onSubmit })
+    await user.click(screen.getByRole("radio", { name: "Not working" }))
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await screen.findByText(RATE_LIMIT_MESSAGE)
   })
 
   test("arrow keys move selection across reactions (roving tabIndex)", async () => {

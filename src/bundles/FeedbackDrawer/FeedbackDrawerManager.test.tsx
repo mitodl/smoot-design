@@ -2,6 +2,7 @@ import { act, render, screen } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import * as React from "react"
 import { FeedbackDrawerManager } from "./FeedbackDrawerManager"
+import { RATE_LIMIT_MESSAGE } from "./FeedbackDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 
 const ORIGIN = "http://localhost:6006"
@@ -236,6 +237,24 @@ describe("FeedbackDrawerManager", () => {
     const postCall = fetchMock.mock.calls.find((c) => c[0] === SUBMIT_URL)
     expect(postCall).toBeTruthy()
     await screen.findByText("Thank you for your feedback!")
+  })
+
+  test("shows the rate-limit message on a 429 response", async () => {
+    jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue({ ok: false, status: 429 } as Response)
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+    await screen.findByText(RATE_LIMIT_MESSAGE)
   })
 
   test("submits without a CSRF header when priming does not set the cookie", async () => {
