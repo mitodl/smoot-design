@@ -19,6 +19,14 @@ import { Button, ButtonLoadingIcon } from "../../components/Button/Button"
 import { Input } from "../../components/Input/Input"
 import { VERSION } from "../../VERSION"
 
+// A 429 from the submit endpoint means the learner is being throttled; the
+// status and both error strings live here so the check + copy stay in one
+// place, are reusable in tests, and give us a single spot to localize later.
+const RATE_LIMIT_STATUS = 429
+const RATE_LIMIT_MESSAGE =
+  "You're sending feedback too quickly. Please wait a moment and try again."
+const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again."
+
 type Sentiment = "positive" | "negative" | "idea"
 
 type FeedbackData = {
@@ -261,6 +269,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   )
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [rateLimited, setRateLimited] = useState(false)
 
   const active =
     REACTIONS.find((reaction) => reaction.key === sentiment) ?? null
@@ -324,10 +333,14 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return
     }
     setStatus("submitting")
+    setRateLimited(false)
     try {
       await onSubmit?.({ sentiment, comment })
       setStatus("success")
-    } catch {
+    } catch (error) {
+      setRateLimited(
+        (error as { status?: number })?.status === RATE_LIMIT_STATUS,
+      )
       setStatus("error")
     }
   }
@@ -409,7 +422,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                 />
                 {status === "error" ? (
                   <ErrorText role="alert">
-                    Something went wrong. Please try again.
+                    {rateLimited ? RATE_LIMIT_MESSAGE : GENERIC_ERROR_MESSAGE}
                   </ErrorText>
                 ) : null}
                 <Footer>
@@ -478,5 +491,11 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   )
 }
 
-export { FeedbackDrawer, REACTIONS }
+export {
+  FeedbackDrawer,
+  REACTIONS,
+  RATE_LIMIT_STATUS,
+  RATE_LIMIT_MESSAGE,
+  GENERIC_ERROR_MESSAGE,
+}
 export type { FeedbackDrawerProps, FeedbackData, Sentiment }

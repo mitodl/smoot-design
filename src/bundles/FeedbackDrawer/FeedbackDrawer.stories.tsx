@@ -20,6 +20,15 @@ const failSubmit = async (data: FeedbackData) => {
   throw new Error("stubbed failure")
 }
 
+const rateLimitedSubmit = async (data: FeedbackData) => {
+  // eslint-disable-next-line no-console
+  console.log("feedback submit (will 429)", data)
+  await wait(700)
+  // Mirrors what FeedbackDrawerManager throws on a 429 response: the drawer
+  // reads `status` to show the throttle-specific copy.
+  throw Object.assign(new Error("throttled"), { status: 429 })
+}
+
 const meta: Meta<typeof FeedbackDrawer> = {
   title: "smoot-design/Feedback/FeedbackDrawer",
   component: FeedbackDrawer,
@@ -116,6 +125,27 @@ export const SlotErrorStory: Story = {
       }}
     >
       <FeedbackDrawer variant="slot" open onSubmit={failSubmit} />
+    </div>
+  ),
+}
+
+/**
+ * Same as Slot, but the stubbed submit rejects with a 429 so the rate-limit
+ * copy is visible (pick a reaction, then Submit).
+ */
+export const SlotRateLimitedStory: Story = {
+  name: "Slot (rate limited)",
+  render: () => (
+    <div
+      style={{
+        width: "420px",
+        maxWidth: "100%",
+        border: "1px solid #e3e6ea",
+        borderRadius: "12px",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
+      }}
+    >
+      <FeedbackDrawer variant="slot" open onSubmit={rateLimitedSubmit} />
     </div>
   ),
 }
