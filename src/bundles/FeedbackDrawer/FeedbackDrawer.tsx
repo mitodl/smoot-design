@@ -118,7 +118,7 @@ const Title = styled.div(({ theme }) => ({
   minWidth: 0,
   color: theme.custom.colors.darkGray2,
   svg: {
-    fill: theme.custom.colors.red,
+    fill: theme.custom.colors.silverGrayDark,
     width: "24px",
     height: "24px",
     flexShrink: 0,
@@ -162,7 +162,6 @@ const Question = styled.h2(({ theme }) => ({
 const Reactions = styled.div({
   display: "flex",
   gap: "8px",
-  maxWidth: "360px",
 })
 
 const ReactionButton = styled.button<{
