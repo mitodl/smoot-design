@@ -61,6 +61,37 @@ describe("FeedbackDrawerManager", () => {
     expect(screen.queryByText("How was this content?")).toBeNull()
   })
 
+  test("passes a keyboard-open through to the drawer's focus-ring marker", () => {
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: ORIGIN,
+          data: {
+            type: "ol-feedback::drawer-open",
+            payload: PAYLOAD,
+            viaKeyboard: true,
+          },
+        }),
+      )
+    })
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("omits the focus-ring marker for a mouse open (no keyboard flag)", () => {
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    openMessage()
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
   test("opens the drawer and POSTs the mapped body on submit", async () => {
     const fetchMock = jest
       .spyOn(global, "fetch")

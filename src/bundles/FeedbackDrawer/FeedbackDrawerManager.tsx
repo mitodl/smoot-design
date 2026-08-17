@@ -14,6 +14,8 @@ type FeedbackPayload = {
 type FeedbackOpenMessage = {
   type: "ol-feedback::drawer-open"
   payload: FeedbackPayload
+  /** True when the opener's trigger was activated by keyboard (click detail 0). */
+  viaKeyboard?: boolean
 }
 
 type FeedbackEnrichment = {
@@ -50,6 +52,9 @@ const FeedbackDrawerManager = ({
 }: FeedbackDrawerManagerProps) => {
   const [payload, setPayload] = useState<FeedbackPayload | null>(null)
   const [open, setOpen] = useState(false)
+  // Keyboard-initiated open (opener sends detail === 0) → drawer rings the
+  // heading; a mouse open focuses it silently.
+  const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   // Bumped on every open so each open remounts FeedbackDrawer (resets state).
   const [openSeq, setOpenSeq] = useState(0)
   // Tracks the pending open-animation frame so a close can cancel it, otherwise
@@ -84,10 +89,11 @@ const FeedbackDrawerManager = ({
         return
       }
       const data = event.data as
-        | { type?: string; payload?: FeedbackPayload }
+        | { type?: string; payload?: FeedbackPayload; viaKeyboard?: boolean }
         | undefined
       if (data?.type === OPEN_MESSAGE) {
         openerRef.current = event.source as Window | null
+        setOpenedViaKeyboard(!!data.viaKeyboard)
         setPayload(data.payload || {})
         setOpenSeq((seq) => seq + 1)
         if (variant === "slot") {
@@ -177,6 +183,7 @@ const FeedbackDrawerManager = ({
       key={openSeq}
       variant={variant}
       open={open}
+      openedViaKeyboard={openedViaKeyboard}
       subtitle={payload.blockDisplayName}
       onClose={handleClose}
       onSubmit={handleSubmit}

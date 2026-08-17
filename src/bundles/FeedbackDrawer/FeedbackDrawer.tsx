@@ -143,9 +143,14 @@ const Heading = styled.h1(({ theme }) => ({
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
-  // The heading is focused programmatically on open (never via Tab), so the
-  // keyboard focus ring meant for tab navigation would be visual noise here.
-  "&:focus": { outline: "none" },
+  // Ring for keyboard opens only (data-focus-ring); a mouse open focuses the
+  // heading silently. Not :focus-visible — focus is programmatic across the
+  // iframe boundary, so the opener signals modality instead. (WCAG 2.4.7)
+  "&[data-focus-ring]:focus": {
+    outline: `2px solid ${theme.custom.colors.darkGray2}`,
+    outlineOffset: "2px",
+    borderRadius: "2px",
+  },
 }))
 
 const BlockName = styled.span(({ theme }) => ({
@@ -247,6 +252,8 @@ type FeedbackDrawerProps = {
    */
   variant?: "drawer" | "slot"
   open?: boolean
+  /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
+  openedViaKeyboard?: boolean
   onClose?: () => void
   onSubmit?: (data: FeedbackData) => Promise<void> | void
   /** Drawer heading. */
@@ -260,6 +267,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   className,
   variant = "drawer",
   open,
+  openedViaKeyboard,
   onClose,
   onSubmit,
   title = "Share your feedback",
@@ -381,7 +389,12 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       <Header>
         <Title>
           <RiMegaphoneLine aria-hidden />
-          <Heading id={headingId} ref={headingRef} tabIndex={-1}>
+          <Heading
+            id={headingId}
+            ref={headingRef}
+            tabIndex={-1}
+            data-focus-ring={openedViaKeyboard ? "" : undefined}
+          >
             {subtitle ? (
               <>
                 {title} about <BlockName>{subtitle}</BlockName>

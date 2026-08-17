@@ -113,6 +113,20 @@ describe("FeedbackDrawer", () => {
     )
   })
 
+  test("marks the heading for a focus ring only when opened via keyboard", () => {
+    renderDrawer({ openedViaKeyboard: true })
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("omits the heading focus-ring marker when opened by mouse", () => {
+    renderDrawer({ openedViaKeyboard: false })
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
   test("exposes the open slot as a region labelled by its heading", () => {
     renderDrawer({ subtitle: "Lecture 1: Limits" })
     screen.getByRole("region", {
