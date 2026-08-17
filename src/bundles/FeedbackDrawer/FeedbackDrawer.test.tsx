@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import * as React from "react"
 import {
@@ -96,5 +96,39 @@ describe("FeedbackDrawer", () => {
       { wrapper: ThemeProvider },
     )
     expect(screen.getByText("Lecture 1: Limits")).toBeVisible()
+  })
+
+  test("moves focus to the heading when opened (slot variant)", async () => {
+    renderDrawer()
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+  })
+
+  test("makes the heading programmatically focusable", () => {
+    renderDrawer()
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "tabindex",
+      "-1",
+    )
+  })
+
+  test("exposes the open slot as a region labelled by its heading", () => {
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    screen.getByRole("region", {
+      name: /share your feedback about lecture 1: limits/i,
+    })
+  })
+
+  test("closes when Escape is pressed inside the open slot", async () => {
+    const onClose = jest.fn()
+    renderDrawer({ onClose })
+    // Focus lands in the panel on open; Escape from anywhere inside should
+    // dismiss it (matching the dialog dismissal convention, WCAG 2.1.2).
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+    await user.keyboard("{Escape}")
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

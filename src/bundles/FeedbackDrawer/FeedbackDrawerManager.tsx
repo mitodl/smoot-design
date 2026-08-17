@@ -35,6 +35,9 @@ type FeedbackDrawerManagerProps = {
 
 const OPEN_MESSAGE = "ol-feedback::drawer-open"
 const CLOSE_MESSAGE = "ol-feedback::drawer-close"
+// Sent back to the opener when the drawer closes so the (cross-origin) trigger
+// can return keyboard focus to its megaphone button.
+const CLOSED_MESSAGE = "ol-feedback::drawer-closed"
 
 const FeedbackDrawerManager = ({
   messageOrigin,
@@ -52,6 +55,10 @@ const FeedbackDrawerManager = ({
   // Tracks the pending open-animation frame so a close can cancel it, otherwise
   // a close arriving before the frame fires would be overridden by setOpen(true).
   const openRafRef = useRef<number | null>(null)
+  // The window that requested the open (the LMS iframe hosting the megaphone).
+  // Captured so we can tell it to refocus its trigger on close; that button is
+  // cross-origin, so the MFE parent can't focus it directly.
+  const openerRef = useRef<Window | null>(null)
 
   const cancelPendingOpen = useCallback(() => {
     if (openRafRef.current !== null) {
@@ -67,7 +74,9 @@ const FeedbackDrawerManager = ({
       setPayload(null)
     }
     setOpen(false)
-  }, [variant, cancelPendingOpen])
+    // Return keyboard focus to the megaphone trigger in the opener iframe.
+    openerRef.current?.postMessage({ type: CLOSED_MESSAGE }, messageOrigin)
+  }, [variant, cancelPendingOpen, messageOrigin])
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -78,6 +87,7 @@ const FeedbackDrawerManager = ({
         | { type?: string; payload?: FeedbackPayload }
         | undefined
       if (data?.type === OPEN_MESSAGE) {
+        openerRef.current = event.source as Window | null
         setPayload(data.payload || {})
         setOpenSeq((seq) => seq + 1)
         if (variant === "slot") {

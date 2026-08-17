@@ -143,6 +143,9 @@ const Heading = styled.h1(({ theme }) => ({
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
+  // The heading is focused programmatically on open (never via Tab), so the
+  // keyboard focus ring meant for tab navigation would be visual noise here.
+  "&:focus": { outline: "none" },
 }))
 
 const BlockName = styled.span(({ theme }) => ({
@@ -275,6 +278,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
 
   const reactionRefs = useRef<(HTMLButtonElement | null)[]>([])
   const successRef = useRef<HTMLDivElement | null>(null)
+  const headingRef = useRef<HTMLHeadingElement | null>(null)
   const headingId = useId()
 
   // Move focus to the success message so screen-reader users are told the
@@ -285,6 +289,34 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       successRef.current?.focus()
     }
   }, [status])
+
+  // When the panel opens as an inline slot, move focus to the heading so
+  // keyboard and screen-reader users are taken into the panel (and hear its
+  // title) rather than being left on the underlying course page. The overlay
+  // "drawer" variant is a MUI Modal, which manages its own focus on open.
+  useEffect(() => {
+    if (open && variant === "slot") {
+      headingRef.current?.focus()
+    }
+  }, [open, variant])
+
+  // The slot is a non-modal region (not a MUI Modal), so it doesn't get
+  // Escape-to-dismiss for free. Listen at the document level while open so
+  // keyboard users can close the panel with Escape, matching the dialog
+  // dismissal convention (WCAG 2.1.2). The overlay "drawer" variant is a MUI
+  // Modal and handles Escape itself.
+  useEffect(() => {
+    if (!open || variant !== "slot") {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose?.()
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [open, variant, onClose])
 
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
@@ -349,7 +381,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       <Header>
         <Title>
           <RiMegaphoneLine aria-hidden />
-          <Heading id={headingId}>
+          <Heading id={headingId} ref={headingRef} tabIndex={-1}>
             {subtitle ? (
               <>
                 {title} about <BlockName>{subtitle}</BlockName>
@@ -453,7 +485,12 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return null
     }
     return (
-      <Container className={className} data-smoot-version={VERSION}>
+      <Container
+        className={className}
+        data-smoot-version={VERSION}
+        role="region"
+        aria-labelledby={headingId}
+      >
         {content}
       </Container>
     )
