@@ -84,6 +84,33 @@ export const SlotStory: Story = {
 }
 
 /**
+ * Slot variant opened via keyboard, so the heading shows its focus ring. Mirrors
+ * a keyboard user activating the megaphone: FeedbackDrawerManager forwards the
+ * keyboard-open flag to the drawer as `openedViaKeyboard`.
+ */
+export const SlotKeyboardStory: Story = {
+  name: "Slot (keyboard open — focus ring)",
+  render: () => (
+    <div
+      style={{
+        width: "420px",
+        maxWidth: "100%",
+        border: "1px solid #e3e6ea",
+        borderRadius: "12px",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
+      }}
+    >
+      <FeedbackDrawer
+        variant="slot"
+        open
+        openedViaKeyboard
+        onSubmit={logSubmit}
+      />
+    </div>
+  ),
+}
+
+/**
  * Slot variant opened with a reaction pre-selected, so the prompt + comment box
  * + Submit are visible without interaction.
  */

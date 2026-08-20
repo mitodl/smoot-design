@@ -33,6 +33,9 @@ type FeedbackDrawerManagerProps = {
   csrfPrimeUrl?: string
   variant?: "drawer" | "slot"
   getEnrichment?: () => FeedbackEnrichment
+  /** Notifies the host (e.g. the MFE sidebar coordinator) that the drawer
+   * closed, so it can hide the surrounding slot/column now that it's empty. */
+  onClose?: () => void
 }
 
 const OPEN_MESSAGE = "ol-feedback::drawer-open"
@@ -49,6 +52,7 @@ const FeedbackDrawerManager = ({
   csrfPrimeUrl,
   variant = "drawer",
   getEnrichment,
+  onClose,
 }: FeedbackDrawerManagerProps) => {
   const [payload, setPayload] = useState<FeedbackPayload | null>(null)
   const [open, setOpen] = useState(false)
@@ -81,7 +85,9 @@ const FeedbackDrawerManager = ({
     setOpen(false)
     // Return keyboard focus to the megaphone trigger in the opener iframe.
     openerRef.current?.postMessage({ type: CLOSED_MESSAGE }, messageOrigin)
-  }, [variant, cancelPendingOpen, messageOrigin])
+    // Let the host (MFE coordinator) hide the slot/column now that it's empty.
+    onClose?.()
+  }, [variant, cancelPendingOpen, messageOrigin, onClose])
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {

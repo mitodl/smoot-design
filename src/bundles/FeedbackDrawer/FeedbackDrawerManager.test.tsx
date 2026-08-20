@@ -204,6 +204,22 @@ describe("FeedbackDrawerManager", () => {
     iframe.remove()
   })
 
+  test("calls onClose when the drawer closes so the host can hide the slot", async () => {
+    const onClose = jest.fn()
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        onClose={onClose}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    screen.getByText("How was this content?")
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
   test("primes the CSRF cookie when missing, then POSTs with the token", async () => {
     const PRIME_URL = "http://localhost:4567/users/me"
     const fetchMock = jest.spyOn(global, "fetch").mockImplementation((url) => {
