@@ -269,13 +269,19 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [rateLimited, setRateLimited] = useState(false)
+  // Bumped whenever a reaction is committed (activated by pointer or
+  // Enter/Space) so an effect can move focus into the comment field that
+  // appears. Arrow-key roving doesn't bump it, so it doesn't move focus.
+  const [commitSeq, setCommitSeq] = useState(0)
 
   const active =
     REACTIONS.find((reaction) => reaction.key === sentiment) ?? null
 
   const reactionRefs = useRef<(HTMLButtonElement | null)[]>([])
   const successRef = useRef<HTMLDivElement | null>(null)
+  const commentRef = useRef<HTMLTextAreaElement | null>(null)
   const headingId = useId()
+  const questionId = useId()
 
   // Move focus to the success message so screen-reader users are told the
   // submission succeeded (role="status" alone isn't reliably announced when the
@@ -286,9 +292,28 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }, [status])
 
+  // After a reaction is committed (not while arrow-roving), move focus into the
+  // freshly revealed comment field so screen-reader users are taken to it;
+  // selecting a reaction otherwise gives no cue that a text field appeared.
+  // Keyed on commitSeq so re-activating the same reaction refocuses too; the
+  // > 0 guard keeps an initial defaultSentiment mount from stealing focus.
+  useEffect(() => {
+    if (commitSeq > 0) {
+      commentRef.current?.focus()
+    }
+  }, [commitSeq])
+
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
     setStatus("idle")
+  }
+
+  // Pointer/Enter/Space activation commits the choice and (via the effect above)
+  // moves focus into the comment field. Arrow keys call selectReaction directly,
+  // so they only rove selection within the group and leave focus on the radios.
+  const commitReaction = (key: Sentiment) => {
+    selectReaction(key)
+    setCommitSeq((seq) => seq + 1)
   }
 
   const focusableIndex = sentiment
@@ -378,9 +403,9 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
           </Success>
         ) : (
           <>
-            <Question>How was this content?</Question>
+            <Question id={questionId}>How was this content?</Question>
 
-            <Reactions role="radiogroup" aria-label="How would you rate this?">
+            <Reactions role="radiogroup" aria-labelledby={questionId}>
               {REACTIONS.map((reaction, index) => {
                 const selected = reaction.key === sentiment
                 const Icon = selected ? reaction.FillIcon : reaction.LineIcon
@@ -399,7 +424,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                     selected={selected}
                     colorKey={reaction.colorKey}
                     tintAlpha={reaction.tintAlpha}
-                    onClick={() => selectReaction(reaction.key)}
+                    onClick={() => commitReaction(reaction.key)}
                     onKeyDown={(event) => handleReactionKeyDown(event, index)}
                   >
                     <Icon />
@@ -415,6 +440,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                   multiline
                   minRows={3}
                   fullWidth
+                  inputRef={commentRef}
                   value={comment}
                   inputProps={{ maxLength: 1000, "aria-label": active.prompt }}
                   onChange={(event) => setComment(event.target.value)}

@@ -24,12 +24,38 @@ describe("FeedbackDrawer", () => {
     screen.getByRole("radio", { name: "Suggestion" })
   })
 
+  test("names the reaction group with the visible question, not a mismatched label", () => {
+    renderDrawer()
+    // The group's accessible name is the on-screen "How was this content?"
+    // heading, so it matches what sighted users see (no stray "rate" wording).
+    screen.getByRole("radiogroup", { name: "How was this content?" })
+    expect(screen.queryByRole("radiogroup", { name: /rate/i })).toBeNull()
+  })
+
   test("selecting a reaction reveals its prompt, a comment box, and Submit", async () => {
     renderDrawer()
     await user.click(screen.getByRole("radio", { name: "Liked it" }))
     screen.getByText("What did you like?")
     screen.getByRole("textbox", { name: "What did you like?" })
     screen.getByRole("button", { name: "Submit" })
+  })
+
+  test("moves focus into the comment field when a reaction is clicked", async () => {
+    renderDrawer()
+    await user.click(screen.getByRole("radio", { name: "Not working" }))
+    expect(
+      screen.getByRole("textbox", { name: "What's not working?" }),
+    ).toHaveFocus()
+  })
+
+  test("moves focus into the comment field when a reaction is activated by keyboard", async () => {
+    renderDrawer()
+    const liked = screen.getByRole("radio", { name: "Liked it" })
+    liked.focus()
+    await user.keyboard("{Enter}")
+    expect(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+    ).toHaveFocus()
   })
 
   test("submitting calls onSubmit and shows the success state", async () => {
@@ -88,6 +114,19 @@ describe("FeedbackDrawer", () => {
     const suggestion = screen.getByRole("radio", { name: "Suggestion" })
     expect(suggestion).toHaveAttribute("aria-checked", "true")
     expect(suggestion).toHaveFocus()
+  })
+
+  test("arrow-key selection stays on the radios and doesn't jump to the comment box", async () => {
+    renderDrawer()
+    const [first] = screen.getAllByRole("radio")
+    first.focus()
+    await user.keyboard("{ArrowRight}")
+    // Arrowing reveals the comment field but keeps focus on the group so the
+    // user can keep comparing options; only an explicit activation moves focus.
+    expect(screen.getByRole("radio", { name: "Not working" })).toHaveFocus()
+    expect(
+      screen.getByRole("textbox", { name: "What's not working?" }),
+    ).not.toHaveFocus()
   })
 
   test("renders the subtitle (content title) under the heading", () => {
