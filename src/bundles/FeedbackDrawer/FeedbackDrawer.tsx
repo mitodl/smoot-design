@@ -143,9 +143,14 @@ const Heading = styled.h1(({ theme }) => ({
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
-  // Ring for keyboard opens only (data-focus-ring); a mouse open focuses the
-  // heading silently. Not :focus-visible — focus is programmatic across the
-  // iframe boundary, so the opener signals modality instead. (WCAG 2.4.7)
+  // The heading is focused programmatically on open, so kill the browser's
+  // native focus outline and drive the ring solely via data-focus-ring (set
+  // only for keyboard opens). Without outline:none the first mouse open still
+  // shows a ring — the megaphone click happens in the cross-origin LMS iframe,
+  // so the parent document has seen no pointer interaction and :focus-visible
+  // paints the native outline on programmatic focus. The opener signals
+  // modality to us instead. (WCAG 2.4.7)
+  outline: "none",
   "&[data-focus-ring]:focus": {
     outline: `2px solid ${theme.custom.colors.darkGray2}`,
     outlineOffset: "2px",
