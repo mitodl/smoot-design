@@ -269,9 +269,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [rateLimited, setRateLimited] = useState(false)
-  // Bumped whenever a reaction is committed (activated by pointer or
-  // Enter/Space) so an effect can move focus into the comment field that
-  // appears. Arrow-key roving doesn't bump it, so it doesn't move focus.
+  // Monotonic counter bumped by commitReaction; the effect below keys on it (not
+  // on sentiment) so re-committing the same reaction still refocuses the comment.
   const [commitSeq, setCommitSeq] = useState(0)
 
   const active =
@@ -292,11 +291,9 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }, [status])
 
-  // After a reaction is committed (not while arrow-roving), move focus into the
-  // freshly revealed comment field so screen-reader users are taken to it;
-  // selecting a reaction otherwise gives no cue that a text field appeared.
-  // Keyed on commitSeq so re-activating the same reaction refocuses too; the
-  // > 0 guard keeps an initial defaultSentiment mount from stealing focus.
+  // Move focus into the freshly revealed comment field so screen-reader users
+  // are taken to it (selecting a reaction otherwise gives no cue a text field
+  // appeared). The > 0 guard skips the initial defaultSentiment mount.
   useEffect(() => {
     if (commitSeq > 0) {
       commentRef.current?.focus()
