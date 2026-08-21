@@ -345,14 +345,19 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }, [commitSeq])
 
+  // Selection follows focus: focusing a reaction — whether the Tab order lands
+  // on it, arrow roving moves onto it, or a pointer presses it — selects it and
+  // reveals its comment prompt. This keeps every reaction consistent, so the
+  // first radio the Tab order lands on previews its field the same way the
+  // others do. It only roves selection; it never moves focus itself.
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
     setStatus("idle")
   }
 
   // Pointer/Enter/Space activation commits the choice and (via the effect above)
-  // moves focus into the comment field. Arrow keys call selectReaction directly,
-  // so they only rove selection within the group and leave focus on the radios.
+  // moves focus into the comment field. Focus alone (Tab or arrow roving) only
+  // previews via selectReaction and leaves focus on the radios.
   const commitReaction = (key: Sentiment) => {
     selectReaction(key)
     setCommitSeq((seq) => seq + 1)
@@ -408,6 +413,36 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
         (error as { status?: number })?.status === RATE_LIMIT_STATUS,
       )
       setStatus("error")
+    }
+  }
+
+  // Keep keyboard focus inside the open slot: Tab past the last control wraps to
+  // the first, Shift+Tab past the first wraps to the last. The slot is a
+  // non-modal region, so without this the tab order spills into unrelated page
+  // chrome (e.g. the site footer) instead of staying with the feedback task.
+  const handleContainerKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key !== "Tab") {
+      return
+    }
+    const tabbable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(
+        "a[href], button, input, textarea, select, [tabindex]",
+      ),
+    ).filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled)
+    if (tabbable.length === 0) {
+      return
+    }
+    const first = tabbable[0]
+    const last = tabbable[tabbable.length - 1]
+    const activeEl = document.activeElement
+    if (event.shiftKey && activeEl === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && activeEl === last) {
+      event.preventDefault()
+      first.focus()
     }
   }
 
@@ -471,6 +506,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                     selected={selected}
                     colorKey={reaction.colorKey}
                     tintAlpha={reaction.tintAlpha}
+                    onFocus={() => selectReaction(reaction.key)}
                     onClick={() => commitReaction(reaction.key)}
                     onKeyDown={(event) => handleReactionKeyDown(event, index)}
                   >
@@ -526,11 +562,15 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return null
     }
     return (
+      // Focus-containment guard only (keeps Tab within the open drawer); the
+      // region itself isn't an interactive control.
+      // eslint-disable-next-line styled-components-a11y/no-noninteractive-element-interactions
       <Container
         className={className}
         data-smoot-version={VERSION}
         role="region"
         aria-labelledby={headingId}
+        onKeyDown={handleContainerKeyDown}
       >
         {content}
       </Container>

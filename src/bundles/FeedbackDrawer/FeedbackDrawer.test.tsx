@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import * as React from "react"
 import {
@@ -51,11 +51,22 @@ describe("FeedbackDrawer", () => {
   test("moves focus into the comment field when a reaction is activated by keyboard", async () => {
     renderDrawer()
     const liked = screen.getByRole("radio", { name: "Liked it" })
-    liked.focus()
+    act(() => liked.focus())
     await user.keyboard("{Enter}")
     expect(
       screen.getByRole("textbox", { name: "What did you like?" }),
     ).toHaveFocus()
+  })
+
+  test("previews the comment box for the first reaction when focus lands on it", () => {
+    renderDrawer()
+    // Selection follows focus, so the first radio the Tab order lands on
+    // previews its prompt and comment box the same way the others do — the
+    // initial thumbs-up isn't a dead option that shows nothing.
+    const liked = screen.getByRole("radio", { name: "Liked it" })
+    act(() => liked.focus())
+    expect(liked).toHaveAttribute("aria-checked", "true")
+    screen.getByRole("textbox", { name: "What did you like?" })
   })
 
   test("submitting calls onSubmit and shows the success state", async () => {
@@ -101,7 +112,7 @@ describe("FeedbackDrawer", () => {
     expect(first).toHaveAttribute("tabindex", "0")
     expect(second).toHaveAttribute("tabindex", "-1")
 
-    first.focus()
+    act(() => first.focus())
     await user.keyboard("{ArrowRight}")
 
     const negative = screen.getByRole("radio", { name: "Not working" })
@@ -119,7 +130,7 @@ describe("FeedbackDrawer", () => {
   test("arrow-key selection stays on the radios and doesn't jump to the comment box", async () => {
     renderDrawer()
     const [first] = screen.getAllByRole("radio")
-    first.focus()
+    act(() => first.focus())
     await user.keyboard("{ArrowRight}")
     // Arrowing reveals the comment field but keeps focus on the group so the
     // user can keep comparing options; only an explicit activation moves focus.
@@ -127,6 +138,26 @@ describe("FeedbackDrawer", () => {
     expect(
       screen.getByRole("textbox", { name: "What's not working?" }),
     ).not.toHaveFocus()
+  })
+
+  test("wraps Tab focus within the slot instead of escaping to the page", async () => {
+    renderDrawer({ onClose: jest.fn() })
+    // Reveal the comment box + Submit so the drawer has its full control set.
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+
+    const close = screen.getByRole("button", { name: "Close" })
+    const submit = screen.getByRole("button", { name: "Submit" })
+
+    // Tab off the last control (Submit) wraps back to the first (Close) instead
+    // of walking out into the page footer.
+    act(() => submit.focus())
+    fireEvent.keyDown(submit, { key: "Tab" })
+    expect(close).toHaveFocus()
+
+    // Shift+Tab off the first control (Close) wraps to the last (Submit).
+    act(() => close.focus())
+    fireEvent.keyDown(close, { key: "Tab", shiftKey: true })
+    expect(submit).toHaveFocus()
   })
 
   test("renders the subtitle (content title) under the heading", () => {
