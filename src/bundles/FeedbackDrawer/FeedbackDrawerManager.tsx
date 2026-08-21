@@ -64,9 +64,8 @@ const FeedbackDrawerManager = ({
   // Tracks the pending open-animation frame so a close can cancel it, otherwise
   // a close arriving before the frame fires would be overridden by setOpen(true).
   const openRafRef = useRef<number | null>(null)
-  // The window that requested the open (the LMS iframe hosting the megaphone).
-  // Captured so we can tell it to refocus its trigger on close; that button is
-  // cross-origin, so the MFE parent can't focus it directly.
+  // The opener window (LMS iframe with the megaphone), captured to postMessage
+  // it to refocus its trigger on close — cross-origin, so we can't focus it.
   const openerRef = useRef<Window | null>(null)
 
   const cancelPendingOpen = useCallback(() => {

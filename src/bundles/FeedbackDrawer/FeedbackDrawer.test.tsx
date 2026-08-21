@@ -60,9 +60,8 @@ describe("FeedbackDrawer", () => {
 
   test("previews the comment box for the first reaction when focus lands on it", () => {
     renderDrawer()
-    // Selection follows focus, so the first radio the Tab order lands on
-    // previews its prompt and comment box the same way the others do — the
-    // initial thumbs-up isn't a dead option that shows nothing.
+    // Selection follows focus, so the first radio previews its prompt and box
+    // like the others.
     const liked = screen.getByRole("radio", { name: "Liked it" })
     act(() => liked.focus())
     expect(liked).toHaveAttribute("aria-checked", "true")
@@ -132,8 +131,8 @@ describe("FeedbackDrawer", () => {
     const [first] = screen.getAllByRole("radio")
     act(() => first.focus())
     await user.keyboard("{ArrowRight}")
-    // Arrowing reveals the comment field but keeps focus on the group so the
-    // user can keep comparing options; only an explicit activation moves focus.
+    // Arrowing reveals the comment field but keeps focus on the radios; only
+    // activation moves focus.
     expect(screen.getByRole("radio", { name: "Not working" })).toHaveFocus()
     expect(
       screen.getByRole("textbox", { name: "What's not working?" }),

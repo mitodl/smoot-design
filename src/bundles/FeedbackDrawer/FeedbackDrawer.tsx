@@ -19,9 +19,7 @@ import { Button, ButtonLoadingIcon } from "../../components/Button/Button"
 import { Input } from "../../components/Input/Input"
 import { VERSION } from "../../VERSION"
 
-// A 429 from the submit endpoint means the learner is being throttled; the
-// status and both error strings live here so the check + copy stay in one
-// place, are reusable in tests, and give us a single spot to localize later.
+// A 429 from the submit endpoint means the learner is being throttled.
 const RATE_LIMIT_STATUS = 429
 const RATE_LIMIT_MESSAGE =
   "You're sending feedback too quickly. Please wait a moment and try again."
@@ -143,13 +141,8 @@ const Heading = styled.h1(({ theme }) => ({
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
-  // The heading is focused programmatically on open, so kill the browser's
-  // native focus outline and drive the ring solely via data-focus-ring (set
-  // only for keyboard opens). Without outline:none the first mouse open still
-  // shows a ring — the megaphone click happens in the cross-origin LMS iframe,
-  // so the parent document has seen no pointer interaction and :focus-visible
-  // paints the native outline on programmatic focus. The opener signals
-  // modality to us instead. (WCAG 2.4.7)
+  // Focused programmatically on open, so suppress the native outline and drive
+  // the ring via data-focus-ring (keyboard opens only). (WCAG 2.4.7)
   outline: "none",
   "&[data-focus-ring]:focus": {
     outline: `2px solid ${theme.custom.colors.darkGray2}`,
@@ -285,8 +278,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [rateLimited, setRateLimited] = useState(false)
-  // Monotonic counter bumped by commitReaction; the effect below keys on it (not
-  // on sentiment) so re-committing the same reaction still refocuses the comment.
+  // Bumped on each commit so re-committing the same reaction still refocuses the
+  // comment field.
   const [commitSeq, setCommitSeq] = useState(0)
 
   const active =
@@ -299,30 +292,24 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const headingId = useId()
   const questionId = useId()
 
-  // Move focus to the success message so screen-reader users are told the
-  // submission succeeded (role="status" alone isn't reliably announced when the
-  // node is newly rendered).
+  // Focus the success message so screen readers announce it (role="status"
+  // alone isn't reliably announced on a newly rendered node).
   useEffect(() => {
     if (status === "success") {
       successRef.current?.focus()
     }
   }, [status])
 
-  // When the panel opens as an inline slot, move focus to the heading so
-  // keyboard and screen-reader users are taken into the panel (and hear its
-  // title) rather than being left on the underlying course page. The overlay
-  // "drawer" variant is a MUI Modal, which manages its own focus on open.
+  // On slot open, focus the heading so keyboard/SR users are taken into the
+  // panel. The "drawer" variant is a MUI Modal and manages its own focus.
   useEffect(() => {
     if (open && variant === "slot") {
       headingRef.current?.focus()
     }
   }, [open, variant])
 
-  // The slot is a non-modal region (not a MUI Modal), so it doesn't get
-  // Escape-to-dismiss for free. Listen at the document level while open so
-  // keyboard users can close the panel with Escape, matching the dialog
-  // dismissal convention (WCAG 2.1.2). The overlay "drawer" variant is a MUI
-  // Modal and handles Escape itself.
+  // The slot is non-modal, so wire Escape-to-close ourselves (WCAG 2.1.2). The
+  // "drawer" variant is a MUI Modal and handles Escape itself.
   useEffect(() => {
     if (!open || variant !== "slot") {
       return
@@ -336,28 +323,23 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [open, variant, onClose])
 
-  // Move focus into the freshly revealed comment field so screen-reader users
-  // are taken to it (selecting a reaction otherwise gives no cue a text field
-  // appeared). The > 0 guard skips the initial defaultSentiment mount.
+  // Focus the revealed comment field on commit so SR users are taken to it. The
+  // > 0 guard skips the initial defaultSentiment mount.
   useEffect(() => {
     if (commitSeq > 0) {
       commentRef.current?.focus()
     }
   }, [commitSeq])
 
-  // Selection follows focus: focusing a reaction — whether the Tab order lands
-  // on it, arrow roving moves onto it, or a pointer presses it — selects it and
-  // reveals its comment prompt. This keeps every reaction consistent, so the
-  // first radio the Tab order lands on previews its field the same way the
-  // others do. It only roves selection; it never moves focus itself.
+  // Selection follows focus: focusing a reaction selects it and reveals its
+  // prompt, but never moves focus itself.
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
     setStatus("idle")
   }
 
-  // Pointer/Enter/Space activation commits the choice and (via the effect above)
-  // moves focus into the comment field. Focus alone (Tab or arrow roving) only
-  // previews via selectReaction and leaves focus on the radios.
+  // Activation (pointer/Enter/Space) commits and moves focus into the comment
+  // field; plain focus only previews via selectReaction.
   const commitReaction = (key: Sentiment) => {
     selectReaction(key)
     setCommitSeq((seq) => seq + 1)
@@ -416,10 +398,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }
 
-  // Keep keyboard focus inside the open slot: Tab past the last control wraps to
-  // the first, Shift+Tab past the first wraps to the last. The slot is a
-  // non-modal region, so without this the tab order spills into unrelated page
-  // chrome (e.g. the site footer) instead of staying with the feedback task.
+  // Keep Tab focus inside the non-modal slot: wrap Tab off the last control to
+  // the first, and Shift+Tab off the first to the last.
   const handleContainerKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -562,8 +542,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return null
     }
     return (
-      // Focus-containment guard only (keeps Tab within the open drawer); the
-      // region itself isn't an interactive control.
+      // Focus-containment guard only; the region isn't an interactive control.
       // eslint-disable-next-line styled-components-a11y/no-noninteractive-element-interactions
       <Container
         className={className}
