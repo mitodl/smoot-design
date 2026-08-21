@@ -14,6 +14,8 @@ type FeedbackPayload = {
 type FeedbackOpenMessage = {
   type: "ol-feedback::drawer-open"
   payload: FeedbackPayload
+  /** True when the opener's trigger was activated by keyboard (click detail 0). */
+  viaKeyboard?: boolean
 }
 
 type FeedbackEnrichment = {
@@ -31,10 +33,16 @@ type FeedbackDrawerManagerProps = {
   csrfPrimeUrl?: string
   variant?: "drawer" | "slot"
   getEnrichment?: () => FeedbackEnrichment
+  /** Notifies the host (e.g. the MFE sidebar coordinator) that the drawer
+   * closed, so it can hide the surrounding slot/column now that it's empty. */
+  onClose?: () => void
 }
 
 const OPEN_MESSAGE = "ol-feedback::drawer-open"
 const CLOSE_MESSAGE = "ol-feedback::drawer-close"
+// Sent back to the opener when the drawer closes so the (cross-origin) trigger
+// can return keyboard focus to its megaphone button.
+const CLOSED_MESSAGE = "ol-feedback::drawer-closed"
 
 const FeedbackDrawerManager = ({
   messageOrigin,
@@ -44,14 +52,21 @@ const FeedbackDrawerManager = ({
   csrfPrimeUrl,
   variant = "drawer",
   getEnrichment,
+  onClose,
 }: FeedbackDrawerManagerProps) => {
   const [payload, setPayload] = useState<FeedbackPayload | null>(null)
   const [open, setOpen] = useState(false)
+  // Keyboard-initiated open (opener sends detail === 0) → drawer rings the
+  // heading; a mouse open focuses it silently.
+  const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   // Bumped on every open so each open remounts FeedbackDrawer (resets state).
   const [openSeq, setOpenSeq] = useState(0)
   // Tracks the pending open-animation frame so a close can cancel it, otherwise
   // a close arriving before the frame fires would be overridden by setOpen(true).
   const openRafRef = useRef<number | null>(null)
+  // The opener window (LMS iframe with the megaphone), captured to postMessage
+  // it to refocus its trigger on close — cross-origin, so we can't focus it.
+  const openerRef = useRef<Window | null>(null)
 
   const cancelPendingOpen = useCallback(() => {
     if (openRafRef.current !== null) {
@@ -67,7 +82,11 @@ const FeedbackDrawerManager = ({
       setPayload(null)
     }
     setOpen(false)
-  }, [variant, cancelPendingOpen])
+    // Return keyboard focus to the megaphone trigger in the opener iframe.
+    openerRef.current?.postMessage({ type: CLOSED_MESSAGE }, messageOrigin)
+    // Let the host (MFE coordinator) hide the slot/column now that it's empty.
+    onClose?.()
+  }, [variant, cancelPendingOpen, messageOrigin, onClose])
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -75,9 +94,11 @@ const FeedbackDrawerManager = ({
         return
       }
       const data = event.data as
-        | { type?: string; payload?: FeedbackPayload }
+        | { type?: string; payload?: FeedbackPayload; viaKeyboard?: boolean }
         | undefined
       if (data?.type === OPEN_MESSAGE) {
+        openerRef.current = event.source as Window | null
+        setOpenedViaKeyboard(!!data.viaKeyboard)
         setPayload(data.payload || {})
         setOpenSeq((seq) => seq + 1)
         if (variant === "slot") {
@@ -167,6 +188,7 @@ const FeedbackDrawerManager = ({
       key={openSeq}
       variant={variant}
       open={open}
+      openedViaKeyboard={openedViaKeyboard}
       subtitle={payload.blockDisplayName}
       onClose={handleClose}
       onSubmit={handleSubmit}

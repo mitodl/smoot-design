@@ -19,9 +19,7 @@ import { Button, ButtonLoadingIcon } from "../../components/Button/Button"
 import { Input } from "../../components/Input/Input"
 import { VERSION } from "../../VERSION"
 
-// A 429 from the submit endpoint means the learner is being throttled; the
-// status and both error strings live here so the check + copy stay in one
-// place, are reusable in tests, and give us a single spot to localize later.
+// A 429 from the submit endpoint means the learner is being throttled.
 const RATE_LIMIT_STATUS = 429
 const RATE_LIMIT_MESSAGE =
   "You're sending feedback too quickly. Please wait a moment and try again."
@@ -143,6 +141,14 @@ const Heading = styled.h1(({ theme }) => ({
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
+  // Focused programmatically on open, so suppress the native outline and drive
+  // the ring via data-focus-ring (keyboard opens only). (WCAG 2.4.7)
+  outline: "none",
+  "&[data-focus-ring]:focus": {
+    outline: `2px solid ${theme.custom.colors.darkGray2}`,
+    outlineOffset: "2px",
+    borderRadius: "2px",
+  },
 }))
 
 const BlockName = styled.span(({ theme }) => ({
@@ -244,6 +250,8 @@ type FeedbackDrawerProps = {
    */
   variant?: "drawer" | "slot"
   open?: boolean
+  /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
+  openedViaKeyboard?: boolean
   onClose?: () => void
   onSubmit?: (data: FeedbackData) => Promise<void> | void
   /** Drawer heading. */
@@ -257,6 +265,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   className,
   variant = "drawer",
   open,
+  openedViaKeyboard,
   onClose,
   onSubmit,
   title = "Share your feedback",
@@ -269,26 +278,71 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [rateLimited, setRateLimited] = useState(false)
+  // Bumped on each commit so re-committing the same reaction still refocuses the
+  // comment field.
+  const [commitSeq, setCommitSeq] = useState(0)
 
   const active =
     REACTIONS.find((reaction) => reaction.key === sentiment) ?? null
 
   const reactionRefs = useRef<(HTMLButtonElement | null)[]>([])
   const successRef = useRef<HTMLDivElement | null>(null)
+  const headingRef = useRef<HTMLHeadingElement | null>(null)
+  const commentRef = useRef<HTMLTextAreaElement | null>(null)
   const headingId = useId()
+  const questionId = useId()
 
-  // Move focus to the success message so screen-reader users are told the
-  // submission succeeded (role="status" alone isn't reliably announced when the
-  // node is newly rendered).
+  // Focus the success message so screen readers announce it (role="status"
+  // alone isn't reliably announced on a newly rendered node).
   useEffect(() => {
     if (status === "success") {
       successRef.current?.focus()
     }
   }, [status])
 
+  // On slot open, focus the heading so keyboard/SR users are taken into the
+  // panel. The "drawer" variant is a MUI Modal and manages its own focus.
+  useEffect(() => {
+    if (open && variant === "slot") {
+      headingRef.current?.focus()
+    }
+  }, [open, variant])
+
+  // The slot is non-modal, so wire Escape-to-close ourselves (WCAG 2.1.2). The
+  // "drawer" variant is a MUI Modal and handles Escape itself.
+  useEffect(() => {
+    if (!open || variant !== "slot") {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose?.()
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [open, variant, onClose])
+
+  // Focus the revealed comment field on commit so SR users are taken to it. The
+  // > 0 guard skips the initial defaultSentiment mount.
+  useEffect(() => {
+    if (commitSeq > 0) {
+      commentRef.current?.focus()
+    }
+  }, [commitSeq])
+
+  // Selection follows focus: focusing a reaction selects it and reveals its
+  // prompt, but never moves focus itself.
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
     setStatus("idle")
+  }
+
+  // Activation (pointer/Enter/Space) commits and moves focus into the comment
+  // field; plain focus only previews via selectReaction.
+  const commitReaction = (key: Sentiment) => {
+    selectReaction(key)
+    setCommitSeq((seq) => seq + 1)
   }
 
   const focusableIndex = sentiment
@@ -344,12 +398,45 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }
 
+  // Keep Tab focus inside the non-modal slot: wrap Tab off the last control to
+  // the first, and Shift+Tab off the first to the last.
+  const handleContainerKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key !== "Tab") {
+      return
+    }
+    const tabbable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(
+        "a[href], button, input, textarea, select, [tabindex]",
+      ),
+    ).filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled)
+    if (tabbable.length === 0) {
+      return
+    }
+    const first = tabbable[0]
+    const last = tabbable[tabbable.length - 1]
+    const activeEl = document.activeElement
+    if (event.shiftKey && activeEl === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && activeEl === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
   const content = (
     <>
       <Header>
         <Title>
           <RiMegaphoneLine aria-hidden />
-          <Heading id={headingId}>
+          <Heading
+            id={headingId}
+            ref={headingRef}
+            tabIndex={-1}
+            data-focus-ring={openedViaKeyboard ? "" : undefined}
+          >
             {subtitle ? (
               <>
                 {title} about <BlockName>{subtitle}</BlockName>
@@ -378,9 +465,9 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
           </Success>
         ) : (
           <>
-            <Question>How was this content?</Question>
+            <Question id={questionId}>How was this content?</Question>
 
-            <Reactions role="radiogroup" aria-label="How would you rate this?">
+            <Reactions role="radiogroup" aria-labelledby={questionId}>
               {REACTIONS.map((reaction, index) => {
                 const selected = reaction.key === sentiment
                 const Icon = selected ? reaction.FillIcon : reaction.LineIcon
@@ -399,7 +486,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                     selected={selected}
                     colorKey={reaction.colorKey}
                     tintAlpha={reaction.tintAlpha}
-                    onClick={() => selectReaction(reaction.key)}
+                    onFocus={() => selectReaction(reaction.key)}
+                    onClick={() => commitReaction(reaction.key)}
                     onKeyDown={(event) => handleReactionKeyDown(event, index)}
                   >
                     <Icon />
@@ -415,6 +503,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                   multiline
                   minRows={3}
                   fullWidth
+                  inputRef={commentRef}
                   value={comment}
                   inputProps={{ maxLength: 1000, "aria-label": active.prompt }}
                   onChange={(event) => setComment(event.target.value)}
@@ -453,7 +542,15 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return null
     }
     return (
-      <Container className={className} data-smoot-version={VERSION}>
+      // Focus-containment guard only; the region isn't an interactive control.
+      // eslint-disable-next-line styled-components-a11y/no-noninteractive-element-interactions
+      <Container
+        className={className}
+        data-smoot-version={VERSION}
+        role="region"
+        aria-labelledby={headingId}
+        onKeyDown={handleContainerKeyDown}
+      >
         {content}
       </Container>
     )

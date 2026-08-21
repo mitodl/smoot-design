@@ -61,6 +61,37 @@ describe("FeedbackDrawerManager", () => {
     expect(screen.queryByText("How was this content?")).toBeNull()
   })
 
+  test("passes a keyboard-open through to the drawer's focus-ring marker", () => {
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: ORIGIN,
+          data: {
+            type: "ol-feedback::drawer-open",
+            payload: PAYLOAD,
+            viaKeyboard: true,
+          },
+        }),
+      )
+    })
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("omits the focus-ring marker for a mouse open (no keyboard flag)", () => {
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    openMessage()
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
   test("opens the drawer and POSTs the mapped body on submit", async () => {
     const fetchMock = jest
       .spyOn(global, "fetch")
@@ -137,6 +168,56 @@ describe("FeedbackDrawerManager", () => {
     })
     expect(screen.queryByText("How was this content?")).toBeNull()
     screen.getByTestId("feedback-drawer-manager-waiting")
+  })
+
+  test("posts a drawer-closed message back to the opener when closed", async () => {
+    // The megaphone trigger lives in a cross-origin LMS iframe, so the manager
+    // (running in the MFE parent) can't focus it directly. On close it must
+    // signal the opener window (event.source) so the trigger can refocus itself.
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: ORIGIN,
+          source: opener,
+          data: { type: "ol-feedback::drawer-open", payload: PAYLOAD },
+        }),
+      )
+    })
+    screen.getByText("How was this content?")
+
+    await user.click(screen.getByRole("button", { name: "Close" }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "ol-feedback::drawer-closed" },
+      ORIGIN,
+    )
+    iframe.remove()
+  })
+
+  test("calls onClose when the drawer closes so the host can hide the slot", async () => {
+    const onClose = jest.fn()
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        onClose={onClose}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    openMessage()
+    screen.getByText("How was this content?")
+    await user.click(screen.getByRole("button", { name: "Close" }))
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   test("primes the CSRF cookie when missing, then POSTs with the token", async () => {

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import * as React from "react"
 import {
@@ -24,12 +24,48 @@ describe("FeedbackDrawer", () => {
     screen.getByRole("radio", { name: "Suggestion" })
   })
 
+  test("names the reaction group with the visible question, not a mismatched label", () => {
+    renderDrawer()
+    // The group's accessible name is the on-screen "How was this content?"
+    // heading, so it matches what sighted users see (no stray "rate" wording).
+    screen.getByRole("radiogroup", { name: "How was this content?" })
+    expect(screen.queryByRole("radiogroup", { name: /rate/i })).toBeNull()
+  })
+
   test("selecting a reaction reveals its prompt, a comment box, and Submit", async () => {
     renderDrawer()
     await user.click(screen.getByRole("radio", { name: "Liked it" }))
     screen.getByText("What did you like?")
     screen.getByRole("textbox", { name: "What did you like?" })
     screen.getByRole("button", { name: "Submit" })
+  })
+
+  test("moves focus into the comment field when a reaction is clicked", async () => {
+    renderDrawer()
+    await user.click(screen.getByRole("radio", { name: "Not working" }))
+    expect(
+      screen.getByRole("textbox", { name: "What's not working?" }),
+    ).toHaveFocus()
+  })
+
+  test("moves focus into the comment field when a reaction is activated by keyboard", async () => {
+    renderDrawer()
+    const liked = screen.getByRole("radio", { name: "Liked it" })
+    act(() => liked.focus())
+    await user.keyboard("{Enter}")
+    expect(
+      screen.getByRole("textbox", { name: "What did you like?" }),
+    ).toHaveFocus()
+  })
+
+  test("previews the comment box for the first reaction when focus lands on it", () => {
+    renderDrawer()
+    // Selection follows focus, so the first radio previews its prompt and box
+    // like the others.
+    const liked = screen.getByRole("radio", { name: "Liked it" })
+    act(() => liked.focus())
+    expect(liked).toHaveAttribute("aria-checked", "true")
+    screen.getByRole("textbox", { name: "What did you like?" })
   })
 
   test("submitting calls onSubmit and shows the success state", async () => {
@@ -75,7 +111,7 @@ describe("FeedbackDrawer", () => {
     expect(first).toHaveAttribute("tabindex", "0")
     expect(second).toHaveAttribute("tabindex", "-1")
 
-    first.focus()
+    act(() => first.focus())
     await user.keyboard("{ArrowRight}")
 
     const negative = screen.getByRole("radio", { name: "Not working" })
@@ -90,11 +126,92 @@ describe("FeedbackDrawer", () => {
     expect(suggestion).toHaveFocus()
   })
 
+  test("arrow-key selection stays on the radios and doesn't jump to the comment box", async () => {
+    renderDrawer()
+    const [first] = screen.getAllByRole("radio")
+    act(() => first.focus())
+    await user.keyboard("{ArrowRight}")
+    // Arrowing reveals the comment field but keeps focus on the radios; only
+    // activation moves focus.
+    expect(screen.getByRole("radio", { name: "Not working" })).toHaveFocus()
+    expect(
+      screen.getByRole("textbox", { name: "What's not working?" }),
+    ).not.toHaveFocus()
+  })
+
+  test("wraps Tab focus within the slot instead of escaping to the page", async () => {
+    renderDrawer({ onClose: jest.fn() })
+    // Reveal the comment box + Submit so the drawer has its full control set.
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+
+    const close = screen.getByRole("button", { name: "Close" })
+    const submit = screen.getByRole("button", { name: "Submit" })
+
+    // Tab off the last control (Submit) wraps back to the first (Close) instead
+    // of walking out into the page footer.
+    act(() => submit.focus())
+    fireEvent.keyDown(submit, { key: "Tab" })
+    expect(close).toHaveFocus()
+
+    // Shift+Tab off the first control (Close) wraps to the last (Submit).
+    act(() => close.focus())
+    fireEvent.keyDown(close, { key: "Tab", shiftKey: true })
+    expect(submit).toHaveFocus()
+  })
+
   test("renders the subtitle (content title) under the heading", () => {
     render(
       <FeedbackDrawer variant="slot" open subtitle="Lecture 1: Limits" />,
       { wrapper: ThemeProvider },
     )
     expect(screen.getByText("Lecture 1: Limits")).toBeVisible()
+  })
+
+  test("moves focus to the heading when opened (slot variant)", async () => {
+    renderDrawer()
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+  })
+
+  test("makes the heading programmatically focusable", () => {
+    renderDrawer()
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "tabindex",
+      "-1",
+    )
+  })
+
+  test("marks the heading for a focus ring only when opened via keyboard", () => {
+    renderDrawer({ openedViaKeyboard: true })
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("omits the heading focus-ring marker when opened by mouse", () => {
+    renderDrawer({ openedViaKeyboard: false })
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("exposes the open slot as a region labelled by its heading", () => {
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    screen.getByRole("region", {
+      name: /share your feedback about lecture 1: limits/i,
+    })
+  })
+
+  test("closes when Escape is pressed inside the open slot", async () => {
+    const onClose = jest.fn()
+    renderDrawer({ onClose })
+    // Focus lands in the panel on open; Escape from anywhere inside should
+    // dismiss it (matching the dialog dismissal convention, WCAG 2.1.2).
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+    await user.keyboard("{Escape}")
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })
