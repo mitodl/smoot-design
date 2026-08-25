@@ -84,6 +84,35 @@ describe("FeedbackDrawer", () => {
     await screen.findByText("Thank you for your feedback!")
   })
 
+  test("keeps the button visible and busy (not greyed-disabled) while submitting", async () => {
+    let resolveSubmit: () => void = () => {}
+    const onSubmit = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSubmit = resolve
+        }),
+    )
+    renderDrawer({ onSubmit })
+    await user.click(screen.getByRole("radio", { name: "Suggestion" }))
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    // In flight: the control stays visually filled (not the native :disabled grey
+    // that hides the white spinner) but announces itself busy/non-actionable.
+    const busy = screen.getByRole("button", { name: /submitting/i })
+    expect(busy).toHaveAttribute("aria-busy", "true")
+    expect(busy).toHaveAttribute("aria-disabled", "true")
+    expect(busy).not.toBeDisabled()
+
+    // A second click while busy is ignored — no double submit.
+    await user.click(busy)
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      resolveSubmit()
+    })
+    await screen.findByText("Thank you for your feedback!")
+  })
+
   test("shows the error state when onSubmit rejects", async () => {
     const onSubmit = jest.fn().mockRejectedValue(new Error("boom"))
     renderDrawer({ onSubmit })

@@ -382,7 +382,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   }
 
   const handleSubmit = async () => {
-    if (!sentiment) {
+    // aria-disabled doesn't block clicks, so guard against double-submit.
+    if (!sentiment || status === "submitting") {
       return
     }
     setStatus("submitting")
@@ -517,7 +518,8 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                   <Button
                     variant="primary"
                     size="medium"
-                    disabled={status === "submitting"}
+                    // aria-disabled (not disabled) keeps the red fill so the spinner shows.
+                    aria-disabled={status === "submitting"}
                     aria-busy={status === "submitting"}
                     startIcon={
                       status === "submitting" ? (
@@ -526,7 +528,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                     }
                     onClick={handleSubmit}
                   >
-                    Submit
+                    {status === "submitting" ? "Submitting…" : "Submit"}
                   </Button>
                 </Footer>
               </>
