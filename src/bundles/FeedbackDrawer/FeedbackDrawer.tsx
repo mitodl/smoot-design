@@ -382,8 +382,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   }
 
   const handleSubmit = async () => {
-    // Guard re-entry: aria-disabled (below) doesn't block clicks, so bail if a
-    // submit is already in flight.
+    // aria-disabled doesn't block clicks, so guard against double-submit.
     if (!sentiment || status === "submitting") {
       return
     }
@@ -519,9 +518,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
                   <Button
                     variant="primary"
                     size="medium"
-                    // aria-disabled (not disabled) keeps the filled-red style so
-                    // the white spinner stays high-contrast; handleSubmit guards
-                    // the re-entrant click.
+                    // aria-disabled (not disabled) keeps the red fill so the spinner shows.
                     aria-disabled={status === "submitting"}
                     aria-busy={status === "submitting"}
                     startIcon={
