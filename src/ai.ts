@@ -6,3 +6,13 @@ export type {
   AiChatDisplayProps,
   AiChatProps,
 } from "./components/AiChat/types"
+export {
+  SYLLABUS_STARTERS,
+  getSyllabusChatProps,
+} from "./components/AiChat/syllabusChat"
+export type {
+  SyllabusChatOptions,
+  SyllabusResourceNoun,
+} from "./components/AiChat/syllabusChat"
+export { ASK_TIM_CLICKED } from "./components/AiChat/analytics"
+export type { AskTimClickedProperties } from "./components/AiChat/analytics"
