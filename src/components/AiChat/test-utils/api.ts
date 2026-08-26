@@ -299,6 +299,16 @@ const handlers = [
       },
     })
   }),
+  // learn-ai agent endpoints, as consumed by LearnAiChat
+  http.post("http://localhost:4567/ai/http/:agentId/", async () => {
+    await delay(600)
+    const body = getReadableStream()
+    return new HttpResponse(body, {
+      headers: {
+        "Content-Type": "text/plain",
+      },
+    })
+  }),
   http.post("http://localhost:4567/streaming-math", async () => {
     await delay(600)
     const body = getReadableStream(4)
