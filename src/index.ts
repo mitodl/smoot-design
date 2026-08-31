@@ -82,6 +82,12 @@ export type { TextFieldProps } from "./components/TextField/TextField"
 export { Tooltip } from "./components/Tooltip/Tooltip"
 export type { TooltipProps } from "./components/Tooltip/Tooltip"
 
+export { UserMenu } from "./components/UserMenu/UserMenu"
+export type {
+  UserMenuProps,
+  UserMenuItem,
+} from "./components/UserMenu/UserMenu"
+
 export { VisuallyHidden } from "./components/VisuallyHidden/VisuallyHidden"
 
 export { VERSION } from "./VERSION"
