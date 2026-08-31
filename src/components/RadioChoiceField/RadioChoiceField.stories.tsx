@@ -55,3 +55,21 @@ export const Simple: Story = {
     return <RadioChoiceField {...args} onChange={onChange} />
   },
 }
+
+export const Required: Story = {
+  args: {
+    label: "Radio choice field label",
+    name: "required-story",
+    required: true,
+    choices: [
+      {
+        value: "option-1",
+        label: "Option 1",
+      },
+      {
+        value: "option-2",
+        label: "Option 2",
+      },
+    ],
+  },
+}
