@@ -6,7 +6,9 @@ import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
 import type { RadioGroupProps } from "@mui/material/RadioGroup"
 import styled from "@emotion/styled"
-import { Required } from "../internal/FormHelpers/FormHelpers"
+// Aliased so it does not shadow TypeScript's built-in `Required<T>`, which is
+// used elsewhere in this package (see Button.tsx).
+import { Required as RequiredMark } from "../internal/FormHelpers/FormHelpers"
 
 const RadioGroupStyled = styled(RadioGroup)(({ theme }) => ({
   display: "flex",
@@ -76,7 +78,7 @@ const RadioChoiceField: React.FC<RadioChoiceFieldProps> = ({
     <FormControl className={className}>
       <Label id={labelId}>
         {label}
-        {required ? <Required aria-hidden="true">*</Required> : null}
+        {required ? <RequiredMark aria-hidden="true">*</RequiredMark> : null}
       </Label>
       <RadioGroupStyled
         aria-labelledby={labelId}
