@@ -5,6 +5,7 @@ import { RadioChoiceField } from "./RadioChoiceField"
 
 const meta: Meta<typeof RadioChoiceField> = {
   title: "smoot-design/RadioChoiceField",
+  component: RadioChoiceField,
   argTypes: {
     onChange: {
       action: "changed",
