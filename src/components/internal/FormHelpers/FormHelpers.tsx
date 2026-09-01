@@ -147,5 +147,5 @@ const FormFieldWrapper: React.FC<FormFieldWrapperProps> = ({
   )
 }
 
-export { FormFieldWrapper, ControlLabel, Description }
+export { FormFieldWrapper, ControlLabel, Description, Required }
 export type { FormFieldWrapperProps, ControlLabelProps }

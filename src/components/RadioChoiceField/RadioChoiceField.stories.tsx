@@ -5,6 +5,7 @@ import { RadioChoiceField } from "./RadioChoiceField"
 
 const meta: Meta<typeof RadioChoiceField> = {
   title: "smoot-design/RadioChoiceField",
+  component: RadioChoiceField,
   argTypes: {
     onChange: {
       action: "changed",
@@ -53,5 +54,23 @@ export const Simple: Story = {
       setArgs({ value: currentTarget.value })
     }
     return <RadioChoiceField {...args} onChange={onChange} />
+  },
+}
+
+export const Required: Story = {
+  args: {
+    label: "Radio choice field label",
+    name: "required-story",
+    required: true,
+    choices: [
+      {
+        value: "option-1",
+        label: "Option 1",
+      },
+      {
+        value: "option-2",
+        label: "Option 2",
+      },
+    ],
   },
 }

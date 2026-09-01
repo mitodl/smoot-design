@@ -6,6 +6,9 @@ import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
 import type { RadioGroupProps } from "@mui/material/RadioGroup"
 import styled from "@emotion/styled"
+// Aliased so it does not shadow TypeScript's built-in `Required<T>`, which is
+// used elsewhere in this package (see Button.tsx).
+import { Required as RequiredMark } from "../internal/FormHelpers/FormHelpers"
 
 const RadioGroupStyled = styled(RadioGroup)(({ theme }) => ({
   display: "flex",
@@ -42,6 +45,14 @@ interface RadioChoiceFieldProps {
   choices: RadioChoiceProps[]
   onChange?: RadioGroupProps["onChange"]
   className?: string
+  /**
+   * Marks the group as required.
+   *
+   * A radio group has no input to carry the native `required` attribute, so
+   * this sets `aria-required` on the group itself. The asterisk beside the
+   * label is `aria-hidden`, since it would otherwise be announced as "star".
+   */
+  required?: boolean
 }
 
 /**
@@ -60,13 +71,18 @@ const RadioChoiceField: React.FC<RadioChoiceFieldProps> = ({
   choices,
   onChange,
   className,
+  required,
 }) => {
   const labelId = useId()
   return (
     <FormControl className={className}>
-      <Label id={labelId}>{label}</Label>
+      <Label id={labelId}>
+        {label}
+        {required ? <RequiredMark aria-hidden="true">*</RequiredMark> : null}
+      </Label>
       <RadioGroupStyled
         aria-labelledby={labelId}
+        aria-required={required}
         name={name}
         defaultValue={defaultValue}
         value={value}
@@ -115,6 +131,7 @@ interface BooleanRadioChoiceFieldProps {
   choices: BooleanRadioChoiceProps[]
   onChange?: (event: { name: string; value: boolean }) => void
   className?: string
+  required?: boolean
 }
 
 const BooleanRadioChoiceField: React.FC<BooleanRadioChoiceFieldProps> = ({
