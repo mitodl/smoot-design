@@ -136,6 +136,77 @@ export const SlotSelectedStory: Story = {
   ),
 }
 
+export const SlotWithBlockTitleStory: Story = {
+  name: "Slot (block title in subheader)",
+  render: () => (
+    <div
+      style={{
+        width: "420px",
+        maxWidth: "100%",
+        border: "1px solid #e3e6ea",
+        borderRadius: "12px",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
+      }}
+    >
+      <FeedbackDrawer
+        variant="slot"
+        open
+        subtitle="Lecture 3: Recursion"
+        onSubmit={logSubmit}
+      />
+    </div>
+  ),
+}
+
+/**
+ * Slot with no block title: the subheader falls back to the (friendly) block
+ * type, e.g. "this problem block".
+ */
+export const SlotBlockTypeFallbackStory: Story = {
+  name: "Slot (block-type fallback in subheader)",
+  render: () => (
+    <div
+      style={{
+        width: "420px",
+        maxWidth: "100%",
+        border: "1px solid #e3e6ea",
+        borderRadius: "12px",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
+      }}
+    >
+      <FeedbackDrawer
+        variant="slot"
+        open
+        blockType="problem"
+        onSubmit={logSubmit}
+      />
+    </div>
+  ),
+}
+
+export const SlotIdeaRequiredStory: Story = {
+  name: "Slot (suggestion — comment required)",
+  render: () => (
+    <div
+      style={{
+        width: "420px",
+        maxWidth: "100%",
+        border: "1px solid #e3e6ea",
+        borderRadius: "12px",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10)",
+      }}
+    >
+      <FeedbackDrawer
+        variant="slot"
+        open
+        defaultSentiment="idea"
+        subtitle="Lecture 3: Recursion"
+        onSubmit={logSubmit}
+      />
+    </div>
+  ),
+}
+
 /**
  * Same as Slot, but the stubbed submit rejects so the error state is visible.
  */

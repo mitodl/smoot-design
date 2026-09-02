@@ -43,6 +43,9 @@ const CLOSE_MESSAGE = "ol-feedback::drawer-close"
 // Sent back to the opener when the drawer closes so the (cross-origin) trigger
 // can return keyboard focus to its megaphone button.
 const CLOSED_MESSAGE = "ol-feedback::drawer-closed"
+// Sent back to the opener to return keyboard focus to its megaphone trigger
+// while leaving the drawer open (the "return to block" skip link).
+const FOCUS_TRIGGER_MESSAGE = "ol-feedback::focus-trigger"
 
 const FeedbackDrawerManager = ({
   messageOrigin,
@@ -87,6 +90,13 @@ const FeedbackDrawerManager = ({
     // Let the host (MFE coordinator) hide the slot/column now that it's empty.
     onClose?.()
   }, [variant, cancelPendingOpen, messageOrigin, onClose])
+
+  const handleReturnToBlock = useCallback(() => {
+    openerRef.current?.postMessage(
+      { type: FOCUS_TRIGGER_MESSAGE },
+      messageOrigin,
+    )
+  }, [messageOrigin])
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -190,7 +200,9 @@ const FeedbackDrawerManager = ({
       open={open}
       openedViaKeyboard={openedViaKeyboard}
       subtitle={payload.blockDisplayName}
+      blockType={payload.blockType}
       onClose={handleClose}
+      onReturnToBlock={handleReturnToBlock}
       onSubmit={handleSubmit}
     />
   )

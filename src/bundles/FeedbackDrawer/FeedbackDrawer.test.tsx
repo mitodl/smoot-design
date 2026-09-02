@@ -15,20 +15,59 @@ const renderDrawer = (props = {}) =>
   })
 
 describe("FeedbackDrawer", () => {
+  test("shows the Appzi-style header", () => {
+    renderDrawer()
+    screen.getByRole("heading", { level: 1, name: "Tell us what you think" })
+  })
+
   test("shows the question and three reactions", () => {
     renderDrawer()
-    screen.getByText("How was this content?")
+    screen.getByText("What kind of feedback do you have about this content?")
     expect(screen.getAllByRole("radio")).toHaveLength(3)
     screen.getByRole("radio", { name: "Liked it" })
     screen.getByRole("radio", { name: "Not working" })
     screen.getByRole("radio", { name: "Suggestion" })
   })
 
+  test("subheader asks about the block by title when one is provided", () => {
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    // The subheader question labels the reaction group (it is not a heading), so
+    // the block context announces when a reaction is focused.
+    screen.getByRole("radiogroup", {
+      name: /what kind of feedback do you have about.*lecture 1: limits/i,
+    })
+  })
+
+  test("subheader falls back to the friendly block type when there is no title", () => {
+    renderDrawer({ blockType: "problem" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this problem block?",
+    })
+  })
+
+  test("maps a raw block type to a friendlier word in the subheader", () => {
+    // "html" reads poorly for a learner; the subheader says "text" instead.
+    renderDrawer({ blockType: "html" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this text block?",
+    })
+  })
+
+  test("keeps the subheader question out of the heading structure", () => {
+    // Only the drawer title is a heading; the question is the radiogroup legend,
+    // so it isn't announced a second time during heading navigation.
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    expect(screen.getAllByRole("heading")).toHaveLength(1)
+    expect(screen.queryByRole("heading", { level: 2 })).toBeNull()
+  })
+
   test("names the reaction group with the visible question, not a mismatched label", () => {
     renderDrawer()
-    // The group's accessible name is the on-screen "How was this content?"
-    // heading, so it matches what sighted users see (no stray "rate" wording).
-    screen.getByRole("radiogroup", { name: "How was this content?" })
+    // The group's accessible name is the on-screen subheader question, so it
+    // matches what sighted users see (no stray "rate" wording).
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this content?",
+    })
     expect(screen.queryByRole("radiogroup", { name: /rate/i })).toBeNull()
   })
 
@@ -94,6 +133,11 @@ describe("FeedbackDrawer", () => {
     )
     renderDrawer({ onSubmit })
     await user.click(screen.getByRole("radio", { name: "Suggestion" }))
+    // A suggestion needs a comment before Submit is actionable.
+    await user.type(
+      screen.getByRole("textbox", { name: "What is your suggestion?" }),
+      "captions",
+    )
     await user.click(screen.getByRole("button", { name: "Submit" }))
 
     // In flight: the control stays visually filled (not the native :disabled grey
@@ -131,6 +175,73 @@ describe("FeedbackDrawer", () => {
     await user.click(screen.getByRole("radio", { name: "Not working" }))
     await user.click(screen.getByRole("button", { name: "Submit" }))
     await screen.findByText(RATE_LIMIT_MESSAGE)
+  })
+
+  test("blocks a Submit with an empty suggestion and shows an inline error", async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderDrawer({ onSubmit })
+    await user.click(screen.getByRole("radio", { name: "Suggestion" }))
+    const submit = screen.getByRole("button", { name: "Submit" })
+
+    // No nagging before the learner acts: the error only appears on Submit.
+    expect(screen.queryByText(/add a comment/i)).toBeNull()
+    await user.click(submit)
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(screen.getByRole("alert")).toHaveTextContent(/add a comment/i)
+    // Focus is pulled to the box so the learner can start typing immediately.
+    const box = screen.getByRole("textbox", {
+      name: "What is your suggestion?",
+    })
+    expect(box).toHaveFocus()
+    expect(box).toHaveAccessibleDescription(/add a comment/i)
+
+    // Typing a real comment clears the error, and Submit then goes through.
+    await user.type(box, "add captions")
+    expect(screen.queryByText(/add a comment/i)).toBeNull()
+    await user.click(submit)
+    expect(onSubmit).toHaveBeenCalledWith({
+      sentiment: "idea",
+      comment: "add captions",
+    })
+  })
+
+  test("treats a whitespace-only suggestion as missing on Submit", async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderDrawer({ onSubmit })
+    await user.click(screen.getByRole("radio", { name: "Suggestion" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "What is your suggestion?" }),
+      "   ",
+    )
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(screen.getByRole("alert")).toHaveTextContent(/add a comment/i)
+  })
+
+  test("marks the suggestion comment as required for screen readers", async () => {
+    renderDrawer()
+    await user.click(screen.getByRole("radio", { name: "Suggestion" }))
+    // aria-required conveys the requirement up front; the visible red asterisk
+    // is the sighted equivalent.
+    expect(
+      screen.getByRole("textbox", { name: "What is your suggestion?" }),
+    ).toBeRequired()
+    // No error until the learner tries to submit.
+    expect(screen.queryByRole("alert")).toBeNull()
+  })
+
+  test("keeps the required error out of the way for a like", async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderDrawer({ onSubmit })
+    // A like/dislike comment is optional: Submit goes straight through with no
+    // error, even when the box is empty.
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+    expect(screen.queryByText(/add a comment/i)).toBeNull()
+    expect(onSubmit).toHaveBeenCalledWith({
+      sentiment: "positive",
+      comment: "",
+    })
   })
 
   test("arrow keys move selection across reactions (roving tabIndex)", async () => {
@@ -188,12 +299,16 @@ describe("FeedbackDrawer", () => {
     expect(submit).toHaveFocus()
   })
 
-  test("renders the subtitle (content title) under the heading", () => {
+  test("renders the subtitle (content title) inside the subheader question", () => {
     render(
       <FeedbackDrawer variant="slot" open subtitle="Lecture 1: Limits" />,
       { wrapper: ThemeProvider },
     )
-    expect(screen.getByText("Lecture 1: Limits")).toBeVisible()
+    expect(
+      screen.getByRole("radiogroup", {
+        name: "What kind of feedback do you have about Lecture 1: Limits?",
+      }),
+    ).toBeVisible()
   })
 
   test("moves focus to the heading when opened (slot variant)", async () => {
@@ -211,6 +326,20 @@ describe("FeedbackDrawer", () => {
     )
   })
 
+  test("describes the heading with the question so block context is announced on open", () => {
+    // Focus lands on the h1 on open (#12876), but the title carries no block
+    // context. Pointing the heading's aria-describedby at the question means the
+    // SR announces which block right away, not only on reaching the radiogroup.
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    const heading = screen.getByRole("heading", { level: 1 })
+    const describedById = heading.getAttribute("aria-describedby")
+    expect(describedById).toBeTruthy()
+    const question = document.getElementById(describedById as string)
+    expect(question).toHaveTextContent(
+      /what kind of feedback do you have about.*lecture 1: limits/i,
+    )
+  })
+
   test("marks the heading for a focus ring only when opened via keyboard", () => {
     renderDrawer({ openedViaKeyboard: true })
     expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
@@ -225,10 +354,13 @@ describe("FeedbackDrawer", () => {
     )
   })
 
-  test("exposes the open slot as a region labelled by its heading", () => {
+  test("names the open slot region by its heading only, not the question", () => {
     renderDrawer({ subtitle: "Lecture 1: Limits" })
-    screen.getByRole("region", {
-      name: /share your feedback about lecture 1: limits/i,
+    // The region is named by the h1 alone; block context is delivered once via
+    // the radiogroup label, so it isn't repeated on region entry.
+    screen.getByRole("region", { name: "Tell us what you think" })
+    screen.getByRole("radiogroup", {
+      name: /what kind of feedback do you have about.*lecture 1: limits/i,
     })
   })
 
@@ -242,5 +374,29 @@ describe("FeedbackDrawer", () => {
     )
     await user.keyboard("{Escape}")
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  test("renders no return-to-block control unless a handler is provided", () => {
+    renderDrawer({ subtitle: "Lecture 1: Limits" })
+    expect(screen.queryByRole("button", { name: /return to/i })).toBeNull()
+  })
+
+  test("exposes the return-to-block control as the first Tab stop, named for the block", async () => {
+    renderDrawer({
+      blockType: "video",
+      onReturnToBlock: jest.fn(),
+      onClose: jest.fn(),
+    })
+    const returnBtn = screen.getByRole("button", {
+      name: "Return to the video",
+    })
+    // Focus starts on the heading on open; the first Tab reaches the return
+    // "skip link" before the Close button.
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+    await user.tab()
+    expect(returnBtn).toHaveFocus()
+    expect(screen.getByRole("button", { name: "Close" })).not.toHaveFocus()
   })
 })

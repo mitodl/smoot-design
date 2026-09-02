@@ -43,7 +43,7 @@ describe("FeedbackDrawerManager", () => {
       wrapper: ThemeProvider,
     })
     screen.getByTestId("feedback-drawer-manager-waiting")
-    expect(screen.queryByText("How was this content?")).toBeNull()
+    expect(screen.queryByRole("radiogroup")).toBeNull()
   })
 
   test("ignores messages from a different origin", () => {
@@ -58,7 +58,7 @@ describe("FeedbackDrawerManager", () => {
         }),
       )
     })
-    expect(screen.queryByText("How was this content?")).toBeNull()
+    expect(screen.queryByRole("radiogroup")).toBeNull()
   })
 
   test("passes a keyboard-open through to the drawer's focus-ring marker", () => {
@@ -113,7 +113,7 @@ describe("FeedbackDrawerManager", () => {
       { wrapper: ThemeProvider },
     )
     openMessage()
-    screen.getByText("How was this content?")
+    screen.getByRole("radiogroup")
     await user.click(screen.getByRole("radio", { name: "Liked it" }))
     await user.type(
       screen.getByRole("textbox", { name: "What did you like?" }),
@@ -149,7 +149,11 @@ describe("FeedbackDrawerManager", () => {
       wrapper: ThemeProvider,
     })
     openMessage()
-    expect(screen.getByText(PAYLOAD.blockDisplayName)).toBeVisible()
+    expect(
+      screen.getByRole("radiogroup", {
+        name: `What kind of feedback do you have about ${PAYLOAD.blockDisplayName}?`,
+      }),
+    ).toBeVisible()
   })
 
   test("clears the drawer on a close message", () => {
@@ -157,7 +161,7 @@ describe("FeedbackDrawerManager", () => {
       wrapper: ThemeProvider,
     })
     openMessage()
-    screen.getByText("How was this content?")
+    screen.getByRole("radiogroup")
     act(() => {
       window.dispatchEvent(
         new MessageEvent("message", {
@@ -166,7 +170,7 @@ describe("FeedbackDrawerManager", () => {
         }),
       )
     })
-    expect(screen.queryByText("How was this content?")).toBeNull()
+    expect(screen.queryByRole("radiogroup")).toBeNull()
     screen.getByTestId("feedback-drawer-manager-waiting")
   })
 
@@ -193,7 +197,7 @@ describe("FeedbackDrawerManager", () => {
         }),
       )
     })
-    screen.getByText("How was this content?")
+    screen.getByRole("radiogroup")
 
     await user.click(screen.getByRole("button", { name: "Close" }))
 
@@ -201,6 +205,46 @@ describe("FeedbackDrawerManager", () => {
       { type: "ol-feedback::drawer-closed" },
       ORIGIN,
     )
+    iframe.remove()
+  })
+
+  test("posts a focus-trigger message to the opener without closing on return-to-block", async () => {
+    // The "return to block" skip link returns keyboard focus to the cross-origin
+    // trigger while leaving the drawer open, so it must message the opener but
+    // must NOT tear the drawer down.
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
+      wrapper: ThemeProvider,
+    })
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: ORIGIN,
+          source: opener,
+          data: { type: "ol-feedback::drawer-open", payload: PAYLOAD },
+        }),
+      )
+    })
+    screen.getByRole("radiogroup")
+
+    await user.click(screen.getByRole("button", { name: /return to/i }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "ol-feedback::focus-trigger" },
+      ORIGIN,
+    )
+    expect(postSpy).not.toHaveBeenCalledWith(
+      { type: "ol-feedback::drawer-closed" },
+      ORIGIN,
+    )
+    // Drawer stays open.
+    screen.getByRole("radiogroup")
     iframe.remove()
   })
 
@@ -215,7 +259,7 @@ describe("FeedbackDrawerManager", () => {
       { wrapper: ThemeProvider },
     )
     openMessage()
-    screen.getByText("How was this content?")
+    screen.getByRole("radiogroup")
     await user.click(screen.getByRole("button", { name: "Close" }))
     expect(onClose).toHaveBeenCalledTimes(1)
   })
