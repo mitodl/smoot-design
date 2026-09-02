@@ -22,23 +22,30 @@ test.each([
   expect(screen.queryByRole("button", { name: "User Menu" })).toBe(null)
 })
 
-test("logged in shows the name and opens the items on click", async () => {
-  renderMenu({ user: { name: "Jane Doe" }, items })
+test.each([{ variant: "desktop" as const }, { variant: "mobile" as const }])(
+  "logged in $variant shows the name and opens the items on click",
+  async ({ variant }) => {
+    renderMenu({ user: { name: "Jane Doe" }, items, variant })
 
-  expect(screen.queryByRole("link", { name: "Log In" })).toBe(null)
-  const trigger = screen.getByRole("button", { name: "User Menu" })
-  expect(trigger).toHaveTextContent("Jane Doe")
-  expect(trigger).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByRole("link", { name: "Log In" })).toBe(null)
+    const trigger = screen.getByRole("button", { name: "User Menu" })
+    expect(trigger).toHaveTextContent("Jane Doe")
+    expect(trigger).toHaveAttribute("aria-expanded", "false")
 
-  await user.click(trigger)
+    await user.click(trigger)
 
-  expect(trigger).toHaveAttribute("aria-expanded", "true")
-  expect(screen.getByRole("menuitem", { name: "Dashboard" })).toHaveAttribute(
-    "href",
-    "/dashboard",
-  )
-  expect(screen.getByRole("menuitem", { name: "Log Out" })).toHaveAttribute(
-    "href",
-    "/logout",
-  )
-})
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByRole("menuitem", { name: "Dashboard" })).toHaveAttribute(
+      "href",
+      "/dashboard",
+    )
+    expect(screen.getByRole("menuitem", { name: "Log Out" })).toHaveAttribute(
+      "href",
+      "/logout",
+    )
+
+    await user.keyboard("{Escape}")
+
+    expect(trigger).toHaveAttribute("aria-expanded", "false")
+  },
+)
