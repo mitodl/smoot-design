@@ -177,6 +177,10 @@ const UserMenu: React.FC<UserMenuProps> = ({
              * Renders the item as a link rather than an <li>. Technically
              * invalid HTML, but the most accessible option MUI offers.
              * See https://github.com/mui/material-ui/issues/33268
+             *
+             * Cast because MUI only infers `component`'s extra props (`href`)
+             * when the component type is known statically; `LinkComponent` is
+             * resolved at runtime, so no prop typing can recover the inference.
              */
             {...({
               component: LinkComponent ?? LinkAdapter,
