@@ -1,5 +1,5 @@
 import * as React from "react"
-import { FC, useEffect, useId, useRef, useState } from "react"
+import { FC, useEffect, useLayoutEffect, useId, useRef, useState } from "react"
 import styled from "@emotion/styled"
 import Drawer from "@mui/material/Drawer"
 import {
@@ -11,19 +11,19 @@ import {
   RiLightbulbLine,
   RiLightbulbFill,
   RiCloseLine,
-  RiCheckLine,
 } from "@remixicon/react"
 import type { RemixiconComponentType } from "@remixicon/react"
 import { ActionButton } from "../../components/Button/ActionButton"
+import { Alert } from "../../components/Alert/Alert"
 import { Button, ButtonLoadingIcon } from "../../components/Button/Button"
 import { Input } from "../../components/Input/Input"
 import { VERSION } from "../../VERSION"
 
-// A 429 from the submit endpoint means the learner is being throttled.
 const RATE_LIMIT_STATUS = 429
 const RATE_LIMIT_MESSAGE =
   "You're sending feedback too quickly. Please wait a moment and try again."
 const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again."
+const COMMENT_REQUIRED_MESSAGE = "Add a comment to submit your suggestion."
 
 type Sentiment = "positive" | "negative" | "idea"
 
@@ -42,6 +42,22 @@ type ReactionConfig = {
   prompt: string
   colorKey: ReactionColorKey
   tintAlpha: number
+}
+
+const FRIENDLY_BLOCK_TYPES: Record<string, string> = {
+  video: "video",
+  problem: "problem",
+  html: "text",
+  discussion: "discussion",
+  "drag-and-drop-v2": "drag-and-drop",
+  openassessment: "open response",
+  lti: "tool",
+  lti_consumer: "tool",
+  poll: "poll",
+  survey: "survey",
+  word_cloud: "word cloud",
+  book: "reading",
+  image: "image",
 }
 
 const REACTIONS: ReactionConfig[] = [
@@ -98,19 +114,20 @@ const Container = styled.div(({ theme }) => ({
 
 const Header = styled.div(({ theme }) => ({
   display: "flex",
+  flexWrap: "wrap",
   alignItems: "flex-start",
   justifyContent: "space-between",
   gap: "4px",
   position: "sticky",
   top: 0,
-  padding: "32px 0 16px 0",
+  padding: "32px 0 8px 0",
   zIndex: 2,
   backgroundColor: theme.custom.colors.white,
 }))
 
 const Title = styled.div(({ theme }) => ({
   display: "flex",
-  alignItems: "flex-start",
+  alignItems: "center",
   gap: "8px",
   flex: 1,
   minWidth: 0,
@@ -120,7 +137,6 @@ const Title = styled.div(({ theme }) => ({
     width: "24px",
     height: "24px",
     flexShrink: 0,
-    marginTop: "2px",
   },
 }))
 
@@ -135,14 +151,12 @@ const CloseButton = styled(ActionButton)(({ theme }) => ({
 }))
 
 const Heading = styled.h1(({ theme }) => ({
-  ...theme.typography.body1,
+  ...theme.typography.h5,
   flex: 1,
   minWidth: 0,
   margin: 0,
   color: theme.custom.colors.darkGray2,
   overflowWrap: "anywhere",
-  // Focused programmatically on open, so suppress the native outline and drive
-  // the ring via data-focus-ring (keyboard opens only). (WCAG 2.4.7)
   outline: "none",
   "&[data-focus-ring]:focus": {
     outline: `2px solid ${theme.custom.colors.darkGray2}`,
@@ -151,18 +165,51 @@ const Heading = styled.h1(({ theme }) => ({
   },
 }))
 
-const BlockName = styled.span(({ theme }) => ({
-  fontWeight: theme.typography.fontWeightBold,
+const ReturnToBlock = styled.button(({ theme }) => ({
+  ...theme.typography.body3,
+  position: "absolute",
+  left: 0,
+  top: 0,
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: "1px",
+  width: "1px",
+  margin: "-1px",
+  padding: 0,
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  border: 0,
+  "&:focus": {
+    position: "static",
+    order: -1,
+    flexBasis: "100%",
+    width: "100%",
+    height: "auto",
+    clip: "auto",
+    clipPath: "none",
+    overflow: "visible",
+    whiteSpace: "normal",
+    textAlign: "left",
+    margin: "0 0 8px",
+    padding: "8px 12px",
+    background: theme.custom.colors.white,
+    color: theme.custom.colors.darkGray2,
+    border: `1px solid ${theme.custom.colors.lightGray2}`,
+    borderRadius: "4px",
+    outline: `2px solid ${theme.custom.colors.darkGray2}`,
+    outlineOffset: "2px",
+    cursor: "pointer",
+  },
 }))
 
 const Body = styled.div({
   paddingBottom: "32px",
 })
 
-const Question = styled.h2(({ theme }) => ({
-  ...theme.typography.subtitle1,
-  color: theme.custom.colors.darkGray2,
-  margin: "0 0 12px",
+const Question = styled.p(({ theme }) => ({
+  ...theme.typography.body1,
+  color: theme.custom.colors.darkGray1,
+  margin: "0 0 24px",
 }))
 
 const Reactions = styled.div({
@@ -212,6 +259,11 @@ const Prompt = styled.p(({ theme }) => ({
   margin: "20px 0 8px",
 }))
 
+const RequiredMark = styled.span(({ theme }) => ({
+  color: theme.custom.colors.red,
+  marginLeft: "2px",
+}))
+
 const Footer = styled.div({
   display: "flex",
   justifyContent: "flex-end",
@@ -224,20 +276,13 @@ const ErrorText = styled.p(({ theme }) => ({
   margin: "10px 0 0",
 }))
 
-const Success = styled.div(({ theme }) => ({
-  ...theme.typography.subtitle1,
-  display: "flex",
-  alignItems: "center",
-  gap: "8px",
-  color: theme.custom.colors.darkGreen,
-  padding: "8px 0",
-  svg: {
-    fill: theme.custom.colors.darkGreen,
-    width: "22px",
-    height: "22px",
-    flexShrink: 0,
+const SuccessWrapper = styled.div({
+  outline: "none",
+  marginTop: "16px",
+  "& .MuiAlert-root": {
+    boxShadow: "none",
   },
-}))
+})
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error"
 
@@ -253,11 +298,14 @@ type FeedbackDrawerProps = {
   /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
   openedViaKeyboard?: boolean
   onClose?: () => void
+  onReturnToBlock?: () => void
   onSubmit?: (data: FeedbackData) => Promise<void> | void
   /** Drawer heading. */
   title?: string
-  /** Content title (block/unit) shown under the heading. */
+  /** Content title (block display name) named in the subheader question. */
   subtitle?: string
+  /** Block type (e.g. "video", "problem"); used in the subheader when there's no title. */
+  blockType?: string
   defaultSentiment?: Sentiment
 }
 
@@ -267,9 +315,11 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   open,
   openedViaKeyboard,
   onClose,
+  onReturnToBlock,
   onSubmit,
-  title = "Share your feedback",
+  title = "Tell us what you think",
   subtitle,
+  blockType,
   defaultSentiment,
 }) => {
   const [sentiment, setSentiment] = useState<Sentiment | null>(
@@ -278,8 +328,7 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const [comment, setComment] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [rateLimited, setRateLimited] = useState(false)
-  // Bumped on each commit so re-committing the same reaction still refocuses the
-  // comment field.
+  const [showRequiredError, setShowRequiredError] = useState(false)
   const [commitSeq, setCommitSeq] = useState(0)
 
   const active =
@@ -291,25 +340,32 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const commentRef = useRef<HTMLTextAreaElement | null>(null)
   const headingId = useId()
   const questionId = useId()
+  const commentErrorId = useId()
 
-  // Focus the success message so screen readers announce it (role="status"
-  // alone isn't reliably announced on a newly rendered node).
-  useEffect(() => {
+  const blockTitle = subtitle?.trim()
+  const friendlyType = blockType
+    ? (FRIENDLY_BLOCK_TYPES[blockType] ?? blockType)
+    : null
+
+  const returnLabel = friendlyType
+    ? `Return to the ${friendlyType}`
+    : "Return to the content"
+
+  const commentRequired = sentiment === "idea"
+  const commentMissing = commentRequired && comment.trim() === ""
+
+  useLayoutEffect(() => {
     if (status === "success") {
       successRef.current?.focus()
     }
   }, [status])
 
-  // On slot open, focus the heading so keyboard/SR users are taken into the
-  // panel. The "drawer" variant is a MUI Modal and manages its own focus.
   useEffect(() => {
     if (open && variant === "slot") {
       headingRef.current?.focus()
     }
   }, [open, variant])
 
-  // The slot is non-modal, so wire Escape-to-close ourselves (WCAG 2.1.2). The
-  // "drawer" variant is a MUI Modal and handles Escape itself.
   useEffect(() => {
     if (!open || variant !== "slot") {
       return
@@ -323,23 +379,18 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [open, variant, onClose])
 
-  // Focus the revealed comment field on commit so SR users are taken to it. The
-  // > 0 guard skips the initial defaultSentiment mount.
   useEffect(() => {
     if (commitSeq > 0) {
       commentRef.current?.focus()
     }
   }, [commitSeq])
 
-  // Selection follows focus: focusing a reaction selects it and reveals its
-  // prompt, but never moves focus itself.
   const selectReaction = (key: Sentiment) => {
     setSentiment(key)
     setStatus("idle")
+    setShowRequiredError(false)
   }
 
-  // Activation (pointer/Enter/Space) commits and moves focus into the comment
-  // field; plain focus only previews via selectReaction.
   const commitReaction = (key: Sentiment) => {
     selectReaction(key)
     setCommitSeq((seq) => seq + 1)
@@ -382,14 +433,19 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   }
 
   const handleSubmit = async () => {
-    // aria-disabled doesn't block clicks, so guard against double-submit.
     if (!sentiment || status === "submitting") {
+      return
+    }
+    if (commentMissing) {
+      setShowRequiredError(true)
+      commentRef.current?.focus()
       return
     }
     setStatus("submitting")
     setRateLimited(false)
     try {
       await onSubmit?.({ sentiment, comment })
+      headingRef.current?.focus()
       setStatus("success")
     } catch (error) {
       setRateLimited(
@@ -399,8 +455,6 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
     }
   }
 
-  // Keep Tab focus inside the non-modal slot: wrap Tab off the last control to
-  // the first, and Shift+Tab off the first to the last.
   const handleContainerKeyDown = (
     event: React.KeyboardEvent<HTMLDivElement>,
   ) => {
@@ -436,17 +490,17 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
             id={headingId}
             ref={headingRef}
             tabIndex={-1}
+            aria-describedby={questionId}
             data-focus-ring={openedViaKeyboard ? "" : undefined}
           >
-            {subtitle ? (
-              <>
-                {title} about <BlockName>{subtitle}</BlockName>
-              </>
-            ) : (
-              title
-            )}
+            {title}
           </Heading>
         </Title>
+        {onReturnToBlock ? (
+          <ReturnToBlock type="button" onClick={onReturnToBlock}>
+            {returnLabel}
+          </ReturnToBlock>
+        ) : null}
         {onClose ? (
           <CloseButton
             variant="text"
@@ -461,12 +515,18 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
 
       <Body>
         {status === "success" ? (
-          <Success ref={successRef} role="status" tabIndex={-1}>
-            <RiCheckLine aria-hidden /> Thank you for your feedback!
-          </Success>
+          <SuccessWrapper ref={successRef} tabIndex={-1}>
+            <Alert severity="success">Thank you for your feedback!</Alert>
+          </SuccessWrapper>
         ) : (
           <>
-            <Question id={questionId}>How was this content?</Question>
+            <Question id={questionId}>
+              {blockTitle
+                ? `What kind of feedback do you have about ${blockTitle}?`
+                : friendlyType
+                  ? `What kind of feedback do you have about this ${friendlyType} block?`
+                  : "What kind of feedback do you have about this content?"}
+            </Question>
 
             <Reactions role="radiogroup" aria-labelledby={questionId}>
               {REACTIONS.map((reaction, index) => {
@@ -499,26 +559,48 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
 
             {active ? (
               <>
-                <Prompt>{active.prompt}</Prompt>
+                <Prompt>
+                  {active.prompt}
+                  {commentRequired ? (
+                    <RequiredMark aria-hidden="true">*</RequiredMark>
+                  ) : null}
+                </Prompt>
                 <Input
                   multiline
                   minRows={3}
                   fullWidth
                   inputRef={commentRef}
                   value={comment}
-                  inputProps={{ maxLength: 1000, "aria-label": active.prompt }}
-                  onChange={(event) => setComment(event.target.value)}
+                  inputProps={{
+                    maxLength: 1000,
+                    "aria-label": active.prompt,
+                    "aria-required": commentRequired,
+                    "aria-invalid": showRequiredError || undefined,
+                    "aria-describedby": showRequiredError
+                      ? commentErrorId
+                      : undefined,
+                  }}
+                  onChange={(event) => {
+                    const value = event.target.value
+                    setComment(value)
+                    if (showRequiredError && value.trim() !== "") {
+                      setShowRequiredError(false)
+                    }
+                  }}
                 />
                 {status === "error" ? (
                   <ErrorText role="alert">
                     {rateLimited ? RATE_LIMIT_MESSAGE : GENERIC_ERROR_MESSAGE}
+                  </ErrorText>
+                ) : showRequiredError ? (
+                  <ErrorText id={commentErrorId} role="alert">
+                    {COMMENT_REQUIRED_MESSAGE}
                   </ErrorText>
                 ) : null}
                 <Footer>
                   <Button
                     variant="primary"
                     size="medium"
-                    // aria-disabled (not disabled) keeps the red fill so the spinner shows.
                     aria-disabled={status === "submitting"}
                     aria-busy={status === "submitting"}
                     startIcon={
@@ -544,7 +626,6 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
       return null
     }
     return (
-      // Focus-containment guard only; the region isn't an interactive control.
       // eslint-disable-next-line styled-components-a11y/no-noninteractive-element-interactions
       <Container
         className={className}
