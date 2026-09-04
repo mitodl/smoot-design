@@ -137,6 +137,86 @@ describe("AiDrawerManager", () => {
     return { open }
   }
 
+  test("passes a keyboard open through to the heading focus ring (slot)", async () => {
+    await setup(
+      {
+        type: "smoot-design::tutor-drawer-open",
+        viaKeyboard: true,
+        payload: {
+          blockType: "problem",
+          title: "AskTIM",
+          chat: { apiUrl: TEST_API_STREAMING },
+        },
+      },
+      { variant: "slot" },
+    )
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("omits the focus-ring marker for a mouse open (slot)", async () => {
+    await setup(
+      {
+        type: "smoot-design::tutor-drawer-open",
+        payload: {
+          blockType: "problem",
+          title: "AskTIM",
+          chat: { apiUrl: TEST_API_STREAMING },
+        },
+      },
+      { variant: "slot" },
+    )
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("posts a drawer-closed message back to the opener on close (slot)", async () => {
+    // The AskTIM trigger lives in a cross-origin LMS iframe, so the manager
+    // (running in the MFE parent) can't focus it directly. On close it must
+    // signal the opener window (event.source) so the trigger can refocus itself.
+    server.listen()
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" variant="slot" />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: {
+            type: "smoot-design::tutor-drawer-open",
+            payload: {
+              blockType: "problem",
+              title: "AskTIM",
+              chat: { apiUrl: TEST_API_STREAMING },
+            },
+          },
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await user.click(screen.getByRole("button", { name: "Close" }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    iframe.remove()
+  })
+
   test("Problem drawer opens showing title", async () => {
     await setup({
       type: "smoot-design::ai-drawer-open",
