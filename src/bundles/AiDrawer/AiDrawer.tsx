@@ -1,5 +1,13 @@
 import * as React from "react"
-import { FC, useEffect, useState, useRef, useMemo } from "react"
+import {
+  FC,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  useRef,
+  useMemo,
+} from "react"
 import styled from "@emotion/styled"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
@@ -78,6 +86,16 @@ const Title = styled.div(({ theme }) => ({
     textOverflow: "ellipsis",
     overflow: "hidden",
     whiteSpace: "nowrap",
+  },
+  // The heading is focused programmatically on slot open, so suppress the native
+  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG 2.4.7).
+  h1: {
+    outline: "none",
+  },
+  "h1[data-focus-ring]:focus": {
+    outline: `2px solid ${theme.custom.colors.darkGray2}`,
+    outlineOffset: "2px",
+    borderRadius: "2px",
   },
 }))
 
@@ -218,6 +236,8 @@ type AiDrawerProps = {
   settings?: AiDrawerSettings
 
   open?: boolean
+  /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
+  openedViaKeyboard?: boolean
   onClose?: () => void
   onTrackingEvent?: TrackingEventHandler
   /**
@@ -374,12 +394,17 @@ const AiDrawer: FC<AiDrawerProps> = ({
   fetchOpts,
   settings,
   open,
+  openedViaKeyboard,
   onClose,
   onTrackingEvent,
   variant = "drawer",
 }: AiDrawerProps) => {
   const { t } = useTranslation()
   const [tab, setTab] = useState("chat")
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  // React's useId returns values wrapped in guillemets («r0»); strip them so the
+  // id is safe to use inside CSS selectors (e.g. aria-labelledby resolution).
+  const headingId = `ai-drawer-heading-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`
 
   const defaultProblemInitialMessages = useMemo<AiChatProps["initialMessages"]>(
     () => [
@@ -401,10 +426,33 @@ const AiDrawer: FC<AiDrawerProps> = ({
   )
   const { response } = useContentFetch(settings?.summary?.apiUrl)
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     onClose?.()
     onTrackingEvent?.({ type: TrackingEventType.Close })
-  }
+  }, [onClose, onTrackingEvent])
+
+  // On slot open, focus the heading so keyboard/SR users are taken into the
+  // panel. The "drawer" variant is a MUI Modal and manages its own focus.
+  useEffect(() => {
+    if (open && variant === "slot") {
+      headingRef.current?.focus()
+    }
+  }, [open, variant])
+
+  // The slot is non-modal, so wire Escape-to-close ourselves (WCAG 2.1.2). The
+  // "drawer" variant is a MUI Modal and handles Escape itself.
+  useEffect(() => {
+    if (!open || variant !== "slot") {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleClose()
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => document.removeEventListener("keydown", onKeyDown)
+  }, [open, variant, handleClose])
 
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
 
@@ -449,7 +497,14 @@ const AiDrawer: FC<AiDrawerProps> = ({
       <Header>
         <Title>
           {title ? <RiSparkling2Line /> : null}
-          <Typography variant="body1" component="h1">
+          <Typography
+            variant="body1"
+            component="h1"
+            id={headingId}
+            ref={headingRef}
+            tabIndex={-1}
+            data-focus-ring={openedViaKeyboard ? "" : undefined}
+          >
             {title?.includes("AskTIM") ? (
               <>
                 Ask<strong>TIM</strong>
@@ -563,6 +618,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
         className={className}
         data-smoot-version={VERSION}
         ref={paperRefCallback}
+        role="region"
+        aria-labelledby={headingId}
       >
         {drawerContent}
       </SlotContainer>

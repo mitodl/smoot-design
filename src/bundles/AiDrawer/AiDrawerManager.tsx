@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AiDrawer } from "./AiDrawer"
 import type { AiDrawerProps, AiDrawerSettings } from "./AiDrawer"
 import { contentHash } from "../../utils/string"
@@ -13,7 +13,13 @@ type AiDrawerInitMessage = {
      */
     trackingUrl?: string
   }
+  /** True when the opener's trigger was activated by keyboard (click detail 0). */
+  viaKeyboard?: boolean
 }
+
+// Sent back to the opener when the drawer closes so the (cross-origin) AskTIM
+// trigger can return keyboard focus to its button. (WCAG 2.4.3)
+const CLOSED_MESSAGE = "smoot-design::tutor-drawer-closed"
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
@@ -55,10 +61,15 @@ const AiDrawerManager = ({
       {
         key: string
         open: boolean
+        openedViaKeyboard: boolean
         payload: AiDrawerInitMessage["payload"]
       }
     >
   >({})
+  // The opener window (LMS iframe with the AskTIM button), captured to
+  // postMessage it to refocus its trigger on close — cross-origin, so we can't
+  // focus it directly.
+  const openerRef = useRef<Window | null>(null)
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -81,15 +92,30 @@ const AiDrawerManager = ({
 
         event.data.payload.chat.chatId = event.data.payload.chat.chatId || key
 
+        // Remember the opener so focus can return to its trigger on close, and
+        // whether it was a keyboard open so the drawer rings the heading.
+        openerRef.current = event.source as Window | null
+        const openedViaKeyboard = !!event.data.viaKeyboard
+
         // For slot variant: clear all existing drawers before opening the new one
         if (variant === "slot") {
           setDrawerStates({
-            [key]: { key, open: true, payload: event.data.payload },
+            [key]: {
+              key,
+              open: true,
+              openedViaKeyboard,
+              payload: event.data.payload,
+            },
           })
         } else {
           setDrawerStates((prev) => ({
             ...prev,
-            [key]: { key, open: false, payload: event.data.payload },
+            [key]: {
+              key,
+              open: false,
+              openedViaKeyboard,
+              payload: event.data.payload,
+            },
           }))
           requestAnimationFrame(() => {
             setDrawerStates((prev) => ({
@@ -121,7 +147,7 @@ const AiDrawerManager = ({
 
   return (
     <>
-      {drawersToRender.map(({ key, open, payload }) => {
+      {drawersToRender.map(({ key, open, openedViaKeyboard, payload }) => {
         const { trackingUrl, ...settings } = payload
         return (
           <AiDrawer
@@ -131,8 +157,14 @@ const AiDrawerManager = ({
             fetchOpts={fetchOpts}
             settings={settings}
             open={open}
+            openedViaKeyboard={openedViaKeyboard}
             variant={variant}
             onClose={() => {
+              // Return keyboard focus to the AskTIM trigger in the opener iframe.
+              openerRef.current?.postMessage(
+                { type: CLOSED_MESSAGE },
+                messageOrigin,
+              )
               setDrawerStates((prev) => {
                 if (variant === "slot") {
                   // Remove closed drawer from state in slot variant
