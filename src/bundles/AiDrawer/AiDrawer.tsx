@@ -54,6 +54,9 @@ type AiDrawerSettings = {
 
 const Header = styled.div<{ externalScroll?: boolean }>(({ theme }) => ({
   display: "flex",
+  // Wrap so the "return to block" skip link can expand to a full-width row on
+  // focus (order: -1 + flexBasis: 100%) without displacing the heading/close.
+  flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "space-between",
   gap: "4px",
@@ -70,6 +73,12 @@ const Title = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "8px",
+  // Fill the header row (basis 0) so the close button stays beside the title
+  // rather than wrapping below it now that the header allows wrapping for the
+  // full-width skip link. minWidth: 0 lets the title ellipsize instead of
+  // forcing a wrap.
+  flex: 1,
+  minWidth: 0,
   color: theme.custom.colors.darkGray2,
   img: {
     width: "24px",
@@ -81,15 +90,14 @@ const Title = styled.div(({ theme }) => ({
     height: "24px",
     flexShrink: 0,
   },
-  overflow: "hidden",
-  p: {
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-  },
   // The heading is focused programmatically on slot open, so suppress the native
-  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG 2.4.7).
+  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG
+  // 2.4.7). It fills the row (flex: 1, minWidth: 0) and wraps long titles rather
+  // than being clipped — no overflow: hidden here, which would crop the ring.
   h1: {
+    flex: 1,
+    minWidth: 0,
+    overflowWrap: "anywhere",
     outline: "none",
   },
   "h1[data-focus-ring]:focus": {
@@ -108,6 +116,55 @@ const CloseButton = styled(ActionButton)(({ theme }) => ({
   zIndex: 3,
   flexShrink: 0,
 }))
+
+// "Return to block" skip link: visually hidden until focused, then it expands to
+// a visible bar at the top of the header (order: -1). Activating it posts a
+// focus-trigger message so the cross-origin LMS trigger regains keyboard focus
+// while the drawer stays open (WCAG 2.4.1). Mirrors the feedback drawer.
+const ReturnToBlock = styled.button(({ theme }) => ({
+  ...theme.typography.body3,
+  position: "absolute",
+  left: 0,
+  top: 0,
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: "1px",
+  width: "1px",
+  margin: "-1px",
+  padding: 0,
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  border: 0,
+  "&:focus": {
+    position: "static",
+    order: -1,
+    flexBasis: "100%",
+    width: "100%",
+    height: "auto",
+    clip: "auto",
+    clipPath: "none",
+    overflow: "visible",
+    whiteSpace: "normal",
+    textAlign: "left",
+    margin: "0 0 8px",
+    padding: "8px 12px",
+    background: theme.custom.colors.white,
+    color: theme.custom.colors.darkGray2,
+    border: `1px solid ${theme.custom.colors.lightGray2}`,
+    borderRadius: "4px",
+    outline: `2px solid ${theme.custom.colors.darkGray2}`,
+    outlineOffset: "2px",
+    cursor: "pointer",
+  },
+}))
+
+// AskTIM blocks are only video/problem; the friendly name is already readable,
+// but keep a map (matching the feedback drawer) so the label stays graceful for
+// any future block type.
+const FRIENDLY_BLOCK_TYPES: Record<string, string> = {
+  video: "video",
+  problem: "problem",
+}
 
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   padding: "0 0 16px",
@@ -239,6 +296,12 @@ type AiDrawerProps = {
   /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
   openedViaKeyboard?: boolean
   onClose?: () => void
+  /**
+   * "Return to block" skip link handler. When provided, a visually-hidden skip
+   * link renders in the header; activating it returns keyboard focus to the
+   * cross-origin LMS trigger without closing the drawer.
+   */
+  onReturnToBlock?: () => void
   onTrackingEvent?: TrackingEventHandler
   /**
    * Rendering variant:
@@ -396,6 +459,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   open,
   openedViaKeyboard,
   onClose,
+  onReturnToBlock,
   onTrackingEvent,
   variant = "drawer",
 }: AiDrawerProps) => {
@@ -430,6 +494,44 @@ const AiDrawer: FC<AiDrawerProps> = ({
     onClose?.()
     onTrackingEvent?.({ type: TrackingEventType.Close })
   }, [onClose, onTrackingEvent])
+
+  // Slot variant is non-modal, so wrap Tab/Shift+Tab within the panel ourselves
+  // (WCAG 2.4.3) — mirrors the feedback drawer. The "drawer" variant is a MUI
+  // Modal and traps focus itself. Escape (wired above) is the way out.
+  const handleContainerKeyDown = (
+    event: React.KeyboardEvent<HTMLDivElement>,
+  ) => {
+    if (event.key !== "Tab") {
+      return
+    }
+    const tabbable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(
+        "a[href], button, input, textarea, select, [tabindex]",
+      ),
+    ).filter(
+      (el) =>
+        el.tabIndex >= 0 &&
+        !(el as HTMLButtonElement).disabled &&
+        // The chat tab panel stays mounted (keepMounted); MUI marks the inactive
+        // panel [hidden], which the browser skips when tabbing. Excluding [hidden]
+        // subtrees keeps first/last aligned with what is actually focusable, so the
+        // wrap fires consistently on every tab (chat/flashcards/summary).
+        !el.closest("[hidden]"),
+    )
+    if (tabbable.length === 0) {
+      return
+    }
+    const first = tabbable[0]
+    const last = tabbable[tabbable.length - 1]
+    const activeEl = document.activeElement
+    if (event.shiftKey && activeEl === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && activeEl === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
 
   // On slot open, focus the heading so keyboard/SR users are taken into the
   // panel. The "drawer" variant is a MUI Modal and manages its own focus.
@@ -491,12 +593,19 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { title, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
+  const friendlyType = blockType
+    ? (FRIENDLY_BLOCK_TYPES[blockType] ?? blockType)
+    : null
+  const returnLabel = friendlyType
+    ? `Return to the ${friendlyType}`
+    : "Return to the content"
+
   // Shared content component
   const drawerContent = (
     <>
       <Header>
         <Title>
-          {title ? <RiSparkling2Line /> : null}
+          {title ? <RiSparkling2Line aria-hidden /> : null}
           <Typography
             variant="body1"
             component="h1"
@@ -515,6 +624,11 @@ const AiDrawer: FC<AiDrawerProps> = ({
             )}
           </Typography>
         </Title>
+        {onReturnToBlock ? (
+          <ReturnToBlock type="button" onClick={onReturnToBlock}>
+            {returnLabel}
+          </ReturnToBlock>
+        ) : null}
         <CloseButton
           variant="text"
           size="medium"
@@ -620,6 +734,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
         ref={paperRefCallback}
         role="region"
         aria-labelledby={headingId}
+        onKeyDown={handleContainerKeyDown}
       >
         {drawerContent}
       </SlotContainer>

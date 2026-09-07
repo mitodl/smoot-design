@@ -20,6 +20,9 @@ type AiDrawerInitMessage = {
 // Sent back to the opener when the drawer closes so the (cross-origin) AskTIM
 // trigger can return keyboard focus to its button. (WCAG 2.4.3)
 const CLOSED_MESSAGE = "smoot-design::tutor-drawer-closed"
+// Sent back to the opener to return keyboard focus to its AskTIM trigger while
+// leaving the drawer open (the "return to block" skip link).
+const FOCUS_TRIGGER_MESSAGE = "smoot-design::tutor-drawer-focus-trigger"
 
 const hashPayload = (payload: AiDrawerInitMessage["payload"]) => {
   const str = JSON.stringify(payload)
@@ -159,6 +162,14 @@ const AiDrawerManager = ({
             open={open}
             openedViaKeyboard={openedViaKeyboard}
             variant={variant}
+            onReturnToBlock={() => {
+              // Return keyboard focus to the AskTIM trigger in the opener iframe
+              // without closing the drawer (the "return to block" skip link).
+              openerRef.current?.postMessage(
+                { type: FOCUS_TRIGGER_MESSAGE },
+                messageOrigin,
+              )
+            }}
             onClose={() => {
               // Return keyboard focus to the AskTIM trigger in the opener iframe.
               openerRef.current?.postMessage(

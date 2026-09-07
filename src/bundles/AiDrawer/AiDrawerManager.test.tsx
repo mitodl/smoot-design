@@ -217,6 +217,57 @@ describe("AiDrawerManager", () => {
     iframe.remove()
   })
 
+  test("posts a focus-trigger message to the opener without closing on return-to-block (slot)", async () => {
+    // The "return to block" skip link returns keyboard focus to the cross-origin
+    // trigger while leaving the drawer open, so it must message the opener but
+    // must NOT tear the drawer down.
+    server.listen()
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" variant="slot" />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: {
+            type: "smoot-design::tutor-drawer-open",
+            payload: {
+              blockType: "problem",
+              title: "AskTIM",
+              chat: { apiUrl: TEST_API_STREAMING },
+            },
+          },
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await user.click(screen.getByRole("button", { name: /return to/i }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-focus-trigger" },
+      "http://localhost:6006",
+    )
+    expect(postSpy).not.toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    // Drawer stays open.
+    screen.getByRole("heading", { level: 1 })
+    iframe.remove()
+  })
+
   test("Problem drawer opens showing title", async () => {
     await setup({
       type: "smoot-design::ai-drawer-open",
