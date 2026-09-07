@@ -12,12 +12,9 @@ jest.mock("../../components/AiChat/Markdown", () => {
   }
 })
 
-// react-markdown, better-react-mathjax and the rehype/remark plugins all resolve
-// to one shared stub (jest.config moduleNameMapper -> test-utils/modulemock.js),
-// so per-name jest.mock factories collide — the last registered one wins for ALL
-// of them. Keep this single factory authoritative: a passthrough MathJaxContext
-// plus a default component that renders its children, which the Summary tab uses
-// as <Markdown> (react-markdown's default export).
+// react-markdown and better-react-mathjax share one moduleNameMapper stub, so
+// their jest.mock factories collide (last wins). This single factory serves both:
+// a passthrough MathJaxContext and a default Markdown component.
 jest.mock("better-react-mathjax", () => ({
   __esModule: true,
   MathJaxContext: ({ children }: { children: React.ReactNode }) => (
@@ -96,8 +93,7 @@ describe("AiDrawer slot focus management", () => {
 
   test("hides the decorative header icon from assistive tech", () => {
     renderSlot()
-    // The sparkle glyph beside the title is purely decorative; the h1 already
-    // names the drawer, so the icon must not add a second, redundant label.
+    // The sparkle glyph is decorative; the h1 already names the drawer.
     const heading = screen.getByRole("heading", { level: 1 })
     const icon = heading.parentElement?.querySelector("svg")
     expect(icon).toHaveAttribute("aria-hidden", "true")
@@ -159,10 +155,8 @@ describe("AiDrawer slot focus management", () => {
 const FOCUSABLE_SELECTOR =
   "a[href], button, input, textarea, select, [tabindex]"
 
-// The controls the browser actually stops on when tabbing: excludes disabled
-// controls and anything inside a [hidden] subtree (an inactive but kept-mounted
-// tab panel). This is what the focus-trap must compute for first/last so the
-// wrap fires on every tab, not just the chat tab.
+// The controls the browser actually stops on: excludes disabled and [hidden]
+// (kept-mounted inactive panels) — what the trap must use for first/last.
 const realTabbable = (region: HTMLElement) =>
   Array.from(region.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
     (el) =>
@@ -213,9 +207,8 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
     const first = tabbable[0]
     const last = tabbable[tabbable.length - 1]
 
-    // Guard the premise: the kept-mounted Chat panel is [hidden] on this tab, so
-    // its controls linger in the DOM *after* the real last stop — exactly what
-    // used to make the trap think focus wasn't on the last element.
+    // Guard the premise: the [hidden] chat panel's controls linger after the real
+    // last stop — what used to make the trap miss the true last element.
     const rawLast = Array.from(
       region.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
     )

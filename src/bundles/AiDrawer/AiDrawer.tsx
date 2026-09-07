@@ -54,8 +54,7 @@ type AiDrawerSettings = {
 
 const Header = styled.div<{ externalScroll?: boolean }>(({ theme }) => ({
   display: "flex",
-  // Wrap so the "return to block" skip link can expand to a full-width row on
-  // focus (order: -1 + flexBasis: 100%) without displacing the heading/close.
+  // Wrap lets the skip link expand to a full-width row on focus.
   flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "space-between",
@@ -73,10 +72,7 @@ const Title = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "8px",
-  // Fill the header row (basis 0) so the close button stays beside the title
-  // rather than wrapping below it now that the header allows wrapping for the
-  // full-width skip link. minWidth: 0 lets the title ellipsize instead of
-  // forcing a wrap.
+  // Fill the row so Close stays beside the title; minWidth: 0 lets it ellipsize.
   flex: 1,
   minWidth: 0,
   color: theme.custom.colors.darkGray2,
@@ -466,8 +462,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { t } = useTranslation()
   const [tab, setTab] = useState("chat")
   const headingRef = useRef<HTMLHeadingElement>(null)
-  // React's useId returns values wrapped in guillemets («r0»); strip them so the
-  // id is safe to use inside CSS selectors (e.g. aria-labelledby resolution).
+  // Strip guillemets from useId so the value is CSS-selector safe.
   const headingId = `ai-drawer-heading-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`
 
   const defaultProblemInitialMessages = useMemo<AiChatProps["initialMessages"]>(
@@ -512,10 +507,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
       (el) =>
         el.tabIndex >= 0 &&
         !(el as HTMLButtonElement).disabled &&
-        // The chat tab panel stays mounted (keepMounted); MUI marks the inactive
-        // panel [hidden], which the browser skips when tabbing. Excluding [hidden]
-        // subtrees keeps first/last aligned with what is actually focusable, so the
-        // wrap fires consistently on every tab (chat/flashcards/summary).
+        // Exclude [hidden] subtrees (the kept-mounted, inactive chat panel) the
+        // browser skips when tabbing, so first/last match reality on every tab.
         !el.closest("[hidden]"),
     )
     if (tabbable.length === 0) {
@@ -533,16 +526,14 @@ const AiDrawer: FC<AiDrawerProps> = ({
     }
   }
 
-  // On slot open, focus the heading so keyboard/SR users are taken into the
-  // panel. The "drawer" variant is a MUI Modal and manages its own focus.
+  // On slot open, focus the heading (the modal "drawer" variant self-manages).
   useEffect(() => {
     if (open && variant === "slot") {
       headingRef.current?.focus()
     }
   }, [open, variant])
 
-  // The slot is non-modal, so wire Escape-to-close ourselves (WCAG 2.1.2). The
-  // "drawer" variant is a MUI Modal and handles Escape itself.
+  // The non-modal slot needs its own Escape-to-close (WCAG 2.1.2).
   useEffect(() => {
     if (!open || variant !== "slot") {
       return
@@ -600,7 +591,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
     ? `Return to the ${friendlyType}`
     : "Return to the content"
 
-  // Shared content component
   const drawerContent = (
     <>
       <Header>
