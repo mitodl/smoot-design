@@ -86,10 +86,8 @@ const Title = styled.div(({ theme }) => ({
     height: "24px",
     flexShrink: 0,
   },
-  // The heading is focused programmatically on slot open, so suppress the native
-  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG
-  // 2.4.7). It fills the row (flex: 1, minWidth: 0) and wraps long titles rather
-  // than being clipped — no overflow: hidden here, which would crop the ring.
+  // The heading is focused programmatically on open, so suppress the native
+  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG 2.4.7).
   h1: {
     flex: 1,
     minWidth: 0,
@@ -116,7 +114,7 @@ const CloseButton = styled(ActionButton)(({ theme }) => ({
 // "Return to block" skip link: visually hidden until focused, then it expands to
 // a visible bar at the top of the header (order: -1). Activating it posts a
 // focus-trigger message so the cross-origin LMS trigger regains keyboard focus
-// while the drawer stays open (WCAG 2.4.1). Mirrors the feedback drawer.
+// while the drawer stays open (WCAG 2.4.1).
 const ReturnToBlock = styled.button(({ theme }) => ({
   ...theme.typography.body3,
   position: "absolute",
@@ -490,8 +488,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   }, [onClose, onTrackingEvent])
 
   // On slot open, focus the heading (the modal "drawer" variant self-manages).
-  // openNonce is a dep so re-activating the trigger while already open (after
-  // "Return to block") re-focuses the heading (WCAG 2.4.3).
+  // openNonce is a dep so a repeat open re-focuses too (see the prop; WCAG 2.4.3).
   useEffect(() => {
     if (open && variant === "slot") {
       headingRef.current?.focus()

@@ -64,8 +64,7 @@ const AiDrawerManager = ({
         key: string
         open: boolean
         openedViaKeyboard: boolean
-        // Bumped on every open message so a repeat open (already-open drawer)
-        // still re-focuses the heading; see AiDrawer's openNonce prop.
+        // Bumped on every open message; see AiDrawer's openNonce prop.
         openNonce: number
         payload: AiDrawerInitMessage["payload"]
       }
