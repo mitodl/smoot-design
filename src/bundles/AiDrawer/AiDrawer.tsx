@@ -482,42 +482,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
     onTrackingEvent?.({ type: TrackingEventType.Close })
   }, [onClose, onTrackingEvent])
 
-  // Slot variant is non-modal, so wrap Tab/Shift+Tab within the panel ourselves
-  // (WCAG 2.4.3) — mirrors the feedback drawer. The "drawer" variant is a MUI
-  // Modal and traps focus itself. Escape (wired above) is the way out.
-  const handleContainerKeyDown = (
-    event: React.KeyboardEvent<HTMLDivElement>,
-  ) => {
-    if (event.key !== "Tab") {
-      return
-    }
-    const tabbable = Array.from(
-      event.currentTarget.querySelectorAll<HTMLElement>(
-        "a[href], button, input, textarea, select, [tabindex]",
-      ),
-    ).filter(
-      (el) =>
-        el.tabIndex >= 0 &&
-        !(el as HTMLButtonElement).disabled &&
-        // Exclude [hidden] subtrees (the kept-mounted, inactive chat panel) the
-        // browser skips when tabbing, so first/last match reality on every tab.
-        !el.closest("[hidden]"),
-    )
-    if (tabbable.length === 0) {
-      return
-    }
-    const first = tabbable[0]
-    const last = tabbable[tabbable.length - 1]
-    const activeEl = document.activeElement
-    if (event.shiftKey && activeEl === first) {
-      event.preventDefault()
-      last.focus()
-    } else if (!event.shiftKey && activeEl === last) {
-      event.preventDefault()
-      first.focus()
-    }
-  }
-
   // On slot open, focus the heading (the modal "drawer" variant self-manages).
   useEffect(() => {
     if (open && variant === "slot") {
@@ -546,6 +510,47 @@ const AiDrawer: FC<AiDrawerProps> = ({
       setScrollElement(node)
     }
   }
+
+  // Trap Tab/Shift+Tab within the non-modal slot (WCAG 2.4.3); the "drawer"
+  // variant is a MUI Modal and traps focus itself. Attached natively (not via a
+  // JSX onKeyDown) so the non-interactive region doesn't take an event listener.
+  useEffect(() => {
+    if (!open || variant !== "slot" || !scrollElement) {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") {
+        return
+      }
+      const tabbable = Array.from(
+        scrollElement.querySelectorAll<HTMLElement>(
+          "a[href], button, input, textarea, select, [tabindex]",
+        ),
+      ).filter(
+        (el) =>
+          el.tabIndex >= 0 &&
+          !(el as HTMLButtonElement).disabled &&
+          // Exclude [hidden] subtrees (the kept-mounted, inactive chat panel) the
+          // browser skips when tabbing, so first/last match reality on every tab.
+          !el.closest("[hidden]"),
+      )
+      if (tabbable.length === 0) {
+        return
+      }
+      const first = tabbable[0]
+      const last = tabbable[tabbable.length - 1]
+      const activeEl = document.activeElement
+      if (event.shiftKey && activeEl === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && activeEl === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    scrollElement.addEventListener("keydown", onKeyDown)
+    return () => scrollElement.removeEventListener("keydown", onKeyDown)
+  }, [open, variant, scrollElement])
 
   useEffect(() => {
     scrollElement?.scrollTo?.({
@@ -717,7 +722,6 @@ const AiDrawer: FC<AiDrawerProps> = ({
         ref={paperRefCallback}
         role="region"
         aria-labelledby={headingId}
-        onKeyDown={handleContainerKeyDown}
       >
         {drawerContent}
       </SlotContainer>
