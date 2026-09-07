@@ -154,14 +154,6 @@ const ReturnToBlock = styled.button(({ theme }) => ({
   },
 }))
 
-// AskTIM blocks are only video/problem; the friendly name is already readable,
-// but keep a map (matching the feedback drawer) so the label stays graceful for
-// any future block type.
-const FRIENDLY_BLOCK_TYPES: Record<string, string> = {
-  video: "video",
-  problem: "problem",
-}
-
 const StyledTabButtonList = styled(TabButtonList)(({ theme }) => ({
   padding: "0 0 16px",
   backgroundColor: theme.custom.colors.white,
@@ -584,11 +576,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { title, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
-  const friendlyType = blockType
-    ? (FRIENDLY_BLOCK_TYPES[blockType] ?? blockType)
-    : null
-  const returnLabel = friendlyType
-    ? `Return to the ${friendlyType}`
+  const returnLabel = blockType
+    ? `Return to the ${blockType}`
     : "Return to the content"
 
   const drawerContent = (
