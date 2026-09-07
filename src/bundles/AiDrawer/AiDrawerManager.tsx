@@ -64,6 +64,9 @@ const AiDrawerManager = ({
         key: string
         open: boolean
         openedViaKeyboard: boolean
+        // Bumped on every open message so a repeat open (already-open drawer)
+        // still re-focuses the heading; see AiDrawer's openNonce prop.
+        openNonce: number
         payload: AiDrawerInitMessage["payload"]
       }
     >
@@ -99,14 +102,15 @@ const AiDrawerManager = ({
 
         // For slot variant: clear all existing drawers before opening the new one
         if (variant === "slot") {
-          setDrawerStates({
+          setDrawerStates((prev) => ({
             [key]: {
               key,
               open: true,
               openedViaKeyboard,
+              openNonce: (prev[key]?.openNonce ?? 0) + 1,
               payload: event.data.payload,
             },
-          })
+          }))
         } else {
           setDrawerStates((prev) => ({
             ...prev,
@@ -114,6 +118,7 @@ const AiDrawerManager = ({
               key,
               open: false,
               openedViaKeyboard,
+              openNonce: (prev[key]?.openNonce ?? 0) + 1,
               payload: event.data.payload,
             },
           }))
@@ -147,66 +152,69 @@ const AiDrawerManager = ({
 
   return (
     <>
-      {drawersToRender.map(({ key, open, openedViaKeyboard, payload }) => {
-        const { trackingUrl, ...settings } = payload
-        return (
-          <AiDrawer
-            key={key}
-            className={className}
-            transformBody={transformBody}
-            fetchOpts={fetchOpts}
-            settings={settings}
-            open={open}
-            openedViaKeyboard={openedViaKeyboard}
-            variant={variant}
-            onReturnToBlock={() => {
-              // Return keyboard focus to the AskTIM trigger in the opener iframe
-              // without closing the drawer (the "return to block" skip link).
-              openerRef.current?.postMessage(
-                { type: FOCUS_TRIGGER_MESSAGE },
-                messageOrigin,
-              )
-            }}
-            onClose={() => {
-              // Return keyboard focus to the AskTIM trigger in the opener iframe.
-              openerRef.current?.postMessage(
-                { type: CLOSED_MESSAGE },
-                messageOrigin,
-              )
-              setDrawerStates((prev) => {
-                if (variant === "slot") {
-                  // Remove closed drawer from state in slot variant
-                  const { [key]: _, ...rest } = prev
-                  return rest
-                }
-                // For drawer variant: keep drawer in state but mark as closed
-                return {
-                  ...prev,
-                  [key]: { ...prev[key], open: false },
-                }
-              })
-            }}
-            onTrackingEvent={(event) => {
-              if (trackingUrl) {
-                const trackingClient = getTrackingClient?.()
-                if (!trackingClient) {
-                  console.warn("trackingClient is not provided")
-                  return
-                }
-                const { type, data } = event
-                const prefix = "ol_openedx_chat.drawer"
-                trackingClient.post(trackingUrl, {
-                  event_type: `${prefix}.${type}`,
-                  event_data: {
-                    ...data,
-                    blockUsageKey: payload.blockUsageKey,
-                  },
+      {drawersToRender.map(
+        ({ key, open, openedViaKeyboard, openNonce, payload }) => {
+          const { trackingUrl, ...settings } = payload
+          return (
+            <AiDrawer
+              key={key}
+              className={className}
+              transformBody={transformBody}
+              fetchOpts={fetchOpts}
+              settings={settings}
+              open={open}
+              openedViaKeyboard={openedViaKeyboard}
+              openNonce={openNonce}
+              variant={variant}
+              onReturnToBlock={() => {
+                // Return keyboard focus to the AskTIM trigger in the opener iframe
+                // without closing the drawer (the "return to block" skip link).
+                openerRef.current?.postMessage(
+                  { type: FOCUS_TRIGGER_MESSAGE },
+                  messageOrigin,
+                )
+              }}
+              onClose={() => {
+                // Return keyboard focus to the AskTIM trigger in the opener iframe.
+                openerRef.current?.postMessage(
+                  { type: CLOSED_MESSAGE },
+                  messageOrigin,
+                )
+                setDrawerStates((prev) => {
+                  if (variant === "slot") {
+                    // Remove closed drawer from state in slot variant
+                    const { [key]: _, ...rest } = prev
+                    return rest
+                  }
+                  // For drawer variant: keep drawer in state but mark as closed
+                  return {
+                    ...prev,
+                    [key]: { ...prev[key], open: false },
+                  }
                 })
-              }
-            }}
-          />
-        )
-      })}
+              }}
+              onTrackingEvent={(event) => {
+                if (trackingUrl) {
+                  const trackingClient = getTrackingClient?.()
+                  if (!trackingClient) {
+                    console.warn("trackingClient is not provided")
+                    return
+                  }
+                  const { type, data } = event
+                  const prefix = "ol_openedx_chat.drawer"
+                  trackingClient.post(trackingUrl, {
+                    event_type: `${prefix}.${type}`,
+                    event_data: {
+                      ...data,
+                      blockUsageKey: payload.blockUsageKey,
+                    },
+                  })
+                }
+              }}
+            />
+          )
+        },
+      )}
     </>
   )
 }

@@ -52,6 +52,25 @@ describe("AiDrawer slot focus management", () => {
     )
   })
 
+  test("re-focuses the heading when the trigger is re-activated while already open", async () => {
+    // After "Return to block", the slot stays open with focus on the cross-origin
+    // trigger. Re-activating the trigger posts another open; the manager bumps
+    // openNonce (open stays true), which must pull focus back into the drawer.
+    const { rerender } = render(
+      <AiDrawer variant="slot" open settings={SETTINGS} openNonce={1} />,
+      { wrapper: ThemeProvider },
+    )
+    const heading = screen.getByRole("heading", { level: 1 })
+    await waitFor(() => expect(heading).toHaveFocus())
+
+    // Simulate "Return to block": focus leaves the drawer heading.
+    act(() => heading.blur())
+    expect(heading).not.toHaveFocus()
+
+    rerender(<AiDrawer variant="slot" open settings={SETTINGS} openNonce={2} />)
+    await waitFor(() => expect(heading).toHaveFocus())
+  })
+
   test("makes the heading programmatically focusable", () => {
     renderSlot()
     expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(

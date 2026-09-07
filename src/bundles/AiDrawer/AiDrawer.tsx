@@ -283,6 +283,12 @@ type AiDrawerProps = {
   open?: boolean
   /** Keyboard-initiated open: the slot shows a focus ring on the heading. */
   openedViaKeyboard?: boolean
+  /**
+   * Bumped on every open request, so re-activating the trigger while the slot is
+   * already open (e.g. after "Return to block") re-focuses the heading — the
+   * `open` boolean alone can't, since it never changes on a repeat open.
+   */
+  openNonce?: number
   onClose?: () => void
   /**
    * "Return to block" skip link handler. When provided, a visually-hidden skip
@@ -446,6 +452,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   settings,
   open,
   openedViaKeyboard,
+  openNonce,
   onClose,
   onReturnToBlock,
   onTrackingEvent,
@@ -483,11 +490,13 @@ const AiDrawer: FC<AiDrawerProps> = ({
   }, [onClose, onTrackingEvent])
 
   // On slot open, focus the heading (the modal "drawer" variant self-manages).
+  // openNonce is a dep so re-activating the trigger while already open (after
+  // "Return to block") re-focuses the heading (WCAG 2.4.3).
   useEffect(() => {
     if (open && variant === "slot") {
       headingRef.current?.focus()
     }
-  }, [open, variant])
+  }, [open, variant, openNonce])
 
   // The non-modal slot needs its own Escape-to-close (WCAG 2.1.2).
   useEffect(() => {
