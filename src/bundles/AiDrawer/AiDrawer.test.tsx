@@ -179,7 +179,7 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
     { question: "Q3", answer: "A3" },
   ]
 
-  const renderVideoSlot = async () => {
+  const setupVideoSlot = async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
@@ -200,7 +200,7 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
   }
 
   test("wraps Tab on the Summary tab instead of escaping to the page (regression)", async () => {
-    const region = await renderVideoSlot()
+    const region = await setupVideoSlot()
     await user.click(screen.getAllByRole("tab")[2]) // Summary
 
     const tabbable = realTabbable(region)
@@ -226,7 +226,7 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
   })
 
   test("wraps Tab on the Flashcards tab", async () => {
-    const region = await renderVideoSlot()
+    const region = await setupVideoSlot()
     await user.click(screen.getAllByRole("tab")[1]) // Flashcards
 
     const tabbable = realTabbable(region)
@@ -239,7 +239,7 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
   })
 
   test("keeps the same wrap flow on the Chat tab while composing a message", async () => {
-    const region = await renderVideoSlot()
+    const region = await setupVideoSlot()
     // Chat is the default tab; simulate the learner typing to communicate with it.
     await user.type(screen.getByRole("textbox"), "How does this work?")
 
