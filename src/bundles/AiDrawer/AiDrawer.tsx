@@ -727,7 +727,10 @@ const AiDrawer: FC<AiDrawerProps> = ({
         data-smoot-version={VERSION}
         ref={paperRefCallback}
         role="region"
-        aria-labelledby={headingId}
+        // Static label, not the heading: on open we focus the heading, so labelling
+        // the region by that same heading makes screen readers announce the title
+        // twice (once entering the region, once on the heading).
+        aria-label={t(TRANSLATION_KEYS.aiDrawer.ariaRegion)}
       >
         {drawerContent}
       </SlotContainer>

@@ -93,9 +93,12 @@ describe("AiDrawer slot focus management", () => {
     )
   })
 
-  test("exposes the open slot as a region labelled by its heading", () => {
+  test("exposes the open slot as a region with a static label (not its heading)", () => {
     renderSlot()
-    screen.getByRole("region", { name: /ask\s*tim about this problem/i })
+    // A static name, not the heading text: the heading is focused on open, so a
+    // heading-derived region name would make the title announce twice.
+    const region = screen.getByRole("region", { name: /^ai chat$/i })
+    expect(region).not.toHaveAttribute("aria-labelledby")
   })
 
   test("closes when Escape is pressed inside the open slot", async () => {

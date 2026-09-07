@@ -7,6 +7,7 @@
 export const TRANSLATION_KEYS = {
   aiDrawer: {
     ariaClose: "aiDrawer.ariaClose",
+    ariaRegion: "aiDrawer.ariaRegion",
     tabLabelChat: "aiDrawer.tabLabelChat",
     tabLabelFlashcards: "aiDrawer.tabLabelFlashcards",
     tabLabelSummary: "aiDrawer.tabLabelSummary",
@@ -54,6 +55,7 @@ export type TranslationKey =
 
 export const DEFAULT_TRANSLATIONS: Record<TranslationKey, string> = {
   [TRANSLATION_KEYS.aiDrawer.ariaClose]: "Close",
+  [TRANSLATION_KEYS.aiDrawer.ariaRegion]: "AI chat",
   [TRANSLATION_KEYS.aiDrawer.tabLabelChat]: "Chat",
   [TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards]: "Flashcards",
   [TRANSLATION_KEYS.aiDrawer.tabLabelSummary]: "Summary",
