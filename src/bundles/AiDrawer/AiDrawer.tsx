@@ -576,9 +576,13 @@ const AiDrawer: FC<AiDrawerProps> = ({
   const { title, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
-  const returnLabel = blockType
-    ? `Return to the ${blockType}`
-    : "Return to the content"
+  const returnLabel = t(
+    blockType === "video"
+      ? TRANSLATION_KEYS.aiDrawer.returnToVideo
+      : blockType === "problem"
+        ? TRANSLATION_KEYS.aiDrawer.returnToProblem
+        : TRANSLATION_KEYS.aiDrawer.returnToContent,
+  )
 
   const drawerContent = (
     <>

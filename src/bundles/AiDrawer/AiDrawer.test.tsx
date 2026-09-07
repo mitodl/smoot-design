@@ -209,11 +209,10 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
 
     // Guard the premise: the [hidden] chat panel's controls linger after the real
     // last stop — what used to make the trap miss the true last element.
-    const rawLast = Array.from(
+    const rawTabbable = Array.from(
       region.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-    )
-      .filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled)
-      .at(-1)
+    ).filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled)
+    const rawLast = rawTabbable[rawTabbable.length - 1]
     expect(rawLast).not.toBe(last)
     expect(rawLast?.closest("[hidden]")).not.toBeNull()
 
