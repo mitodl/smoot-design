@@ -54,7 +54,6 @@ type AiDrawerSettings = {
 
 const Header = styled.div<{ externalScroll?: boolean }>(({ theme }) => ({
   display: "flex",
-  // Wrap lets the skip link expand to a full-width row on focus.
   flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "space-between",
@@ -72,7 +71,6 @@ const Title = styled.div(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   gap: "8px",
-  // Fill the row so Close stays beside the title; minWidth: 0 lets it ellipsize.
   flex: 1,
   minWidth: 0,
   color: theme.custom.colors.darkGray2,
@@ -111,10 +109,8 @@ const CloseButton = styled(ActionButton)(({ theme }) => ({
   flexShrink: 0,
 }))
 
-// "Return to block" skip link: visually hidden until focused, then it expands to
-// a visible bar at the top of the header (order: -1). Activating it posts a
-// focus-trigger message so the cross-origin LMS trigger regains keyboard focus
-// while the drawer stays open (WCAG 2.4.1).
+// Skip link (WCAG 2.4.1): visually hidden until focused. Activating it hands
+// keyboard focus back to the cross-origin LMS trigger while the drawer stays open.
 const ReturnToBlock = styled.button(({ theme }) => ({
   ...theme.typography.body3,
   position: "absolute",
@@ -495,21 +491,27 @@ const AiDrawer: FC<AiDrawerProps> = ({
     }
   }, [open, variant, openNonce])
 
-  // The non-modal slot needs its own Escape-to-close (WCAG 2.1.2).
+  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
+
+  // The non-modal slot needs its own Escape-to-close (WCAG 2.1.2), but only while
+  // focus is inside it. A host can hide the slot (to show another sidebar) without
+  // closing it; a stray Escape elsewhere must not dismiss the hidden drawer and
+  // yank focus back via the return message.
   useEffect(() => {
-    if (!open || variant !== "slot") {
+    if (!open || variant !== "slot" || !scrollElement) {
       return
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (
+        event.key === "Escape" &&
+        scrollElement.contains(document.activeElement)
+      ) {
         handleClose()
       }
     }
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
-  }, [open, variant, handleClose])
-
-  const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
+  }, [open, variant, scrollElement, handleClose])
 
   const paperRefCallback = (node: HTMLDivElement | null) => {
     if (node) {
@@ -546,7 +548,11 @@ const AiDrawer: FC<AiDrawerProps> = ({
       const first = tabbable[0]
       const last = tabbable[tabbable.length - 1]
       const activeEl = document.activeElement
-      if (event.shiftKey && activeEl === first) {
+      // On open focus sits on the heading (tabIndex -1, so it is not in
+      // `tabbable`); treat it as the leading boundary so the first Shift+Tab wraps
+      // instead of escaping above the region.
+      const atStart = activeEl === first || activeEl === headingRef.current
+      if (event.shiftKey && atStart) {
         event.preventDefault()
         last.focus()
       } else if (!event.shiftKey && activeEl === last) {
@@ -618,7 +624,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
             )}
           </Typography>
         </Title>
-        {onReturnToBlock ? (
+        {onReturnToBlock && variant === "slot" ? (
           <ReturnToBlock type="button" onClick={onReturnToBlock}>
             {returnLabel}
           </ReturnToBlock>

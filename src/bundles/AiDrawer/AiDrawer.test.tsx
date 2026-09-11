@@ -113,6 +113,19 @@ describe("AiDrawer slot focus management", () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  test("ignores Escape when focus is outside the open slot", async () => {
+    const onClose = jest.fn()
+    renderSlot({ onClose })
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { level: 1 })).toHaveFocus(),
+    )
+    // A host may hide the slot (to show another sidebar) without closing it and
+    // move focus away; a stray Escape there must not dismiss the hidden drawer.
+    act(() => (document.activeElement as HTMLElement | null)?.blur())
+    await user.keyboard("{Escape}")
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   test("hides the decorative header icon from assistive tech", () => {
     renderSlot()
     // The sparkle glyph is decorative; the h1 already names the drawer.
@@ -150,6 +163,22 @@ describe("AiDrawer slot focus management", () => {
     expect(onReturnToBlock).toHaveBeenCalledTimes(1)
   })
 
+  test("omits the return-to-block control in the modal drawer variant", () => {
+    // Return-to-block is a slot-only skip link; in the aria-modal drawer it would
+    // try to move focus out of the modal's own focus trap, so it must not render.
+    render(
+      <AiDrawer
+        variant="drawer"
+        open
+        settings={SETTINGS}
+        onReturnToBlock={jest.fn()}
+        onClose={jest.fn()}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    expect(screen.queryByRole("button", { name: /return to/i })).toBeNull()
+  })
+
   test("wraps Tab focus within the open slot instead of escaping to the page", () => {
     renderSlot({ onReturnToBlock: jest.fn(), onClose: jest.fn() })
     const region = screen.getByRole("region")
@@ -167,9 +196,23 @@ describe("AiDrawer slot focus management", () => {
     fireEvent.keyDown(last, { key: "Tab" })
     expect(first).toHaveFocus()
 
-    // Shift+Tab off the first control wraps to the last.
     act(() => first.focus())
     fireEvent.keyDown(first, { key: "Tab", shiftKey: true })
+    expect(last).toHaveFocus()
+  })
+
+  test("wraps Shift+Tab from the initial heading focus to the last control", async () => {
+    renderSlot({ onReturnToBlock: jest.fn(), onClose: jest.fn() })
+    const heading = screen.getByRole("heading", { level: 1 })
+    // Focus starts on the heading (tabIndex -1, so it is not in the tabbable
+    // list); the very first Shift+Tab must still wrap to the last control rather
+    // than escape above the region.
+    await waitFor(() => expect(heading).toHaveFocus())
+    const region = screen.getByRole("region")
+    const tabbable = realTabbable(region)
+    const last = tabbable[tabbable.length - 1]
+
+    fireEvent.keyDown(heading, { key: "Tab", shiftKey: true })
     expect(last).toHaveFocus()
   })
 })
