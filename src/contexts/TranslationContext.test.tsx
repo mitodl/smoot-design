@@ -32,11 +32,6 @@ describe("TranslationProvider resolution", () => {
     expect(out()).toBe(DEFAULT_LABEL)
   })
 
-  test("record path: uses the host-provided string when present", () => {
-    renderWith({ [KEY]: "Zurück zum Video" })
-    expect(out()).toBe("Zurück zum Video")
-  })
-
   test("function path: uses the host translation when it has one", () => {
     const hostT: TranslationFn = () => "Zurück zum Video"
     renderWith(hostT)

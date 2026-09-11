@@ -84,8 +84,8 @@ const Title = styled.div(({ theme }) => ({
     height: "24px",
     flexShrink: 0,
   },
-  // The heading is focused programmatically on open, so suppress the native
-  // outline and drive the ring via data-focus-ring (keyboard opens only, WCAG 2.4.7).
+  // Heading is focused on open; suppress the native outline and drive the ring
+  // via data-focus-ring for keyboard opens only (WCAG 2.4.7).
   h1: {
     flex: 1,
     minWidth: 0,
@@ -493,10 +493,9 @@ const AiDrawer: FC<AiDrawerProps> = ({
 
   const [scrollElement, setScrollElement] = useState<HTMLElement | null>(null)
 
-  // The non-modal slot needs its own Escape-to-close (WCAG 2.1.2), but only while
-  // focus is inside it. A host can hide the slot (to show another sidebar) without
-  // closing it; a stray Escape elsewhere must not dismiss the hidden drawer and
-  // yank focus back via the return message.
+  // Non-modal slot needs its own Escape-to-close (WCAG 2.1.2), but only while
+  // focus is inside it: a host may hide the slot without closing it, and a stray
+  // Escape elsewhere must not dismiss the hidden drawer.
   useEffect(() => {
     if (!open || variant !== "slot" || !scrollElement) {
       return
@@ -520,8 +519,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
   }
 
   // Trap Tab/Shift+Tab within the non-modal slot (WCAG 2.4.3); the "drawer"
-  // variant is a MUI Modal and traps focus itself. Attached natively (not via a
-  // JSX onKeyDown) so the non-interactive region doesn't take an event listener.
+  // variant is a MUI Modal and traps focus itself. Attached natively so the
+  // non-interactive region doesn't take a JSX event listener.
   useEffect(() => {
     if (!open || variant !== "slot" || !scrollElement) {
       return
@@ -548,9 +547,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
       const first = tabbable[0]
       const last = tabbable[tabbable.length - 1]
       const activeEl = document.activeElement
-      // On open focus sits on the heading (tabIndex -1, so it is not in
-      // `tabbable`); treat it as the leading boundary so the first Shift+Tab wraps
-      // instead of escaping above the region.
+      // On open, focus is on the heading (tabIndex -1, not in `tabbable`); treat
+      // it as the leading boundary so the first Shift+Tab wraps.
       const atStart = activeEl === first || activeEl === headingRef.current
       if (event.shiftKey && atStart) {
         event.preventDefault()
@@ -733,9 +731,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
         data-smoot-version={VERSION}
         ref={paperRefCallback}
         role="region"
-        // Static label, not the heading: on open we focus the heading, so labelling
-        // the region by that same heading makes screen readers announce the title
-        // twice (once entering the region, once on the heading).
+        // Static label, not the heading: we focus the heading on open, so a
+        // heading-derived region name would announce the title twice.
         aria-label={t(TRANSLATION_KEYS.aiDrawer.ariaRegion)}
       >
         {drawerContent}

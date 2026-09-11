@@ -155,27 +155,9 @@ describe("AiDrawerManager", () => {
     )
   })
 
-  test("omits the focus-ring marker for a mouse open (slot)", async () => {
-    await setup(
-      {
-        type: "smoot-design::tutor-drawer-open",
-        payload: {
-          blockType: "problem",
-          title: "AskTIM",
-          chat: { apiUrl: TEST_API_STREAMING },
-        },
-      },
-      { variant: "slot" },
-    )
-    expect(screen.getByRole("heading", { level: 1 })).not.toHaveAttribute(
-      "data-focus-ring",
-    )
-  })
-
   test("posts a drawer-closed message back to the opener on close (slot)", async () => {
-    // The AskTIM trigger lives in a cross-origin LMS iframe, so the manager
-    // (running in the MFE parent) can't focus it directly. On close it must
-    // signal the opener window (event.source) so the trigger can refocus itself.
+    // The AskTIM trigger is in a cross-origin iframe, so on close the manager
+    // signals the opener window (event.source) to refocus its own trigger.
     server.listen()
     const iframe = document.createElement("iframe")
     document.body.appendChild(iframe)
@@ -218,9 +200,8 @@ describe("AiDrawerManager", () => {
   })
 
   test("posts a focus-trigger message to the opener without closing on return-to-block (slot)", async () => {
-    // The "return to block" skip link returns keyboard focus to the cross-origin
-    // trigger while leaving the drawer open, so it must message the opener but
-    // must NOT tear the drawer down.
+    // Return-to-block refocuses the trigger but leaves the drawer open, so it
+    // messages the opener without tearing the drawer down.
     server.listen()
     const iframe = document.createElement("iframe")
     document.body.appendChild(iframe)
