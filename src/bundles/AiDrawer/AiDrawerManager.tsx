@@ -67,12 +67,17 @@ const AiDrawerManager = ({
         // Bumped on every open message; see AiDrawer's openNonce prop.
         openNonce: number
         payload: AiDrawerInitMessage["payload"]
+        // The opener iframe for this drawer, kept so we can postMessage it to
+        // refocus its trigger (cross-origin — we can't focus it directly). Stored
+        // per drawer because the modal variant keeps several mounted at once.
+        opener: Window | null
       }
     >
   >({})
-  // Opener iframe, kept so we can postMessage it to refocus its trigger
-  // (cross-origin — we can't focus it directly).
-  const openerRef = useRef<Window | null>(null)
+  // Mirror of drawerStates for the message handler, which is registered once and
+  // would otherwise close over stale state.
+  const drawerStatesRef = useRef(drawerStates)
+  drawerStatesRef.current = drawerStates
 
   useEffect(() => {
     const cb = (event: MessageEvent) => {
@@ -96,7 +101,7 @@ const AiDrawerManager = ({
         event.data.payload.chat.chatId = event.data.payload.chat.chatId || key
 
         // Remember the opener (refocus on close) and whether it was a keyboard open.
-        openerRef.current = event.source as Window | null
+        const opener = event.source as Window | null
         const openedViaKeyboard = !!event.data.viaKeyboard
 
         // For slot variant: clear all existing drawers before opening the new one
@@ -108,6 +113,7 @@ const AiDrawerManager = ({
               openedViaKeyboard,
               openNonce: (prev[key]?.openNonce ?? 0) + 1,
               payload: event.data.payload,
+              opener,
             },
           }))
         } else {
@@ -119,6 +125,7 @@ const AiDrawerManager = ({
               openedViaKeyboard,
               openNonce: (prev[key]?.openNonce ?? 0) + 1,
               payload: event.data.payload,
+              opener,
             },
           }))
           requestAnimationFrame(() => {
@@ -132,6 +139,11 @@ const AiDrawerManager = ({
 
       if (event.data.type === "smoot-design::ai-drawer-close") {
         if (variant === "slot") {
+          // Host-initiated close still owes the trigger its focus-return message,
+          // same as the in-drawer Close button.
+          Object.values(drawerStatesRef.current).forEach((drawer) => {
+            drawer.opener?.postMessage({ type: CLOSED_MESSAGE }, messageOrigin)
+          })
           setDrawerStates({})
         }
       }
@@ -152,7 +164,7 @@ const AiDrawerManager = ({
   return (
     <>
       {drawersToRender.map(
-        ({ key, open, openedViaKeyboard, openNonce, payload }) => {
+        ({ key, open, openedViaKeyboard, openNonce, payload, opener }) => {
           const { trackingUrl, ...settings } = payload
           return (
             <AiDrawer
@@ -168,17 +180,14 @@ const AiDrawerManager = ({
               onReturnToBlock={() => {
                 // Return keyboard focus to the AskTIM trigger in the opener iframe
                 // without closing the drawer (the "return to block" skip link).
-                openerRef.current?.postMessage(
+                opener?.postMessage(
                   { type: FOCUS_TRIGGER_MESSAGE },
                   messageOrigin,
                 )
               }}
               onClose={() => {
                 // Return keyboard focus to the AskTIM trigger in the opener iframe.
-                openerRef.current?.postMessage(
-                  { type: CLOSED_MESSAGE },
-                  messageOrigin,
-                )
+                opener?.postMessage({ type: CLOSED_MESSAGE }, messageOrigin)
                 setDrawerStates((prev) => {
                   if (variant === "slot") {
                     // Remove closed drawer from state in slot variant
