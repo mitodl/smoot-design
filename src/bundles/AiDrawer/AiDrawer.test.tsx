@@ -61,17 +61,15 @@ describe("AiDrawer slot focus management", () => {
     )
   })
 
-  test("focuses a named heading even when the payload omits a title", async () => {
-    // title is optional; without a fallback the focused <h1> would be empty and
-    // the screen reader would land on an unnamed element.
-    render(
-      <AiDrawer
-        variant="slot"
-        open
-        settings={{ ...SETTINGS, title: undefined }}
-      />,
-      { wrapper: ThemeProvider },
-    )
+  // title is optional and a host may pass an empty/whitespace string; without a
+  // fallback the focused <h1> would be unnamed for the screen reader.
+  test.each([
+    ["missing", undefined],
+    ["blank", "   "],
+  ])("focuses a named heading when the title is %s", async (_label, title) => {
+    render(<AiDrawer variant="slot" open settings={{ ...SETTINGS, title }} />, {
+      wrapper: ThemeProvider,
+    })
     const heading = screen.getByRole("heading", { level: 1 })
     await waitFor(() => expect(heading).toHaveFocus())
     expect(heading).toHaveAccessibleName(/ai chat/i)
