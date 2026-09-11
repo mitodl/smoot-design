@@ -618,7 +618,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
                 {title.replace("AskTIM", "")}
               </>
             ) : (
-              title
+              // title is optional; fall back so the focused heading is never unnamed.
+              (title ?? t(TRANSLATION_KEYS.aiDrawer.ariaRegion))
             )}
           </Typography>
         </Title>
