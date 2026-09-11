@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen, within } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { AiDrawerManager } from "./AiDrawerManager"
 import type {
@@ -136,6 +136,239 @@ describe("AiDrawerManager", () => {
     await open()
     return { open }
   }
+
+  test("passes a keyboard open through to the heading focus ring (slot)", async () => {
+    await setup(
+      {
+        type: "smoot-design::tutor-drawer-open",
+        viaKeyboard: true,
+        payload: {
+          blockType: "problem",
+          title: "AskTIM",
+          chat: { apiUrl: TEST_API_STREAMING },
+        },
+      },
+      { variant: "slot" },
+    )
+    expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
+      "data-focus-ring",
+    )
+  })
+
+  test("posts a drawer-closed message back to the opener on close (slot)", async () => {
+    // The AskTIM trigger is in a cross-origin iframe, so on close the manager
+    // signals the opener window (event.source) to refocus its own trigger.
+    server.listen()
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" variant="slot" />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: {
+            type: "smoot-design::tutor-drawer-open",
+            payload: {
+              blockType: "problem",
+              title: "AskTIM",
+              chat: { apiUrl: TEST_API_STREAMING },
+            },
+          },
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await user.click(screen.getByRole("button", { name: "Close" }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    iframe.remove()
+  })
+
+  test("posts a focus-trigger message to the opener without closing on return-to-block (slot)", async () => {
+    // Return-to-block refocuses the trigger but leaves the drawer open, so it
+    // messages the opener without tearing the drawer down.
+    server.listen()
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" variant="slot" />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: {
+            type: "smoot-design::tutor-drawer-open",
+            payload: {
+              blockType: "problem",
+              title: "AskTIM",
+              chat: { apiUrl: TEST_API_STREAMING },
+            },
+          },
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await user.click(screen.getByRole("button", { name: /return to/i }))
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-focus-trigger" },
+      "http://localhost:6006",
+    )
+    expect(postSpy).not.toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    // Drawer stays open.
+    screen.getByRole("heading", { level: 1 })
+    iframe.remove()
+  })
+
+  test("posts a drawer-closed message when the host closes the slot externally", async () => {
+    // A host can dismiss the slot with an ai-drawer-close message instead of the
+    // in-drawer Close button; the trigger must still get its focus-return.
+    server.listen()
+    const iframe = document.createElement("iframe")
+    document.body.appendChild(iframe)
+    const opener = iframe.contentWindow as Window
+    const postSpy = jest
+      .spyOn(opener, "postMessage")
+      .mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager messageOrigin="http://localhost:6006" variant="slot" />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: {
+            type: "smoot-design::tutor-drawer-open",
+            payload: {
+              blockType: "problem",
+              title: "AskTIM",
+              chat: { apiUrl: TEST_API_STREAMING },
+            },
+          },
+        }),
+      )
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    })
+
+    await act(async () => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: "http://localhost:6006",
+          source: opener,
+          data: { type: "smoot-design::ai-drawer-close" },
+        }),
+      )
+    })
+
+    expect(postSpy).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    iframe.remove()
+  })
+
+  test("closes the correct opener when multiple drawers are mounted (drawer variant)", async () => {
+    // The modal variant keeps every drawer mounted, so the opener must be tracked
+    // per instance: closing the first drawer must refocus its own trigger, not the
+    // most-recently-opened one.
+    server.listen()
+    const iframeA = document.createElement("iframe")
+    const iframeB = document.createElement("iframe")
+    document.body.appendChild(iframeA)
+    document.body.appendChild(iframeB)
+    const openerA = iframeA.contentWindow as Window
+    const openerB = iframeB.contentWindow as Window
+    const spyA = jest.spyOn(openerA, "postMessage").mockImplementation(() => {})
+    const spyB = jest.spyOn(openerB, "postMessage").mockImplementation(() => {})
+
+    render(
+      <AiDrawerManager
+        messageOrigin="http://localhost:6006"
+        variant="drawer"
+      />,
+      { wrapper: ThemeProvider },
+    )
+    await screen.findByTestId("ai-drawer-manager-waiting")
+
+    const openFrom = async (opener: Window, title: string) =>
+      await act(async () => {
+        window.dispatchEvent(
+          new MessageEvent("message", {
+            origin: "http://localhost:6006",
+            source: opener,
+            data: {
+              type: "smoot-design::tutor-drawer-open",
+              payload: {
+                blockType: "problem",
+                title,
+                chat: { apiUrl: TEST_API_STREAMING },
+              },
+            },
+          }),
+        )
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      })
+
+    await openFrom(openerA, "Block A")
+    await openFrom(openerB, "Block B")
+
+    // The second open modal marks the first aria-hidden and drops a backdrop over
+    // it, so query with hidden:true and fire the click directly past the backdrop.
+    const headingA = screen.getByRole("heading", {
+      name: /Block A/,
+      hidden: true,
+    })
+    const drawerA = headingA.closest(".MuiDrawer-root") as HTMLElement
+    fireEvent.click(
+      within(drawerA).getByRole("button", { name: "Close", hidden: true }),
+    )
+
+    expect(spyA).toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+    expect(spyB).not.toHaveBeenCalledWith(
+      { type: "smoot-design::tutor-drawer-closed" },
+      "http://localhost:6006",
+    )
+
+    iframeA.remove()
+    iframeB.remove()
+  })
 
   test("Problem drawer opens showing title", async () => {
     await setup({

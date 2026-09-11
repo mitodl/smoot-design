@@ -7,10 +7,14 @@
 export const TRANSLATION_KEYS = {
   aiDrawer: {
     ariaClose: "aiDrawer.ariaClose",
+    ariaRegion: "aiDrawer.ariaRegion",
     tabLabelChat: "aiDrawer.tabLabelChat",
     tabLabelFlashcards: "aiDrawer.tabLabelFlashcards",
     tabLabelSummary: "aiDrawer.tabLabelSummary",
     videoEntryScreenTitle: "aiDrawer.videoEntryScreenTitle",
+    returnToVideo: "aiDrawer.returnToVideo",
+    returnToProblem: "aiDrawer.returnToProblem",
+    returnToContent: "aiDrawer.returnToContent",
   },
   aiChat: {
     feedbackGood: "aiChat.feedbackGood",
@@ -51,11 +55,15 @@ export type TranslationKey =
 
 export const DEFAULT_TRANSLATIONS: Record<TranslationKey, string> = {
   [TRANSLATION_KEYS.aiDrawer.ariaClose]: "Close",
+  [TRANSLATION_KEYS.aiDrawer.ariaRegion]: "AI chat",
   [TRANSLATION_KEYS.aiDrawer.tabLabelChat]: "Chat",
   [TRANSLATION_KEYS.aiDrawer.tabLabelFlashcards]: "Flashcards",
   [TRANSLATION_KEYS.aiDrawer.tabLabelSummary]: "Summary",
   [TRANSLATION_KEYS.aiDrawer.videoEntryScreenTitle]:
     "What do you want to know about this video?",
+  [TRANSLATION_KEYS.aiDrawer.returnToVideo]: "Return to the video",
+  [TRANSLATION_KEYS.aiDrawer.returnToProblem]: "Return to the problem",
+  [TRANSLATION_KEYS.aiDrawer.returnToContent]: "Return to the content",
 
   [TRANSLATION_KEYS.aiChat.feedbackGood]: "Good response",
   [TRANSLATION_KEYS.aiChat.feedbackBad]: "Bad response",

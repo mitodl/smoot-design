@@ -57,7 +57,17 @@ export const TranslationProvider: React.FC<{
 }> = ({ translations = null, children }) => {
   const value = React.useMemo<TranslationContextValue>(() => {
     if (typeof translations === "function") {
-      return { t: translations }
+      const hostT = translations
+      return {
+        t: (key: TranslationKey, vars?: TranslationVars) => {
+          const result = hostT(key, vars)
+          // Host i18n returns the key id when it has no message for it; fall
+          // back to our bundled default so new keys never render as raw ids.
+          return result === key
+            ? getTranslation(DEFAULT_TRANSLATIONS, key, vars)
+            : result
+        },
+      }
     }
     return {
       t: (key: TranslationKey, vars?: TranslationVars) =>

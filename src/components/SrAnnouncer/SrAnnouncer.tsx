@@ -39,6 +39,14 @@ const SrAnnouncer: React.FC<SrAnnouncerProps> = ({
 }) => {
   const [loadingMsgIndex, setLoadingMsgIndex] = React.useState(-1)
 
+  // aria-live only announces content that mutates in *after* the region is in
+  // the a11y tree. Render empty on first paint, then fill on the next tick so an
+  // initial message (e.g. a chat greeting) is announced instead of staying silent.
+  const [mounted, setMounted] = React.useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   /**
    * If loadingMessages changes, the timeouts are reset.
    * Desirable if the change is real, undesirable if it's a mistake (e.g., by
@@ -68,7 +76,7 @@ const SrAnnouncer: React.FC<SrAnnouncerProps> = ({
 
   return (
     <VisuallyHidden aria-atomic="true" aria-live="polite">
-      {isLoading ? loadingTxt : message}
+      {mounted ? (isLoading ? loadingTxt : message) : ""}
     </VisuallyHidden>
   )
 }
