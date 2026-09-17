@@ -155,5 +155,8 @@
     "workerDirectory": [
       "storybook-public"
     ]
+  },
+  "resolutions": {
+    "@xmldom/xmldom": "^0.9.12"
   }
 }
