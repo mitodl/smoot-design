@@ -51,7 +51,9 @@ const INSTANCES: TypographyProps[] = [
   { variant: "subtitle3", children: "Subtitle level 3" },
   { variant: "subtitle4", children: "Subtitle level 4" },
   { variant: "body1", children: `body level 1... ${text}` },
+  { variant: "body1Loose", children: `body level 1 loose... ${text}` },
   { variant: "body2", children: `body level 2... ${text}` },
+  { variant: "body2Loose", children: `body level 2 loose... ${text}` },
   { variant: "body3", children: `body level 3... ${text}` },
   { variant: "body4", children: `body level 4... ${text}` },
 ]
