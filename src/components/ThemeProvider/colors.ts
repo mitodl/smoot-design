@@ -12,6 +12,7 @@ const colors = {
   lightGray1: "#F3F4F8",
   lightGray0: "#F7F7F7",
   navGray: "#303337",
+  backgroundGray: "#EEEFF3",
   darkPink: "#750062",
   pink: "#FF14F0",
   lightPink: "#FFB3FF",

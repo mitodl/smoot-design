@@ -8,7 +8,9 @@ declare module "@mui/material/styles" {
     h4: React.CSSProperties
     h5: React.CSSProperties
     body1: React.CSSProperties
+    body1Loose: React.CSSProperties
     body2: React.CSSProperties
+    body2Loose: React.CSSProperties
     body3: React.CSSProperties
     body4: React.CSSProperties
     subtitle1: React.CSSProperties
@@ -26,7 +28,9 @@ declare module "@mui/material/styles" {
     h4: React.CSSProperties
     h5: React.CSSProperties
     body1: React.CSSProperties
+    body1Loose: React.CSSProperties
     body2: React.CSSProperties
+    body2Loose: React.CSSProperties
     body3: React.CSSProperties
     body4: React.CSSProperties
     subtitle1: React.CSSProperties
@@ -42,7 +46,9 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     body1: true
+    body1Loose: true
     body2: true
+    body2Loose: true
     body3: true
     body4: true
     subtitle1: true
