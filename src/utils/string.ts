@@ -36,6 +36,6 @@ export const contentHash = (str: string) => {
 }
 
 export const prekFixture = (value: string): string => {
-    let trimmed = value.trim();
-    return trimmed
+  const trimmed = value.trim()
+  return trimmed
 }
