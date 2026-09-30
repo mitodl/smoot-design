@@ -34,3 +34,8 @@ export const contentHash = (str: string) => {
   }
   return Math.abs(hash).toString(36)
 }
+
+export const prekFixtureBroken = (): number => {
+  const unused = 1
+  return 2
+}
