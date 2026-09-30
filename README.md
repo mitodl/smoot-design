@@ -12,6 +12,8 @@ Design system components for MITODL Projects
 
 ## Development and Release
 
+Hooks are defined in `.pre-commit-config.yaml` and run with [prek](https://prek.j178.dev/), which `yarn install` provides. Run them with `npx prek run --all-files`, and install the git hook with `npx prek install -f` (`-f` replaces an existing pre-commit hook). CI runs every hook in the `prek` check, and autofix.ci pushes a commit with any fixes to the PR.
+
 All PR titles and commits to `main` should use the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format. During release, the types of commits included since the last release inform what sort of version bump should be made. For example, bugfixes yield a new patch version, whereas breaking changes trigger a major version bump.
 
 To trigger a release, use the "Releases (Semantic & Pre-release)" github action (`release.md`). This action will perform a semantic release or pre-release based on `release-type` input.
