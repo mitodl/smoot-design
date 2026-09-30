@@ -34,3 +34,8 @@ export const contentHash = (str: string) => {
   }
   return Math.abs(hash).toString(36)
 }
+
+export const prekFixture = (value: string): string => {
+    let trimmed = value.trim();
+    return trimmed
+}
