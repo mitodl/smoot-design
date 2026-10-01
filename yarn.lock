@@ -2937,82 +2937,82 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@j178/prek-android-arm64@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-android-arm64@npm:0.5.4"
+"@j178/prek-android-arm64@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-android-arm64@npm:0.5.3"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
-"@j178/prek-darwin-arm64@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-darwin-arm64@npm:0.5.4"
+"@j178/prek-darwin-arm64@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-darwin-arm64@npm:0.5.3"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@j178/prek-darwin-x64@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-darwin-x64@npm:0.5.4"
+"@j178/prek-darwin-x64@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-darwin-x64@npm:0.5.3"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@j178/prek-linux-arm64-gnu@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-linux-arm64-gnu@npm:0.5.4"
+"@j178/prek-linux-arm64-gnu@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-linux-arm64-gnu@npm:0.5.3"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@j178/prek-linux-arm64-musl@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-linux-arm64-musl@npm:0.5.4"
+"@j178/prek-linux-arm64-musl@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-linux-arm64-musl@npm:0.5.3"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@j178/prek-linux-x64-gnu@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-linux-x64-gnu@npm:0.5.4"
+"@j178/prek-linux-x64-gnu@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-linux-x64-gnu@npm:0.5.3"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@j178/prek-linux-x64-musl@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-linux-x64-musl@npm:0.5.4"
+"@j178/prek-linux-x64-musl@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-linux-x64-musl@npm:0.5.3"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@j178/prek-win32-arm64-msvc@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-win32-arm64-msvc@npm:0.5.4"
+"@j178/prek-win32-arm64-msvc@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-win32-arm64-msvc@npm:0.5.3"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@j178/prek-win32-x64-msvc@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek-win32-x64-msvc@npm:0.5.4"
+"@j178/prek-win32-x64-msvc@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek-win32-x64-msvc@npm:0.5.3"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@j178/prek@npm:0.5.4":
-  version: 0.5.4
-  resolution: "@j178/prek@npm:0.5.4"
+"@j178/prek@npm:0.5.3":
+  version: 0.5.3
+  resolution: "@j178/prek@npm:0.5.3"
   dependencies:
-    "@j178/prek-android-arm64": "npm:0.5.4"
-    "@j178/prek-darwin-arm64": "npm:0.5.4"
-    "@j178/prek-darwin-x64": "npm:0.5.4"
-    "@j178/prek-linux-arm64-gnu": "npm:0.5.4"
-    "@j178/prek-linux-arm64-musl": "npm:0.5.4"
-    "@j178/prek-linux-x64-gnu": "npm:0.5.4"
-    "@j178/prek-linux-x64-musl": "npm:0.5.4"
-    "@j178/prek-win32-arm64-msvc": "npm:0.5.4"
-    "@j178/prek-win32-x64-msvc": "npm:0.5.4"
+    "@j178/prek-android-arm64": "npm:0.5.3"
+    "@j178/prek-darwin-arm64": "npm:0.5.3"
+    "@j178/prek-darwin-x64": "npm:0.5.3"
+    "@j178/prek-linux-arm64-gnu": "npm:0.5.3"
+    "@j178/prek-linux-arm64-musl": "npm:0.5.3"
+    "@j178/prek-linux-x64-gnu": "npm:0.5.3"
+    "@j178/prek-linux-x64-musl": "npm:0.5.3"
+    "@j178/prek-win32-arm64-msvc": "npm:0.5.3"
+    "@j178/prek-win32-x64-msvc": "npm:0.5.3"
   dependenciesMeta:
     "@j178/prek-android-arm64":
       optional: true
@@ -3034,7 +3034,7 @@ __metadata:
       optional: true
   bin:
     prek: bin/prek.js
-  checksum: 10/0dd80f23b76c1fde697f978b560a1854f49a4f49092da0d08dc45e04a222239d55364161688434b3eddf4c60a2e02383eb87769282f8447d27c2e2394add05a1
+  checksum: 10/e12083b0d58eeff0071685f064aadcc544edd668e3ed86592ca48a9496972bdcda39763f52da7083a693cae891d2b95c1bbd38b11a93ce70ad8ffa533dc4030d
   languageName: node
   linkType: hard
 
@@ -3540,7 +3540,7 @@ __metadata:
     "@emotion/react": "npm:^11.11.1"
     "@emotion/styled": "npm:^11.11.0"
     "@faker-js/faker": "npm:^10.0.0"
-    "@j178/prek": "npm:0.5.4"
+    "@j178/prek": "npm:0.5.3"
     "@jest/environment": "npm:^30.0.0"
     "@mui/lab": "npm:^7.0.0-beta.12"
     "@mui/material": "npm:^7.0.0"
