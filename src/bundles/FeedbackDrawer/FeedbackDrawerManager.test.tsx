@@ -12,7 +12,8 @@ const PAYLOAD = {
   courseId: "course-v1:MITx+6.00+2024",
   blockUsageKey: "block-v1:MITx+6.00+2024+type@video+block@abc",
   blockType: "video",
-  blockDisplayName: "Lecture 1",
+  blockDisplayName: "Lecture 1 - Studio label",
+  visibleTitle: "Lecture 1",
 }
 
 const openMessage = () =>
@@ -144,16 +145,59 @@ describe("FeedbackDrawerManager", () => {
     await screen.findByText("Thank you for your feedback!")
   })
 
-  test("shows the block display name as the drawer subtitle", () => {
+  test("shows the title as the drawer subtitle when the block renders it", () => {
     render(<FeedbackDrawerManager messageOrigin={ORIGIN} variant="slot" />, {
       wrapper: ThemeProvider,
     })
     openMessage()
     expect(
       screen.getByRole("radiogroup", {
-        name: `What kind of feedback do you have about ${PAYLOAD.blockDisplayName}?`,
+        name: `What kind of feedback do you have about ${PAYLOAD.visibleTitle}?`,
       }),
     ).toBeVisible()
+  })
+
+  test("names the block type instead when the block doesn't render its name, but still posts it (mitodl/hq#13643)", async () => {
+    const studioName = "Wk3 intro copy - REVISED, do not reuse"
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue({ ok: true } as Response)
+    render(
+      <FeedbackDrawerManager
+        messageOrigin={ORIGIN}
+        variant="slot"
+        submitUrl={SUBMIT_URL}
+      />,
+      { wrapper: ThemeProvider },
+    )
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          origin: ORIGIN,
+          data: {
+            type: "ol-feedback::drawer-open",
+            payload: {
+              ...PAYLOAD,
+              blockType: "html",
+              blockDisplayName: studioName,
+              visibleTitle: undefined,
+            },
+          },
+        }),
+      )
+    })
+
+    expect(screen.getByRole("radiogroup")).toHaveAccessibleName(
+      "What kind of feedback do you have about this text?",
+    )
+    expect(document.body).not.toHaveTextContent(/REVISED/i)
+
+    await user.click(screen.getByRole("radio", { name: "Liked it" }))
+    await user.click(screen.getByRole("button", { name: "Submit" }))
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit
+    const body = JSON.parse(init.body as string)
+    expect(body.block_display_name).toBe(studioName)
   })
 
   test("clears the drawer on a close message", () => {
