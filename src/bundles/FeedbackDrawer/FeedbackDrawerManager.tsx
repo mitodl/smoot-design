@@ -8,7 +8,9 @@ type FeedbackPayload = {
   courseId?: string
   blockUsageKey?: string
   blockType?: string
+  /** Studio name. Always recorded; only shown via `visibleTitle`. */
   blockDisplayName?: string
+  visibleTitle?: string
 }
 
 type FeedbackOpenMessage = {
@@ -199,7 +201,7 @@ const FeedbackDrawerManager = ({
       variant={variant}
       open={open}
       openedViaKeyboard={openedViaKeyboard}
-      subtitle={payload.blockDisplayName}
+      subtitle={payload.visibleTitle}
       blockType={payload.blockType}
       onClose={handleClose}
       onReturnToBlock={handleReturnToBlock}

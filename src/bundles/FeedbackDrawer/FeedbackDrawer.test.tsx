@@ -38,10 +38,17 @@ describe("FeedbackDrawer", () => {
     })
   })
 
+  test("prefers the title over the block type when both are provided", () => {
+    renderDrawer({ subtitle: "Lecture 1: Limits", blockType: "video" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about Lecture 1: Limits?",
+    })
+  })
+
   test("subheader falls back to the friendly block type when there is no title", () => {
     renderDrawer({ blockType: "problem" })
     screen.getByRole("radiogroup", {
-      name: "What kind of feedback do you have about this problem block?",
+      name: "What kind of feedback do you have about this problem?",
     })
   })
 
@@ -49,7 +56,123 @@ describe("FeedbackDrawer", () => {
     // "html" reads poorly for a learner; the subheader says "text" instead.
     renderDrawer({ blockType: "html" })
     screen.getByRole("radiogroup", {
-      name: "What kind of feedback do you have about this text block?",
+      name: "What kind of feedback do you have about this text?",
+    })
+  })
+
+  test("tolerates casing and stray whitespace in the block type", () => {
+    renderDrawer({ blockType: " Video " })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this video?",
+    })
+  })
+
+  test.each([
+    ["annotatable", "reading"],
+    ["drag-and-drop-v2", "drag-and-drop activity"],
+    ["edx_sga", "assignment"],
+    ["lti", "tool"],
+    ["lti_consumer", "tool"],
+    ["openassessment", "open response"],
+    ["pdf", "PDF"],
+    ["poll", "poll"],
+    ["problem", "problem"],
+    ["staffgradedxblock", "assignment"],
+    ["survey", "survey"],
+    ["video", "video"],
+    ["videoalpha", "video"],
+    ["word_cloud", "word cloud"],
+  ])("names %p as %p when its title comes through blank", (blockType, noun) => {
+    renderDrawer({ blockType, subtitle: "  " })
+    screen.getByRole("radiogroup", {
+      name: `What kind of feedback do you have about this ${noun}?`,
+    })
+  })
+
+  test("names the built-in poll, which never sends a title", () => {
+    renderDrawer({ blockType: "poll_question", subtitle: "" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this poll?",
+    })
+  })
+
+  test.each([
+    ["Which approach did you prefer?", "poll"],
+    ["Try this one!", "problem"],
+    ["To be continued…", "video"],
+    ["为什么要用递归？", "poll"],
+    ["すごい！", "video"],
+    ["第4章。", "annotatable"],
+    ["Recursion (why?)", "poll"],
+    ["She said ‘wait!’”", "annotatable"],
+    ["为什么要用递归？）", "poll"],
+  ])(
+    "does not add a second terminator to %p, which already ends a sentence",
+    (title, blockType) => {
+      renderDrawer({ subtitle: title, blockType })
+      screen.getByRole("radiogroup", {
+        name: `What kind of feedback do you have about ${title}`,
+      })
+    },
+  )
+
+  test.each([
+    ["Problem Set 1.", "problem"],
+    ["Ch. 4.", "annotatable"],
+    ['Read "The Raven."', "annotatable"],
+  ])(
+    "still asks a question about %p, whose trailing period isn't a sentence end",
+    (title, blockType) => {
+      renderDrawer({ subtitle: title, blockType })
+      screen.getByRole("radiogroup", {
+        name: `What kind of feedback do you have about ${title}?`,
+      })
+    },
+  )
+
+  test("still adds the question mark to a title that ends in a bracket", () => {
+    renderDrawer({ subtitle: "Midterm (offline)", blockType: "problem" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about Midterm (offline)?",
+    })
+  })
+
+  test("falls back to generic wording rather than leaking an unmapped type slug", () => {
+    renderDrawer({ blockType: "ol_openedx_chat_xblock" })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this content?",
+    })
+  })
+
+  test.each(["constructor", "__proto__", "toString"])(
+    "treats the inherited key %p as unmapped",
+    (blockType) => {
+      // Without the own-key check these resolve to Object.prototype members.
+      renderDrawer({ blockType })
+      screen.getByRole("radiogroup", {
+        name: "What kind of feedback do you have about this content?",
+      })
+    },
+  )
+
+  test("renders generic wording when the block type isn't a string", () => {
+    // The type arrives over postMessage, so the sender controls its shape.
+    renderDrawer({
+      blockType: { toString: () => "video" } as unknown as string,
+    })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this content?",
+    })
+  })
+
+  test("still renders when the title isn't a string", () => {
+    // An unguarded .trim() would throw mid-render and blank the panel.
+    renderDrawer({
+      subtitle: 5 as unknown as string,
+      blockType: "video",
+    })
+    screen.getByRole("radiogroup", {
+      name: "What kind of feedback do you have about this video?",
     })
   })
 
@@ -299,18 +422,6 @@ describe("FeedbackDrawer", () => {
     expect(submit).toHaveFocus()
   })
 
-  test("renders the subtitle (content title) inside the subheader question", () => {
-    render(
-      <FeedbackDrawer variant="slot" open subtitle="Lecture 1: Limits" />,
-      { wrapper: ThemeProvider },
-    )
-    expect(
-      screen.getByRole("radiogroup", {
-        name: "What kind of feedback do you have about Lecture 1: Limits?",
-      }),
-    ).toBeVisible()
-  })
-
   test("moves focus to the heading when opened (slot variant)", async () => {
     renderDrawer()
     await waitFor(() =>
@@ -379,6 +490,14 @@ describe("FeedbackDrawer", () => {
   test("renders no return-to-block control unless a handler is provided", () => {
     renderDrawer({ subtitle: "Lecture 1: Limits" })
     expect(screen.queryByRole("button", { name: /return to/i })).toBeNull()
+  })
+
+  test("keeps an unmapped type slug out of the return-to-block control", () => {
+    renderDrawer({
+      blockType: "ol_openedx_chat_xblock",
+      onReturnToBlock: jest.fn(),
+    })
+    screen.getByRole("button", { name: "Return to the content" })
   })
 
   test("exposes the return-to-block control as the first Tab stop, named for the block", async () => {
