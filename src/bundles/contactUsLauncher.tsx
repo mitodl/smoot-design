@@ -59,7 +59,9 @@ const init = (
     container.appendChild(reactContainer)
   }
 
-  if (!container.id) {
+  // Only ours to name. Stamping this on a host's element hijacks their
+  // getElementById, and two launchers in two host divs would share one id.
+  if (containerCreatedByInit && !container.id) {
     container.id = "smoot-contact-us-root"
   }
 

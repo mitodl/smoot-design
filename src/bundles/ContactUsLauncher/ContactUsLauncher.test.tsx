@@ -173,6 +173,77 @@ test("a click outside closes the card", async () => {
   expect(screen.queryByRole("dialog")).toBeNull()
 })
 
+test("a click outside leaves the card open once the learner has typed something", async () => {
+  // Losing a half-written description to a stray click is the same loss as
+  // losing a sent one: the learner clicks the page to copy an error code and
+  // comes back to a blank card, because the text lives in unmounted state.
+  renderLauncher()
+
+  await openCard()
+  await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
+  await user.paste("my video will not play when I")
+  await user.click(document.body)
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+})
+
+test("Escape is ignored while focus sits outside the card", async () => {
+  // After a send the card deliberately survives an outside click, so the
+  // learner can use the page underneath. Escape aimed at a host dropdown or
+  // autofill must not take the transcript with it. AiDrawer scopes its own
+  // slot Escape the same way.
+  const hostField = document.createElement("input")
+  document.body.appendChild(hostField)
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  hostField.focus()
+  await user.keyboard("{Escape}")
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  hostField.remove()
+})
+
+test("defaults the page URL to the current page when the host sends none", async () => {
+  // The ticket has to record where the learner was without asking them. A host
+  // that only configures apiUrl would otherwise file every ticket with no page.
+  const mockFetch = jest.spyOn(window, "fetch")
+  render(<ContactUsLauncher settings={{ chat: { apiUrl: TEST_API } }} />, {
+    wrapper: ThemeProvider,
+  })
+
+  await openCard()
+  await sendMessage("my video will not play")
+
+  expect(mockFetch).toHaveBeenCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: window.location.href,
+        message: "my video will not play",
+        clear_history: true,
+      }),
+    }),
+  )
+})
+
+test("lets the host override the entry screen title", async () => {
+  // The prop type accepts entryScreenTitle, so a translated host string has to
+  // win over the English default rather than being silently dropped.
+  renderLauncher({
+    settings: {
+      chat: { ...SETTINGS.chat, entryScreenTitle: "¿En qué podemos ayudarte?" },
+    },
+  })
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByText("¿En qué podemos ayudarte?"),
+  ).toBeInTheDocument()
+})
+
 test("a click outside leaves the card open once a message has been sent", async () => {
   // Dismissing by accident would throw away a support request the learner has
   // already started; past that point only the close button and Escape close it.

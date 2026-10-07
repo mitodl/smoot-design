@@ -75,6 +75,17 @@ test("unmounting removes a container init created for itself", () => {
   expect(container.isConnected).toBe(false)
 })
 
+test("leaves a host container's id alone", () => {
+  // Stamping our id on a caller's element hijacks their getElementById, and
+  // two launchers in two host divs would end up sharing one id.
+  const container = hostContainer()
+
+  const { unmount } = mount(container)
+
+  expect(container.id).toBe("")
+  act(() => unmount())
+})
+
 test("renders the launcher into the host container", () => {
   const container = hostContainer()
 

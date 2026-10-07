@@ -121,19 +121,31 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   }, [])
 
   // AiDrawer only defaults the entry screen on for video blocks, so ask for it
-  // explicitly; without it the card opens blank above the input.
+  // explicitly; without it the card opens blank above the input. These are
+  // defaults, so a host that sets its own (a translated title) still wins.
   const cardSettings = React.useMemo(
     () => ({
       ...settings,
       title: CARD_TITLE,
       chat: {
-        ...settings.chat,
         entryScreenEnabled: true,
         entryScreenTitle: ENTRY_TITLE,
+        ...settings.chat,
+        requestBody: {
+          page_url: window.location.href,
+          ...settings.chat?.requestBody,
+        },
       },
     }),
     [settings],
   )
+
+  const hasDraft = useCallback(() => {
+    const field = cardRef.current?.querySelector<HTMLTextAreaElement>(
+      "textarea, input[type='text']",
+    )
+    return Boolean(field?.value.trim())
+  }, [])
 
   // The card is non-modal, so there is no backdrop to catch these.
   useEffect(() => {
@@ -142,8 +154,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     }
     const onPointerDown = (event: MouseEvent) => {
       // Once there is a support request in progress, a stray click must not
-      // throw the transcript away. Close and Escape still work.
-      if (conversationStarted.current) {
+      // throw it away. A half-typed description counts: it only lives in the
+      // card's state, so closing loses it just as surely as losing a sent one.
+      if (conversationStarted.current || hasDraft()) {
         return
       }
       const target = event.target as Node
@@ -157,9 +170,21 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       setOpen(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false)
+      if (event.key !== "Escape") {
+        return
       }
+      // Escape aimed at a host dropdown or autofill must not take the card with
+      // it. Body counts as ours: right after opening, focus falls back there
+      // because the launcher that had it is now hidden.
+      const focused = document.activeElement
+      if (
+        focused &&
+        focused !== document.body &&
+        !cardRef.current?.contains(focused)
+      ) {
+        return
+      }
+      setOpen(false)
     }
     document.addEventListener("mousedown", onPointerDown)
     document.addEventListener("keydown", onKeyDown)
@@ -167,7 +192,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       document.removeEventListener("mousedown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open])
+  }, [open, hasDraft])
 
   // Runs after the re-render that makes the launcher visible again (WCAG 2.4.3).
   useEffect(() => {
