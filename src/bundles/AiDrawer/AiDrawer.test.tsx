@@ -236,3 +236,27 @@ describe("AiDrawer slot focus trap stays consistent across the video tabs", () =
     expect(last).toHaveFocus()
   })
 })
+
+describe("AiDrawer without a blockType", () => {
+  // blockType is optional, but the chat used to render only for "problem" and
+  // "video", so a host with no courseware block (e.g. a support drawer) got a
+  // header and nothing else.
+  test("renders the chat", () => {
+    render(
+      <AiDrawer open settings={{ title: "Contact us", chat: SETTINGS.chat }} />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(screen.getByRole("textbox")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument()
+  })
+
+  test("does not seed the problem-specific opening message", () => {
+    render(
+      <AiDrawer open settings={{ title: "Contact us", chat: SETTINGS.chat }} />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(screen.queryByText(/problem/i)).toBeNull()
+  })
+})

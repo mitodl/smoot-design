@@ -263,7 +263,7 @@ type AiDrawerProps = {
    * *This cannot be supplied via message events since the function is not serializable.*
    *
    */
-  transformBody?: (messages: AiChatMessage[]) => Iterable<unknown>
+  transformBody?: (messages: AiChatMessage[]) => object
   /**
    * Fetch options to be passed to the fetch call.
    *
@@ -359,7 +359,7 @@ const ChatComponent = ({
   onTrackingEvent,
 }: {
   settings: AiDrawerSettings["chat"]
-  transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
+  transformBody: (messages: AiChatMessage[]) => object
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
   scrollElement: AiChatProps["scrollElement"]
   entryScreenEnabled: boolean
@@ -638,7 +638,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           <RiCloseLine />
         </CloseButton>
       </Header>
-      {blockType === "problem" ? (
+      {blockType !== "video" ? (
         <ChatComponent
           settings={chat}
           transformBody={transformBody}
@@ -647,10 +647,12 @@ const AiDrawer: FC<AiDrawerProps> = ({
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
           entryScreenTitle={chat.entryScreenTitle}
           initialMessages={
-            chat.initialMessages || defaultProblemInitialMessages
+            blockType === "problem"
+              ? chat.initialMessages || defaultProblemInitialMessages
+              : chat.initialMessages
           }
           hasTabs={hasTabs}
-          needsMathJax={true}
+          needsMathJax={blockType === "problem"}
           variant={variant}
           onTrackingEvent={onTrackingEvent}
         />
