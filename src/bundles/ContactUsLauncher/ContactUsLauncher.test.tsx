@@ -232,16 +232,16 @@ test("defaults the page URL to the current page when the host sends none", async
 })
 
 test("reads the page URL at send time, not at mount", async () => {
-  // The Learning MFE routes client-side and init() renders once, so a learner
-  // who moves to the next unit before reporting would otherwise file the ticket
-  // against the URL the card was mounted on.
+  // A host that routes client-side changes the URL under a card init() renders
+  // only once. The move has to happen while the card is already open, or this
+  // also passes against an implementation that captures the URL at open time.
   const mockFetch = jest.spyOn(window, "fetch")
   render(<ContactUsLauncher settings={{ chat: { apiUrl: TEST_API } }} />, {
     wrapper: ThemeProvider,
   })
 
-  window.history.pushState({}, "", "/courses/18.01/week-9")
   await openCard()
+  window.history.pushState({}, "", "/courses/18.01/week-9")
   await sendMessage("my video will not play")
 
   expect(mockFetch).toHaveBeenCalledWith(
