@@ -190,8 +190,8 @@ test("a click outside leaves the card open once the learner has typed something"
 test("Escape is ignored while focus sits outside the card", async () => {
   // After a send the card deliberately survives an outside click, so the
   // learner can use the page underneath. Escape aimed at a host dropdown or
-  // autofill must not take the transcript with it. AiDrawer scopes its own
-  // slot Escape the same way.
+  // autofill must not take the transcript with it. AiDrawer gates its own slot
+  // Escape on focus too, though it has no body fallback.
   const hostField = document.createElement("input")
   document.body.appendChild(hostField)
   renderLauncher()

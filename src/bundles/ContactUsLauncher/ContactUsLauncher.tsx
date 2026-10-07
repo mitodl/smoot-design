@@ -174,8 +174,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         return
       }
       // Escape aimed at a host dropdown or autofill must not take the card with
-      // it. Body counts as ours: right after opening, focus falls back there
-      // because the launcher that had it is now hidden.
+      // it. Body still counts as ours: sending disables the Send button that had
+      // focus, so focus lands there with the card still the only thing on screen.
       const focused = document.activeElement
       if (
         focused &&
