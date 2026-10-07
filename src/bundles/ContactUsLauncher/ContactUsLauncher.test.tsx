@@ -35,7 +35,10 @@ const server = setupServer(
 )
 
 beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  server.resetHandlers()
+  window.history.pushState({}, "", "/")
+})
 afterAll(() => server.close())
 
 const SETTINGS = {
@@ -226,6 +229,46 @@ test("defaults the page URL to the current page when the host sends none", async
       }),
     }),
   )
+})
+
+test("reads the page URL at send time, not at mount", async () => {
+  // The Learning MFE routes client-side and init() renders once, so a learner
+  // who moves to the next unit before reporting would otherwise file the ticket
+  // against the URL the card was mounted on.
+  const mockFetch = jest.spyOn(window, "fetch")
+  render(<ContactUsLauncher settings={{ chat: { apiUrl: TEST_API } }} />, {
+    wrapper: ThemeProvider,
+  })
+
+  window.history.pushState({}, "", "/courses/18.01/week-9")
+  await openCard()
+  await sendMessage("my video will not play")
+
+  expect(mockFetch).toHaveBeenCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: window.location.href,
+        message: "my video will not play",
+        clear_history: true,
+      }),
+    }),
+  )
+})
+
+test("Escape spares a draft when it was not aimed at the card", async () => {
+  // The same loss the click-away guard prevents: the learner clicks the page to
+  // read an error code off it, which leaves focus on body, and Escape aimed at
+  // nothing in particular would take the description with it.
+  renderLauncher()
+
+  await openCard()
+  await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
+  await user.paste("my video stops at 3:41, error VID-421")
+  await user.click(document.body)
+  await user.keyboard("{Escape}")
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
 test("lets the host override the entry screen title", async () => {

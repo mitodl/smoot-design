@@ -106,13 +106,21 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
    * It stays on until a send comes back, because a send that errored never
    * started a thread for the retry to continue.
    */
-  const transformBody = useCallback((messages: AiChatMessage[]) => {
-    conversationStarted.current = true
-    return {
-      message: messages[messages.length - 1].content,
-      clear_history: !historyCleared.current,
-    }
-  }, [])
+  const hostPageUrl = settings.chat?.requestBody?.page_url
+
+  const transformBody = useCallback(
+    (messages: AiChatMessage[]) => {
+      conversationStarted.current = true
+      return {
+        // Read at send, not at mount: a host that routes client-side changes the
+        // URL under a card that init() only ever renders once.
+        page_url: hostPageUrl ?? window.location.href,
+        message: messages[messages.length - 1].content,
+        clear_history: !historyCleared.current,
+      }
+    },
+    [hostPageUrl],
+  )
 
   const onTrackingEvent = useCallback((event: TrackingEvent) => {
     if (event.type === TrackingEventType.Response) {
@@ -131,10 +139,6 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         entryScreenEnabled: true,
         entryScreenTitle: ENTRY_TITLE,
         ...settings.chat,
-        requestBody: {
-          page_url: window.location.href,
-          ...settings.chat?.requestBody,
-        },
       },
     }),
     [settings],
@@ -174,14 +178,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         return
       }
       // Escape aimed at a host dropdown or autofill must not take the card with
-      // it. Body still counts as ours: sending disables the Send button that had
-      // focus, so focus lands there with the card still the only thing on screen.
+      // it. Body counts as ours only with nothing to lose: sending disables the
+      // Send button that had focus, so focus lands on body with the card still
+      // the only thing on screen, but so does a click on the page mid-draft.
       const focused = document.activeElement
-      if (
-        focused &&
-        focused !== document.body &&
-        !cardRef.current?.contains(focused)
-      ) {
+      const inCard = Boolean(focused && cardRef.current?.contains(focused))
+      const strayButHarmless =
+        (!focused || focused === document.body) && !hasDraft()
+      if (!inCard && !strayButHarmless) {
         return
       }
       setOpen(false)
