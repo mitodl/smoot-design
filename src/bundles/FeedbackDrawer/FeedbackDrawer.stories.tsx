@@ -174,7 +174,7 @@ export const SlotBlockTypeStory: Story = {
       <FeedbackDrawer
         variant="slot"
         open
-        blockType="html"
+        blockType="problem"
         onSubmit={logSubmit}
       />
     </div>

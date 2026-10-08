@@ -178,7 +178,6 @@ describe("FeedbackDrawerManager", () => {
             type: "ol-feedback::drawer-open",
             payload: {
               ...PAYLOAD,
-              blockType: "html",
               blockDisplayName: studioName,
               visibleTitle: undefined,
             },
@@ -188,7 +187,7 @@ describe("FeedbackDrawerManager", () => {
     })
 
     expect(screen.getByRole("radiogroup")).toHaveAccessibleName(
-      "What kind of feedback do you have about this text?",
+      "What kind of feedback do you have about this video?",
     )
     expect(document.body).not.toHaveTextContent(/REVISED/i)
 

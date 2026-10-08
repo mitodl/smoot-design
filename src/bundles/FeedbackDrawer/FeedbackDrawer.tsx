@@ -44,11 +44,13 @@ type ReactionConfig = {
   tintAlpha: number
 }
 
+// "html" has no entry: Studio's Text component also holds images, embeds,
+// and announcements, so there's no single noun that's right for all of them.
+// It falls through to the generic "this content" wording below instead.
 const FRIENDLY_BLOCK_TYPES: Record<string, string> = {
   video: "video",
   videoalpha: "video",
   problem: "problem",
-  html: "text",
   discussion: "discussion",
   "drag-and-drop-v2": "drag-and-drop activity",
   openassessment: "open response",

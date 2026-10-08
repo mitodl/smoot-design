@@ -52,11 +52,12 @@ describe("FeedbackDrawer", () => {
     })
   })
 
-  test("maps a raw block type to a friendlier word in the subheader", () => {
-    // "html" reads poorly for a learner; the subheader says "text" instead.
+  test("falls back to generic wording for a type with no single noun", () => {
+    // Studio's "html" component also holds images, embeds, and
+    // announcements, so there's no one word that's right for all of them.
     renderDrawer({ blockType: "html" })
     screen.getByRole("radiogroup", {
-      name: "What kind of feedback do you have about this text?",
+      name: "What kind of feedback do you have about this content?",
     })
   })
 
