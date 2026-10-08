@@ -23,6 +23,11 @@ const CARD_INSET = "24px"
 // AiDrawer renders its AskTIM wordmark and sparkle off this exact string.
 const CARD_TITLE = "AskTIM"
 
+const CARD_BADGE = "AI ASSISTANT"
+
+// "Ask a question" invites one the support bot cannot answer.
+const INPUT_PLACEHOLDER = "Describe the problem"
+
 // Nothing on the way in says what this does with what the learner types: they
 // clicked a button labelled "Contact us" and landed on a chat box.
 const GREETING = [
@@ -143,10 +148,12 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   // its own (a translated greeting) still wins.
   const cardSettings = React.useMemo(
     () => ({
+      badge: CARD_BADGE,
       ...settings,
       title: CARD_TITLE,
       chat: {
         initialMessages: GREETING,
+        placeholder: INPUT_PLACEHOLDER,
         ...settings.chat,
       },
     }),

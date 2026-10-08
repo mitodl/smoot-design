@@ -54,7 +54,9 @@ const renderLauncher = (props = {}) =>
   })
 
 const sendMessage = async (text: string) => {
-  await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe the problem" }),
+  )
   await user.paste(text)
   await user.click(screen.getByRole("button", { name: "Send" }))
 }
@@ -107,6 +109,28 @@ test("opens on a greeting that says what the card will do", async () => {
 
   expect(transcript(card)).toHaveTextContent(/I'm AskTIM/)
   expect(transcript(card)).toHaveTextContent(/support team/)
+})
+
+test("marks the card as an AI assistant", async () => {
+  // The greeting says AskTIM will pass the request on; the chip says the thing
+  // answering is a model, which is why the disclaimer underneath applies.
+  renderLauncher()
+
+  const card = await openCard()
+
+  expect(within(card).getByText("AI ASSISTANT")).toBeInTheDocument()
+})
+
+test("asks for a problem rather than a question", async () => {
+  // "Ask a question" invites a question the support bot cannot answer. The
+  // learner is describing something that went wrong.
+  renderLauncher()
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("textbox", { name: "Describe the problem" }),
+  ).toBeInTheDocument()
 })
 
 test("opens into the conversation rather than an entry screen", async () => {
@@ -187,7 +211,9 @@ test("a click outside leaves the card open once the learner has typed something"
   renderLauncher()
 
   await openCard()
-  await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe the problem" }),
+  )
   await user.paste("my video will not play when I")
   await user.click(document.body)
 
@@ -270,7 +296,9 @@ test("Escape spares a draft when it was not aimed at the card", async () => {
   renderLauncher()
 
   await openCard()
-  await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe the problem" }),
+  )
   await user.paste("my video stops at 3:41, error VID-421")
   await user.click(document.body)
   await user.keyboard("{Escape}")

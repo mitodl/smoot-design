@@ -260,3 +260,44 @@ describe("AiDrawer without a blockType", () => {
     expect(screen.queryByText(/problem/i)).toBeNull()
   })
 })
+
+describe("AiDrawer badge", () => {
+  test("renders the badge beside the title", () => {
+    render(
+      <AiDrawer open settings={{ ...SETTINGS, badge: "AI ASSISTANT" }} />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(screen.getByText("AI ASSISTANT")).toBeInTheDocument()
+  })
+
+  // Every existing host leaves it unset, so the AskTIM drawer must look the
+  // same as it did before the setting existed.
+  test("renders nothing when the host sets no badge", () => {
+    renderSlot()
+
+    expect(
+      screen.getByRole("heading", { level: 1 }).closest("header, div")
+        ?.textContent,
+    ).toBe("AskTIM about this problem")
+  })
+})
+
+describe("AiDrawer chat placeholder", () => {
+  test("passes the placeholder through to the chat input", () => {
+    render(
+      <AiDrawer
+        open
+        settings={{
+          ...SETTINGS,
+          chat: { ...SETTINGS.chat, placeholder: "Describe the problem" },
+        }}
+      />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(
+      screen.getByRole("textbox", { name: "Describe the problem" }),
+    ).toBeInTheDocument()
+  })
+})

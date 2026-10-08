@@ -118,6 +118,25 @@ describe("AiChat", () => {
     return { initialMessages, conversationStarters, rerender, onSubmit }
   }
 
+  test("names the input after its placeholder when one is given", async () => {
+    // Speech-input users say the label they can see, so a visible "Type a
+    // message..." over an accessible name of "Ask a question" is unreachable
+    // by voice (WCAG 2.5.3).
+    setup({ placeholder: "Type a message..." })
+
+    expect(
+      screen.getByRole("textbox", { name: "Type a message..." }),
+    ).toBeInTheDocument()
+  })
+
+  test("falls back to the default input name when no placeholder is given", async () => {
+    setup({ placeholder: undefined })
+
+    expect(
+      screen.getByRole("textbox", { name: "Ask a question" }),
+    ).toBeInTheDocument()
+  })
+
   test("Clicking conversation starters and sending chats", async () => {
     const { initialMessages, conversationStarters, onSubmit } = setup()
 
