@@ -1,5 +1,5 @@
 import * as React from "react"
-import { render, screen, within } from "@testing-library/react"
+import { act, render, screen, within } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { setupServer } from "msw/node"
 import { http, HttpResponse } from "msw"
@@ -53,8 +53,6 @@ const renderLauncher = (props = {}) =>
     wrapper: ThemeProvider,
   })
 
-// The entry screen and the chat screen each have their own input. Only the
-// chat screen's carries a placeholder, so target the shared accessible name.
 const sendMessage = async (text: string) => {
   await user.click(screen.getByRole("textbox", { name: "Ask a question" }))
   await user.paste(text)
@@ -65,6 +63,11 @@ const openCard = async () => {
   await user.click(screen.getByRole("button", { name: "Contact us" }))
   return screen.findByRole("dialog", { name: "AskTIM" })
 }
+
+// AiChat repeats every message in an aria-live region, so text queries match
+// twice. The transcript is the copy the learner reads.
+const transcript = (card: HTMLElement) =>
+  card.querySelector('[data-chat-role="assistant"]')
 
 test("renders a labelled launcher button and no card until clicked", () => {
   renderLauncher()
@@ -95,24 +98,25 @@ test("brands the card as AskTIM rather than repeating the launcher label", async
   expect(card).not.toHaveTextContent("Contact us")
 })
 
-test("opens on the AskTIM entry screen, TIM logo and all", async () => {
-  // AiDrawer defaults entryScreenEnabled to false for non-video blocks, which
-  // left the card blank above the input. AskTIM's video drawer defaults it on.
+test("opens on a greeting that says what the card will do", async () => {
+  // Nothing on the way in says this files a support request: the learner
+  // clicked a button labelled "Contact us" and landed on a chat box.
   renderLauncher()
 
   const card = await openCard()
 
-  const entry = within(card).getByTestId("ai-chat-entry-screen")
-  expect(entry.querySelector("svg")).toBeInTheDocument()
+  expect(transcript(card)).toHaveTextContent(/I'm AskTIM/)
+  expect(transcript(card)).toHaveTextContent(/support team/)
 })
 
-test("drops the entry screen once the learner sends a message", async () => {
+test("opens into the conversation rather than an entry screen", async () => {
+  // The entry screen has room for a heading and nothing else, so the greeting
+  // has to be a message in the thread.
   renderLauncher()
 
-  await openCard()
-  await sendMessage("my video will not play")
+  const card = await openCard()
 
-  expect(screen.queryByTestId("ai-chat-entry-screen")).toBeNull()
+  expect(within(card).queryByTestId("ai-chat-entry-screen")).toBeNull()
 })
 
 test("closes the card again", async () => {
@@ -201,7 +205,10 @@ test("Escape is ignored while focus sits outside the card", async () => {
 
   await openCard()
   await sendMessage("my video will not play")
-  hostField.focus()
+  // Focus now sits in the chat textarea, so blurring it updates MUI state.
+  await act(async () => {
+    hostField.focus()
+  })
   await user.keyboard("{Escape}")
 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
@@ -271,20 +278,24 @@ test("Escape spares a draft when it was not aimed at the card", async () => {
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
-test("lets the host override the entry screen title", async () => {
-  // The prop type accepts entryScreenTitle, so a translated host string has to
+test("lets the host replace the greeting", async () => {
+  // The prop type accepts initialMessages, so a translated host string has to
   // win over the English default rather than being silently dropped.
   renderLauncher({
     settings: {
-      chat: { ...SETTINGS.chat, entryScreenTitle: "¿En qué podemos ayudarte?" },
+      chat: {
+        ...SETTINGS.chat,
+        initialMessages: [
+          { role: "assistant" as const, content: "¿En qué podemos ayudarte?" },
+        ],
+      },
     },
   })
 
   const card = await openCard()
 
-  expect(
-    within(card).getByText("¿En qué podemos ayudarte?"),
-  ).toBeInTheDocument()
+  expect(transcript(card)).toHaveTextContent("¿En qué podemos ayudarte?")
+  expect(transcript(card)).not.toHaveTextContent(/I'm AskTIM/)
 })
 
 test("a click outside leaves the card open once a message has been sent", async () => {

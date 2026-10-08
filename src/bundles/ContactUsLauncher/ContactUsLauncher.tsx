@@ -23,7 +23,17 @@ const CARD_INSET = "24px"
 // AiDrawer renders its AskTIM wordmark and sparkle off this exact string.
 const CARD_TITLE = "AskTIM"
 
-const ENTRY_TITLE = "What do you need help with?"
+// Nothing on the way in says what this does with what the learner types: they
+// clicked a button labelled "Contact us" and landed on a chat box.
+const GREETING = [
+  {
+    role: "assistant" as const,
+    content:
+      "**How can we help?**\n\nI'm AskTIM, and I'm here to help you send a " +
+      "request to the MIT Open Learning support team. Tell me what went " +
+      "wrong and I'll pass it on.",
+  },
+]
 
 // First fixed-position component in the library. zIndex.fab (1050) keeps it
 // under the MUI Drawer (1200) and Modal (1300) rather than over them.
@@ -128,16 +138,15 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     }
   }, [])
 
-  // AiDrawer only defaults the entry screen on for video blocks, so ask for it
-  // explicitly; without it the card opens blank above the input. These are
-  // defaults, so a host that sets its own (a translated title) still wins.
+  // The entry screen has room for a heading and nothing else, so the greeting
+  // is a message in the thread instead. It is a default, so a host that sets
+  // its own (a translated greeting) still wins.
   const cardSettings = React.useMemo(
     () => ({
       ...settings,
       title: CARD_TITLE,
       chat: {
-        entryScreenEnabled: true,
-        entryScreenTitle: ENTRY_TITLE,
+        initialMessages: GREETING,
         ...settings.chat,
       },
     }),
