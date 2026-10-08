@@ -8,16 +8,65 @@ const PAGE_URL = "https://learn.mit.edu/courses/18.01/week-3"
 const ASK_FOR_EMAIL =
   "Sorry that happened. What email address should the support team reply to?"
 const TICKET_FILED =
-  "Thanks - your request is filed as **STUB-4F2A91** and support will email you."
+  "Thanks - I've passed that on to the MIT Open Learning support team. Your " +
+  "reference number is STUB-4F2A91, and they'll follow up at {email}."
+
+const review = (description: string, email: string) =>
+  [
+    "Here's what I'll send to the support team:",
+    "",
+    `**Your message:** ${description}`,
+    "",
+    `**Where you were:** ${PAGE_URL}`,
+    "",
+    `**Reply to:** ${email}`,
+    "",
+    'Anything else to add? Send it and I\'ll include it - otherwise reply "send" ' +
+      "and I'll pass this on.",
+  ].join("\n")
+
+type Intake = { email: string; description: string[]; awaitingSend: boolean }
+
+const freshIntake = (): Intake => ({
+  email: "",
+  description: [],
+  awaitingSend: false,
+})
+
+let intake = freshIntake()
 
 /**
- * Stands in for learn-ai's support bot: it asks for an address, then confirms
- * the ticket once it has one. Good enough to walk the whole intake flow.
+ * Stands in for learn-ai's support bot across all three turns: ask for an
+ * address, show the ticket for review, then file it on the turn after. The
+ * review step is in learn-ai's code rather than its model, so a mock that files
+ * the moment an address arrives would demo a flow the backend no longer has.
  */
 const supportHandler = http.post(SUPPORT_API, async ({ request }) => {
-  const { message } = (await request.json()) as { message: string }
+  const { message, clear_history: clearHistory } = (await request.json()) as {
+    message: string
+    clear_history: boolean
+  }
+  // Each card session starts a new thread, so the mock forgets with it.
+  if (clearHistory) {
+    intake = freshIntake()
+  }
   await delay(400)
-  return HttpResponse.text(message.includes("@") ? TICKET_FILED : ASK_FOR_EMAIL)
+
+  if (intake.awaitingSend) {
+    const reply = TICKET_FILED.replace("{email}", intake.email)
+    intake = freshIntake()
+    return HttpResponse.text(reply)
+  }
+
+  const address = message.match(/\S+@\S+\.\S+/)?.[0]
+  if (!address) {
+    intake.description.push(message)
+    return HttpResponse.text(ASK_FOR_EMAIL)
+  }
+
+  intake.email = address
+  intake.awaitingSend = true
+  return HttpResponse.text(review(intake.description.join("\n\n"), address))
 })
 
 const meta: Meta<typeof ContactUsLauncher> = {
@@ -50,7 +99,8 @@ type Story = StoryObj<typeof ContactUsLauncher>
 /**
  * The launcher is `position: fixed`, so it sits in the bottom-right of the
  * canvas rather than in the flow of the story. Click it to open the card,
- * describe a problem, then give an address to see the ticket confirmation.
+ * describe a problem, then give an address. The card shows what it will send
+ * before anything is filed; reply "send" (or add more) to get the reference.
  */
 export const Default: Story = {}
 
