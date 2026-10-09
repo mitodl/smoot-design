@@ -18,6 +18,7 @@ import {
   TabButton,
 } from "../../components/TabButtons/TabButtonList"
 import Typography from "@mui/material/Typography"
+import Chip from "@mui/material/Chip"
 import TabContext from "@mui/lab/TabContext"
 import TabPanel from "@mui/lab/TabPanel"
 import { AiChat } from "../../components/AiChat/AiChat"
@@ -38,6 +39,10 @@ type AiDrawerSettings = {
    * If the title begins "AskTIM", it is styled as the AskTIM logo.
    */
   title?: string
+  /**
+   * Short label shown as a chip beside the title, e.g. "AI ASSISTANT".
+   */
+  badge?: string
   chat: {
     chatId?: AiChatProps["chatId"]
     conversationStarters?: AiChatProps["conversationStarters"]
@@ -46,6 +51,7 @@ type AiDrawerSettings = {
     requestBody?: Record<string, unknown>
     entryScreenEnabled?: AiChatProps["entryScreenEnabled"]
     entryScreenTitle?: AiChatProps["entryScreenTitle"]
+    placeholder?: AiChatProps["placeholder"]
   }
   summary?: {
     apiUrl: string
@@ -86,8 +92,10 @@ const Title = styled.div(({ theme }) => ({
   },
   // Heading is focused on open; suppress the native outline and drive the ring
   // via data-focus-ring for keyboard opens only (WCAG 2.4.7).
+  // Shrinks but does not grow, so a badge after it sits against the title
+  // rather than being pushed to the far side of the header.
   h1: {
-    flex: 1,
+    flex: "0 1 auto",
     minWidth: 0,
     overflowWrap: "anywhere",
     outline: "none",
@@ -97,6 +105,13 @@ const Title = styled.div(({ theme }) => ({
     outlineOffset: "2px",
     borderRadius: "2px",
   },
+}))
+
+const Badge = styled(Chip)(({ theme }) => ({
+  flexShrink: 0,
+  borderColor: theme.custom.colors.lightGray2,
+  color: theme.custom.colors.silverGrayDark,
+  letterSpacing: "0.5px",
 }))
 
 const CloseButton = styled(ActionButton)(({ theme }) => ({
@@ -263,7 +278,7 @@ type AiDrawerProps = {
    * *This cannot be supplied via message events since the function is not serializable.*
    *
    */
-  transformBody?: (messages: AiChatMessage[]) => Iterable<unknown>
+  transformBody?: (messages: AiChatMessage[]) => object
   /**
    * Fetch options to be passed to the fetch call.
    *
@@ -359,7 +374,7 @@ const ChatComponent = ({
   onTrackingEvent,
 }: {
   settings: AiDrawerSettings["chat"]
-  transformBody: (messages: AiChatMessage[]) => Iterable<unknown>
+  transformBody: (messages: AiChatMessage[]) => object
   fetchOpts: AiChatProps["requestOpts"]["fetchOpts"]
   scrollElement: AiChatProps["scrollElement"]
   entryScreenEnabled: boolean
@@ -381,6 +396,7 @@ const ChatComponent = ({
       scrollElement={scrollElement}
       entryScreenEnabled={entryScreenEnabled}
       entryScreenTitle={entryScreenTitle}
+      placeholder={settings.placeholder}
       requestOpts={{
         transformBody: (messages) => ({
           ...settings.requestBody,
@@ -588,7 +604,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
     return <div data-testid="ai-drawer-waiting"></div>
   }
 
-  const { title, blockType, chat } = settings
+  const { title, badge, blockType, chat } = settings
   const hasTabs = blockType === "video"
 
   const returnLabel = t(
@@ -623,6 +639,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               title?.trim() || t(TRANSLATION_KEYS.aiDrawer.ariaRegion)
             )}
           </Typography>
+          {badge ? <Badge size="medium" label={badge} /> : null}
         </Title>
         {onReturnToBlock && variant === "slot" ? (
           <ReturnToBlock type="button" onClick={onReturnToBlock}>
@@ -638,7 +655,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           <RiCloseLine />
         </CloseButton>
       </Header>
-      {blockType === "problem" ? (
+      {blockType !== "video" ? (
         <ChatComponent
           settings={chat}
           transformBody={transformBody}
@@ -647,10 +664,12 @@ const AiDrawer: FC<AiDrawerProps> = ({
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
           entryScreenTitle={chat.entryScreenTitle}
           initialMessages={
-            chat.initialMessages || defaultProblemInitialMessages
+            blockType === "problem"
+              ? chat.initialMessages || defaultProblemInitialMessages
+              : chat.initialMessages
           }
           hasTabs={hasTabs}
-          needsMathJax={true}
+          needsMathJax={blockType === "problem"}
           variant={variant}
           onTrackingEvent={onTrackingEvent}
         />
