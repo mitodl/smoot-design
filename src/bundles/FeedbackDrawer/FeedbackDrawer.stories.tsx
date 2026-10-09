@@ -152,18 +152,15 @@ export const SlotWithBlockTitleStory: Story = {
         variant="slot"
         open
         subtitle="Lecture 3: Recursion"
+        blockType="video"
         onSubmit={logSubmit}
       />
     </div>
   ),
 }
 
-/**
- * Slot with no block title: the subheader falls back to the (friendly) block
- * type, e.g. "this problem block".
- */
-export const SlotBlockTypeFallbackStory: Story = {
-  name: "Slot (block-type fallback in subheader)",
+export const SlotBlockTypeStory: Story = {
+  name: "Slot (block type in subheader)",
   render: () => (
     <div
       style={{

@@ -44,20 +44,30 @@ type ReactionConfig = {
   tintAlpha: number
 }
 
+// "html" has no entry: Studio's Text component also holds images, embeds,
+// and announcements, so there's no single noun that's right for all of them.
+// It falls through to the generic "this content" wording below instead.
 const FRIENDLY_BLOCK_TYPES: Record<string, string> = {
   video: "video",
+  videoalpha: "video",
   problem: "problem",
-  html: "text",
   discussion: "discussion",
-  "drag-and-drop-v2": "drag-and-drop",
+  "drag-and-drop-v2": "drag-and-drop activity",
   openassessment: "open response",
   lti: "tool",
   lti_consumer: "tool",
   poll: "poll",
+  // The built-in poll draws its question, not its name, so it never sends a
+  // title and always lands here.
+  poll_question: "poll",
   survey: "survey",
   word_cloud: "word cloud",
+  annotatable: "reading",
   book: "reading",
   image: "image",
+  pdf: "PDF",
+  edx_sga: "assignment",
+  staffgradedxblock: "assignment",
 }
 
 const REACTIONS: ReactionConfig[] = [
@@ -302,9 +312,9 @@ type FeedbackDrawerProps = {
   onSubmit?: (data: FeedbackData) => Promise<void> | void
   /** Drawer heading. */
   title?: string
-  /** Content title (block display name) named in the subheader question. */
+  /** Title for the subheader. Pass it only when the learner can see it on the page. */
   subtitle?: string
-  /** Block type (e.g. "video", "problem"); used in the subheader when there's no title. */
+  /** Block type (e.g. "video", "problem"); names the content when there's no subtitle. */
   blockType?: string
   defaultSentiment?: Sentiment
 }
@@ -342,10 +352,22 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
   const questionId = useId()
   const commentErrorId = useId()
 
-  const blockTitle = subtitle?.trim()
-  const friendlyType = blockType
-    ? (FRIENDLY_BLOCK_TYPES[blockType] ?? blockType)
+  const blockTitle = typeof subtitle === "string" ? subtitle.trim() : ""
+  const typeKey =
+    typeof blockType === "string" ? blockType.trim().toLowerCase() : ""
+  const friendlyType = Object.prototype.hasOwnProperty.call(
+    FRIENDLY_BLOCK_TYPES,
+    typeKey,
+  )
+    ? FRIENDLY_BLOCK_TYPES[typeKey]
     : null
+
+  // A title can already end a sentence — poll renders the Studio name as its
+  // heading, and authors write questions there. Don't make it "...prefer??".
+  // "." is not in the set: a trailing period is usually numbering ("Ch. 4."),
+  // not a sentence, and swallowing the "?" leaves the radiogroup name a statement.
+  const titleEnd = blockTitle.replace(/[)\]}"'’”»）】」』]+$/u, "")
+  const titleTerminator = /[?!…。！？]$/u.test(titleEnd) ? "" : "?"
 
   const returnLabel = friendlyType
     ? `Return to the ${friendlyType}`
@@ -522,9 +544,9 @@ const FeedbackDrawer: FC<FeedbackDrawerProps> = ({
           <>
             <Question id={questionId}>
               {blockTitle
-                ? `What kind of feedback do you have about ${blockTitle}?`
+                ? `What kind of feedback do you have about ${blockTitle}${titleTerminator}`
                 : friendlyType
-                  ? `What kind of feedback do you have about this ${friendlyType} block?`
+                  ? `What kind of feedback do you have about this ${friendlyType}?`
                   : "What kind of feedback do you have about this content?"}
             </Question>
 
