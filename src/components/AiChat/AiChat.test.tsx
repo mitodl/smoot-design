@@ -280,6 +280,35 @@ describe("AiChat", () => {
     expect(alert).toHaveTextContent("An unexpected error has occurred")
   })
 
+  test("names the entry screen input after its placeholder when one is given", async () => {
+    // The chat screen's input keeps this same accessible name once the entry
+    // screen gives way to it (see "names the input after its placeholder"
+    // above); without this, voice-input users would lose their match target
+    // partway through the first exchange (WCAG 2.5.3).
+    setup({
+      entryScreenEnabled: true,
+      initialMessages: [],
+      conversationStarters: [],
+    })
+
+    expect(
+      screen.getByRole("textbox", { name: "Type a message..." }),
+    ).toBeInTheDocument()
+  })
+
+  test("falls back to the default entry screen input name when no placeholder is given", async () => {
+    setup({
+      entryScreenEnabled: true,
+      placeholder: undefined,
+      initialMessages: [],
+      conversationStarters: [],
+    })
+
+    expect(
+      screen.getByRole("textbox", { name: "Ask a question" }),
+    ).toBeInTheDocument()
+  })
+
   test("Shows the entry screen if entryScreenEnabled is true", async () => {
     setup({
       entryScreenEnabled: true,

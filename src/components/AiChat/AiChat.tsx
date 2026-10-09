@@ -489,6 +489,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
         <EntryScreen
           className={classes.entryScreenContainer}
           title={entryScreenTitle}
+          placeholder={placeholder}
           conversationStarters={conversationStarters}
           onPromptSubmit={(prompt, meta) => {
             if (prompt.trim() === "") {
