@@ -1,5 +1,5 @@
 import * as React from "react"
-import { act } from "@testing-library/react"
+import { act, within } from "@testing-library/react"
 import { init } from "./contactUsLauncher"
 
 jest.mock("../components/AiChat/Markdown", () => ({
@@ -87,10 +87,14 @@ test("leaves a host container's id alone", () => {
 })
 
 test("renders the launcher into the host container", () => {
+  // The launcher button is icon-only, named by its aria-label rather than
+  // visible text, so the host's markup is checked by accessible name.
   const container = hostContainer()
 
   const { unmount } = mount(container)
 
-  expect(container.textContent).toContain("Contact us")
+  expect(
+    within(container).getByRole("button", { name: "Contact us" }),
+  ).toBeInTheDocument()
   act(() => unmount())
 })

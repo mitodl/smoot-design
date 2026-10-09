@@ -55,7 +55,7 @@ const renderLauncher = (props = {}) =>
 
 const sendMessage = async (text: string) => {
   await user.click(
-    screen.getByRole("textbox", { name: "Describe the problem" }),
+    screen.getByRole("textbox", { name: "Describe what you need" }),
   )
   await user.paste(text)
   await user.click(screen.getByRole("button", { name: "Send" }))
@@ -76,6 +76,13 @@ test("renders a labelled launcher button and no card until clicked", () => {
 
   expect(screen.getByRole("button", { name: "Contact us" })).toBeInTheDocument()
   expect(screen.queryByRole("dialog")).toBeNull()
+})
+
+test("the launcher button is icon-only, named by its label rather than visible text", () => {
+  renderLauncher()
+
+  const launcher = screen.getByRole("button", { name: "Contact us" })
+  expect(launcher).not.toHaveTextContent("Contact us")
 })
 
 test("opens the card when the launcher is clicked", async () => {
@@ -129,7 +136,7 @@ test("asks for a problem rather than a question", async () => {
   const card = await openCard()
 
   expect(
-    within(card).getByRole("textbox", { name: "Describe the problem" }),
+    within(card).getByRole("textbox", { name: "Describe what you need" }),
   ).toBeInTheDocument()
 })
 
@@ -212,7 +219,7 @@ test("a click outside leaves the card open once the learner has typed something"
 
   await openCard()
   await user.click(
-    screen.getByRole("textbox", { name: "Describe the problem" }),
+    screen.getByRole("textbox", { name: "Describe what you need" }),
   )
   await user.paste("my video will not play when I")
   await user.click(document.body)
@@ -297,7 +304,7 @@ test("Escape spares a draft when it was not aimed at the card", async () => {
 
   await openCard()
   await user.click(
-    screen.getByRole("textbox", { name: "Describe the problem" }),
+    screen.getByRole("textbox", { name: "Describe what you need" }),
   )
   await user.paste("my video stops at 3:41, error VID-421")
   await user.click(document.body)
@@ -426,10 +433,13 @@ test("only the first message of a session clears history", async () => {
   )
 })
 
-test("a retry after a failed send still clears history", async () => {
-  // A send that errored never started a thread, so the retry is still the first
-  // message of this session. Counting user messages instead would drop the
-  // retry into the previous visit's thread, whose ticket is already filed.
+test("a retry after a failed send continues the same thread", async () => {
+  // learn-ai mints a thread either way when none exists yet (no cookie to read
+  // back), so the retry doesn't need a fresh clear_history to get one. Sending
+  // true here would risk the opposite case instead: a response that filed a
+  // ticket server-side but dropped before the client saw it finish. A retry
+  // that cleared history then would hide that ticket in an abandoned thread
+  // and let the support bot file a second one for the same request.
   server.use(http.post(TEST_API, () => new HttpResponse(null, { status: 500 })))
   const mockFetch = jest.spyOn(window, "fetch")
   renderLauncher()
@@ -447,7 +457,7 @@ test("a retry after a failed send still clears history", async () => {
       body: JSON.stringify({
         page_url: PAGE_URL,
         message: "my video will not play",
-        clear_history: true,
+        clear_history: false,
       }),
     }),
   )

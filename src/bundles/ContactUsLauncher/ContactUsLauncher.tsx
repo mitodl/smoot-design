@@ -2,18 +2,16 @@ import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
 import { keyframes } from "@emotion/react"
-import { RiCustomerService2Line } from "@remixicon/react"
-import { Button } from "../../components/Button/Button"
+import { RiChatAiLine } from "@remixicon/react"
+import { ActionButton } from "../../components/Button/ActionButton"
 import { AiDrawer } from "../AiDrawer/AiDrawer"
 import type { AiDrawerSettings } from "../AiDrawer/AiDrawer"
-import { TrackingEventType } from "../AiDrawer/trackingEvents"
-import type { TrackingEvent } from "../AiDrawer/trackingEvents"
 import type { AiChatMessage } from "../../components/AiChat/types"
 
 type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
   settings: Omit<AiDrawerSettings, "title">
-  /** Visible button text. Also the accessible name. */
+  /** The launcher button's accessible name; the button itself is icon-only. */
   label?: string
   className?: string
 }
@@ -26,7 +24,7 @@ const CARD_TITLE = "AskTIM"
 const CARD_BADGE = "AI ASSISTANT"
 
 // "Ask a question" invites one the support bot cannot answer.
-const INPUT_PLACEHOLDER = "Describe the problem"
+const INPUT_PLACEHOLDER = "Describe what you need"
 
 // Nothing on the way in says what this does with what the learner types: they
 // clicked a button labelled "Contact us" and landed on a chat box.
@@ -42,11 +40,19 @@ const GREETING = [
 
 // First fixed-position component in the library. zIndex.fab (1050) keeps it
 // under the MUI Drawer (1200) and Modal (1300) rather than over them.
-const LauncherButton = styled(Button)(({ theme }) => ({
+//
+// Icon-only: a floating chat bubble reads as "open a chat" the way the FAB
+// pattern common to chat widgets does, which a text pill doesn't signal as
+// clearly. The label still names it for anyone not reading it visually.
+const LAUNCHER_DIAMETER = "56px"
+
+const LauncherButton = styled(ActionButton)(({ theme }) => ({
   position: "fixed",
   bottom: CARD_INSET,
   right: CARD_INSET,
   zIndex: theme.zIndex.fab,
+  width: LAUNCHER_DIAMETER,
+  height: LAUNCHER_DIAMETER,
   boxShadow: "0 6px 20px rgba(0, 0, 0, 0.16)",
   // The card lands on top of the launcher. Hiding rather than unmounting keeps
   // the ref alive so focus can return here on close.
@@ -114,34 +120,38 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
    * messages array has to be collapsed before it is sent. clear_history starts a
-   * new thread for each card session: the thread cookie outlives the card, and
-   * the support bot files one ticket per thread, so a returning learner would
-   * otherwise be read back the reference from their last visit.
+   * new thread for the first send of a card session: the thread cookie outlives
+   * the card, and the support bot files one ticket per thread, so a returning
+   * learner would otherwise be read back the reference from their last visit.
+   * Closing and reopening the card is how a learner starts another request on
+   * purpose (see the reset below); within one open card, every send after the
+   * first continues that same thread.
    *
-   * It stays on until a send comes back, because a send that errored never
-   * started a thread for the retry to continue.
+   * The flag flips here, before the request goes out, rather than once a reply
+   * comes back: learn-ai sets the thread cookie as soon as it answers, even if
+   * the stream is then cut off before the client sees it finish, so a retry
+   * that cleared history again could abandon a thread that already got a
+   * ticket filed and have the support bot file a second one. Flipping early
+   * costs nothing when the first send simply failed outright - learn-ai mints
+   * a thread for a request with no cookie either way.
    */
   const hostPageUrl = settings.chat?.requestBody?.page_url
 
   const transformBody = useCallback(
     (messages: AiChatMessage[]) => {
       conversationStarted.current = true
+      const clearHistory = !historyCleared.current
+      historyCleared.current = true
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
         page_url: hostPageUrl ?? window.location.href,
         message: messages[messages.length - 1].content,
-        clear_history: !historyCleared.current,
+        clear_history: clearHistory,
       }
     },
     [hostPageUrl],
   )
-
-  const onTrackingEvent = useCallback((event: TrackingEvent) => {
-    if (event.type === TrackingEventType.Response) {
-      historyCleared.current = true
-    }
-  }, [])
 
   // The entry screen has room for a heading and nothing else, so the greeting
   // is a message in the thread instead. It is a default, so a host that sets
@@ -218,6 +228,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   useEffect(() => {
     if (wasOpen.current && !open) {
       launcherRef.current?.focus()
+      // Closing and reopening is how a learner starts another request on
+      // purpose, so the next send should clear history again instead of
+      // continuing the thread (and ticket) from this visit.
       conversationStarted.current = false
       historyCleared.current = false
     }
@@ -229,11 +242,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       <LauncherButton
         ref={launcherRef}
         className={className}
-        startIcon={<RiCustomerService2Line />}
+        variant="primary"
+        edge="circular"
+        size="large"
+        aria-label={label}
         onClick={() => setOpen(true)}
         data-open={open ? "" : undefined}
       >
-        {label}
+        <RiChatAiLine />
       </LauncherButton>
       {open ? (
         <PopoverCard ref={cardRef} role="dialog" aria-label={CARD_TITLE}>
@@ -243,7 +259,6 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}
-            onTrackingEvent={onTrackingEvent}
           />
         </PopoverCard>
       ) : null}
