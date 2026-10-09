@@ -1864,7 +1864,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chromatic-com/storybook@npm:^4.0.1":
+"@chromatic-com/storybook@npm:4.1.0":
   version: 4.1.0
   resolution: "@chromatic-com/storybook@npm:4.1.0"
   dependencies:
@@ -2033,7 +2033,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/react@npm:^11.11.1":
+"@emotion/react@npm:11.14.0":
   version: 11.14.0
   resolution: "@emotion/react@npm:11.14.0"
   dependencies:
@@ -2074,7 +2074,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/styled@npm:^11.11.0":
+"@emotion/styled@npm:11.14.1":
   version: 11.14.1
   resolution: "@emotion/styled@npm:11.14.1"
   dependencies:
@@ -2548,7 +2548,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@faker-js/faker@npm:^10.0.0":
+"@faker-js/faker@npm:10.6.0":
   version: 10.6.0
   resolution: "@faker-js/faker@npm:10.6.0"
   checksum: 10/f45220ceae76133d831dee8c8f5c8566767bfd857b7f872b5ec58866b68da889dabe96e805a598e095a6c58eae250363a7f335aa0afc513cb2ad5fe69e2a967f
@@ -3156,7 +3156,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/environment@npm:^30.0.0":
+"@jest/environment@npm:30.2.0":
   version: 30.2.0
   resolution: "@jest/environment@npm:30.2.0"
   dependencies:
@@ -3535,78 +3535,78 @@ __metadata:
   resolution: "@mitodl/smoot-design@workspace:."
   dependencies:
     "@ai-sdk/react": "npm:1.2.12"
-    "@chromatic-com/storybook": "npm:^4.0.1"
+    "@chromatic-com/storybook": "npm:4.1.0"
     "@emotion/cache": "npm:^11.14.0"
-    "@emotion/react": "npm:^11.11.1"
-    "@emotion/styled": "npm:^11.11.0"
-    "@faker-js/faker": "npm:^10.0.0"
+    "@emotion/react": "npm:11.14.0"
+    "@emotion/styled": "npm:11.14.1"
+    "@faker-js/faker": "npm:10.6.0"
     "@j178/prek": "npm:0.5.3"
-    "@jest/environment": "npm:^30.0.0"
-    "@mui/lab": "npm:^7.0.0-beta.12"
-    "@mui/material": "npm:^7.0.0"
-    "@mui/system": "npm:^7.0.0"
+    "@jest/environment": "npm:30.2.0"
+    "@mui/lab": "npm:7.0.0-beta.12"
+    "@mui/material": "npm:7.1.0"
+    "@mui/system": "npm:7.1.0"
     "@mui/utils": "npm:^7.0.0"
-    "@remixicon/react": "npm:^4.2.0"
-    "@storybook/addon-docs": "npm:^10.0.0"
-    "@storybook/addon-links": "npm:^10.0.0"
-    "@storybook/addon-onboarding": "npm:^10.0.0"
-    "@storybook/addon-webpack5-compiler-swc": "npm:^4.0.0"
-    "@storybook/nextjs": "npm:^10.0.0"
-    "@storybook/react-webpack5": "npm:^10.0.0"
+    "@remixicon/react": "npm:4.6.0"
+    "@storybook/addon-docs": "npm:10.2.19"
+    "@storybook/addon-links": "npm:10.2.19"
+    "@storybook/addon-onboarding": "npm:10.2.19"
+    "@storybook/addon-webpack5-compiler-swc": "npm:4.0.2"
+    "@storybook/nextjs": "npm:10.2.19"
+    "@storybook/react-webpack5": "npm:10.2.19"
     "@storybook/test": "npm:8.6.15"
-    "@swc/jest": "npm:^0.2.37"
-    "@testing-library/dom": "npm:^10.4.0"
-    "@testing-library/jest-dom": "npm:^6.6.3"
-    "@testing-library/react": "npm:^16.0.1"
+    "@swc/jest": "npm:0.2.39"
+    "@testing-library/dom": "npm:10.4.1"
+    "@testing-library/jest-dom": "npm:6.7.0"
+    "@testing-library/react": "npm:16.3.0"
     "@testing-library/user-event": "npm:14.6.1"
-    "@types/jest": "npm:^30.0.0"
-    "@types/lodash": "npm:^4.17.13"
+    "@types/jest": "npm:30.0.0"
+    "@types/lodash": "npm:4.17.20"
     "@types/react": "npm:^19.0.8"
     "@types/react-dom": "npm:^19.0.0"
-    "@types/stylis": "npm:^4"
-    "@typescript-eslint/eslint-plugin": "npm:^8.13.0"
-    "@typescript-eslint/typescript-estree": "npm:^8.13.0"
+    "@types/stylis": "npm:4.2.7"
+    "@typescript-eslint/eslint-plugin": "npm:8.39.1"
+    "@typescript-eslint/typescript-estree": "npm:8.54.0"
     better-react-mathjax: "npm:^2.3.0"
     classnames: "npm:^2.5.1"
     conventional-changelog-conventionalcommits: "npm:^9.0.0"
     eslint: "npm:8.57.1"
-    eslint-config-mitodl: "npm:^2.1.0"
-    eslint-config-prettier: "npm:^10.0.0"
-    eslint-import-resolver-typescript: "npm:^4.0.0"
-    eslint-plugin-import: "npm:^2.29.1"
-    eslint-plugin-jest: "npm:^29.0.0"
-    eslint-plugin-mdx: "npm:^3.0.0"
-    eslint-plugin-react: "npm:^7.34.3"
-    eslint-plugin-react-hooks: "npm:^5.0.0"
+    eslint-config-mitodl: "npm:2.1.0"
+    eslint-config-prettier: "npm:10.1.8"
+    eslint-import-resolver-typescript: "npm:4.4.4"
+    eslint-plugin-import: "npm:2.32.0"
+    eslint-plugin-jest: "npm:29.0.1"
+    eslint-plugin-mdx: "npm:3.6.2"
+    eslint-plugin-react: "npm:7.37.5"
+    eslint-plugin-react-hooks: "npm:5.2.0"
     eslint-plugin-storybook: "npm:10.2.1"
-    eslint-plugin-styled-components-a11y: "npm:^2.1.35"
-    eslint-plugin-testing-library: "npm:^7.0.0"
-    jest: "npm:^30.0.0"
-    jest-environment-jsdom: "npm:^30.0.0"
-    jest-extended: "npm:^6.0.0"
-    jest-fail-on-console: "npm:^3.3.1"
-    jest-fixed-jsdom: "npm:^0.0.10"
-    jest-watch-typeahead: "npm:^3.0.0"
+    eslint-plugin-styled-components-a11y: "npm:2.2.1"
+    eslint-plugin-testing-library: "npm:7.6.6"
+    jest: "npm:30.0.5"
+    jest-environment-jsdom: "npm:30.0.5"
+    jest-extended: "npm:6.0.0"
+    jest-fail-on-console: "npm:3.3.1"
+    jest-fixed-jsdom: "npm:0.0.10"
+    jest-watch-typeahead: "npm:3.0.1"
     lodash: "npm:^4.17.21"
-    msw: "npm:^2.7.0"
-    msw-storybook-addon: "npm:^2.0.5"
+    msw: "npm:2.10.5"
+    msw-storybook-addon: "npm:2.0.5"
     next: "npm:^15.0.2"
-    prettier: "npm:^3.3.3"
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
+    prettier: "npm:3.6.2"
+    react: "npm:19.1.1"
+    react-dom: "npm:19.1.1"
     react-markdown: "npm:^10.0.0"
     rehype-mathjax: "npm:^7.1.0"
     rehype-raw: "npm:^7.0.0"
     remark-math: "npm:^6.0.0"
     remark-supersub: "npm:^1.0.0"
-    semantic-release: "npm:^25.0.2"
-    storybook: "npm:^10.0.0"
+    semantic-release: "npm:25.0.2"
+    storybook: "npm:10.2.19"
     tiny-invariant: "npm:^1.3.1"
-    ts-node: "npm:^10.9.2"
-    tsconfig-paths-webpack-plugin: "npm:^4.1.0"
-    type-fest: "npm:^5.0.0"
-    typescript: "npm:^5.6.3"
-    vite: "npm:^7.0.0"
+    ts-node: "npm:10.9.2"
+    tsconfig-paths-webpack-plugin: "npm:4.2.0"
+    type-fest: "npm:5.0.1"
+    typescript: "npm:5.9.2"
+    vite: "npm:7.3.6"
     zod: "npm:^4.0.0"
   peerDependencies:
     "@emotion/react": ^11.11.1
@@ -3641,7 +3641,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/lab@npm:^7.0.0-beta.12":
+"@mui/lab@npm:7.0.0-beta.12":
   version: 7.0.0-beta.12
   resolution: "@mui/lab@npm:7.0.0-beta.12"
   dependencies:
@@ -3672,7 +3672,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/material@npm:^7.0.0":
+"@mui/material@npm:7.1.0":
   version: 7.1.0
   resolution: "@mui/material@npm:7.1.0"
   dependencies:
@@ -3748,7 +3748,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mui/system@npm:^7.0.0, @mui/system@npm:^7.1.0":
+"@mui/system@npm:7.1.0, @mui/system@npm:^7.1.0":
   version: 7.1.0
   resolution: "@mui/system@npm:7.1.0"
   dependencies:
@@ -4476,7 +4476,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@remixicon/react@npm:^4.2.0":
+"@remixicon/react@npm:4.6.0":
   version: 4.6.0
   resolution: "@remixicon/react@npm:4.6.0"
   peerDependencies:
@@ -4885,7 +4885,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-docs@npm:^10.0.0":
+"@storybook/addon-docs@npm:10.2.19":
   version: 10.2.19
   resolution: "@storybook/addon-docs@npm:10.2.19"
   dependencies:
@@ -4902,7 +4902,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-links@npm:^10.0.0":
+"@storybook/addon-links@npm:10.2.19":
   version: 10.2.19
   resolution: "@storybook/addon-links@npm:10.2.19"
   dependencies:
@@ -4917,7 +4917,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-onboarding@npm:^10.0.0":
+"@storybook/addon-onboarding@npm:10.2.19":
   version: 10.2.19
   resolution: "@storybook/addon-onboarding@npm:10.2.19"
   peerDependencies:
@@ -4926,7 +4926,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-webpack5-compiler-swc@npm:^4.0.0":
+"@storybook/addon-webpack5-compiler-swc@npm:4.0.2":
   version: 4.0.2
   resolution: "@storybook/addon-webpack5-compiler-swc@npm:4.0.2"
   dependencies:
@@ -5030,7 +5030,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/nextjs@npm:^10.0.0":
+"@storybook/nextjs@npm:10.2.19":
   version: 10.2.19
   resolution: "@storybook/nextjs@npm:10.2.19"
   dependencies:
@@ -5135,7 +5135,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react-webpack5@npm:^10.0.0":
+"@storybook/react-webpack5@npm:10.2.19":
   version: 10.2.19
   resolution: "@storybook/react-webpack5@npm:10.2.19"
   dependencies:
@@ -5322,7 +5322,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/jest@npm:^0.2.37":
+"@swc/jest@npm:0.2.39":
   version: 0.2.39
   resolution: "@swc/jest@npm:0.2.39"
   dependencies:
@@ -5360,7 +5360,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:^10.4.0":
+"@testing-library/dom@npm:10.4.1":
   version: 10.4.1
   resolution: "@testing-library/dom@npm:10.4.1"
   dependencies:
@@ -5391,7 +5391,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^6.6.3":
+"@testing-library/jest-dom@npm:6.7.0, @testing-library/jest-dom@npm:^6.6.3":
   version: 6.7.0
   resolution: "@testing-library/jest-dom@npm:6.7.0"
   dependencies:
@@ -5405,7 +5405,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:^16.0.1":
+"@testing-library/react@npm:16.3.0":
   version: 16.3.0
   resolution: "@testing-library/react@npm:16.3.0"
   dependencies:
@@ -5674,7 +5674,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^30.0.0":
+"@types/jest@npm:30.0.0":
   version: 30.0.0
   resolution: "@types/jest@npm:30.0.0"
   dependencies:
@@ -5716,7 +5716,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.13":
+"@types/lodash@npm:4.17.20":
   version: 4.17.20
   resolution: "@types/lodash@npm:4.17.20"
   checksum: 10/8cd8ad3bd78d2e06a93ae8d6c9907981d5673655fec7cb274a4d9a59549aab5bb5b3017361280773b8990ddfccf363e14d1b37c97af8a9fe363de677f9a61524
@@ -5847,7 +5847,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/stylis@npm:^4":
+"@types/stylis@npm:4.2.7":
   version: 4.2.7
   resolution: "@types/stylis@npm:4.2.7"
   checksum: 10/068c7fd64ee2e1649b06615da57c76dd9f5be1836e310ebf94aa08193c3544d48944079ce6e94ba89b72b716944f217234a86fecc28185246c1787f02ad0eae1
@@ -5898,7 +5898,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^8.13.0":
+"@typescript-eslint/eslint-plugin@npm:8.39.1":
   version: 8.39.1
   resolution: "@typescript-eslint/eslint-plugin@npm:8.39.1"
   dependencies:
@@ -6087,7 +6087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/typescript-estree@npm:8.54.0, @typescript-eslint/typescript-estree@npm:^8.13.0":
+"@typescript-eslint/typescript-estree@npm:8.54.0":
   version: 8.54.0
   resolution: "@typescript-eslint/typescript-estree@npm:8.54.0"
   dependencies:
@@ -9400,7 +9400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-mitodl@npm:^2.1.0":
+"eslint-config-mitodl@npm:2.1.0":
   version: 2.1.0
   resolution: "eslint-config-mitodl@npm:2.1.0"
   dependencies:
@@ -9421,7 +9421,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^10.0.0":
+"eslint-config-prettier@npm:10.1.8":
   version: 10.1.8
   resolution: "eslint-config-prettier@npm:10.1.8"
   peerDependencies:
@@ -9458,7 +9458,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-import-resolver-typescript@npm:^4.0.0":
+"eslint-import-resolver-typescript@npm:4.4.4":
   version: 4.4.4
   resolution: "eslint-import-resolver-typescript@npm:4.4.4"
   dependencies:
@@ -9521,7 +9521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import@npm:^2.29.1":
+"eslint-plugin-import@npm:2.32.0":
   version: 2.32.0
   resolution: "eslint-plugin-import@npm:2.32.0"
   dependencies:
@@ -9550,7 +9550,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jest@npm:^29.0.0":
+"eslint-plugin-jest@npm:29.0.1":
   version: 29.0.1
   resolution: "eslint-plugin-jest@npm:29.0.1"
   dependencies:
@@ -9593,7 +9593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-mdx@npm:^3.0.0":
+"eslint-plugin-mdx@npm:3.6.2":
   version: 3.6.2
   resolution: "eslint-plugin-mdx@npm:3.6.2"
   dependencies:
@@ -9613,7 +9613,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react-hooks@npm:^5.0.0":
+"eslint-plugin-react-hooks@npm:5.2.0":
   version: 5.2.0
   resolution: "eslint-plugin-react-hooks@npm:5.2.0"
   peerDependencies:
@@ -9622,7 +9622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:^7.34.3":
+"eslint-plugin-react@npm:7.37.5":
   version: 7.37.5
   resolution: "eslint-plugin-react@npm:7.37.5"
   dependencies:
@@ -9662,7 +9662,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-styled-components-a11y@npm:^2.1.35":
+"eslint-plugin-styled-components-a11y@npm:2.2.1":
   version: 2.2.1
   resolution: "eslint-plugin-styled-components-a11y@npm:2.2.1"
   dependencies:
@@ -9674,7 +9674,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-testing-library@npm:^7.0.0":
+"eslint-plugin-testing-library@npm:7.6.6":
   version: 7.6.6
   resolution: "eslint-plugin-testing-library@npm:7.6.6"
   dependencies:
@@ -12040,7 +12040,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-jsdom@npm:^30.0.0":
+"jest-environment-jsdom@npm:30.0.5":
   version: 30.0.5
   resolution: "jest-environment-jsdom@npm:30.0.5"
   dependencies:
@@ -12073,7 +12073,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-extended@npm:^6.0.0":
+"jest-extended@npm:6.0.0":
   version: 6.0.0
   resolution: "jest-extended@npm:6.0.0"
   dependencies:
@@ -12090,14 +12090,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-fail-on-console@npm:^3.3.1":
+"jest-fail-on-console@npm:3.3.1":
   version: 3.3.1
   resolution: "jest-fail-on-console@npm:3.3.1"
   checksum: 10/59d72906c20390dcd79be51c2ff0d65fe66fb68c2a4633339b95c3bd5dce5745adb06ac91b095de03f367cc2b4d6868d44abf97e1fb21d7e7835a9710b0630cd
   languageName: node
   linkType: hard
 
-"jest-fixed-jsdom@npm:^0.0.10":
+"jest-fixed-jsdom@npm:0.0.10":
   version: 0.0.10
   resolution: "jest-fixed-jsdom@npm:0.0.10"
   peerDependencies:
@@ -12401,7 +12401,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-watch-typeahead@npm:^3.0.0":
+"jest-watch-typeahead@npm:3.0.1":
   version: 3.0.1
   resolution: "jest-watch-typeahead@npm:3.0.1"
   dependencies:
@@ -12474,7 +12474,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:^30.0.0":
+"jest@npm:30.0.5":
   version: 30.0.5
   resolution: "jest@npm:30.0.5"
   dependencies:
@@ -14113,7 +14113,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw-storybook-addon@npm:^2.0.5":
+"msw-storybook-addon@npm:2.0.5":
   version: 2.0.5
   resolution: "msw-storybook-addon@npm:2.0.5"
   dependencies:
@@ -14124,7 +14124,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:^2.7.0":
+"msw@npm:2.10.5":
   version: 2.10.5
   resolution: "msw@npm:2.10.5"
   dependencies:
@@ -15520,7 +15520,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.3.3":
+"prettier@npm:3.6.2":
   version: 3.6.2
   resolution: "prettier@npm:3.6.2"
   bin:
@@ -15875,7 +15875,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0, react-dom@npm:^19.0.0":
+"react-dom@npm:19.1.1, react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
   version: 19.1.1
   resolution: "react-dom@npm:19.1.1"
   dependencies:
@@ -15958,7 +15958,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0, react@npm:^19.0.0":
+"react@npm:19.1.1, react@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
   version: 19.1.1
   resolution: "react@npm:19.1.1"
   checksum: 10/9801530fdc939e1a7a499422e930515b2400809cb39c2872984e99f832d233f61659a693871183dac3155c2f9b2c9dcf4440a56bd18983277ae92860e38c3a61
@@ -16731,7 +16731,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semantic-release@npm:^25.0.2":
+"semantic-release@npm:25.0.2":
   version: 25.0.2
   resolution: "semantic-release@npm:25.0.2"
   dependencies:
@@ -17330,7 +17330,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:^10.0.0":
+"storybook@npm:10.2.19":
   version: 10.2.19
   resolution: "storybook@npm:10.2.19"
   dependencies:
@@ -18215,7 +18215,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.2":
+"ts-node@npm:10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -18253,7 +18253,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsconfig-paths-webpack-plugin@npm:^4.0.1, tsconfig-paths-webpack-plugin@npm:^4.1.0":
+"tsconfig-paths-webpack-plugin@npm:4.2.0, tsconfig-paths-webpack-plugin@npm:^4.0.1":
   version: 4.2.0
   resolution: "tsconfig-paths-webpack-plugin@npm:4.2.0"
   dependencies:
@@ -18347,6 +18347,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"type-fest@npm:5.0.1":
+  version: 5.0.1
+  resolution: "type-fest@npm:5.0.1"
+  dependencies:
+    tagged-tag: "npm:^1.0.0"
+  checksum: 10/5ec4def4ce82e6a33cf2e1a50f7ef512226fbe85314e402155aaedd70d4aa7ccea4224a72234d5351b1b4a730b36243d5b011c147e91795d2eee0dba291c6e51
+  languageName: node
+  linkType: hard
+
 "type-fest@npm:^0.20.2":
   version: 0.20.2
   resolution: "type-fest@npm:0.20.2"
@@ -18386,15 +18395,6 @@ __metadata:
   version: 4.41.0
   resolution: "type-fest@npm:4.41.0"
   checksum: 10/617ace794ac0893c2986912d28b3065ad1afb484cad59297835a0807dc63286c39e8675d65f7de08fafa339afcb8fe06a36e9a188b9857756ae1e92ee8bda212
-  languageName: node
-  linkType: hard
-
-"type-fest@npm:^5.0.0":
-  version: 5.0.1
-  resolution: "type-fest@npm:5.0.1"
-  dependencies:
-    tagged-tag: "npm:^1.0.0"
-  checksum: 10/5ec4def4ce82e6a33cf2e1a50f7ef512226fbe85314e402155aaedd70d4aa7ccea4224a72234d5351b1b4a730b36243d5b011c147e91795d2eee0dba291c6e51
   languageName: node
   linkType: hard
 
@@ -18467,7 +18467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.6.3":
+"typescript@npm:5.9.2":
   version: 5.9.2
   resolution: "typescript@npm:5.9.2"
   bin:
@@ -18477,7 +18477,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.6.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.9.2#optional!builtin<compat/typescript>":
   version: 5.9.2
   resolution: "typescript@patch:typescript@npm%3A5.9.2#optional!builtin<compat/typescript>::version=5.9.2&hash=5786d5"
   bin:
@@ -19110,7 +19110,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^7.0.0":
+"vite@npm:7.3.6":
   version: 7.3.6
   resolution: "vite@npm:7.3.6"
   dependencies:
