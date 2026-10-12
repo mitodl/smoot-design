@@ -379,6 +379,13 @@ test("accepts a custom label", () => {
   expect(screen.getByRole("button", { name: "Get help" })).toBeInTheDocument()
 })
 
+test("shows the label as visible text when showLabel is enabled", () => {
+  renderLauncher({ showLabel: true })
+
+  const launcher = screen.getByRole("button", { name: "Contact us" })
+  expect(launcher).toHaveTextContent("Contact us")
+})
+
 test("the launcher is fixed-positioned so it floats over page content", () => {
   renderLauncher()
 

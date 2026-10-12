@@ -4,6 +4,7 @@ import styled from "@emotion/styled"
 import { keyframes } from "@emotion/react"
 import { RiChatAiLine } from "@remixicon/react"
 import { ActionButton } from "../../components/Button/ActionButton"
+import { Button } from "../../components/Button/Button"
 import { AiDrawer } from "../AiDrawer/AiDrawer"
 import type { AiDrawerSettings } from "../AiDrawer/AiDrawer"
 import type { AiChatMessage } from "../../components/AiChat/types"
@@ -11,8 +12,11 @@ import type { AiChatMessage } from "../../components/AiChat/types"
 type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
   settings: Omit<AiDrawerSettings, "title">
-  /** The launcher button's accessible name; the button itself is icon-only. */
+  /** The launcher button's accessible name; the button itself is icon-only
+   * unless showLabel is set, in which case it's also the visible text. */
   label?: string
+  /** Shows the label as visible text next to the icon instead of icon-only. */
+  showLabel?: boolean
   className?: string
 }
 
@@ -46,19 +50,31 @@ const GREETING = [
 // clearly. The label still names it for anyone not reading it visually.
 const LAUNCHER_DIAMETER = "56px"
 
-const LauncherButton = styled(ActionButton)(({ theme }) => ({
-  position: "fixed",
+// Shared between the icon-only circle and the labelled pill below: both float
+// in the same corner and hide (rather than unmount, so focus can return to
+// them on close) while the card covers them.
+const launcherPositionStyles = (theme: { zIndex: { fab: number } }) => ({
+  position: "fixed" as const,
   bottom: CARD_INSET,
   right: CARD_INSET,
   zIndex: theme.zIndex.fab,
+  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.16)",
+  "&[data-open]": {
+    visibility: "hidden" as const,
+  },
+})
+
+const LauncherIconButton = styled(ActionButton)(({ theme }) => ({
+  ...launcherPositionStyles(theme),
   width: LAUNCHER_DIAMETER,
   height: LAUNCHER_DIAMETER,
-  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.16)",
-  // The card lands on top of the launcher. Hiding rather than unmounting keeps
-  // the ref alive so focus can return here on close.
-  "&[data-open]": {
-    visibility: "hidden",
-  },
+}))
+
+// edge="circular" on Button (unlike ActionButton) clips to a pill rather than
+// a circle once there's text content driving the width.
+const LauncherLabelButton = styled(Button)(({ theme }) => ({
+  ...launcherPositionStyles(theme),
+  height: LAUNCHER_DIAMETER,
 }))
 
 const cardEnter = keyframes({
@@ -107,6 +123,7 @@ const CardBody = styled(AiDrawer)({
 const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   settings,
   label = "Contact us",
+  showLabel = false,
   className,
 }) => {
   const [open, setOpen] = useState(false)
@@ -239,18 +256,33 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
 
   return (
     <>
-      <LauncherButton
-        ref={launcherRef}
-        className={className}
-        variant="primary"
-        edge="circular"
-        size="large"
-        aria-label={label}
-        onClick={() => setOpen(true)}
-        data-open={open ? "" : undefined}
-      >
-        <RiChatAiLine />
-      </LauncherButton>
+      {showLabel ? (
+        <LauncherLabelButton
+          ref={launcherRef}
+          className={className}
+          variant="primary"
+          edge="circular"
+          size="large"
+          startIcon={<RiChatAiLine />}
+          onClick={() => setOpen(true)}
+          data-open={open ? "" : undefined}
+        >
+          {label}
+        </LauncherLabelButton>
+      ) : (
+        <LauncherIconButton
+          ref={launcherRef}
+          className={className}
+          variant="primary"
+          edge="circular"
+          size="large"
+          aria-label={label}
+          onClick={() => setOpen(true)}
+          data-open={open ? "" : undefined}
+        >
+          <RiChatAiLine />
+        </LauncherIconButton>
+      )}
       {open ? (
         <PopoverCard ref={cardRef} role="dialog" aria-label={CARD_TITLE}>
           <CardBody
