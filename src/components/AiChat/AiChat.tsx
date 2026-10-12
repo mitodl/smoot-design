@@ -159,6 +159,9 @@ const Message = styled.div(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
   backgroundColor: theme.custom.colors.white,
   ...theme.typography.body2,
+  // A URL or error code has nowhere to break, so without this it runs off the
+  // side and is clipped - there is no horizontal scrollbar to chase it with.
+  overflowWrap: "break-word",
   "p:first-of-type": {
     marginTop: 0,
   },
@@ -486,6 +489,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
         <EntryScreen
           className={classes.entryScreenContainer}
           title={entryScreenTitle}
+          placeholder={placeholder}
           conversationStarters={conversationStarters}
           onPromptSubmit={(prompt, meta) => {
             if (prompt.trim() === "") {
@@ -662,7 +666,10 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                     }
                   }}
                   inputProps={{
-                    "aria-label": t(TRANSLATION_KEYS.aiChat.askQuestion),
+                    // Speech-input users say the label they can see, so the
+                    // name has to follow the placeholder (WCAG 2.5.3).
+                    "aria-label":
+                      placeholder || t(TRANSLATION_KEYS.aiChat.askQuestion),
                   }}
                   disabled={needsProblemSet}
                   endAdornment={
