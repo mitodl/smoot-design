@@ -110,6 +110,15 @@ export const CustomLabel: Story = {
 }
 
 /**
+ * The label renders as visible text beside the icon, as a pill. The accessible
+ * name is the same either way, so this only changes what a sighted user sees.
+ */
+export const ShowLabel: Story = {
+  name: "Label shown",
+  args: { showLabel: true },
+}
+
+/**
  * The support endpoint 500s, so the card shows its error alert. Sending again
  * still starts a fresh thread, since the failed send never opened one.
  */
