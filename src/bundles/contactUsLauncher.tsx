@@ -59,12 +59,6 @@ const init = (
     container.appendChild(reactContainer)
   }
 
-  // Only ours to name. Stamping this on a host's element hijacks their
-  // getElementById, and two launchers in two host divs would share one id.
-  if (containerCreatedByInit && !container.id) {
-    container.id = "smoot-contact-us-root"
-  }
-
   // MUI's Drawer portals out of the StyleIsolation subtree, which breaks the
   // DOM-hierarchy selectors increaseSpecificity emits. Point the portal back
   // inside the isolation root so those selectors match. See aiDrawerManager.

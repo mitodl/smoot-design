@@ -86,6 +86,19 @@ test("leaves a host container's id alone", () => {
   act(() => unmount())
 })
 
+test("two launchers created without a container do not share an id", () => {
+  const first = mount()
+  const second = mount()
+
+  const ids = [first.container.id, second.container.id].filter(Boolean)
+  expect(new Set(ids).size).toBe(ids.length)
+
+  act(() => {
+    first.unmount()
+    second.unmount()
+  })
+})
+
 test("renders the launcher into the host container", () => {
   // The launcher button is icon-only, named by its aria-label rather than
   // visible text, so the host's markup is checked by accessible name.
