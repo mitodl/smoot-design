@@ -27,7 +27,8 @@ const chipComponent: NonNullable<ThemeOptions["components"]>["MuiChip"] = {
         width: "14px",
         height: "14px",
       },
-      margin: "0 -2px 0 8px",
+      /* 4px from the label, and the chip 4px narrower on the cross's side. */
+      margin: "0 -4px 0 4px",
       color: "inherit",
     },
     icon: {
@@ -75,12 +76,12 @@ const chipComponent: NonNullable<ThemeOptions["components"]>["MuiChip"] = {
       props: { variant: "outlined" },
       style: {
         borderColor: colors.silverGrayLight,
-        color: colors.darkGray1,
+        color: colors.darkGray2,
         "&.Mui-focusVisible": {
           backgroundColor: "transparent",
         },
         "&.MuiChip-clickable:hover, &.MuiChip-deletable:hover": {
-          color: colors.darkGray1,
+          color: colors.darkGray2,
           borderColor: colors.silverGrayDark,
           backgroundColor: "transparent", // mui has a default background color for hover
         },
@@ -92,12 +93,12 @@ const chipComponent: NonNullable<ThemeOptions["components"]>["MuiChip"] = {
         backgroundColor: "white",
         border: "1px solid",
         borderColor: colors.silverGrayLight,
-        color: colors.darkGray1,
+        color: colors.darkGray2,
         "&.Mui-focusVisible": {
           backgroundColor: "white",
         },
         "&.MuiChip-clickable:hover, &.MuiChip-deletable:hover": {
-          color: colors.darkGray1,
+          color: colors.darkGray2,
           borderColor: colors.silverGrayDark,
           backgroundColor: "white", // mui has a default background color hover
         },
