@@ -288,6 +288,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           <CardBody
             variant="slot"
             open
+            // The page behind stays usable, and the click-away guard above
+            // keeps a draft when the learner goes to it. Trapping Tab would
+            // leave the keyboard with no way across that didn't close the card.
+            trapFocus={false}
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}

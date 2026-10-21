@@ -227,6 +227,35 @@ test("a click outside leaves the card open once the learner has typed something"
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
+test("lets a keyboard user tab out to the page without losing the draft", async () => {
+  // The same reach for an error code the click-away guard protects, done by
+  // keyboard. AiDrawer's slot variant traps Tab by default, which suits a
+  // drawer that fills the page and not a card floating over a usable one: the
+  // only way across would be Escape, which closes and takes the draft with it.
+  renderLauncher()
+
+  const card = await openCard()
+  const hostButton = document.createElement("button")
+  document.body.appendChild(hostButton)
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  )
+  await user.paste("my video stops at 3:41")
+
+  const tabbable = Array.from(
+    card.querySelectorAll<HTMLElement>("a[href], button, input, textarea"),
+  ).filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled)
+  // Blurring the chat textarea updates MUI state, so this needs act.
+  await act(async () => {
+    tabbable[tabbable.length - 1].focus()
+  })
+  await user.tab()
+
+  expect(card.contains(document.activeElement)).toBe(false)
+  expect(screen.getByRole("dialog")).toBeInTheDocument()
+  hostButton.remove()
+})
+
 test("Escape is ignored while focus sits outside the card", async () => {
   // After a send the card deliberately survives an outside click, so the
   // learner can use the page underneath. Escape aimed at a host dropdown or

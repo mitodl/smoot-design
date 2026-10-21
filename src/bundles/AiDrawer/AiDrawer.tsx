@@ -314,6 +314,14 @@ type AiDrawerProps = {
    * @default "drawer"
    */
   variant?: "drawer" | "slot"
+  /**
+   * Keeps Tab inside the "slot" variant. A card floating over a page the
+   * learner can still use should set this false: otherwise the only way out by
+   * keyboard is Escape, which closes the slot and discards whatever was typed.
+   *
+   * @default true
+   */
+  trapFocus?: boolean
 }
 
 const DEFAULT_FETCH_OPTS: AiDrawerProps["fetchOpts"] = {
@@ -467,6 +475,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   onReturnToBlock,
   onTrackingEvent,
   variant = "drawer",
+  trapFocus = true,
 }: AiDrawerProps) => {
   const { t } = useTranslation()
   const [tab, setTab] = useState("chat")
@@ -538,7 +547,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   // variant is a MUI Modal and traps focus itself. Attached natively so the
   // non-interactive region doesn't take a JSX event listener.
   useEffect(() => {
-    if (!open || variant !== "slot" || !scrollElement) {
+    if (!open || variant !== "slot" || !scrollElement || !trapFocus) {
       return
     }
     const onKeyDown = (event: KeyboardEvent) => {
@@ -576,7 +585,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
     }
     scrollElement.addEventListener("keydown", onKeyDown)
     return () => scrollElement.removeEventListener("keydown", onKeyDown)
-  }, [open, variant, scrollElement])
+  }, [open, variant, scrollElement, trapFocus])
 
   useEffect(() => {
     scrollElement?.scrollTo?.({
