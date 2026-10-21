@@ -469,6 +469,34 @@ test("only the first message of a session clears history", async () => {
   )
 })
 
+test("a reopened card starts a fresh thread", async () => {
+  // Closing and reopening is how a learner files a second request. Continuing
+  // the first thread would put the new request behind the ticket already filed
+  // against it, and the one-ticket-per-conversation guard would read back that
+  // ticket's reference instead of filing another.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  await user.click(screen.getByRole("button", { name: "Close" }))
+
+  await openCard()
+  await sendMessage("my certificate has not arrived")
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "my certificate has not arrived",
+        clear_history: true,
+      }),
+    }),
+  )
+})
+
 test("a retry after a failed send continues the same thread", async () => {
   // learn-ai mints a thread either way when none exists yet (no cookie to read
   // back), so the retry doesn't need a fresh clear_history to get one. Sending
