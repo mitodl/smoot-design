@@ -296,6 +296,21 @@ describe("AiChat", () => {
     ).toBeInTheDocument()
   })
 
+  test("shows the entry screen placeholder rather than only naming the input after it", async () => {
+    // WCAG 2.5.3 is about the name matching text the user can see. Without the
+    // attribute the field looks empty, so there is nothing for a voice-input
+    // user to say and the name above is justified by text that isn't there.
+    setup({
+      entryScreenEnabled: true,
+      initialMessages: [],
+      conversationStarters: [],
+    })
+
+    expect(
+      screen.getByRole("textbox", { name: "Type a message..." }),
+    ).toHaveAttribute("placeholder", "Type a message...")
+  })
+
   test("falls back to the default entry screen input name when no placeholder is given", async () => {
     setup({
       entryScreenEnabled: true,

@@ -149,6 +149,7 @@ const EntryScreen = ({
         multiline
         maxRows={20}
         name="prompt"
+        placeholder={placeholder}
         onChange={onPromptChange}
         inputProps={{
           // Matches the chat screen's input so the name doesn't change out
