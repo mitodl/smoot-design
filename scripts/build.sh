@@ -10,4 +10,5 @@ rm -rf dist &&
 	npm run build:bundles &&
 	npm run build:bundles:legacy &&
 	npm run build:bundles:aiChat &&
-	npm run build:bundles:feedback
+	npm run build:bundles:feedback &&
+	npm run build:bundles:contactUs

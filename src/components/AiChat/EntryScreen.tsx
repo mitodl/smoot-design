@@ -103,6 +103,7 @@ const Starter = styled.button(({ theme }) => ({
 
 type EntryScreenProps = {
   title?: string
+  placeholder?: string
   conversationStarters?: { content: string }[]
   onPromptSubmit: (
     prompt: string,
@@ -116,6 +117,7 @@ type EntryScreenProps = {
 
 const EntryScreen = ({
   title,
+  placeholder,
   conversationStarters,
   className,
   onPromptSubmit,
@@ -147,9 +149,13 @@ const EntryScreen = ({
         multiline
         maxRows={20}
         name="prompt"
+        placeholder={placeholder}
         onChange={onPromptChange}
         inputProps={{
-          "aria-label": t(TRANSLATION_KEYS.aiChat.askQuestion),
+          // Matches the chat screen's input so the name doesn't change out
+          // from under a voice-input user partway through the conversation
+          // (WCAG 2.5.3).
+          "aria-label": placeholder || t(TRANSLATION_KEYS.aiChat.askQuestion),
         }}
         endAdornment={
           <AdornmentButton

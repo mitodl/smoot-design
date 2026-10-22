@@ -21,6 +21,7 @@
     "build:bundles:legacy": "vite build --config vite.config.legacy.mts",
     "build:bundles:aiChat": "vite build --config vite.config.aiChat.mts",
     "build:bundles:feedback": "vite build --config vite.config.feedback.mts",
+    "build:bundles:contactUs": "vite build --config vite.config.contactUs.mts",
     "build:type-augmentation": "cp -r src/type-augmentation dist/type-augmentation",
     "build": "./scripts/build.sh",
     "lint-check": "eslint src/ .storybook/",
@@ -56,6 +57,20 @@
       "default": {
         "types": "./dist/esm/ai.d.ts",
         "default": "./dist/esm/ai.js"
+      }
+    },
+    "./contact-us": {
+      "import": {
+        "types": "./dist/esm/contact-us.d.ts",
+        "default": "./dist/esm/contact-us.js"
+      },
+      "require": {
+        "types": "./dist/cjs/contact-us.d.ts",
+        "default": "./dist/cjs/contact-us.js"
+      },
+      "default": {
+        "types": "./dist/esm/contact-us.d.ts",
+        "default": "./dist/esm/contact-us.js"
       }
     },
     "./type-augmentation": {
