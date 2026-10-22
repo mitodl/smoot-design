@@ -168,9 +168,15 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
    * comes back: learn-ai sets the thread cookie as soon as it answers, even if
    * the stream is then cut off before the client sees it finish, so a retry
    * that cleared history again could abandon a thread that already got a
-   * ticket filed and have the support bot file a second one. Flipping early
-   * costs nothing when the first send simply failed outright - learn-ai mints
-   * a thread for a request with no cookie either way.
+   * ticket filed and have the support bot file a second one.
+   *
+   * The cost is the mirror case, which this deliberately accepts: if a learner
+   * already has a live thread cookie and the very first send dies before
+   * reaching learn-ai, the clear_history it carried never ran, and the retry
+   * sends false against the thread that cookie still names. One boolean cannot
+   * tell that apart from "learn-ai answered and the stream dropped", since
+   * neither reaches the client. Filing one ticket against a stale thread beats
+   * filing two against a live one, so the flag favours the latter.
    */
   const hostPageUrl = settings.chat?.requestBody?.page_url
 
