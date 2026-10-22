@@ -43,7 +43,9 @@ const GREETING = [
 ]
 
 // First fixed-position component in the library. zIndex.fab (1050) keeps it
-// under the MUI Drawer (1200) and Modal (1300) rather than over them.
+// under the MUI Drawer (1200) and Modal (1300) rather than over them. The
+// exception is the full-screen mobile card, which is raised to modal level
+// below the sm breakpoint (see PopoverCard).
 //
 // Icon-only: a floating chat bubble reads as "open a chat" the way the FAB
 // pattern common to chat widgets does, which a text pill doesn't signal as
@@ -107,6 +109,10 @@ const PopoverCard = styled.div(({ theme }) => ({
     height: "auto",
     maxHeight: "none",
     borderRadius: 0,
+    // Covering the viewport makes the card's own header the only way out, so it
+    // has to outrank a host's fixed AppBar (1100) that would otherwise paint
+    // over the Close button. No Escape key on a phone to fall back on.
+    zIndex: theme.zIndex.modal,
   },
 }))
 
@@ -127,7 +133,21 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   className,
 }) => {
   const [open, setOpen] = useState(false)
+  const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const onClose = useCallback(() => setOpen(false), [])
+
+  // Opening hides the launcher and moves focus to the card's heading, whose
+  // outline AiDrawer suppresses unless openedViaKeyboard is set, so a keyboard
+  // open needs the ring back (WCAG 2.4.7). Enter and Space fire a click with
+  // detail 0; a pointer click reports 1 or more.
+  const onLauncherClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      setOpenedViaKeyboard(event.detail === 0)
+      setOpen(true)
+    },
+    [],
+  )
+
   const cardRef = useRef<HTMLDivElement>(null)
   const launcherRef = useRef<HTMLButtonElement>(null)
   const wasOpen = useRef(false)
@@ -264,7 +284,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           edge="circular"
           size="large"
           startIcon={<RiChatAiLine />}
-          onClick={() => setOpen(true)}
+          onClick={onLauncherClick}
           data-open={open ? "" : undefined}
         >
           {label}
@@ -277,7 +297,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           edge="circular"
           size="large"
           aria-label={label}
-          onClick={() => setOpen(true)}
+          onClick={onLauncherClick}
           data-open={open ? "" : undefined}
         >
           <RiChatAiLine />
@@ -292,6 +312,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             // keeps a draft when the learner goes to it. Trapping Tab would
             // leave the keyboard with no way across that didn't close the card.
             trapFocus={false}
+            openedViaKeyboard={openedViaKeyboard}
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}

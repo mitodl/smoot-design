@@ -71,6 +71,23 @@ const openCard = async () => {
 const transcript = (card: HTMLElement) =>
   card.querySelector('[data-chat-role="assistant"]')
 
+// jsdom never applies media queries to getComputedStyle, so the only way to see
+// what the breakpoint declares is to read Emotion's injected rule back.
+const mobileStyle = (element: HTMLElement) => {
+  const classes = Array.from(element.classList)
+  for (const sheet of Array.from(document.styleSheets)) {
+    for (const rule of Array.from(sheet.cssRules)) {
+      const isCardBreakpoint =
+        rule.cssText.includes("max-width:599.95px") &&
+        classes.some((name) => rule.cssText.includes(name))
+      if (isCardBreakpoint) {
+        return (rule as CSSMediaRule).cssRules[0] as CSSStyleRule
+      }
+    }
+  }
+  return null
+}
+
 test("renders a labelled launcher button and no card until clicked", () => {
   renderLauncher()
 
@@ -169,6 +186,18 @@ test("opens as a card anchored in the corner, not a full-height drawer", async (
   expect(style.right).toBe("24px")
   expect(style.width).toBe("400px")
   expect(style.height).toBe("560px")
+})
+
+test("the full-screen mobile card sits above fixed host chrome", async () => {
+  // Full screen, so the card's own header holds the only way out. At fab + 1
+  // (1051) a host's fixed AppBar (zIndex.appBar, 1100) paints over the heading
+  // and the Close button, and a phone has no Escape key to fall back on.
+  renderLauncher()
+
+  const style = mobileStyle(await openCard())?.style
+
+  expect(style?.getPropertyValue("inset")).toBe("0")
+  expect(style?.getPropertyValue("z-index")).toBe("1300")
 })
 
 test("scrolls the card body once the conversation outgrows the card", async () => {
@@ -400,6 +429,40 @@ test("returns focus to the launcher when the card closes", async () => {
   await user.click(screen.getByRole("button", { name: "Close" }))
 
   expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+})
+
+test.each([
+  { showLabel: false, variant: "icon-only" },
+  { showLabel: true, variant: "labelled" },
+])(
+  "a keyboard open leaves a visible focus ring on the $variant launcher's card",
+  async ({ showLabel }) => {
+    // Opening moves focus to the card's heading and hides the launcher. The
+    // heading's outline is suppressed unless data-focus-ring is set, so without
+    // this a keyboard user has no focus indicator anywhere (WCAG 2.4.7).
+    renderLauncher({ showLabel })
+
+    await user.tab()
+    expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+    await user.keyboard("{Enter}")
+
+    const heading = within(await screen.findByRole("dialog")).getByRole(
+      "heading",
+      { level: 1 },
+    )
+    expect(heading).toHaveFocus()
+    expect(heading).toHaveAttribute("data-focus-ring")
+  },
+)
+
+test("a mouse open leaves no focus ring", async () => {
+  // The ring is for keyboard users; a pointer open would just show an outline
+  // nobody asked for.
+  renderLauncher()
+
+  const heading = within(await openCard()).getByRole("heading", { level: 1 })
+
+  expect(heading).not.toHaveAttribute("data-focus-ring")
 })
 
 test("accepts a custom label", () => {
