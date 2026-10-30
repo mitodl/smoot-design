@@ -289,15 +289,28 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       return
     }
     const card = cardRef.current
-    const hidden = Array.from(document.body.children).filter(
-      (element): element is HTMLElement =>
-        element instanceof HTMLElement &&
-        !element.contains(card) &&
-        !element.hasAttribute(KEEP_INTERACTIVE) &&
-        // Leave the host's own inert alone; clearing it on close would hand
-        // back interactivity the host had deliberately taken away.
-        !element.hasAttribute("inert"),
-    )
+    // The card is only a child of body when the host lets us create our own
+    // container. Mounted into the host's tree, the page behind is the siblings
+    // of each ancestor up to body, so walk the whole way.
+    const hidden: HTMLElement[] = []
+    for (
+      let node = card as Element | null;
+      node && node !== document.body;
+      node = node.parentElement
+    ) {
+      const siblings = Array.from(node.parentElement?.children ?? [])
+      hidden.push(
+        ...siblings.filter(
+          (element): element is HTMLElement =>
+            element !== node &&
+            element instanceof HTMLElement &&
+            !element.hasAttribute(KEEP_INTERACTIVE) &&
+            // Leave the host's own inert alone; clearing it on close would hand
+            // back interactivity the host had deliberately taken away.
+            !element.hasAttribute("inert"),
+        ),
+      )
+    }
     hidden.forEach((element) => element.setAttribute("inert", ""))
     const hostOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"

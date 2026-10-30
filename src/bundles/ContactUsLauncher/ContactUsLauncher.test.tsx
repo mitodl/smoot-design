@@ -260,6 +260,25 @@ test("gives the page back when the mobile card closes", async () => {
   expect(host).not.toHaveAttribute("inert")
 })
 
+test("takes the page behind out of order when mounted inside the host's tree", async () => {
+  // init({ container }) renders into the host's own element, so the page
+  // behind is the siblings of each ancestor up to body, not body's children.
+  setViewportWidth(MOBILE_WIDTH)
+  const appRoot = hostElement()
+  const content = document.createElement("div")
+  const mountPoint = document.createElement("div")
+  appRoot.append(content, mountPoint)
+  render(<ContactUsLauncher settings={SETTINGS} />, {
+    wrapper: ThemeProvider,
+    container: mountPoint,
+  })
+
+  await openCard()
+
+  expect(content).toHaveAttribute("inert")
+  expect(appRoot).not.toHaveAttribute("inert")
+})
+
 test("leaves the page reachable behind the desktop card", async () => {
   const host = hostElement()
   renderLauncher()

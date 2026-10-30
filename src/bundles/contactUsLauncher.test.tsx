@@ -130,6 +130,9 @@ test("does not trap the launcher in its own stacking context", () => {
       .filter((text) => hashed.some((name) => text.includes(name))),
   )
 
+  // contain: style proves the lookup found the root's own rule, so the
+  // assertion above is about the isolate being gone, not the rule being missed.
+  expect(rules.join("")).toContain("contain: style")
   expect(rules.join("")).not.toContain("isolation: isolate")
   act(() => unmount())
 })

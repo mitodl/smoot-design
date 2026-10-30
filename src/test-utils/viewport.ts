@@ -7,8 +7,10 @@
 
 const DEFAULT_WIDTH = 1024
 
+type Listener = (event: MediaQueryListEvent) => void
+
 let width = DEFAULT_WIDTH
-const listeners = new Set<(event: MediaQueryListEvent) => void>()
+const subscribers = new Set<{ query: string; listener: Listener }>()
 
 const readFeature = (query: string, feature: string) => {
   const match = new RegExp(`\\(\\s*${feature}\\s*:\\s*([\\d.]+)px\\s*\\)`).exec(
@@ -20,16 +22,25 @@ const readFeature = (query: string, feature: string) => {
 const evaluate = (query: string) => {
   const max = readFeature(query, "max-width")
   const min = readFeature(query, "min-width")
+  // Fail closed. Only width is modelled here, so reporting a match for
+  // something like (prefers-reduced-motion: reduce) would be a guess.
+  if (max === null && min === null) {
+    return false
+  }
   return (max === null || width <= max) && (min === null || width >= min)
 }
 
 const installMatchMedia = () => {
   window.matchMedia = (query: string): MediaQueryList => {
-    const subscribe = (listener: (event: MediaQueryListEvent) => void) => {
-      listeners.add(listener)
+    const subscribe = (listener: Listener) => {
+      subscribers.add({ query, listener })
     }
-    const unsubscribe = (listener: (event: MediaQueryListEvent) => void) => {
-      listeners.delete(listener)
+    const unsubscribe = (listener: Listener) => {
+      subscribers.forEach((entry) => {
+        if (entry.query === query && entry.listener === listener) {
+          subscribers.delete(entry)
+        }
+      })
     }
     return {
       // A getter, not a snapshot: useMediaQuery reads `matches` on every render
@@ -40,9 +51,9 @@ const installMatchMedia = () => {
       media: query,
       onchange: null,
       addEventListener: (_type: string, listener: EventListener) =>
-        subscribe(listener as (event: MediaQueryListEvent) => void),
+        subscribe(listener as Listener),
       removeEventListener: (_type: string, listener: EventListener) =>
-        unsubscribe(listener as (event: MediaQueryListEvent) => void),
+        unsubscribe(listener as Listener),
       addListener: subscribe,
       removeListener: unsubscribe,
       dispatchEvent: () => true,
@@ -52,14 +63,14 @@ const installMatchMedia = () => {
 
 const setViewportWidth = (next: number) => {
   width = next
-  listeners.forEach((listener) =>
-    listener({ matches: true, media: "" } as MediaQueryListEvent),
+  subscribers.forEach(({ query, listener }) =>
+    listener({ matches: evaluate(query), media: query } as MediaQueryListEvent),
   )
 }
 
 const resetViewport = () => {
   width = DEFAULT_WIDTH
-  listeners.clear()
+  subscribers.clear()
 }
 
-export { installMatchMedia, setViewportWidth, resetViewport, DEFAULT_WIDTH }
+export { installMatchMedia, setViewportWidth, resetViewport }

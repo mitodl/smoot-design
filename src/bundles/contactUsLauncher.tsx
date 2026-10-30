@@ -1,6 +1,9 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { ContactUsLauncher } from "./ContactUsLauncher/ContactUsLauncher"
+import {
+  ContactUsLauncher,
+  KEEP_INTERACTIVE,
+} from "./ContactUsLauncher/ContactUsLauncher"
 import type { ContactUsLauncherProps } from "./ContactUsLauncher/ContactUsLauncher"
 import {
   ThemeProvider,
@@ -119,4 +122,4 @@ const init = (
   }
 }
 
-export { init }
+export { init, KEEP_INTERACTIVE }
