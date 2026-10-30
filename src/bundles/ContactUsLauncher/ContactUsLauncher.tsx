@@ -29,9 +29,10 @@ const CARD_TITLE = "AskTIM"
 const CARD_BADGE = "AI ASSISTANT"
 
 /**
- * Opt a top-level host element out of being made `inert` while the full-screen
- * mobile card is open. For hosts that portal their own overlays into `body`:
- * without this their portal root is frozen behind a card it renders over.
+ * Opt a host element out of being made `inert` while the full-screen mobile
+ * card is open. Honoured at any depth. For hosts that portal their own
+ * overlays: without this their portal root is frozen behind a card it
+ * renders over.
  */
 const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 

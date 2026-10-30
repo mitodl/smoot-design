@@ -105,7 +105,8 @@ type Story = StoryObj<typeof ContactUsLauncher>
  * Narrow the canvas below 600px and the card goes full screen. It becomes a
  * modal at that point: the page behind is made `inert` and stops scrolling,
  * since none of it is visible or reachable. Host elements carrying the
- * `KEEP_INTERACTIVE` attribute are left alone.
+ * `KEEP_INTERACTIVE` attribute (`data-contact-us-keep-interactive`) are left
+ * alone, at any depth.
  */
 export const Default: Story = {}
 
