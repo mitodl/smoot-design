@@ -6,9 +6,7 @@ import type { MutableRefObject, ForwardedRef, RefCallback } from "react"
  */
 const composeRefs = <T>(
   ...refs: (
-    | ForwardedRef<T>
-    | MutableRefObject<T | undefined>
-    | RefCallback<T>
+    ForwardedRef<T> | MutableRefObject<T | undefined> | RefCallback<T>
   )[]
 ): RefCallback<T> => {
   return (value) => {
