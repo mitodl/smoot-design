@@ -101,6 +101,12 @@ type Story = StoryObj<typeof ContactUsLauncher>
  * canvas rather than in the flow of the story. Click it to open the card,
  * describe a problem, then give an address. The card shows what it will send
  * before anything is filed; reply "send" (or add more) to get the reference.
+ *
+ * Narrow the canvas below 600px and the card goes full screen. It becomes a
+ * modal at that point: the page behind is made `inert` and stops scrolling,
+ * since none of it is visible or reachable. Host elements carrying the
+ * `KEEP_INTERACTIVE` attribute (`data-contact-us-keep-interactive`) are left
+ * alone, at any depth.
  */
 export const Default: Story = {}
 

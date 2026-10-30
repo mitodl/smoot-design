@@ -1,6 +1,7 @@
 import * as React from "react"
 import { act, within } from "@testing-library/react"
 import { init } from "./contactUsLauncher"
+import { ISOLATION_CLASS_NAME } from "../components/StyleIsolation/increaseSpecificityPlugin"
 
 jest.mock("../components/AiChat/Markdown", () => ({
   __esModule: true,
@@ -109,5 +110,29 @@ test("renders the launcher into the host container", () => {
   expect(
     within(container).getByRole("button", { name: "Contact us" }),
   ).toBeInTheDocument()
+  act(() => unmount())
+})
+
+// An isolation root that makes its own stacking context sits at z-index auto in
+// the host page, so a host sticky header or cookie banner paints over the
+// launcher and zIndex.fab cannot raise it (#276).
+test("does not trap the launcher in its own stacking context", () => {
+  const container = hostContainer()
+  const { unmount } = mount(container)
+  const button = within(container).getByRole("button", { name: "Contact us" })
+  const root = button.closest(`.${ISOLATION_CLASS_NAME}`) as HTMLElement
+  const hashed = Array.from(root.classList).filter(
+    (name) => name !== ISOLATION_CLASS_NAME,
+  )
+  const rules = Array.from(document.styleSheets).flatMap((sheet) =>
+    Array.from(sheet.cssRules)
+      .map((rule) => rule.cssText)
+      .filter((text) => hashed.some((name) => text.includes(name))),
+  )
+
+  // contain: style proves the lookup found the root's own rule, so the
+  // assertion above is about the isolate being gone, not the rule being missed.
+  expect(rules.join("")).toContain("contain: style")
+  expect(rules.join("")).not.toContain("isolation: isolate")
   act(() => unmount())
 })

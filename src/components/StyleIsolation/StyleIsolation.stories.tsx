@@ -229,6 +229,59 @@ export const ComplexParentSelectors: Story = {
 }
 
 /**
+ * By default the container is its own stacking context, which sits at
+ * `z-index: auto` in the host page. Nothing inside can then paint over host
+ * content stacked above it, however high its own z-index. Pass
+ * `isolateStacking={false}` when a child has to outrank host chrome; the
+ * resets above are unaffected, since the protection comes from their
+ * specificity rather than from the stacking context.
+ */
+export const StackingContext: Story = {
+  render: () => {
+    const Page = styled.div({ position: "relative", height: "260px" })
+
+    const HostChrome = styled.div({
+      position: "absolute",
+      insetInline: 0,
+      top: "100px",
+      height: "48px",
+      zIndex: 1100,
+      background: "#333",
+      color: "white",
+      display: "grid",
+      placeItems: "center",
+    })
+
+    const Overlay = styled.div({
+      position: "absolute",
+      top: "76px",
+      width: "280px",
+      height: "96px",
+      zIndex: 1300,
+      padding: "8px",
+      boxSizing: "border-box",
+      background: "orange",
+    })
+
+    return (
+      <Page>
+        <StyleIsolation>
+          <Overlay style={{ left: 0 }}>
+            Default: trapped behind the host bar
+          </Overlay>
+        </StyleIsolation>
+        <StyleIsolation isolateStacking={false}>
+          <Overlay style={{ left: "300px" }}>
+            isolateStacking=false: paints over it
+          </Overlay>
+        </StyleIsolation>
+        <HostChrome>Host chrome, z-index 1100</HostChrome>
+      </Page>
+    )
+  },
+}
+
+/**
  * Demonstrates styled component overrides with custom resets.
  *
  * Custom resets get increased specificity through StyleIsolation's Stylis plugin,

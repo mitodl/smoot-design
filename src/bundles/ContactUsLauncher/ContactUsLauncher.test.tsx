@@ -3,8 +3,9 @@ import { act, render, screen, within } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { setupServer } from "msw/node"
 import { http, HttpResponse } from "msw"
-import { ContactUsLauncher } from "./ContactUsLauncher"
+import { ContactUsLauncher, KEEP_INTERACTIVE } from "./ContactUsLauncher"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
+import { setViewportWidth } from "../../test-utils/viewport"
 
 jest.mock("../../components/AiChat/Markdown", () => ({
   __esModule: true,
@@ -65,6 +66,27 @@ const openCard = async () => {
   await user.click(screen.getByRole("button", { name: "Contact us" }))
   return screen.findByRole("dialog", { name: "AskTIM" })
 }
+
+const closeCard = () =>
+  user.click(screen.getByRole("button", { name: "Close" }))
+
+const MOBILE_WIDTH = 375
+
+const hostElements: HTMLElement[] = []
+
+const hostElement = (attributes: Record<string, string> = {}) => {
+  const element = document.createElement("div")
+  Object.entries(attributes).forEach(([name, value]) =>
+    element.setAttribute(name, value),
+  )
+  document.body.appendChild(element)
+  hostElements.push(element)
+  return element
+}
+
+afterEach(() => {
+  hostElements.splice(0).forEach((element) => element.remove())
+})
 
 // AiChat repeats every message in an aria-live region, so text queries match
 // twice. The transcript is the copy the learner reads.
@@ -198,6 +220,137 @@ test("the full-screen mobile card sits above fixed host chrome", async () => {
 
   expect(style?.getPropertyValue("inset")).toBe("0")
   expect(style?.getPropertyValue("z-index")).toBe("1300")
+})
+
+test("announces the full-screen mobile card as a modal", async () => {
+  // It covers the viewport, so a screen reader that keeps browsing the page
+  // underneath is reading content the learner cannot see or reach.
+  setViewportWidth(MOBILE_WIDTH)
+  renderLauncher()
+
+  expect(await openCard()).toHaveAttribute("aria-modal", "true")
+})
+
+test("leaves the desktop card non-modal", async () => {
+  // It floats over a page that stays usable, and the click-away guard depends
+  // on the learner being able to reach it.
+  renderLauncher()
+
+  expect(await openCard()).not.toHaveAttribute("aria-modal", "true")
+})
+
+test("takes the page behind the mobile card out of the tab and reading order", async () => {
+  setViewportWidth(MOBILE_WIDTH)
+  const host = hostElement()
+  renderLauncher()
+
+  await openCard()
+
+  expect(host).toHaveAttribute("inert")
+})
+
+test("gives the page back when the mobile card closes", async () => {
+  setViewportWidth(MOBILE_WIDTH)
+  const host = hostElement()
+  renderLauncher()
+
+  await openCard()
+  await closeCard()
+
+  expect(host).not.toHaveAttribute("inert")
+})
+
+test("takes the page behind out of order when mounted inside the host's tree", async () => {
+  // init({ container }) renders into the host's own element, so the page
+  // behind is the siblings of each ancestor up to body, not body's children.
+  setViewportWidth(MOBILE_WIDTH)
+  const appRoot = hostElement()
+  const content = document.createElement("div")
+  const mountPoint = document.createElement("div")
+  appRoot.append(content, mountPoint)
+  render(<ContactUsLauncher settings={SETTINGS} />, {
+    wrapper: ThemeProvider,
+    container: mountPoint,
+  })
+
+  await openCard()
+
+  expect(content).toHaveAttribute("inert")
+  expect(appRoot).not.toHaveAttribute("inert")
+})
+
+test("leaves the page reachable behind the desktop card", async () => {
+  const host = hostElement()
+  renderLauncher()
+
+  await openCard()
+
+  expect(host).not.toHaveAttribute("inert")
+})
+
+test("spares host elements marked as staying interactive", async () => {
+  // A host whose overlays portal into body needs a way to keep its own root
+  // reachable; inerting it would freeze whatever it renders over us.
+  setViewportWidth(MOBILE_WIDTH)
+  const host = hostElement({ [KEEP_INTERACTIVE]: "" })
+  renderLauncher()
+
+  await openCard()
+
+  expect(host).not.toHaveAttribute("inert")
+})
+
+test("leaves inert the host set itself", async () => {
+  // Clearing everything on close would hand back interactivity the host had
+  // deliberately taken away.
+  setViewportWidth(MOBILE_WIDTH)
+  const host = hostElement({ inert: "" })
+  renderLauncher()
+
+  await openCard()
+  await closeCard()
+
+  expect(host).toHaveAttribute("inert")
+})
+
+test("stops the page behind scrolling under the mobile card", async () => {
+  // Touch scrolling that reaches the page underneath moves content the card
+  // covers, and the learner gets back to a page scrolled somewhere else.
+  setViewportWidth(MOBILE_WIDTH)
+  renderLauncher()
+
+  await openCard()
+
+  expect(document.body.style.overflow).toBe("hidden")
+})
+
+test("restores the host's own overflow when the mobile card closes", async () => {
+  setViewportWidth(MOBILE_WIDTH)
+  document.body.style.overflow = "auto"
+  renderLauncher()
+
+  await openCard()
+  await closeCard()
+
+  expect(document.body.style.overflow).toBe("auto")
+  document.body.style.overflow = ""
+})
+
+test("drops the modal semantics when the viewport grows past the breakpoint", async () => {
+  // Rotating a phone, or the card outliving a resize on a tablet, leaves a
+  // corner card with the whole page behind it inert.
+  setViewportWidth(MOBILE_WIDTH)
+  const host = hostElement()
+  renderLauncher()
+  const card = await openCard()
+
+  await act(async () => {
+    setViewportWidth(1024)
+  })
+
+  expect(card).not.toHaveAttribute("aria-modal", "true")
+  expect(host).not.toHaveAttribute("inert")
+  expect(document.body.style.overflow).toBe("")
 })
 
 test("scrolls the card body once the conversation outgrows the card", async () => {

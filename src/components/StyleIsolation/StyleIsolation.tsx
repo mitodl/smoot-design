@@ -38,6 +38,15 @@ type StyleIsolationProps = {
    * ```
    */
   customResets?: Record<string, CSSObject>
+  /**
+   * Whether the container creates its own stacking context. Defaults to true.
+   *
+   * The context it creates sits at `z-index: auto` in the host page, so a host
+   * element at any higher level paints over everything inside and no z-index
+   * within can raise it. A fixed-position child that has to outrank host
+   * content needs this off, so its own z-index competes in the host page.
+   */
+  isolateStacking?: boolean
 }
 
 /**
@@ -69,8 +78,9 @@ type StyleIsolationProps = {
  */
 const StyleIsolationRoot = styled.div<{
   customResets?: Record<string, CSSObject>
+  isolateStacking?: boolean
   sx?: CSSObject
-}>(({ customResets, sx }) => {
+}>(({ customResets, isolateStacking = true, sx }) => {
   const baseStyles: CSSObject = {
     /* CSS Containment: contain: "style"
      *
@@ -91,20 +101,16 @@ const StyleIsolationRoot = styled.div<{
 
     /* CSS Isolation: isolation: "isolate"
      *
-     * Creates a new stacking context and isolates the element from its siblings
-     * in terms of z-index and positioning. More importantly for our use case,
-     * it creates a new containing block for positioned descendants.
+     * Creates a new stacking context, so z-indexes set inside order only
+     * against each other rather than against host page content. It does NOT
+     * create a containing block -- `position: fixed` descendants still resolve
+     * against the viewport.
      *
-     * Benefits:
-     * - Creates a new stacking context (useful for z-index isolation)
-     * - Helps with positioning context isolation
-     * - Works together with contain: "style" for better isolation
-     *
-     * Note: This is primarily for layout/positioning isolation, but complements
-     * contain: "style" for comprehensive isolation. The real protection against
-     * parent CSS comes from the && high-specificity selectors below.
+     * The real protection against parent CSS comes from the && high-specificity
+     * selectors below, not from this. Turn it off (isolateStacking={false})
+     * when a child has to outrank host content; see the prop docs above.
      */
-    isolation: "isolate",
+    ...(isolateStacking ? { isolation: "isolate" as const } : {}),
   }
 
   // Build resets for common elements
@@ -225,7 +231,7 @@ const StyleIsolationRoot = styled.div<{
 })
 
 const StyleIsolation = React.forwardRef<HTMLDivElement, StyleIsolationProps>(
-  ({ children, className, customResets }, ref) => {
+  ({ children, className, customResets, isolateStacking }, ref) => {
     /* Create an Emotion cache with the Stylis plugin that increases specificity
      * for all styles within the isolation container.
      * Include prefixer to preserve Emotion's default vendor prefixing behavior.
@@ -249,6 +255,7 @@ const StyleIsolation = React.forwardRef<HTMLDivElement, StyleIsolationProps>(
               : ISOLATION_CLASS_NAME
           }
           customResets={customResets}
+          isolateStacking={isolateStacking}
         >
           {children}
         </StyleIsolationRoot>
