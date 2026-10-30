@@ -90,7 +90,7 @@ const init = (
 
   const root = createRoot(reactContainer)
   root.render(
-    <StyleIsolation ref={isolationRootRef}>
+    <StyleIsolation ref={isolationRootRef} isolateStacking={false}>
       <ThemeProvider theme={theme}>
         <TranslationProvider translations={translations ?? null}>
           <ContactUsLauncher {...launcherProps} />

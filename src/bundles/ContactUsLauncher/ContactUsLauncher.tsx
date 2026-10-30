@@ -1,7 +1,8 @@
 import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
-import { keyframes } from "@emotion/react"
+import { keyframes, useTheme } from "@emotion/react"
+import useMediaQuery from "@mui/material/useMediaQuery"
 import { RiChatAiLine } from "@remixicon/react"
 import { ActionButton } from "../../components/Button/ActionButton"
 import { Button } from "../../components/Button/Button"
@@ -26,6 +27,13 @@ const CARD_INSET = "24px"
 const CARD_TITLE = "AskTIM"
 
 const CARD_BADGE = "AI ASSISTANT"
+
+/**
+ * Opt a top-level host element out of being made `inert` while the full-screen
+ * mobile card is open. For hosts that portal their own overlays into `body`:
+ * without this their portal root is frozen behind a card it renders over.
+ */
+const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
@@ -136,6 +144,11 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const onClose = useCallback(() => setOpen(false), [])
 
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
+    noSsr: true,
+  })
+
   // Opening hides the launcher and moves focus to the card's heading, whose
   // outline AiDrawer suppresses unless openedViaKeyboard is set, so a keyboard
   // open needs the ring back (WCAG 2.4.7). Enter and Space fire a click with
@@ -220,7 +233,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     return Boolean(field?.value.trim())
   }, [])
 
-  // The card is non-modal, so there is no backdrop to catch these.
+  // The desktop card is non-modal, so there is no backdrop to catch these.
   useEffect(() => {
     if (!open) {
       return
@@ -267,6 +280,33 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     }
   }, [open, hasDraft])
 
+  // The full-screen card leaves nothing of the page visible or reachable, so
+  // everything behind it is hidden rather than left for a screen reader or the
+  // Tab key to wander into. This is also what keeps focus in the card below the
+  // breakpoint, since browsers skip inert content.
+  useEffect(() => {
+    if (!open || !fullScreen) {
+      return
+    }
+    const card = cardRef.current
+    const hidden = Array.from(document.body.children).filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement &&
+        !element.contains(card) &&
+        !element.hasAttribute(KEEP_INTERACTIVE) &&
+        // Leave the host's own inert alone; clearing it on close would hand
+        // back interactivity the host had deliberately taken away.
+        !element.hasAttribute("inert"),
+    )
+    hidden.forEach((element) => element.setAttribute("inert", ""))
+    const hostOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      hidden.forEach((element) => element.removeAttribute("inert"))
+      document.body.style.overflow = hostOverflow
+    }
+  }, [open, fullScreen])
+
   // Runs after the re-render that makes the launcher visible again (WCAG 2.4.3).
   useEffect(() => {
     if (wasOpen.current && !open) {
@@ -310,13 +350,20 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         </LauncherIconButton>
       )}
       {open ? (
-        <PopoverCard ref={cardRef} role="dialog" aria-label={CARD_TITLE}>
+        <PopoverCard
+          ref={cardRef}
+          role="dialog"
+          aria-label={CARD_TITLE}
+          aria-modal={fullScreen || undefined}
+        >
           <CardBody
             variant="slot"
             open
-            // The page behind stays usable, and the click-away guard above
-            // keeps a draft when the learner goes to it. Trapping Tab would
-            // leave the keyboard with no way across that didn't close the card.
+            // On desktop the page behind stays usable, and the click-away
+            // guard above keeps a draft when the learner goes to it. Trapping
+            // Tab would leave the keyboard with no way across that didn't
+            // close the card. Full screen there is nothing to cross to: the
+            // inert page behind already keeps Tab in the card.
             trapFocus={false}
             openedViaKeyboard={openedViaKeyboard}
             onClose={onClose}
@@ -329,5 +376,5 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   )
 }
 
-export { ContactUsLauncher }
+export { ContactUsLauncher, KEEP_INTERACTIVE }
 export type { ContactUsLauncherProps }
