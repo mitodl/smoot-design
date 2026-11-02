@@ -86,6 +86,7 @@ const hostElement = (attributes: Record<string, string> = {}) => {
 
 afterEach(() => {
   hostElements.splice(0).forEach((element) => element.remove())
+  document.body.style.overflow = ""
 })
 
 // AiChat repeats every message in an aria-live region, so text queries match
@@ -333,7 +334,32 @@ test("restores the host's own overflow when the mobile card closes", async () =>
   await closeCard()
 
   expect(document.body.style.overflow).toBe("auto")
-  document.body.style.overflow = ""
+})
+
+test("returns focus to the launcher when the full-screen card closes", async () => {
+  // The launcher is itself one of the siblings the sweep inerts, so focus can
+  // only land back on it because React runs every cleanup before any effect.
+  setViewportWidth(MOBILE_WIDTH)
+  renderLauncher()
+
+  await openCard()
+  await closeCard()
+
+  expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+})
+
+test("applies the modal semantics when the viewport shrinks past the breakpoint", async () => {
+  const host = hostElement()
+  renderLauncher()
+  const card = await openCard()
+
+  await act(async () => {
+    setViewportWidth(MOBILE_WIDTH)
+  })
+
+  expect(card).toHaveAttribute("aria-modal", "true")
+  expect(host).toHaveAttribute("inert")
+  expect(document.body.style.overflow).toBe("hidden")
 })
 
 test("drops the modal semantics when the viewport grows past the breakpoint", async () => {

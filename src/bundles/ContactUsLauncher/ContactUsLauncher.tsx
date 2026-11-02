@@ -30,9 +30,10 @@ const CARD_BADGE = "AI ASSISTANT"
 
 /**
  * Opt a host element out of being made `inert` while the full-screen mobile
- * card is open. Honoured at any depth. For hosts that portal their own
- * overlays: without this their portal root is frozen behind a card it
- * renders over.
+ * card is open. For hosts that portal their own overlays: without this their
+ * portal root is frozen behind a card it renders over. Put it on the element
+ * itself -- `inert` inherits, so marking a descendant of one the sweep
+ * reaches does nothing.
  */
 const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 

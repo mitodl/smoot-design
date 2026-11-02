@@ -106,7 +106,7 @@ type Story = StoryObj<typeof ContactUsLauncher>
  * modal at that point: the page behind is made `inert` and stops scrolling,
  * since none of it is visible or reachable. Host elements carrying the
  * `KEEP_INTERACTIVE` attribute (`data-contact-us-keep-interactive`) are left
- * alone, at any depth.
+ * alone.
  */
 export const Default: Story = {}
 
