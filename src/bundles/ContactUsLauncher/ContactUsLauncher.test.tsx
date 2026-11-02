@@ -224,8 +224,6 @@ test("the full-screen mobile card sits above fixed host chrome", async () => {
 })
 
 test("announces the full-screen mobile card as a modal", async () => {
-  // It covers the viewport, so a screen reader that keeps browsing the page
-  // underneath is reading content the learner cannot see or reach.
   setViewportWidth(MOBILE_WIDTH)
   renderLauncher()
 
@@ -233,8 +231,6 @@ test("announces the full-screen mobile card as a modal", async () => {
 })
 
 test("leaves the desktop card non-modal", async () => {
-  // It floats over a page that stays usable, and the click-away guard depends
-  // on the learner being able to reach it.
   renderLauncher()
 
   expect(await openCard()).not.toHaveAttribute("aria-modal", "true")
@@ -262,8 +258,6 @@ test("gives the page back when the mobile card closes", async () => {
 })
 
 test("takes the page behind out of order when mounted inside the host's tree", async () => {
-  // init({ container }) renders into the host's own element, so the page
-  // behind is the siblings of each ancestor up to body, not body's children.
   setViewportWidth(MOBILE_WIDTH)
   const appRoot = hostElement()
   const content = document.createElement("div")
@@ -290,8 +284,6 @@ test("leaves the page reachable behind the desktop card", async () => {
 })
 
 test("spares host elements marked as staying interactive", async () => {
-  // A host whose overlays portal into body needs a way to keep its own root
-  // reachable; inerting it would freeze whatever it renders over us.
   setViewportWidth(MOBILE_WIDTH)
   const host = hostElement({ [KEEP_INTERACTIVE]: "" })
   renderLauncher()
@@ -302,8 +294,6 @@ test("spares host elements marked as staying interactive", async () => {
 })
 
 test("leaves inert the host set itself", async () => {
-  // Clearing everything on close would hand back interactivity the host had
-  // deliberately taken away.
   setViewportWidth(MOBILE_WIDTH)
   const host = hostElement({ inert: "" })
   renderLauncher()
@@ -315,8 +305,6 @@ test("leaves inert the host set itself", async () => {
 })
 
 test("stops the page behind scrolling under the mobile card", async () => {
-  // Touch scrolling that reaches the page underneath moves content the card
-  // covers, and the learner gets back to a page scrolled somewhere else.
   setViewportWidth(MOBILE_WIDTH)
   renderLauncher()
 
@@ -363,8 +351,6 @@ test("applies the modal semantics when the viewport shrinks past the breakpoint"
 })
 
 test("drops the modal semantics when the viewport grows past the breakpoint", async () => {
-  // Rotating a phone, or the card outliving a resize on a tablet, leaves a
-  // corner card with the whole page behind it inert.
   setViewportWidth(MOBILE_WIDTH)
   const host = hostElement()
   renderLauncher()

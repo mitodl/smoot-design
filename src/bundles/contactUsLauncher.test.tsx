@@ -113,9 +113,8 @@ test("renders the launcher into the host container", () => {
   act(() => unmount())
 })
 
-// An isolation root that makes its own stacking context sits at z-index auto in
-// the host page, so a host sticky header or cookie banner paints over the
-// launcher and zIndex.fab cannot raise it (#276).
+// A root with its own stacking context sits at z-index auto in the host page, so
+// a host sticky header paints over the launcher and zIndex.fab cannot raise it.
 test("does not trap the launcher in its own stacking context", () => {
   const container = hostContainer()
   const { unmount } = mount(container)
@@ -130,8 +129,8 @@ test("does not trap the launcher in its own stacking context", () => {
       .filter((text) => hashed.some((name) => text.includes(name))),
   )
 
-  // contain: style proves the lookup found the root's own rule, so the
-  // assertion above is about the isolate being gone, not the rule being missed.
+  // contain: style proves the lookup found the root's own rule, so the next
+  // assertion is about the isolate being gone, not the rule being missed.
   expect(rules.join("")).toContain("contain: style")
   expect(rules.join("")).not.toContain("isolation: isolate")
   act(() => unmount())

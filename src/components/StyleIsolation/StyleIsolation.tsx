@@ -101,14 +101,9 @@ const StyleIsolationRoot = styled.div<{
 
     /* CSS Isolation: isolation: "isolate"
      *
-     * Creates a new stacking context, so z-indexes set inside order only
-     * against each other rather than against host page content. It does NOT
-     * create a containing block -- `position: fixed` descendants still resolve
-     * against the viewport.
-     *
-     * The real protection against parent CSS comes from the && high-specificity
-     * selectors below, not from this. Turn it off (isolateStacking={false})
-     * when a child has to outrank host content; see the prop docs above.
+     * Creates a new stacking context (see the isolateStacking prop). Safe to
+     * turn off: the protection against parent CSS comes from the &&
+     * high-specificity selectors below, not from this.
      */
     ...(isolateStacking ? { isolation: "isolate" as const } : {}),
   }

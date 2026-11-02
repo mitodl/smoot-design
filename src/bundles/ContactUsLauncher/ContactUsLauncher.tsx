@@ -29,11 +29,10 @@ const CARD_TITLE = "AskTIM"
 const CARD_BADGE = "AI ASSISTANT"
 
 /**
- * Opt a host element out of being made `inert` while the full-screen mobile
- * card is open. For hosts that portal their own overlays: without this their
- * portal root is frozen behind a card it renders over. Put it on the element
- * itself -- `inert` inherits, so marking a descendant of one the sweep
- * reaches does nothing.
+ * Opts a host element out of being inerted while the full-screen mobile card is
+ * open, so a host that portals its own overlays can keep its portal root
+ * reachable. Put it on the element itself: `inert` inherits, so marking a
+ * descendant of an inerted element does nothing.
  */
 const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 
@@ -282,18 +281,16 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     }
   }, [open, hasDraft])
 
-  // The full-screen card leaves nothing of the page visible or reachable, so
-  // everything behind it is hidden rather than left for a screen reader or the
-  // Tab key to wander into. This is also what keeps focus in the card below the
-  // breakpoint, since browsers skip inert content.
+  // The full-screen card covers everything, so the page behind it is inerted
+  // rather than left for a screen reader or Tab to wander into. Browsers skip
+  // inert content, so this is also what keeps focus in the card.
   useEffect(() => {
     if (!open || !fullScreen) {
       return
     }
     const card = cardRef.current
-    // The card is only a child of body when the host lets us create our own
-    // container. Mounted into the host's tree, the page behind is the siblings
-    // of each ancestor up to body, so walk the whole way.
+    // init({ container }) renders into the host's own element, so the page
+    // behind is the siblings of every ancestor up to body, not body's children.
     const hidden: HTMLElement[] = []
     for (
       let node = card as Element | null;
@@ -307,8 +304,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             element !== node &&
             element instanceof HTMLElement &&
             !element.hasAttribute(KEEP_INTERACTIVE) &&
-            // Leave the host's own inert alone; clearing it on close would hand
-            // back interactivity the host had deliberately taken away.
+            // Clearing this on close would hand back interactivity the host
+            // had deliberately taken away.
             !element.hasAttribute("inert"),
         ),
       )
@@ -374,11 +371,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           <CardBody
             variant="slot"
             open
-            // On desktop the page behind stays usable, and the click-away
-            // guard above keeps a draft when the learner goes to it. Trapping
-            // Tab would leave the keyboard with no way across that didn't
-            // close the card. Full screen there is nothing to cross to: the
-            // inert page behind already keeps Tab in the card.
+            // On desktop the page behind stays usable, and the click-away guard
+            // above keeps a draft when the learner goes to it; trapping Tab
+            // would leave the keyboard no way across. Full screen needs no trap
+            // either, since the inert page behind already keeps Tab in the card.
             trapFocus={false}
             openedViaKeyboard={openedViaKeyboard}
             onClose={onClose}
