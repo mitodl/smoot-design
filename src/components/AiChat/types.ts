@@ -170,6 +170,20 @@ type AiChatDisplayProps = {
    */
   problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
 
+  /**
+   * If provided, shows a button under the newest assistant message that sends
+   * `label` as the next message. Hosts whose backend treats a press differently
+   * from the same words typed should pair it with `onEscalate`.
+   */
+  escalation?: { label: string }
+
+  /**
+   * Called when the escalation button is pressed, in the same tick as the send
+   * it causes. A host that marks the request can set its flag here and read it
+   * back in `transformBody`, which runs on that same send.
+   */
+  onEscalate?: () => void
+
   onSubmit?: (
     messageText: string,
     meta: {

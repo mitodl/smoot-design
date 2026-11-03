@@ -294,6 +294,51 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
+const EscalateRow = styled.div({
+  display: "flex",
+  margin: "12px 0 2px",
+})
+
+const EscalateChip = styled.button(({ theme }) => ({
+  border: `1px solid ${theme.custom.colors.lightGray2}`,
+  backgroundColor: theme.custom.colors.white,
+  color: theme.custom.colors.darkGray2,
+  padding: "8px 16px",
+  ...theme.typography.body3,
+  cursor: "pointer",
+  boxSizing: "border-box",
+  borderRadius: "8px",
+  "&:hover": {
+    color: theme.custom.colors.white,
+    backgroundColor: theme.custom.colors.silverGrayDark,
+    borderColor: "transparent",
+  },
+}))
+
+const EscalateButton: FC<{ label: string; onEscalate?: () => void }> = ({
+  label,
+  onEscalate,
+}) => {
+  const { append } = useAiChat()
+
+  return (
+    <EscalateRow>
+      <EscalateChip
+        type="button"
+        onClick={() => {
+          // Same click handler as the append, so the host's flag is set before
+          // transformBody reads it: that runs in a later microtask, once this
+          // handler has returned. Order within the handler does not matter.
+          onEscalate?.()
+          append({ role: "user", content: label })
+        }}
+      >
+        {label}
+      </EscalateChip>
+    </EscalateRow>
+  )
+}
+
 const hasMessageError = (message: AiChatMessage): boolean => {
   const errorMessage = message.data?.error?.message
 
@@ -371,6 +416,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   useMathJax = false,
   mathJaxConfig,
   onSubmit,
+  escalation,
+  onEscalate,
   problemSetListUrl,
   problemSetInitialMessages,
   problemSetEmptyMessages,
@@ -449,6 +496,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   }, [problemSetListResponse, problemSetEmptyMessages, setMessages, t])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
+
+  // The opening greeting is an initial message, not a reply to anything.
+  const assistantHasReplied = messages.length > (initialMessages?.length || 0)
 
   const waiting =
     !showStarters && !error && messages[messages.length - 1]?.role === "user"
@@ -582,6 +632,15 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                               {message.content}
                             </Markdown>
                             <FeedbackButtons message={aiChatMessage} />
+                            {escalation &&
+                            assistantHasReplied &&
+                            message.role === "assistant" &&
+                            index === messages.length - 1 ? (
+                              <EscalateButton
+                                label={escalation.label}
+                                onEscalate={onEscalate}
+                              />
+                            ) : null}
                           </>
                         )}
                       </Message>

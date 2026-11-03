@@ -1,5 +1,5 @@
 import * as React from "react"
-import { act, render, screen, within } from "@testing-library/react"
+import { act, render, screen, waitFor, within } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { setupServer } from "msw/node"
 import { http, HttpResponse } from "msw"
@@ -720,6 +720,62 @@ test("a reopened card starts a fresh thread", async () => {
         page_url: PAGE_URL,
         message: "my certificate has not arrived",
         clear_history: true,
+      }),
+    }),
+  )
+})
+
+test("a press on the escalation offer marks that turn and sends its own words", async () => {
+  // learn-ai takes escalate as a button press rather than a phrase, so a
+  // learner who wants a person never has to guess wording the bot recognises.
+  // It blanks whatever message the press arrives with, which is why the button
+  // sends its own label rather than repeating what the learner last typed.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Contact the support team",
+        clear_history: false,
+        escalate: true,
+      }),
+    }),
+  )
+})
+
+test("the turn after a press is an ordinary one", async () => {
+  // learn-ai blanks the message on any turn marked escalate, so a mark that
+  // outlived the press would throw away everything the learner typed after it
+  // and the ticket would carry nothing they said.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2))
+  await sendMessage("me@example.com")
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "me@example.com",
+        clear_history: false,
       }),
     }),
   )

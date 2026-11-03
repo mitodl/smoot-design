@@ -287,6 +287,18 @@ type AiDrawerProps = {
    */
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 
+  /**
+   * Shows a button under the newest assistant message that sends `label` as the
+   * next message. Not serializable through message events, same as the handler.
+   */
+  escalation?: AiChatProps["escalation"]
+
+  /**
+   * Called when that button is pressed, in the same tick as the send it causes,
+   * so a flag set here is readable from `transformBody` on that same request.
+   */
+  onEscalate?: AiChatProps["onEscalate"]
+
   settings?: AiDrawerSettings
 
   open?: boolean
@@ -380,6 +392,8 @@ const ChatComponent = ({
   needsMathJax,
   variant,
   onTrackingEvent,
+  escalation,
+  onEscalate,
 }: {
   settings: AiDrawerSettings["chat"]
   transformBody: (messages: AiChatMessage[]) => object
@@ -393,6 +407,8 @@ const ChatComponent = ({
   needsMathJax: boolean
   variant: "drawer" | "slot"
   onTrackingEvent?: TrackingEventHandler
+  escalation?: AiChatProps["escalation"]
+  onEscalate?: AiChatProps["onEscalate"]
 }) => {
   if (!settings) return null
   return (
@@ -400,6 +416,8 @@ const ChatComponent = ({
       key={settings.chatId}
       chatId={settings.chatId}
       conversationStarters={conversationStarters}
+      escalation={escalation}
+      onEscalate={onEscalate}
       initialMessages={initialMessages}
       scrollElement={scrollElement}
       entryScreenEnabled={entryScreenEnabled}
@@ -474,6 +492,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
   onClose,
   onReturnToBlock,
   onTrackingEvent,
+  escalation,
+  onEscalate,
   variant = "drawer",
   trapFocus = true,
 }: AiDrawerProps) => {
@@ -668,6 +688,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
         <ChatComponent
           settings={chat}
           transformBody={transformBody}
+          escalation={escalation}
+          onEscalate={onEscalate}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
@@ -717,6 +739,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
             <ChatComponent
               settings={chat}
               transformBody={transformBody}
+              escalation={escalation}
+              onEscalate={onEscalate}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
               entryScreenEnabled={chat?.entryScreenEnabled ?? true}

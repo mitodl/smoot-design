@@ -39,6 +39,11 @@ const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
 
+// The button sends these exact words, and learn-ai blanks them, so what the
+// learner last typed is not repeated into the ticket. Reaching a person is a
+// press rather than a phrase the learner has to guess.
+const ESCALATE_LABEL = "Contact the support team"
+
 // Nothing on the way in says what this does with what the learner types: they
 // clicked a button labelled "Contact us" and landed on a chat box.
 const GREETING = [
@@ -167,6 +172,11 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const wasOpen = useRef(false)
   const conversationStarted = useRef(false)
   const historyCleared = useRef(false)
+  // A ref, not state: learn-ai blanks the message every escalated turn arrives
+  // with, so a flag that survived the send would blank each later turn too and
+  // the learner's own words would never reach the ticket. transformBody reads
+  // it and clears it on the one request the press causes.
+  const escalating = useRef(false)
 
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
@@ -199,12 +209,17 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       conversationStarted.current = true
       const clearHistory = !historyCleared.current
       historyCleared.current = true
+      const escalate = escalating.current
+      escalating.current = false
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
         page_url: hostPageUrl ?? window.location.href,
         message: messages[messages.length - 1].content,
         clear_history: clearHistory,
+        // Omitted rather than sent as false, so normal turns keep the wire
+        // shape learn-ai already reads.
+        ...(escalate && { escalate: true }),
       }
     },
     [hostPageUrl],
@@ -380,6 +395,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}
+            escalation={{ label: ESCALATE_LABEL }}
+            onEscalate={() => {
+              escalating.current = true
+            }}
           />
         </PopoverCard>
       ) : null}

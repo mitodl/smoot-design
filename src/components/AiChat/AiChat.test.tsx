@@ -470,6 +470,61 @@ describe("AiChat", () => {
       screen.queryByRole("button", { name: "Bad response" }),
     ).not.toBeInTheDocument()
   })
+
+  test("offers escalation under the newest assistant message only", async () => {
+    // Under every reply it repeats the whole way down the transcript; under an
+    // older one it asks the learner to scroll back to reach a person.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    const messages = await whenCount(getMessages, 3)
+
+    const escalate = screen.getAllByRole("button", {
+      name: "Contact the support team",
+    })
+    expect(escalate).toHaveLength(1)
+    expect(messages[2]).toContainElement(escalate[0])
+  })
+
+  test("calls back in time for the send the press causes", async () => {
+    // The host marks the request from onEscalate and reads the mark back in
+    // transformBody. A press that sends without calling back first marks the
+    // turn after instead - a different message, and in Contact Us's case the
+    // learner's own words.
+    const marked: boolean[] = []
+    let escalating = false
+    const transformBody = jest.fn((messages: { content: string }[]) => {
+      marked.push(escalating)
+      escalating = false
+      return { message: messages[messages.length - 1].content }
+    })
+    setup({
+      escalation: { label: "Contact the support team" },
+      onEscalate: () => {
+        escalating = true
+      },
+      requestOpts: { apiUrl: API_URL, transformBody },
+    })
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, 3)
+    await user.click(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    )
+    await whenCount(getMessages, 5)
+
+    expect(marked).toEqual([false, true])
+  })
+
+  test("holds the escalation offer back until the assistant has replied", async () => {
+    // The opening greeting is not a reply, and pressing it there sends a
+    // message the host blanks, so the learner's problem never gets asked for.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+  })
 })
 
 test("replaceMathjax replaces unsupported MathJax syntax", () => {
