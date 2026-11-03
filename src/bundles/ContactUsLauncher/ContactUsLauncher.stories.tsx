@@ -25,12 +25,20 @@ const review = (description: string, email: string) =>
       "and I'll pass this on.",
   ].join("\n")
 
-type Intake = { email: string; description: string[]; awaitingSend: boolean }
+type Intake = {
+  email: string
+  description: string[]
+  awaitingSend: boolean
+  // The answering story starts false and flips on a press; the intake-only
+  // story is always collecting, so it starts true.
+  escalated: boolean
+}
 
-const freshIntake = (): Intake => ({
+const freshIntake = (escalated = true): Intake => ({
   email: "",
   description: [],
   awaitingSend: false,
+  escalated,
 })
 
 let intake = freshIntake()
@@ -122,6 +130,72 @@ export const CustomLabel: Story = {
 export const ShowLabel: Story = {
   name: "Label shown",
   args: { showLabel: true },
+}
+
+const ANSWER =
+  "Your certificate is issued once the course ends and your grade is final, " +
+  "usually within a few days of the end date.\n\nIf that doesn't match what " +
+  "you're seeing, I can pass this to our support team."
+
+/**
+ * Stands in for the answering support bot. The first turn gets an answer and an
+ * offer; a turn carrying `escalate` goes to intake instead, with the message
+ * blanked the way learn-ai blanks it, so the press is what routes the thread
+ * rather than the words the button happens to send.
+ */
+const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
+  const {
+    message,
+    clear_history: clearHistory,
+    escalate,
+  } = (await request.json()) as {
+    message: string
+    clear_history: boolean
+    escalate?: boolean
+  }
+  if (clearHistory) {
+    intake = freshIntake(false)
+  }
+  await delay(400)
+
+  if (escalate) {
+    intake.escalated = true
+    return HttpResponse.text(ASK_FOR_EMAIL)
+  }
+  if (!intake.escalated) {
+    intake.description.push(message)
+    return HttpResponse.text(ANSWER)
+  }
+
+  if (intake.awaitingSend) {
+    const reply = TICKET_FILED.replace("{email}", intake.email)
+    intake = freshIntake()
+    return HttpResponse.text(reply)
+  }
+
+  const address = message.match(/\S+@\S+\.\S+/)?.[0]
+  if (!address) {
+    intake.description.push(message)
+    return HttpResponse.text(ASK_FOR_EMAIL)
+  }
+
+  intake.email = address
+  intake.awaitingSend = true
+  return HttpResponse.text(review(intake.description.join("\n\n"), address))
+})
+
+/**
+ * Ask something the bot can answer ("when do I get my certificate?"). It
+ * answers and offers a handoff, and a "Contact the support team" button appears
+ * under that reply. Press it to reach intake: the request carries
+ * `escalate: true` for that one turn, which you can watch in the network panel,
+ * and the turn after it is an ordinary one again.
+ */
+export const AnswersFirst: Story = {
+  name: "Answers first",
+  parameters: {
+    msw: { handlers: [answeringHandler] },
+  },
 }
 
 /**
