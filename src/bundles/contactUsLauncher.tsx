@@ -1,6 +1,9 @@
 import * as React from "react"
 import { createRoot } from "react-dom/client"
-import { ContactUsLauncher } from "./ContactUsLauncher/ContactUsLauncher"
+import {
+  ContactUsLauncher,
+  KEEP_INTERACTIVE,
+} from "./ContactUsLauncher/ContactUsLauncher"
 import type { ContactUsLauncherProps } from "./ContactUsLauncher/ContactUsLauncher"
 import {
   ThemeProvider,
@@ -90,7 +93,7 @@ const init = (
 
   const root = createRoot(reactContainer)
   root.render(
-    <StyleIsolation ref={isolationRootRef}>
+    <StyleIsolation ref={isolationRootRef} isolateStacking={false}>
       <ThemeProvider theme={theme}>
         <TranslationProvider translations={translations ?? null}>
           <ContactUsLauncher {...launcherProps} />
@@ -119,4 +122,4 @@ const init = (
   }
 }
 
-export { init }
+export { init, KEEP_INTERACTIVE }

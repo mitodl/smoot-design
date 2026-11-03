@@ -1,7 +1,8 @@
 import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import styled from "@emotion/styled"
-import { keyframes } from "@emotion/react"
+import { keyframes, useTheme } from "@emotion/react"
+import useMediaQuery from "@mui/material/useMediaQuery"
 import { RiChatAiLine } from "@remixicon/react"
 import { ActionButton } from "../../components/Button/ActionButton"
 import { Button } from "../../components/Button/Button"
@@ -26,6 +27,14 @@ const CARD_INSET = "24px"
 const CARD_TITLE = "AskTIM"
 
 const CARD_BADGE = "AI ASSISTANT"
+
+/**
+ * Opts a host element out of being inerted while the full-screen mobile card is
+ * open, so a host that portals its own overlays can keep its portal root
+ * reachable. Put it on the element itself: `inert` inherits, so marking a
+ * descendant of an inerted element does nothing.
+ */
+const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
@@ -136,6 +145,11 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const onClose = useCallback(() => setOpen(false), [])
 
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
+    noSsr: true,
+  })
+
   // Opening hides the launcher and moves focus to the card's heading, whose
   // outline AiDrawer suppresses unless openedViaKeyboard is set, so a keyboard
   // open needs the ring back (WCAG 2.4.7). Enter and Space fire a click with
@@ -220,7 +234,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     return Boolean(field?.value.trim())
   }, [])
 
-  // The card is non-modal, so there is no backdrop to catch these.
+  // The desktop card is non-modal, so there is no backdrop to catch these.
   useEffect(() => {
     if (!open) {
       return
@@ -267,6 +281,44 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     }
   }, [open, hasDraft])
 
+  // The full-screen card covers everything, so the page behind it is inerted
+  // rather than left for a screen reader or Tab to wander into. Browsers skip
+  // inert content, so this is also what keeps focus in the card.
+  useEffect(() => {
+    if (!open || !fullScreen) {
+      return
+    }
+    const card = cardRef.current
+    // init({ container }) renders into the host's own element, so the page
+    // behind is the siblings of every ancestor up to body, not body's children.
+    const hidden: HTMLElement[] = []
+    for (
+      let node = card as Element | null;
+      node && node !== document.body;
+      node = node.parentElement
+    ) {
+      const siblings = Array.from(node.parentElement?.children ?? [])
+      hidden.push(
+        ...siblings.filter(
+          (element): element is HTMLElement =>
+            element !== node &&
+            element instanceof HTMLElement &&
+            !element.hasAttribute(KEEP_INTERACTIVE) &&
+            // Clearing this on close would hand back interactivity the host
+            // had deliberately taken away.
+            !element.hasAttribute("inert"),
+        ),
+      )
+    }
+    hidden.forEach((element) => element.setAttribute("inert", ""))
+    const hostOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      hidden.forEach((element) => element.removeAttribute("inert"))
+      document.body.style.overflow = hostOverflow
+    }
+  }, [open, fullScreen])
+
   // Runs after the re-render that makes the launcher visible again (WCAG 2.4.3).
   useEffect(() => {
     if (wasOpen.current && !open) {
@@ -310,13 +362,19 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         </LauncherIconButton>
       )}
       {open ? (
-        <PopoverCard ref={cardRef} role="dialog" aria-label={CARD_TITLE}>
+        <PopoverCard
+          ref={cardRef}
+          role="dialog"
+          aria-label={CARD_TITLE}
+          aria-modal={fullScreen || undefined}
+        >
           <CardBody
             variant="slot"
             open
-            // The page behind stays usable, and the click-away guard above
-            // keeps a draft when the learner goes to it. Trapping Tab would
-            // leave the keyboard with no way across that didn't close the card.
+            // On desktop the page behind stays usable, and the click-away guard
+            // above keeps a draft when the learner goes to it; trapping Tab
+            // would leave the keyboard no way across. Full screen needs no trap
+            // either, since the inert page behind already keeps Tab in the card.
             trapFocus={false}
             openedViaKeyboard={openedViaKeyboard}
             onClose={onClose}
@@ -329,5 +387,5 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   )
 }
 
-export { ContactUsLauncher }
+export { ContactUsLauncher, KEEP_INTERACTIVE }
 export type { ContactUsLauncherProps }
