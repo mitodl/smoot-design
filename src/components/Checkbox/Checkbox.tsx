@@ -50,7 +50,7 @@ const childCheckboxStyles = (theme: Theme) => css`
       color: ${theme.custom.colors.darkGray2};
     }
   }
-`;
+`
 
 const Container = styled.div<{ theme?: Theme }>(({ theme }) => [
   {

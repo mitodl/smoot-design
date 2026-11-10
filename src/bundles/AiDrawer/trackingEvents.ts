@@ -39,11 +39,7 @@ interface TabChangeEvent extends ITrackingEvent {
 }
 
 type TrackingEvent =
-  | OpenEvent
-  | CloseEvent
-  | SubmitEvent
-  | ResponseEvent
-  | TabChangeEvent
+  OpenEvent | CloseEvent | SubmitEvent | ResponseEvent | TabChangeEvent
 
 type TrackingEventHandler = (event: TrackingEvent) => void
 
