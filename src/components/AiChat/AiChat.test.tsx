@@ -565,6 +565,27 @@ describe("AiChat", () => {
     ).toBeInTheDocument()
   })
 
+  test("keeps the escalation offer when the reply itself is the error", async () => {
+    // learn-ai sends its headers before it streams, so a failure after that
+    // arrives as a 200 with the error appended to the reply. That reply is
+    // the newest one, and it renders as an alert rather than as content.
+    server.use(
+      http.post(API_URL, () =>
+        HttpResponse.text(
+          '<!-- {"error":{"message":"An error occurred, please try again"},"checkpoint_pk":123,"thread_id":"f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->',
+        ),
+      ),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByRole("alert")
+
+    expect(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
   test("keeps the escalation offer when the send fails", async () => {
     // A failed send leaves the learner's own message newest, and the offer is
     // the only way back to a person - a retyped retry carries no escalation.

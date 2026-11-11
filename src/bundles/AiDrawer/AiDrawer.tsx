@@ -288,8 +288,9 @@ type AiDrawerProps = {
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 
   /**
-   * Shows a button under the newest assistant message that sends `label` as the
-   * next message. Not serializable through message events, same as the handler.
+   * Shows a button under the newest reply that sends `label` as the next
+   * message. See `AiChatProps["escalation"]` for when it is and isn't shown.
+   * Not serializable through message events, same as the handler.
    */
   escalation?: AiChatProps["escalation"]
 

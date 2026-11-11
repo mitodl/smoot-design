@@ -628,19 +628,20 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                               {message.content}
                             </Markdown>
                             <FeedbackButtons message={aiChatMessage} />
-                            {/* Hidden while a request is open: append() does
-                            not abort it, so a press would run two turns at
-                            once on the same thread. */}
-                            {escalation &&
-                            !isLoading &&
-                            index === lastReplyIndex ? (
-                              <EscalateButton
-                                label={escalation.label}
-                                onEscalate={onEscalate}
-                              />
-                            ) : null}
                           </>
                         )}
+                        {/* Outside the branch above, so a reply that failed
+                        still offers a person. Hidden while a request is open:
+                        append() does not abort it, so a press would run two
+                        turns at once on the same thread. */}
+                        {escalation &&
+                        !isLoading &&
+                        index === lastReplyIndex ? (
+                          <EscalateButton
+                            label={escalation.label}
+                            onEscalate={onEscalate}
+                          />
+                        ) : null}
                       </Message>
                     </MessageRow>
                   )
