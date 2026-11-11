@@ -478,6 +478,9 @@ describe("AiChat", () => {
 
     await user.click(getConversationStarters()[0])
     const messages = await whenCount(getMessages, 3)
+    // The message renders before the request closes, and the offer waits for
+    // the close, so finding it is a wait rather than a read.
+    await screen.findByRole("button", { name: "Contact the support team" })
 
     const escalate = screen.getAllByRole("button", {
       name: "Contact the support team",
@@ -509,7 +512,7 @@ describe("AiChat", () => {
     await user.click(getConversationStarters()[0])
     await whenCount(getMessages, 3)
     await user.click(
-      screen.getByRole("button", { name: "Contact the support team" }),
+      await screen.findByRole("button", { name: "Contact the support team" }),
     )
     await whenCount(getMessages, 5)
 
@@ -524,6 +527,63 @@ describe("AiChat", () => {
     expect(
       screen.queryByRole("button", { name: "Contact the support team" }),
     ).not.toBeInTheDocument()
+  })
+
+  test("holds the escalation offer back until the reply has finished", async () => {
+    // The first chunk makes the reply the newest message while the request is
+    // still open. append() does not abort that one, so a press here would run
+    // two turns at once on the same thread.
+    let endStream: () => void = () => {}
+    const streamEnded = new Promise<void>((resolve) => {
+      endStream = resolve
+    })
+    server.use(
+      http.post(API_URL, () => {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode("Half an answer"))
+            streamEnded.then(() => controller.close())
+          },
+        })
+        return new HttpResponse(stream, {
+          headers: { "Content-Type": "text/plain" },
+        })
+      }),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByText("Half an answer")
+
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+
+    endStream()
+    expect(
+      await screen.findByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("keeps the escalation offer when the send fails", async () => {
+    // A failed send leaves the learner's own message newest, and the offer is
+    // the only way back to a person - a retyped retry carries no escalation.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    const escalate = await screen.findByRole("button", {
+      name: "Contact the support team",
+    })
+
+    server.use(
+      http.post(API_URL, () => new HttpResponse(null, { status: 500 })),
+    )
+    await user.click(escalate)
+    await screen.findByRole("alert")
+
+    expect(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
   })
 })
 

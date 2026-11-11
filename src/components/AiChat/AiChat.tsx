@@ -299,20 +299,9 @@ const EscalateRow = styled.div({
   margin: "12px 0 2px",
 })
 
-const EscalateChip = styled.button(({ theme }) => ({
-  border: `1px solid ${theme.custom.colors.lightGray2}`,
-  backgroundColor: theme.custom.colors.white,
+// The conversation-starter chip, so the two cannot drift apart.
+const EscalateChip = styled(Starter)(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
-  padding: "8px 16px",
-  ...theme.typography.body3,
-  cursor: "pointer",
-  boxSizing: "border-box",
-  borderRadius: "8px",
-  "&:hover": {
-    color: theme.custom.colors.white,
-    backgroundColor: theme.custom.colors.silverGrayDark,
-    borderColor: "transparent",
-  },
 }))
 
 const EscalateButton: FC<{ label: string; onEscalate?: () => void }> = ({
@@ -496,8 +485,16 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
-  // The opening greeting is an initial message, not a reply to anything.
-  const assistantHasReplied = messages.length > (initialMessages?.length || 0)
+  // The newest reply, which stops being the newest message once a send fails
+  // and leaves the learner's own message last. -1 until one arrives: the
+  // opening greeting is an initial message, not a reply to anything.
+  const lastReplyIndex = messages.reduce(
+    (last, message, index) =>
+      index >= (initialMessages?.length || 0) && message.role === "assistant"
+        ? index
+        : last,
+    -1,
+  )
 
   const waiting =
     !showStarters && !error && messages[messages.length - 1]?.role === "user"
@@ -631,10 +628,12 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                               {message.content}
                             </Markdown>
                             <FeedbackButtons message={aiChatMessage} />
+                            {/* Hidden while a request is open: append() does
+                            not abort it, so a press would run two turns at
+                            once on the same thread. */}
                             {escalation &&
-                            assistantHasReplied &&
-                            message.role === "assistant" &&
-                            index === messages.length - 1 ? (
+                            !isLoading &&
+                            index === lastReplyIndex ? (
                               <EscalateButton
                                 label={escalation.label}
                                 onEscalate={onEscalate}
