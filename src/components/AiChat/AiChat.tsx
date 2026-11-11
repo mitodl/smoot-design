@@ -326,9 +326,8 @@ const EscalateButton: FC<{ label: string; onEscalate?: () => void }> = ({
       <EscalateChip
         type="button"
         onClick={() => {
-          // Same click handler as the append, so the host's flag is set before
-          // transformBody reads it: that runs in a later microtask, once this
-          // handler has returned. Order within the handler does not matter.
+          // Before the append, so the host's flag is already set when
+          // transformBody reads it on the request this press causes.
           onEscalate?.()
           append({ role: "user", content: label })
         }}
