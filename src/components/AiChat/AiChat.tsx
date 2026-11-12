@@ -304,28 +304,16 @@ const EscalateChip = styled(Starter)(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
 }))
 
-const EscalateButton: FC<{ label: string; onEscalate?: () => void }> = ({
+const EscalateButton: FC<{ label: string; onClick: () => void }> = ({
   label,
-  onEscalate,
-}) => {
-  const { append } = useAiChat()
-
-  return (
-    <EscalateRow>
-      <EscalateChip
-        type="button"
-        onClick={() => {
-          // Before the append, so the host's flag is already set when
-          // transformBody reads it on the request this press causes.
-          onEscalate?.()
-          append({ role: "user", content: label })
-        }}
-      >
-        {label}
-      </EscalateChip>
-    </EscalateRow>
-  )
-}
+  onClick,
+}) => (
+  <EscalateRow>
+    <EscalateChip type="button" onClick={onClick}>
+      {label}
+    </EscalateChip>
+  </EscalateRow>
+)
 
 const hasMessageError = (message: AiChatMessage): boolean => {
   const errorMessage = message.data?.error?.message
@@ -505,6 +493,14 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     })
   }
 
+  // A textarea rather than an input: the composer is multiline, so that is
+  // what MUI renders it as.
+  const focusComposer = () => {
+    promptInputRef.current
+      ?.querySelector("textarea")
+      ?.focus({ preventScroll: true })
+  }
+
   const onProblemSetChange = (event: SelectChangeEvent<string | string[]>) => {
     if (problemSetInitialMessages) {
       setMessages(
@@ -636,7 +632,20 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         index === lastAssistantIndex ? (
                           <EscalateButton
                             label={escalation.label}
-                            onEscalate={onEscalate}
+                            onClick={() => {
+                              // The press unmounts this chip, so focus has to
+                              // be moved by hand or it falls to the body.
+                              focusComposer()
+                              scrollToBottom()
+                              // Before the append, so the host's flag is
+                              // already set when transformBody reads it on the
+                              // request this press causes.
+                              onEscalate?.()
+                              append({
+                                role: "user",
+                                content: escalation.label,
+                              })
+                            }}
                           />
                         ) : null}
                       </Message>

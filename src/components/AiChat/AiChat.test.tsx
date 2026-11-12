@@ -636,6 +636,37 @@ describe("AiChat", () => {
       screen.getByRole("button", { name: "Contact the support team" }),
     ).toBeInTheDocument()
   })
+
+  test("scrolls the reply an escalation press causes into view", async () => {
+    // The reader can be parked on the greeting with the newest message well
+    // below it, and useScrollSnap only follows along within 200px of the
+    // bottom, so otherwise the reply the press causes lands offscreen.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    const scrollBy = jest.spyOn(HTMLElement.prototype, "scrollBy")
+    await user.click(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    )
+    await whenCount(getMessages, 3)
+
+    expect(scrollBy).toHaveBeenCalled()
+  })
+
+  test("moves focus to the composer when the offer is activated", async () => {
+    // The press unmounts the chip it came from, so focus would fall to the
+    // body and a keyboard learner would lose their place in the card
+    // (WCAG 2.4.3). The bot asks for an email next, which is where they need
+    // to be anyway.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    screen.getByRole("button", { name: "Contact the support team" }).focus()
+    await user.keyboard("{Enter}")
+    await whenCount(getMessages, 3)
+
+    expect(
+      screen.getByRole("textbox", { name: "Type a message..." }),
+    ).toHaveFocus()
+  })
 })
 
 test("replaceMathjax replaces unsupported MathJax syntax", () => {
