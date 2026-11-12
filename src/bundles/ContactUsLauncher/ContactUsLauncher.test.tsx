@@ -560,6 +560,38 @@ test("lets the host replace the greeting", async () => {
   expect(transcript(card)).not.toHaveTextContent(/I'm AskTIM/)
 })
 
+test("offers the support team from the moment the card opens", async () => {
+  // The path to a person is never hidden; the greeting anchors it before
+  // the learner has typed anything.
+  renderLauncher()
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", { name: "Contact the support team" }),
+  ).toBeInTheDocument()
+})
+
+test("a host-replaced greeting still anchors the offer", async () => {
+  // Replacing the copy (a translated host string) must not cost the button.
+  renderLauncher({
+    settings: {
+      chat: {
+        ...SETTINGS.chat,
+        initialMessages: [
+          { role: "assistant" as const, content: "¿En qué podemos ayudarte?" },
+        ],
+      },
+    },
+  })
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", { name: "Contact the support team" }),
+  ).toBeInTheDocument()
+})
+
 test("a click outside leaves the card open once a message has been sent", async () => {
   // Dismissing by accident would throw away a support request the learner has
   // already started; past that point only the close button and Escape close it.
@@ -780,6 +812,32 @@ test("the turn after a press is an ordinary one", async () => {
         page_url: PAGE_URL,
         message: "me@example.com",
         clear_history: false,
+      }),
+    }),
+  )
+})
+
+test("a press straight from the greeting starts the thread as an escalation", async () => {
+  // First request of the thread: it must carry clear_history so learn-ai
+  // mints a fresh thread, and escalate so the blanked label is never read
+  // as the learner's words.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await screen.findAllByText(REPLY)
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Contact the support team",
+        clear_history: true,
+        escalate: true,
       }),
     }),
   )
