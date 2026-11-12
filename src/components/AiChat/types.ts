@@ -171,11 +171,10 @@ type AiChatDisplayProps = {
   problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
 
   /**
-   * If provided, shows a button that sends `label` as the next message. It sits
-   * under the newest reply the chat has received, including one that arrived as
-   * an error, and is hidden until a reply arrives and while a request is open.
-   * Entries in `initialMessages` are a greeting rather than a reply, so a host
-   * that opens with one still gets no button until the first real reply.
+   * If provided, shows a button that sends `label` as the next message. It
+   * sits under the newest assistant message - a greeting from
+   * `initialMessages` included, so a chat that opens with one offers it from
+   * the start - and is hidden while a request is open.
    *
    * Hosts whose backend treats a press differently from the same words typed
    * should pair it with `onEscalate`.

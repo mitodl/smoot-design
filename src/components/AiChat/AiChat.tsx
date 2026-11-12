@@ -485,14 +485,11 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
-  // The newest reply, which stops being the newest message once a send fails
-  // and leaves the learner's own message last. -1 until one arrives: the
-  // opening greeting is an initial message, not a reply to anything.
-  const lastReplyIndex = messages.reduce(
-    (last, message, index) =>
-      index >= (initialMessages?.length || 0) && message.role === "assistant"
-        ? index
-        : last,
+  // The newest assistant message - the greeting counts, so the offer shows
+  // from the start, and a failed send that leaves the learner's own message
+  // last does not move it. -1 when nothing assistant-authored exists yet.
+  const lastAssistantIndex = messages.reduce(
+    (last, message, index) => (message.role === "assistant" ? index : last),
     -1,
   )
 
@@ -636,7 +633,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         turns at once on the same thread. */}
                         {escalation &&
                         !isLoading &&
-                        index === lastReplyIndex ? (
+                        index === lastAssistantIndex ? (
                           <EscalateButton
                             label={escalation.label}
                             onEscalate={onEscalate}

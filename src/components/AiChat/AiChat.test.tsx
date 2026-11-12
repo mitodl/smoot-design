@@ -519,14 +519,44 @@ describe("AiChat", () => {
     expect(marked).toEqual([false, true])
   })
 
-  test("holds the escalation offer back until the assistant has replied", async () => {
-    // The opening greeting is not a reply, and pressing it there sends a
-    // message the host blanks, so the learner's problem never gets asked for.
+  test("offers escalation under the greeting before any reply", () => {
+    // The offer is visible from the start: the learner can reach a person
+    // without first sending the bot something it may not understand.
     setup({ escalation: { label: "Contact the support team" } })
+
+    const escalate = screen.getByRole("button", {
+      name: "Contact the support team",
+    })
+    expect(getMessages()[0]).toContainElement(escalate)
+  })
+
+  test("offers no escalation when there is nothing to anchor it under", () => {
+    // No greeting and no reply yet: the offer renders under a message, so an
+    // empty transcript has nowhere to put it.
+    setup({
+      escalation: { label: "Contact the support team" },
+      initialMessages: [],
+    })
 
     expect(
       screen.queryByRole("button", { name: "Contact the support team" }),
     ).not.toBeInTheDocument()
+  })
+
+  test("keeps the offer on the greeting when the first send fails", async () => {
+    // A failed first send leaves the learner's own message newest with no
+    // reply ever arrived; the greeting still anchors the way to a person.
+    server.use(
+      http.post(API_URL, () => new HttpResponse(null, { status: 500 })),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByRole("alert")
+
+    expect(getMessages()[0]).toContainElement(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    )
   })
 
   test("holds the escalation offer back until the reply has finished", async () => {
