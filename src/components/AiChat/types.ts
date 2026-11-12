@@ -176,6 +176,10 @@ type AiChatDisplayProps = {
    * `initialMessages` included, so a chat that opens with one offers it from
    * the start - and is hidden while a request is open.
    *
+   * The entry screen renders in place of the transcript, so with
+   * `entryScreenEnabled` the button appears only once the chat screen takes
+   * over, not on the entry screen itself.
+   *
    * Hosts whose backend treats a press differently from the same words typed
    * should pair it with `onEscalate`.
    */
