@@ -185,11 +185,12 @@ const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
 })
 
 /**
- * Ask something the bot can answer ("when do I get my certificate?"). It
- * answers and offers a handoff, and a "Contact the support team" button appears
- * under that reply. Press it to reach intake: the request carries
- * `escalate: true` for that one turn, which you can watch in the network panel,
- * and the turn after it is an ordinary one again.
+ * The "Contact the support team" button sits under the greeting from the
+ * start and follows the newest reply. Ask something the bot can answer
+ * ("when do I get my certificate?") and it answers and offers a handoff —
+ * or press the button right away. The request it causes carries
+ * `escalate: true` for that one turn, which you can watch in the network
+ * panel, and the turn after it is an ordinary one again.
  */
 export const AnswersFirst: Story = {
   name: "Answers first",
