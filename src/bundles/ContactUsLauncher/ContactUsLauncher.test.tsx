@@ -148,14 +148,18 @@ test("brands the card as AskTIM rather than repeating the launcher label", async
 })
 
 test("opens on a greeting that says what the card will do", async () => {
-  // Nothing on the way in says this files a support request: the learner
-  // clicked a button labelled "Contact us" and landed on a chat box.
+  // Nothing on the way in says what this is: the learner clicked "Contact
+  // us" and landed on a chat box. The greeting sets the deal - the bot
+  // answers what it can, a person is reachable but slower - and ends by
+  // asking what they need.
   renderLauncher()
 
   const card = await openCard()
 
   expect(transcript(card)).toHaveTextContent(/I'm AskTIM/)
-  expect(transcript(card)).toHaveTextContent(/support team/)
+  expect(transcript(card)).toHaveTextContent(/might not know/)
+  expect(transcript(card)).toHaveTextContent(/contact the support team/)
+  expect(transcript(card)).toHaveTextContent(/What do you need help with\?/)
 })
 
 test("marks the card as an AI assistant", async () => {

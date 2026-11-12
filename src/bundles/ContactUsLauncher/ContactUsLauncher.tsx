@@ -44,15 +44,17 @@ const INPUT_PLACEHOLDER = "Describe what you need"
 // press rather than a phrase the learner has to guess.
 const ESCALATE_LABEL = "Contact the support team"
 
-// Nothing on the way in says what this does with what the learner types: they
-// clicked a button labelled "Contact us" and landed on a chat box.
+// The greeting sets the deal up front: the bot answers what it can, a
+// person is always reachable but slower. Nothing else on the way in says
+// what this card does.
 const GREETING = [
   {
     role: "assistant" as const,
     content:
-      "**How can we help?**\n\nI'm AskTIM, and I'm here to help you send a " +
-      "request to the MIT Open Learning support team. Tell me what went " +
-      "wrong and I'll pass it on.",
+      "**How can we help?**\n\nI'm AskTIM. I can answer many questions " +
+      "quickly, but I might not know some things — you can always contact " +
+      "the support team, though an answer from a person takes longer. " +
+      "What do you need help with?",
   },
 ]
 
