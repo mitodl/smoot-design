@@ -154,9 +154,10 @@ test("opens on a greeting that says what the card will do", async () => {
   const card = await openCard()
 
   expect(transcript(card)).toHaveTextContent(/I'm AskTIM/)
-  expect(transcript(card)).toHaveTextContent(/might not know/)
-  expect(transcript(card)).toHaveTextContent(/contact the support team/)
-  expect(transcript(card)).toHaveTextContent(/What do you need help with\?/)
+  expect(transcript(card)).toHaveTextContent(
+    /account, enrollment, or certificates/,
+  )
+  expect(transcript(card)).toHaveTextContent(/our support team/)
 })
 
 test("marks the card as an AI assistant", async () => {
