@@ -7,6 +7,9 @@ const PAGE_URL = "https://learn.mit.edu/courses/18.01/week-3"
 
 const ASK_FOR_EMAIL =
   "Sorry that happened. What email address should the support team reply to?"
+const ASK_MORE =
+  "Thanks for letting us know. Is there anything else you'd like to add " +
+  "before I pass this on to the MIT Open Learning support team?"
 const TICKET_FILED =
   "Thanks - I've passed that on to the MIT Open Learning support team. Your " +
   "reference number is STUB-4F2A91, and they'll follow up at {email}."
@@ -174,14 +177,24 @@ const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
   }
 
   const address = message.match(/\S+@\S+\.\S+/)?.[0]
-  if (!address) {
+  if (address) {
+    intake.email = address
+  } else {
     intake.description.push(message)
+  }
+  if (!intake.email) {
     return HttpResponse.text(ASK_FOR_EMAIL)
   }
+  // A press on the greeting escalates before the learner has said anything.
+  // learn-ai asks for more rather than show a review with no problem in it.
+  if (intake.description.length === 0) {
+    return HttpResponse.text(ASK_MORE)
+  }
 
-  intake.email = address
   intake.awaitingSend = true
-  return HttpResponse.text(review(intake.description.join("\n\n"), address))
+  return HttpResponse.text(
+    review(intake.description.join("\n\n"), intake.email),
+  )
 })
 
 /**
