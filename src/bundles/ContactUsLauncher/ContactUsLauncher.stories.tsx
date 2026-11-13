@@ -7,9 +7,9 @@ const PAGE_URL = "https://learn.mit.edu/courses/18.01/week-3"
 
 const ASK_FOR_EMAIL =
   "Sorry that happened. What email address should the support team reply to?"
-const ASK_MORE =
-  "Thanks for letting us know. Is there anything else you'd like to add " +
-  "before I pass this on to the MIT Open Learning support team?"
+const ASK_PROBLEM =
+  "What's going on? Tell me what you need help with and I'll pass it on to " +
+  "the MIT Open Learning support team."
 const TICKET_FILED =
   "Thanks - I've passed that on to the MIT Open Learning support team. Your " +
   "reference number is STUB-4F2A91, and they'll follow up at {email}."
@@ -32,8 +32,7 @@ type Intake = {
   email: string
   description: string[]
   awaitingSend: boolean
-  // The answering story starts false and flips on a press; the intake-only
-  // story is always collecting, so it starts true.
+  // False in Answers first until a press; the intake-only stories start true.
   escalated: boolean
 }
 
@@ -141,10 +140,8 @@ const ANSWER =
   "you're seeing, I can pass this to our support team."
 
 /**
- * Stands in for the answering support bot. The first turn gets an answer and an
- * offer; a turn carrying `escalate` goes to intake instead, with the message
- * blanked the way learn-ai blanks it, so the press is what routes the thread
- * rather than the words the button happens to send.
+ * Mock answering bot: answers until a turn carries `escalate`, then runs intake
+ * with that turn's message blanked, as learn-ai does.
  */
 const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
   const {
@@ -186,9 +183,8 @@ const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
     return HttpResponse.text(ASK_FOR_EMAIL)
   }
   // A press on the greeting escalates before the learner has said anything.
-  // learn-ai asks for more rather than show a review with no problem in it.
   if (intake.description.length === 0) {
-    return HttpResponse.text(ASK_MORE)
+    return HttpResponse.text(ASK_PROBLEM)
   }
 
   intake.awaitingSend = true
@@ -198,12 +194,10 @@ const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
 })
 
 /**
- * The "Contact the support team" button sits under the greeting from the
- * start and follows the newest reply. Ask something the bot can answer
- * ("when do I get my certificate?") and it answers and offers a handoff —
- * or press the button right away. The request it causes carries
- * `escalate: true` for that one turn, which you can watch in the network
- * panel, and the turn after it is an ordinary one again.
+ * The support-team button sits under the newest reply from the start. Ask
+ * something ("when do I get my certificate?") or press it right away. A press
+ * sends `escalate: true` on that one request (see the network panel); the next
+ * turn is ordinary.
  */
 export const AnswersFirst: Story = {
   name: "Answers first",

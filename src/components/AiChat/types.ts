@@ -171,24 +171,16 @@ type AiChatDisplayProps = {
   problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
 
   /**
-   * If provided, shows a button that sends `label` as the next message. It
-   * sits under the newest assistant message - a greeting from
-   * `initialMessages` included, so a chat that opens with one offers it from
-   * the start - and is hidden while a request is open.
-   *
-   * The entry screen renders in place of the transcript, so with
-   * `entryScreenEnabled` the button appears only once the chat screen takes
-   * over, not on the entry screen itself.
-   *
-   * Hosts whose backend treats a press differently from the same words typed
-   * should pair it with `onEscalate`.
+   * Shows a button under the newest assistant message (the greeting included)
+   * that sends `label` as the next user message. Hidden while a request is
+   * open and on the entry screen. Pair with `onEscalate` if the backend must
+   * tell a press from typed text.
    */
   escalation?: { label: string }
 
   /**
-   * Called when the escalation button is pressed, in the same tick as the send
-   * it causes. A host that marks the request can set its flag here and read it
-   * back in `transformBody`, which runs on that same send.
+   * Called on a press, just before the send, so a flag set here is visible to
+   * `transformBody` for that request.
    */
   onEscalate?: () => void
 

@@ -18,6 +18,8 @@ type ContactUsLauncherProps = {
   label?: string
   /** Shows the label as visible text next to the icon instead of icon-only. */
   showLabel?: boolean
+  /** Text of the button that hands the chat to the support team. */
+  escalateLabel?: string
   className?: string
 }
 
@@ -39,14 +41,10 @@ const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
 
-// The button sends these exact words, and learn-ai blanks them, so what the
-// learner last typed is not repeated into the ticket. Reaching a person is a
-// press rather than a phrase the learner has to guess.
+// learn-ai blanks an escalated turn's message, so this never reaches the ticket.
 const ESCALATE_LABEL = "Contact the support team"
 
-// The greeting sets the deal up front: the bot answers what it can, a
-// person is always reachable but slower. Nothing else on the way in says
-// what this card does.
+// Nothing else on the way in says what this card does.
 const GREETING = [
   {
     role: "assistant" as const,
@@ -146,6 +144,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   settings,
   label = "Contact us",
   showLabel = false,
+  escalateLabel = ESCALATE_LABEL,
   className,
 }) => {
   const [open, setOpen] = useState(false)
@@ -174,10 +173,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const wasOpen = useRef(false)
   const conversationStarted = useRef(false)
   const historyCleared = useRef(false)
-  // A ref, not state: learn-ai blanks the message every escalated turn arrives
-  // with, so a flag that survived the send would blank each later turn too and
-  // the learner's own words would never reach the ticket. transformBody reads
-  // it and clears it on the one request the press causes.
+  // A ref so transformBody sees the press without waiting for a re-render.
+  // Cleared on read: learn-ai blanks every escalated turn's message.
   const escalating = useRef(false)
 
   /**
@@ -219,8 +216,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         page_url: hostPageUrl ?? window.location.href,
         message: messages[messages.length - 1].content,
         clear_history: clearHistory,
-        // Omitted rather than sent as false, so normal turns keep the wire
-        // shape learn-ai already reads.
+        // Omitted when false so ordinary turns are unchanged on the wire.
         ...(escalate && { escalate: true }),
       }
     },
@@ -397,7 +393,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}
-            escalation={{ label: ESCALATE_LABEL }}
+            escalation={{ label: escalateLabel }}
             onEscalate={() => {
               escalating.current = true
             }}

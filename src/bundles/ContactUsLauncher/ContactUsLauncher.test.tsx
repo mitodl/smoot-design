@@ -148,10 +148,7 @@ test("brands the card as AskTIM rather than repeating the launcher label", async
 })
 
 test("opens on a greeting that says what the card will do", async () => {
-  // Nothing on the way in says what this is: the learner clicked "Contact
-  // us" and landed on a chat box. The greeting sets the deal - the bot
-  // answers what it can, a person is reachable but slower - and ends by
-  // asking what they need.
+  // The greeting is the only thing that says what the card does.
   renderLauncher()
 
   const card = await openCard()
@@ -592,6 +589,18 @@ test("a host-replaced greeting still anchors the offer", async () => {
   ).toBeInTheDocument()
 })
 
+test("a host can relabel the escalation button", async () => {
+  renderLauncher({ escalateLabel: "Contactar al equipo de soporte" })
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", {
+      name: "Contactar al equipo de soporte",
+    }),
+  ).toBeInTheDocument()
+})
+
 test("a click outside leaves the card open once a message has been sent", async () => {
   // Dismissing by accident would throw away a support request the learner has
   // already started; past that point only the close button and Escape close it.
@@ -762,10 +771,7 @@ test("a reopened card starts a fresh thread", async () => {
 })
 
 test("a press on the escalation offer marks that turn and sends its own words", async () => {
-  // learn-ai takes escalate as a button press rather than a phrase, so a
-  // learner who wants a person never has to guess wording the bot recognises.
-  // It blanks whatever message the press arrives with, which is why the button
-  // sends its own label rather than repeating what the learner last typed.
+  // learn-ai blanks the message of an escalated turn, so the label is safe to send.
   const mockFetch = jest.spyOn(window, "fetch")
   renderLauncher()
 
@@ -790,9 +796,7 @@ test("a press on the escalation offer marks that turn and sends its own words", 
 })
 
 test("the turn after a press is an ordinary one", async () => {
-  // learn-ai blanks the message on any turn marked escalate, so a mark that
-  // outlived the press would throw away everything the learner typed after it
-  // and the ticket would carry nothing they said.
+  // A mark that outlived the press would blank every later message.
   const mockFetch = jest.spyOn(window, "fetch")
   renderLauncher()
 

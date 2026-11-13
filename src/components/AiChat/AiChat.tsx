@@ -294,26 +294,11 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
-const EscalateRow = styled.div({
-  display: "flex",
-  margin: "12px 0 2px",
-})
-
-// The conversation-starter chip, so the two cannot drift apart.
 const EscalateChip = styled(Starter)(({ theme }) => ({
+  display: "block",
+  margin: "12px 0 2px",
   color: theme.custom.colors.darkGray2,
 }))
-
-const EscalateButton: FC<{ label: string; onClick: () => void }> = ({
-  label,
-  onClick,
-}) => (
-  <EscalateRow>
-    <EscalateChip type="button" onClick={onClick}>
-      {label}
-    </EscalateChip>
-  </EscalateRow>
-)
 
 const hasMessageError = (message: AiChatMessage): boolean => {
   const errorMessage = message.data?.error?.message
@@ -447,6 +432,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     }
   }, [showEntryScreen])
 
+  // The composer is multiline, so MUI renders a textarea, not an input.
+  const focusComposer = () => {
+    promptInputRef.current
+      ?.querySelector("textarea")
+      ?.focus({ preventScroll: true })
+  }
+
   useEffect(() => {
     if (
       problemSetListResponse &&
@@ -473,9 +465,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
 
   const showStarters = messages.length === (initialMessages?.length || 0)
 
-  // The newest assistant message - the greeting counts, so the offer shows
-  // from the start, and a failed send that leaves the learner's own message
-  // last does not move it. -1 when nothing assistant-authored exists yet.
+  // The greeting counts; a failed send that leaves the user's message last
+  // doesn't move it.
   const lastAssistantIndex = messages.reduce(
     (last, message, index) => (message.role === "assistant" ? index : last),
     -1,
@@ -491,14 +482,6 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
       behavior: "instant",
       top: element?.scrollHeight,
     })
-  }
-
-  // A textarea rather than an input: the composer is multiline, so that is
-  // what MUI renders it as.
-  const focusComposer = () => {
-    promptInputRef.current
-      ?.querySelector("textarea")
-      ?.focus({ preventScroll: true })
   }
 
   const onProblemSetChange = (event: SelectChangeEvent<string | string[]>) => {
@@ -623,30 +606,29 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             <FeedbackButtons message={aiChatMessage} />
                           </>
                         )}
-                        {/* Outside the branch above, so a reply that failed
-                        still offers a person. Hidden while a request is open:
-                        append() does not abort it, so a press would run two
-                        turns at once on the same thread. */}
+                        {/* Outside the branch above so a failed reply still
+                        offers a person. Hidden while loading: append() won't
+                        abort the open request, so a press would run two turns
+                        at once. */}
                         {escalation &&
                         !isLoading &&
                         index === lastAssistantIndex ? (
-                          <EscalateButton
-                            label={escalation.label}
+                          <EscalateChip
+                            type="button"
                             onClick={() => {
-                              // The press unmounts this chip, so focus has to
-                              // be moved by hand or it falls to the body.
+                              // The chip unmounts on press; keep focus off <body>.
                               focusComposer()
                               scrollToBottom()
-                              // Before the append, so the host's flag is
-                              // already set when transformBody reads it on the
-                              // request this press causes.
+                              // Before append() so transformBody sees the flag.
                               onEscalate?.()
                               append({
                                 role: "user",
                                 content: escalation.label,
                               })
                             }}
-                          />
+                          >
+                            {escalation.label}
+                          </EscalateChip>
                         ) : null}
                       </Message>
                     </MessageRow>

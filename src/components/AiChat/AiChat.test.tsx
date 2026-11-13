@@ -596,9 +596,8 @@ describe("AiChat", () => {
   })
 
   test("keeps the escalation offer when the reply itself is the error", async () => {
-    // learn-ai sends its headers before it streams, so a failure after that
-    // arrives as a 200 with the error appended to the reply. That reply is
-    // the newest one, and it renders as an alert rather than as content.
+    // learn-ai sends headers before streaming, so a later failure arrives as
+    // a 200 whose reply renders as an alert.
     server.use(
       http.post(API_URL, () =>
         HttpResponse.text(
@@ -617,8 +616,7 @@ describe("AiChat", () => {
   })
 
   test("keeps the escalation offer when the send fails", async () => {
-    // A failed send leaves the learner's own message newest, and the offer is
-    // the only way back to a person - a retyped retry carries no escalation.
+    // A failed send leaves the learner's own message newest.
     setup({ escalation: { label: "Contact the support team" } })
 
     await user.click(getConversationStarters()[0])

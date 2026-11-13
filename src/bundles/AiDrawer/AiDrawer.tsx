@@ -287,17 +287,10 @@ type AiDrawerProps = {
    */
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 
-  /**
-   * Shows a button under the newest reply that sends `label` as the next
-   * message. See `AiChatProps["escalation"]` for when it is and isn't shown.
-   * Not serializable through message events, same as the handler.
-   */
+  /** See `AiChatProps["escalation"]`. Prop only; can't be sent through message events. */
   escalation?: AiChatProps["escalation"]
 
-  /**
-   * Called when that button is pressed, in the same tick as the send it causes,
-   * so a flag set here is readable from `transformBody` on that same request.
-   */
+  /** See `AiChatProps["onEscalate"]`. */
   onEscalate?: AiChatProps["onEscalate"]
 
   settings?: AiDrawerSettings
