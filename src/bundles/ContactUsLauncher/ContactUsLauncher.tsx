@@ -18,6 +18,8 @@ type ContactUsLauncherProps = {
   label?: string
   /** Shows the label as visible text next to the icon instead of icon-only. */
   showLabel?: boolean
+  /** Text of the button that hands the chat to the support team. */
+  escalateLabel?: string
   className?: string
 }
 
@@ -39,15 +41,17 @@ const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
 
-// Nothing on the way in says what this does with what the learner types: they
-// clicked a button labelled "Contact us" and landed on a chat box.
+// learn-ai blanks an escalated turn's message, so this never reaches the ticket.
+const ESCALATE_LABEL = "Contact the support team"
+
+// Nothing else on the way in says what this card does.
 const GREETING = [
   {
     role: "assistant" as const,
     content:
-      "**How can we help?**\n\nI'm AskTIM, and I'm here to help you send a " +
-      "request to the MIT Open Learning support team. Tell me what went " +
-      "wrong and I'll pass it on.",
+      "**How can we help?**\n\nI'm AskTIM. Ask me about your account, " +
+      "enrollment, or certificates, and I'll find the answer. If I can't, " +
+      "I'll get your request to our support team.",
   },
 ]
 
@@ -139,6 +143,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   settings,
   label = "Contact us",
   showLabel = false,
+  escalateLabel = ESCALATE_LABEL,
   className,
 }) => {
   const [open, setOpen] = useState(false)
@@ -167,6 +172,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const wasOpen = useRef(false)
   const conversationStarted = useRef(false)
   const historyCleared = useRef(false)
+  // A ref so transformBody sees the press without waiting for a re-render.
+  // Cleared on read: learn-ai blanks every escalated turn's message.
+  const escalating = useRef(false)
 
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
@@ -199,12 +207,16 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       conversationStarted.current = true
       const clearHistory = !historyCleared.current
       historyCleared.current = true
+      const escalate = escalating.current
+      escalating.current = false
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
         page_url: hostPageUrl ?? window.location.href,
         message: messages[messages.length - 1].content,
         clear_history: clearHistory,
+        // Omitted when false so ordinary turns are unchanged on the wire.
+        ...(escalate && { escalate: true }),
       }
     },
     [hostPageUrl],
@@ -380,6 +392,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}
+            escalation={{ label: escalateLabel }}
+            onEscalate={() => {
+              escalating.current = true
+            }}
           />
         </PopoverCard>
       ) : null}
