@@ -45,45 +45,76 @@ const freshIntake = (escalated = true): Intake => ({
 
 let intake = freshIntake()
 
+const ANSWER =
+  "Your certificate is issued once the course ends and your grade is final, " +
+  "usually within a few days of the end date.\n\nIf that doesn't match what " +
+  "you're seeing, I can pass this to our support team."
+
 /**
- * Stands in for learn-ai's support bot across all three turns: ask for an
- * address, show the ticket for review, then file it on the turn after. The
- * review step is in learn-ai's code rather than its model, so a mock that files
- * the moment an address arrives would demo a flow the backend no longer has.
+ * Stands in for learn-ai's support bot: answers until a turn carries
+ * `escalate` (unless it starts escalated), then runs intake with that turn's
+ * message blanked, as learn-ai does. Intake asks for an address, shows the
+ * ticket for review, then files it on the turn after. The review step is in
+ * learn-ai's code rather than its model, so a mock that files the moment an
+ * address arrives would demo a flow the backend no longer has.
  */
-const supportHandler = http.post(SUPPORT_API, async ({ request }) => {
-  const { message, clear_history: clearHistory } = (await request.json()) as {
-    message: string
-    clear_history: boolean
-  }
-  // Each card session starts a new thread, so the mock forgets with it.
-  if (clearHistory) {
-    intake = freshIntake()
-  }
-  await delay(400)
+const supportHandler = (startEscalated: boolean) =>
+  http.post(SUPPORT_API, async ({ request }) => {
+    const {
+      message,
+      clear_history: clearHistory,
+      escalate,
+    } = (await request.json()) as {
+      message: string
+      clear_history: boolean
+      escalate?: boolean
+    }
+    // Each card session starts a new thread, so the mock forgets with it.
+    if (clearHistory) {
+      intake = freshIntake(startEscalated)
+    }
+    await delay(400)
 
-  if (intake.awaitingSend) {
-    const reply = TICKET_FILED.replace("{email}", intake.email)
-    intake = freshIntake()
-    return HttpResponse.text(reply)
-  }
+    if (escalate) {
+      intake.escalated = true
+      return HttpResponse.text(ASK_FOR_EMAIL)
+    }
+    if (!intake.escalated) {
+      intake.description.push(message)
+      return HttpResponse.text(ANSWER)
+    }
 
-  const address = message.match(/\S+@\S+\.\S+/)?.[0]
-  if (!address) {
-    intake.description.push(message)
-    return HttpResponse.text(ASK_FOR_EMAIL)
-  }
+    if (intake.awaitingSend) {
+      const reply = TICKET_FILED.replace("{email}", intake.email)
+      intake = freshIntake(startEscalated)
+      return HttpResponse.text(reply)
+    }
 
-  intake.email = address
-  intake.awaitingSend = true
-  return HttpResponse.text(review(intake.description.join("\n\n"), address))
-})
+    const address = message.match(/\S+@\S+\.\S+/)?.[0]
+    if (address) {
+      intake.email = address
+    } else {
+      intake.description.push(message)
+    }
+    if (!intake.email) {
+      return HttpResponse.text(ASK_FOR_EMAIL)
+    }
+    // A press on the greeting escalates before the learner has said anything.
+    if (intake.description.length === 0) {
+      return HttpResponse.text(ASK_PROBLEM)
+    }
+
+    intake.awaitingSend = true
+    return HttpResponse.text(
+      review(intake.description.join("\n\n"), intake.email),
+    )
+  })
 
 const meta: Meta<typeof ContactUsLauncher> = {
   title: "smoot-design/AI/ContactUsLauncher",
   component: ContactUsLauncher,
   parameters: {
-    msw: { handlers: [supportHandler] },
+    msw: { handlers: [supportHandler(true)] },
   },
   args: {
     settings: {
@@ -134,65 +165,6 @@ export const ShowLabel: Story = {
   args: { showLabel: true },
 }
 
-const ANSWER =
-  "Your certificate is issued once the course ends and your grade is final, " +
-  "usually within a few days of the end date.\n\nIf that doesn't match what " +
-  "you're seeing, I can pass this to our support team."
-
-/**
- * Mock answering bot: answers until a turn carries `escalate`, then runs intake
- * with that turn's message blanked, as learn-ai does.
- */
-const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
-  const {
-    message,
-    clear_history: clearHistory,
-    escalate,
-  } = (await request.json()) as {
-    message: string
-    clear_history: boolean
-    escalate?: boolean
-  }
-  if (clearHistory) {
-    intake = freshIntake(false)
-  }
-  await delay(400)
-
-  if (escalate) {
-    intake.escalated = true
-    return HttpResponse.text(ASK_FOR_EMAIL)
-  }
-  if (!intake.escalated) {
-    intake.description.push(message)
-    return HttpResponse.text(ANSWER)
-  }
-
-  if (intake.awaitingSend) {
-    const reply = TICKET_FILED.replace("{email}", intake.email)
-    intake = freshIntake()
-    return HttpResponse.text(reply)
-  }
-
-  const address = message.match(/\S+@\S+\.\S+/)?.[0]
-  if (address) {
-    intake.email = address
-  } else {
-    intake.description.push(message)
-  }
-  if (!intake.email) {
-    return HttpResponse.text(ASK_FOR_EMAIL)
-  }
-  // A press on the greeting escalates before the learner has said anything.
-  if (intake.description.length === 0) {
-    return HttpResponse.text(ASK_PROBLEM)
-  }
-
-  intake.awaitingSend = true
-  return HttpResponse.text(
-    review(intake.description.join("\n\n"), intake.email),
-  )
-})
-
 /**
  * The support-team button sits under the newest reply from the start. Ask
  * something ("when do I get my certificate?") or press it right away. A press
@@ -202,7 +174,7 @@ const answeringHandler = http.post(SUPPORT_API, async ({ request }) => {
 export const AnswersFirst: Story = {
   name: "Answers first",
   parameters: {
-    msw: { handlers: [answeringHandler] },
+    msw: { handlers: [supportHandler(false)] },
   },
 }
 
