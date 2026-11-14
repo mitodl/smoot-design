@@ -848,6 +848,37 @@ test("a press straight from the greeting starts the thread as an escalation", as
   )
 })
 
+test("every retry of an escalated send keeps the mark", async () => {
+  // transformBody clears the mark as it reads it, so it must run once per
+  // send, not once per attempt.
+  let attempts = 0
+  const bodies: unknown[] = []
+  server.use(
+    http.post(TEST_API, async ({ request }) => {
+      bodies.push(await request.json())
+      attempts += 1
+      return attempts < 3
+        ? new HttpResponse(null, { status: 500 })
+        : HttpResponse.text(REPLY)
+    }),
+  )
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await screen.findAllByText(REPLY)
+
+  expect(bodies).toHaveLength(3)
+  bodies.forEach((body) =>
+    expect(body).toMatchObject({
+      message: "Contact the support team",
+      escalate: true,
+    }),
+  )
+})
+
 test("a retry after a failed send continues the same thread", async () => {
   // learn-ai mints a thread either way when none exists yet (no cookie to read
   // back), so the retry doesn't need a fresh clear_history to get one. Sending
