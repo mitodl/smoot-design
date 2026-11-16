@@ -170,6 +170,20 @@ type AiChatDisplayProps = {
    */
   problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
 
+  /**
+   * Shows a button under the newest assistant message (the greeting included)
+   * that sends `label` as the next user message. Hidden while a request is
+   * open and on the entry screen. Pair with `onEscalate` if the backend must
+   * tell a press from typed text.
+   */
+  escalation?: { label: string }
+
+  /**
+   * Called on a press, just before the send, so a flag set here is visible to
+   * `transformBody` for that request.
+   */
+  onEscalate?: () => void
+
   onSubmit?: (
     messageText: string,
     meta: {

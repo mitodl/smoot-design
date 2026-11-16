@@ -1,5 +1,5 @@
 import * as React from "react"
-import { act, render, screen, within } from "@testing-library/react"
+import { act, render, screen, waitFor, within } from "@testing-library/react"
 import user from "@testing-library/user-event"
 import { setupServer } from "msw/node"
 import { http, HttpResponse } from "msw"
@@ -148,14 +148,16 @@ test("brands the card as AskTIM rather than repeating the launcher label", async
 })
 
 test("opens on a greeting that says what the card will do", async () => {
-  // Nothing on the way in says this files a support request: the learner
-  // clicked a button labelled "Contact us" and landed on a chat box.
+  // The greeting is the only thing that says what the card does.
   renderLauncher()
 
   const card = await openCard()
 
   expect(transcript(card)).toHaveTextContent(/I'm AskTIM/)
-  expect(transcript(card)).toHaveTextContent(/support team/)
+  expect(transcript(card)).toHaveTextContent(
+    /account, enrollment, or certificates/,
+  )
+  expect(transcript(card)).toHaveTextContent(/our support team/)
 })
 
 test("marks the card as an AI assistant", async () => {
@@ -556,6 +558,50 @@ test("lets the host replace the greeting", async () => {
   expect(transcript(card)).not.toHaveTextContent(/I'm AskTIM/)
 })
 
+test("offers the support team from the moment the card opens", async () => {
+  // The path to a person is never hidden; the greeting anchors it before
+  // the learner has typed anything.
+  renderLauncher()
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", { name: "Contact the support team" }),
+  ).toBeInTheDocument()
+})
+
+test("a host-replaced greeting still anchors the offer", async () => {
+  // Replacing the copy (a translated host string) must not cost the button.
+  renderLauncher({
+    settings: {
+      chat: {
+        ...SETTINGS.chat,
+        initialMessages: [
+          { role: "assistant" as const, content: "¿En qué podemos ayudarte?" },
+        ],
+      },
+    },
+  })
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", { name: "Contact the support team" }),
+  ).toBeInTheDocument()
+})
+
+test("a host can relabel the escalation button", async () => {
+  renderLauncher({ escalateLabel: "Contactar al equipo de soporte" })
+
+  const card = await openCard()
+
+  expect(
+    within(card).getByRole("button", {
+      name: "Contactar al equipo de soporte",
+    }),
+  ).toBeInTheDocument()
+})
+
 test("a click outside leaves the card open once a message has been sent", async () => {
   // Dismissing by accident would throw away a support request the learner has
   // already started; past that point only the close button and Escape close it.
@@ -721,6 +767,114 @@ test("a reopened card starts a fresh thread", async () => {
         message: "my certificate has not arrived",
         clear_history: true,
       }),
+    }),
+  )
+})
+
+test("a press on the escalation offer marks that turn and sends its own words", async () => {
+  // learn-ai blanks the message of an escalated turn, so the label is safe to send.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Contact the support team",
+        clear_history: false,
+        escalate: true,
+      }),
+    }),
+  )
+})
+
+test("the turn after a press is an ordinary one", async () => {
+  // A mark that outlived the press would blank every later message.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2))
+  await sendMessage("me@example.com")
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "me@example.com",
+        clear_history: false,
+      }),
+    }),
+  )
+})
+
+test("a press straight from the greeting starts the thread as an escalation", async () => {
+  // First request of the thread: it must carry clear_history so learn-ai
+  // mints a fresh thread, and escalate so the blanked label is never read
+  // as the learner's words.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await screen.findAllByText(REPLY)
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Contact the support team",
+        clear_history: true,
+        escalate: true,
+      }),
+    }),
+  )
+})
+
+test("every retry of an escalated send keeps the mark", async () => {
+  // transformBody clears the mark as it reads it, so it must run once per
+  // send, not once per attempt.
+  let attempts = 0
+  const bodies: unknown[] = []
+  server.use(
+    http.post(TEST_API, async ({ request }) => {
+      bodies.push(await request.json())
+      attempts += 1
+      return attempts < 3
+        ? new HttpResponse(null, { status: 500 })
+        : HttpResponse.text(REPLY)
+    }),
+  )
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("button", { name: "Contact the support team" }),
+  )
+  await screen.findAllByText(REPLY)
+
+  expect(bodies).toHaveLength(3)
+  bodies.forEach((body) =>
+    expect(body).toMatchObject({
+      message: "Contact the support team",
+      escalate: true,
     }),
   )
 })

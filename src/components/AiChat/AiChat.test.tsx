@@ -470,6 +470,201 @@ describe("AiChat", () => {
       screen.queryByRole("button", { name: "Bad response" }),
     ).not.toBeInTheDocument()
   })
+
+  test("offers escalation under the newest assistant message only", async () => {
+    // Under every reply it repeats the whole way down the transcript; under an
+    // older one it asks the learner to scroll back to reach a person.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    const messages = await whenCount(getMessages, 3)
+    // The message renders before the request closes, and the offer waits for
+    // the close, so finding it is a wait rather than a read.
+    await screen.findByRole("button", { name: "Contact the support team" })
+
+    const escalate = screen.getAllByRole("button", {
+      name: "Contact the support team",
+    })
+    expect(escalate).toHaveLength(1)
+    expect(messages[2]).toContainElement(escalate[0])
+  })
+
+  test("calls back in time for the send the press causes", async () => {
+    // The host marks the request from onEscalate and reads the mark back in
+    // transformBody. A press that sends without calling back first marks the
+    // turn after instead - a different message, and in Contact Us's case the
+    // learner's own words.
+    const marked: boolean[] = []
+    let escalating = false
+    const transformBody = jest.fn((messages: { content: string }[]) => {
+      marked.push(escalating)
+      escalating = false
+      return { message: messages[messages.length - 1].content }
+    })
+    setup({
+      escalation: { label: "Contact the support team" },
+      onEscalate: () => {
+        escalating = true
+      },
+      requestOpts: { apiUrl: API_URL, transformBody },
+    })
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, 3)
+    await user.click(
+      await screen.findByRole("button", { name: "Contact the support team" }),
+    )
+    await whenCount(getMessages, 5)
+
+    expect(marked).toEqual([false, true])
+  })
+
+  test("offers escalation under the greeting before any reply", () => {
+    // The offer is visible from the start: the learner can reach a person
+    // without first sending the bot something it may not understand.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    const escalate = screen.getByRole("button", {
+      name: "Contact the support team",
+    })
+    expect(getMessages()[0]).toContainElement(escalate)
+  })
+
+  test("offers no escalation when there is nothing to anchor it under", () => {
+    // No greeting and no reply yet: the offer renders under a message, so an
+    // empty transcript has nowhere to put it.
+    setup({
+      escalation: { label: "Contact the support team" },
+      initialMessages: [],
+    })
+
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+  })
+
+  test("keeps the offer on the greeting when the first send fails", async () => {
+    // A failed first send leaves the learner's own message newest with no
+    // reply ever arrived; the greeting still anchors the way to a person.
+    server.use(
+      http.post(API_URL, () => new HttpResponse(null, { status: 500 })),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByRole("alert")
+
+    expect(getMessages()[0]).toContainElement(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    )
+  })
+
+  test("holds the escalation offer back until the reply has finished", async () => {
+    // The first chunk makes the reply the newest message while the request is
+    // still open. append() does not abort that one, so a press here would run
+    // two turns at once on the same thread.
+    let endStream: () => void = () => {}
+    const streamEnded = new Promise<void>((resolve) => {
+      endStream = resolve
+    })
+    server.use(
+      http.post(API_URL, () => {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode("Half an answer"))
+            streamEnded.then(() => controller.close())
+          },
+        })
+        return new HttpResponse(stream, {
+          headers: { "Content-Type": "text/plain" },
+        })
+      }),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByText("Half an answer")
+
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+
+    endStream()
+    expect(
+      await screen.findByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("keeps the escalation offer when the reply itself is the error", async () => {
+    // learn-ai sends headers before streaming, so a later failure arrives as
+    // a 200 whose reply renders as an alert.
+    server.use(
+      http.post(API_URL, () =>
+        HttpResponse.text(
+          '<!-- {"error":{"message":"An error occurred, please try again"},"checkpoint_pk":123,"thread_id":"f8a2b9c4e7d6f1a3b5c8e9d2f4a7b6c1"} -->',
+        ),
+      ),
+    )
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByRole("alert")
+
+    expect(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("keeps the escalation offer when the send fails", async () => {
+    // A failed send leaves the learner's own message newest.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    await user.click(getConversationStarters()[0])
+    const escalate = await screen.findByRole("button", {
+      name: "Contact the support team",
+    })
+
+    server.use(
+      http.post(API_URL, () => new HttpResponse(null, { status: 500 })),
+    )
+    await user.click(escalate)
+    await screen.findByRole("alert")
+
+    expect(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("scrolls the reply an escalation press causes into view", async () => {
+    // The reader can be parked on the greeting with the newest message well
+    // below it, and useScrollSnap only follows along within 200px of the
+    // bottom, so otherwise the reply the press causes lands offscreen.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    const scrollBy = jest.spyOn(HTMLElement.prototype, "scrollBy")
+    await user.click(
+      screen.getByRole("button", { name: "Contact the support team" }),
+    )
+    await whenCount(getMessages, 3)
+
+    expect(scrollBy).toHaveBeenCalled()
+  })
+
+  test("moves focus to the composer when the offer is activated", async () => {
+    // The press unmounts the chip it came from, so focus would fall to the
+    // body and a keyboard learner would lose their place in the card
+    // (WCAG 2.4.3). The bot asks for an email next, which is where they need
+    // to be anyway.
+    setup({ escalation: { label: "Contact the support team" } })
+
+    screen.getByRole("button", { name: "Contact the support team" }).focus()
+    await user.keyboard("{Enter}")
+    await whenCount(getMessages, 3)
+
+    expect(
+      screen.getByRole("textbox", { name: "Type a message..." }),
+    ).toHaveFocus()
+  })
 })
 
 test("replaceMathjax replaces unsupported MathJax syntax", () => {

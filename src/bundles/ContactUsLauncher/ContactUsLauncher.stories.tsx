@@ -7,6 +7,9 @@ const PAGE_URL = "https://learn.mit.edu/courses/18.01/week-3"
 
 const ASK_FOR_EMAIL =
   "Sorry that happened. What email address should the support team reply to?"
+const ASK_PROBLEM =
+  "What's going on? Tell me what you need help with and I'll pass it on to " +
+  "the MIT Open Learning support team."
 const TICKET_FILED =
   "Thanks - I've passed that on to the MIT Open Learning support team. Your " +
   "reference number is STUB-4F2A91, and they'll follow up at {email}."
@@ -25,55 +28,93 @@ const review = (description: string, email: string) =>
       "and I'll pass this on.",
   ].join("\n")
 
-type Intake = { email: string; description: string[]; awaitingSend: boolean }
+type Intake = {
+  email: string
+  description: string[]
+  awaitingSend: boolean
+  // False in Answers first until a press; the intake-only stories start true.
+  escalated: boolean
+}
 
-const freshIntake = (): Intake => ({
+const freshIntake = (escalated = true): Intake => ({
   email: "",
   description: [],
   awaitingSend: false,
+  escalated,
 })
 
 let intake = freshIntake()
 
+const ANSWER =
+  "Your certificate is issued once the course ends and your grade is final, " +
+  "usually within a few days of the end date.\n\nIf that doesn't match what " +
+  "you're seeing, I can pass this to our support team."
+
 /**
- * Stands in for learn-ai's support bot across all three turns: ask for an
- * address, show the ticket for review, then file it on the turn after. The
- * review step is in learn-ai's code rather than its model, so a mock that files
- * the moment an address arrives would demo a flow the backend no longer has.
+ * Stands in for learn-ai's support bot: answers until a turn carries
+ * `escalate` (unless it starts escalated), then runs intake with that turn's
+ * message blanked, as learn-ai does. Intake asks for an address, shows the
+ * ticket for review, then files it on the turn after. The review step is in
+ * learn-ai's code rather than its model, so a mock that files the moment an
+ * address arrives would demo a flow the backend no longer has.
  */
-const supportHandler = http.post(SUPPORT_API, async ({ request }) => {
-  const { message, clear_history: clearHistory } = (await request.json()) as {
-    message: string
-    clear_history: boolean
-  }
-  // Each card session starts a new thread, so the mock forgets with it.
-  if (clearHistory) {
-    intake = freshIntake()
-  }
-  await delay(400)
+const supportHandler = (startEscalated: boolean) =>
+  http.post(SUPPORT_API, async ({ request }) => {
+    const {
+      message,
+      clear_history: clearHistory,
+      escalate,
+    } = (await request.json()) as {
+      message: string
+      clear_history: boolean
+      escalate?: boolean
+    }
+    // Each card session starts a new thread, so the mock forgets with it.
+    if (clearHistory) {
+      intake = freshIntake(startEscalated)
+    }
+    await delay(400)
 
-  if (intake.awaitingSend) {
-    const reply = TICKET_FILED.replace("{email}", intake.email)
-    intake = freshIntake()
-    return HttpResponse.text(reply)
-  }
+    if (escalate) {
+      intake.escalated = true
+      return HttpResponse.text(ASK_FOR_EMAIL)
+    }
+    if (!intake.escalated) {
+      intake.description.push(message)
+      return HttpResponse.text(ANSWER)
+    }
 
-  const address = message.match(/\S+@\S+\.\S+/)?.[0]
-  if (!address) {
-    intake.description.push(message)
-    return HttpResponse.text(ASK_FOR_EMAIL)
-  }
+    if (intake.awaitingSend) {
+      const reply = TICKET_FILED.replace("{email}", intake.email)
+      intake = freshIntake(startEscalated)
+      return HttpResponse.text(reply)
+    }
 
-  intake.email = address
-  intake.awaitingSend = true
-  return HttpResponse.text(review(intake.description.join("\n\n"), address))
-})
+    const address = message.match(/\S+@\S+\.\S+/)?.[0]
+    if (address) {
+      intake.email = address
+    } else {
+      intake.description.push(message)
+    }
+    if (!intake.email) {
+      return HttpResponse.text(ASK_FOR_EMAIL)
+    }
+    // A press on the greeting escalates before the learner has said anything.
+    if (intake.description.length === 0) {
+      return HttpResponse.text(ASK_PROBLEM)
+    }
+
+    intake.awaitingSend = true
+    return HttpResponse.text(
+      review(intake.description.join("\n\n"), intake.email),
+    )
+  })
 
 const meta: Meta<typeof ContactUsLauncher> = {
   title: "smoot-design/AI/ContactUsLauncher",
   component: ContactUsLauncher,
   parameters: {
-    msw: { handlers: [supportHandler] },
+    msw: { handlers: [supportHandler(true)] },
   },
   args: {
     settings: {
@@ -122,6 +163,19 @@ export const CustomLabel: Story = {
 export const ShowLabel: Story = {
   name: "Label shown",
   args: { showLabel: true },
+}
+
+/**
+ * The support-team button sits under the newest reply from the start. Ask
+ * something ("when do I get my certificate?") or press it right away. A press
+ * sends `escalate: true` on that one request (see the network panel); the next
+ * turn is ordinary.
+ */
+export const AnswersFirst: Story = {
+  name: "Answers first",
+  parameters: {
+    msw: { handlers: [supportHandler(false)] },
+  },
 }
 
 /**

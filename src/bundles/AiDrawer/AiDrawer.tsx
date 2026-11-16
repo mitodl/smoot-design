@@ -287,6 +287,12 @@ type AiDrawerProps = {
    */
   fetchOpts?: AiChatProps["requestOpts"]["fetchOpts"]
 
+  /** See `AiChatProps["escalation"]`. Prop only; can't be sent through message events. */
+  escalation?: AiChatProps["escalation"]
+
+  /** See `AiChatProps["onEscalate"]`. */
+  onEscalate?: AiChatProps["onEscalate"]
+
   settings?: AiDrawerSettings
 
   open?: boolean
@@ -380,6 +386,8 @@ const ChatComponent = ({
   needsMathJax,
   variant,
   onTrackingEvent,
+  escalation,
+  onEscalate,
 }: {
   settings: AiDrawerSettings["chat"]
   transformBody: (messages: AiChatMessage[]) => object
@@ -393,6 +401,8 @@ const ChatComponent = ({
   needsMathJax: boolean
   variant: "drawer" | "slot"
   onTrackingEvent?: TrackingEventHandler
+  escalation?: AiChatProps["escalation"]
+  onEscalate?: AiChatProps["onEscalate"]
 }) => {
   if (!settings) return null
   return (
@@ -400,6 +410,8 @@ const ChatComponent = ({
       key={settings.chatId}
       chatId={settings.chatId}
       conversationStarters={conversationStarters}
+      escalation={escalation}
+      onEscalate={onEscalate}
       initialMessages={initialMessages}
       scrollElement={scrollElement}
       entryScreenEnabled={entryScreenEnabled}
@@ -474,6 +486,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
   onClose,
   onReturnToBlock,
   onTrackingEvent,
+  escalation,
+  onEscalate,
   variant = "drawer",
   trapFocus = true,
 }: AiDrawerProps) => {
@@ -668,6 +682,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
         <ChatComponent
           settings={chat}
           transformBody={transformBody}
+          escalation={escalation}
+          onEscalate={onEscalate}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
@@ -717,6 +733,8 @@ const AiDrawer: FC<AiDrawerProps> = ({
             <ChatComponent
               settings={chat}
               transformBody={transformBody}
+              escalation={escalation}
+              onEscalate={onEscalate}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
               entryScreenEnabled={chat?.entryScreenEnabled ?? true}

@@ -294,6 +294,12 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
+const EscalateChip = styled(Starter)(({ theme }) => ({
+  display: "block",
+  margin: "12px 0 2px",
+  color: theme.custom.colors.darkGray2,
+}))
+
 const hasMessageError = (message: AiChatMessage): boolean => {
   const errorMessage = message.data?.error?.message
 
@@ -371,6 +377,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   useMathJax = false,
   mathJaxConfig,
   onSubmit,
+  escalation,
+  onEscalate,
   problemSetListUrl,
   problemSetInitialMessages,
   problemSetEmptyMessages,
@@ -424,6 +432,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
     }
   }, [showEntryScreen])
 
+  // The composer is multiline, so MUI renders a textarea, not an input.
+  const focusComposer = () => {
+    promptInputRef.current
+      ?.querySelector("textarea")
+      ?.focus({ preventScroll: true })
+  }
+
   useEffect(() => {
     if (
       problemSetListResponse &&
@@ -449,6 +464,13 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   }, [problemSetListResponse, problemSetEmptyMessages, setMessages, t])
 
   const showStarters = messages.length === (initialMessages?.length || 0)
+
+  // The greeting counts; a failed send that leaves the user's message last
+  // doesn't move it.
+  const lastAssistantIndex = messages.reduce(
+    (last, message, index) => (message.role === "assistant" ? index : last),
+    -1,
+  )
 
   const waiting =
     !showStarters && !error && messages[messages.length - 1]?.role === "user"
@@ -584,6 +606,30 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             <FeedbackButtons message={aiChatMessage} />
                           </>
                         )}
+                        {/* Outside the branch above so a failed reply still
+                        offers a person. Hidden while loading: append() won't
+                        abort the open request, so a press would run two turns
+                        at once. */}
+                        {escalation &&
+                        !isLoading &&
+                        index === lastAssistantIndex ? (
+                          <EscalateChip
+                            type="button"
+                            onClick={() => {
+                              // The chip unmounts on press; keep focus off <body>.
+                              focusComposer()
+                              scrollToBottom()
+                              // Before append() so transformBody sees the flag.
+                              onEscalate?.()
+                              append({
+                                role: "user",
+                                content: escalation.label,
+                              })
+                            }}
+                          >
+                            {escalation.label}
+                          </EscalateChip>
+                        ) : null}
                       </Message>
                     </MessageRow>
                   )
