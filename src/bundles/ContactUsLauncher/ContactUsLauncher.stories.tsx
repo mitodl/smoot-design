@@ -13,6 +13,9 @@ const ASK_PROBLEM =
 const TICKET_FILED =
   "Thanks - I've passed that on to the MIT Open Learning support team. Your " +
   "reference number is STUB-4F2A91, and they'll follow up at {email}."
+const CANCELLED =
+  "No problem - I haven't sent anything, and I've put aside what you'd written " +
+  "so far. Tell me about it again whenever you're ready and we'll start fresh."
 
 const review = (description: string, email: string) =>
   [
@@ -84,6 +87,10 @@ const supportHandler = (startEscalated: boolean) =>
       return HttpResponse.text(ANSWER)
     }
 
+    if (intake.awaitingSend && message.trim().toLowerCase() === "cancel") {
+      intake = freshIntake(startEscalated)
+      return HttpResponse.text(CANCELLED)
+    }
     if (intake.awaitingSend) {
       const reply = TICKET_FILED.replace("{email}", intake.email)
       intake = freshIntake(startEscalated)
@@ -105,8 +112,9 @@ const supportHandler = (startEscalated: boolean) =>
     }
 
     intake.awaitingSend = true
+    // learn-ai's flag for the Send request and Cancel buttons.
     return HttpResponse.text(
-      review(intake.description.join("\n\n"), intake.email),
+      `${review(intake.description.join("\n\n"), intake.email)}\n\n<!-- {"awaiting_send": true} -->`,
     )
   })
 

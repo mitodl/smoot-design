@@ -44,6 +44,12 @@ const INPUT_PLACEHOLDER = "Describe what you need"
 // learn-ai blanks an escalated turn's message, so this never reaches the ticket.
 const ESCALATE_LABEL = "Contact the support team"
 
+// Not "Send": the composer's submit button already has that name. learn-ai
+// files on the confirm flag and blanks this label, so the wording is free.
+const SEND_LABEL = "Send request"
+// One word learn-ai already reads as a cancellation, so no flag is needed.
+const CANCEL_LABEL = "Cancel"
+
 // Nothing else on the way in says what this card does.
 const GREETING = [
   {
@@ -175,6 +181,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   // A ref so transformBody sees the press without waiting for a re-render.
   // Cleared on read: learn-ai blanks every escalated turn's message.
   const escalating = useRef(false)
+  // Same, for Send: a stored press would approve every later turn.
+  const confirming = useRef(false)
 
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
@@ -209,6 +217,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       historyCleared.current = true
       const escalate = escalating.current
       escalating.current = false
+      const confirm = confirming.current
+      confirming.current = false
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
@@ -217,6 +227,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         clear_history: clearHistory,
         // Omitted when false so ordinary turns are unchanged on the wire.
         ...(escalate && { escalate: true }),
+        ...(confirm && { confirm: true }),
       }
     },
     [hostPageUrl],
@@ -396,6 +407,19 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onEscalate={() => {
               escalating.current = true
             }}
+            messageActions={(message) =>
+              message.data?.awaiting_send
+                ? [
+                    {
+                      label: SEND_LABEL,
+                      onPress: () => {
+                        confirming.current = true
+                      },
+                    },
+                    { label: CANCEL_LABEL },
+                  ]
+                : []
+            }
           />
         </PopoverCard>
       ) : null}
