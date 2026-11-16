@@ -8,6 +8,8 @@ type Role = "assistant" | "user" | "data" | "system"
 type MessageData = {
   checkpoint_pk?: string
   thread_id?: string
+  /** learn-ai's support bot is waiting on a send-or-cancel answer. */
+  awaiting_send?: boolean
   error?: {
     message?: string
   }
@@ -183,6 +185,16 @@ type AiChatDisplayProps = {
    * `transformBody` for that request.
    */
   onEscalate?: () => void
+
+  /**
+   * Buttons to show under the newest assistant message, picked from that
+   * message (usually its `data`). Each press sends `label` as the next user
+   * message, with `onPress` called just before so `transformBody` sees any
+   * flag it sets. Shown above the escalation button, under the same rules.
+   */
+  messageActions?: (
+    message: AiChatMessage,
+  ) => { label: string; onPress?: () => void }[]
 
   onSubmit?: (
     messageText: string,
