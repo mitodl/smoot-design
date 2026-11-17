@@ -693,6 +693,24 @@ describe("AiChat", () => {
     )
   })
 
+  test("shows message actions on one row in place of the escalation chip", async () => {
+    server.use(http.post(API_URL, () => HttpResponse.text(AWAITING_SEND)))
+    setup({
+      messageActions: sendOrCancel,
+      escalation: { label: "Contact the support team" },
+    })
+
+    await user.click(getConversationStarters()[0])
+    const row = (await screen.findByRole("button", { name: "Send request" }))
+      .parentElement
+
+    expect(row).toContainElement(screen.getByRole("button", { name: "Cancel" }))
+    expect(row).toHaveStyle({ display: "flex" })
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+  })
+
   test("shows no message actions when the reply does not ask for them", async () => {
     setup({
       messageActions: sendOrCancel,

@@ -928,8 +928,8 @@ test("offers Send request and Cancel when learn-ai is waiting on a send", async 
 
   expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
   expect(
-    screen.getByRole("button", { name: "Contact the support team" }),
-  ).toBeInTheDocument()
+    screen.queryByRole("button", { name: "Contact the support team" }),
+  ).not.toBeInTheDocument()
 })
 
 test("a Send request press sends confirm on that request only", async () => {

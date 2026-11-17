@@ -190,7 +190,8 @@ type AiChatDisplayProps = {
    * Buttons to show under the newest assistant message, picked from that
    * message (usually its `data`). Each press sends `label` as the next user
    * message, with `onPress` called just before so `transformBody` sees any
-   * flag it sets. Shown above the escalation button, under the same rules.
+   * flag it sets. Shown in place of the escalation button, under the same
+   * rules.
    */
   messageActions?: (
     message: AiChatMessage,
