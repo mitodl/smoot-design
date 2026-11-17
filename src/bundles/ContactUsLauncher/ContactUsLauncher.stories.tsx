@@ -67,10 +67,12 @@ const supportHandler = (startEscalated: boolean) =>
       message,
       clear_history: clearHistory,
       escalate,
+      confirm,
     } = (await request.json()) as {
       message: string
       clear_history: boolean
       escalate?: boolean
+      confirm?: boolean
     }
     // Each card session starts a new thread, so the mock forgets with it.
     if (clearHistory) {
@@ -91,7 +93,8 @@ const supportHandler = (startEscalated: boolean) =>
       intake = freshIntake(startEscalated)
       return HttpResponse.text(CANCELLED)
     }
-    if (intake.awaitingSend) {
+    // Anything else on the review is an addition, shown back rather than sent.
+    if (intake.awaitingSend && (confirm || /^(send|yes)\b/i.test(message))) {
       const reply = TICKET_FILED.replace("{email}", intake.email)
       intake = freshIntake(startEscalated)
       return HttpResponse.text(reply)
