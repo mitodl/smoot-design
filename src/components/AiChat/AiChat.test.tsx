@@ -665,6 +665,135 @@ describe("AiChat", () => {
       screen.getByRole("textbox", { name: "Type a message..." }),
     ).toHaveFocus()
   })
+
+  const AWAITING_SEND = `Here's what I'll send.
+
+<!-- {"checkpoint_pk": 1, "thread_id": "t", "awaiting_send": true} -->`
+  const sendOrCancel: AiChatProps["messageActions"] = (message) =>
+    message.data?.awaiting_send
+      ? [{ label: "Send request" }, { label: "Cancel" }]
+      : []
+
+  test("shows message actions under the newest assistant message only", async () => {
+    server.use(http.post(API_URL, () => HttpResponse.text(AWAITING_SEND)))
+    setup({ messageActions: sendOrCancel })
+
+    await user.click(getConversationStarters()[0])
+    await user.click(
+      await screen.findByRole("button", { name: "Send request" }),
+    )
+    const messages = await whenCount(getMessages, 5)
+    await screen.findByRole("button", { name: "Send request" })
+
+    const send = screen.getAllByRole("button", { name: "Send request" })
+    expect(send).toHaveLength(1)
+    expect(messages[4]).toContainElement(send[0])
+    expect(messages[4]).toContainElement(
+      screen.getByRole("button", { name: "Cancel" }),
+    )
+  })
+
+  test("shows message actions on one row in place of the escalation chip", async () => {
+    server.use(http.post(API_URL, () => HttpResponse.text(AWAITING_SEND)))
+    setup({
+      messageActions: sendOrCancel,
+      escalation: { label: "Contact the support team" },
+    })
+
+    await user.click(getConversationStarters()[0])
+    const row = (await screen.findByRole("button", { name: "Send request" }))
+      .parentElement
+
+    expect(row).toContainElement(screen.getByRole("button", { name: "Cancel" }))
+    expect(row).toHaveStyle({ display: "flex" })
+    expect(
+      screen.queryByRole("button", { name: "Contact the support team" }),
+    ).not.toBeInTheDocument()
+  })
+
+  test("shows no message actions when the reply does not ask for them", async () => {
+    setup({
+      messageActions: sendOrCancel,
+      escalation: { label: "Contact the support team" },
+    })
+
+    await user.click(getConversationStarters()[0])
+    await whenCount(getMessages, 3)
+    // The escalation offer appears once the reply has finished.
+    await screen.findByRole("button", { name: "Contact the support team" })
+
+    expect(
+      screen.queryByRole("button", { name: "Send request" }),
+    ).not.toBeInTheDocument()
+  })
+
+  test("holds message actions back until the reply has finished", async () => {
+    let endStream: () => void = () => {}
+    const streamEnded = new Promise<void>((resolve) => {
+      endStream = resolve
+    })
+    server.use(
+      http.post(API_URL, () => {
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(AWAITING_SEND))
+            streamEnded.then(() => controller.close())
+          },
+        })
+        return new HttpResponse(stream, {
+          headers: { "Content-Type": "text/plain" },
+        })
+      }),
+    )
+    setup({ messageActions: sendOrCancel })
+
+    await user.click(getConversationStarters()[0])
+    await screen.findByText(/Here's what I'll send/)
+
+    expect(
+      screen.queryByRole("button", { name: "Send request" }),
+    ).not.toBeInTheDocument()
+
+    endStream()
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+  })
+
+  test("calls an action back in time for the send its press causes", async () => {
+    server.use(http.post(API_URL, () => HttpResponse.text(AWAITING_SEND)))
+    const marked: [boolean, string][] = []
+    let confirming = false
+    const transformBody = jest.fn((messages: { content: string }[]) => {
+      const message = messages[messages.length - 1].content
+      marked.push([confirming, message])
+      confirming = false
+      return { message }
+    })
+    setup({
+      messageActions: (message) =>
+        message.data?.awaiting_send
+          ? [
+              {
+                label: "Send request",
+                onPress: () => {
+                  confirming = true
+                },
+              },
+            ]
+          : [],
+      requestOpts: { apiUrl: API_URL, transformBody },
+    })
+
+    await user.click(getConversationStarters()[0])
+    await user.click(
+      await screen.findByRole("button", { name: "Send request" }),
+    )
+    await whenCount(getMessages, 5)
+
+    expect(marked[1]).toEqual([true, "Send request"])
+    expect(marked[0][0]).toBe(false)
+  })
 })
 
 test("replaceMathjax replaces unsupported MathJax syntax", () => {

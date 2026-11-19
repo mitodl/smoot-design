@@ -908,3 +908,95 @@ test("a retry after a failed send continues the same thread", async () => {
     }),
   )
 })
+
+// What learn-ai ends a reply with while the request waits on Send or Cancel.
+const AWAITING_SEND = `Here's what I'll send to the support team:
+
+<!-- {"checkpoint_pk": 1, "thread_id": "t", "awaiting_send": true} -->`
+
+const reachTheReview = async () => {
+  server.use(http.post(TEST_API, () => HttpResponse.text(AWAITING_SEND)))
+  await openCard()
+  await sendMessage("my video will not play")
+  return screen.findByRole("button", { name: "Send request" })
+}
+
+test("offers Send request and Cancel when learn-ai is waiting on a send", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+
+  expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  expect(
+    screen.queryByRole("button", { name: "Contact the support team" }),
+  ).not.toBeInTheDocument()
+})
+
+test("a Send request press sends confirm on that request only", async () => {
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await user.click(await reachTheReview())
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Send request",
+        clear_history: false,
+        confirm: true,
+      }),
+    }),
+  )
+
+  await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2))
+  await sendMessage("it also happens on week 4")
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "it also happens on week 4",
+        clear_history: false,
+      }),
+    }),
+  )
+})
+
+test("a Cancel press sends the word learn-ai cancels on, without confirm", async () => {
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await reachTheReview()
+  await user.click(screen.getByRole("button", { name: "Cancel" }))
+
+  expect(mockFetch).toHaveBeenLastCalledWith(
+    TEST_API,
+    expect.objectContaining({
+      body: JSON.stringify({
+        page_url: PAGE_URL,
+        message: "Cancel",
+        clear_history: false,
+      }),
+    }),
+  )
+})
+
+test("offers neither Send request nor Cancel when the reply carries no flag", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await screen.findAllByText(REPLY)
+  // The offer comes back once the reply has finished.
+  await screen.findByRole("button", { name: "Contact the support team" })
+
+  expect(
+    screen.queryByRole("button", { name: "Send request" }),
+  ).not.toBeInTheDocument()
+  expect(
+    screen.queryByRole("button", { name: "Cancel" }),
+  ).not.toBeInTheDocument()
+})

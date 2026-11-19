@@ -293,6 +293,9 @@ type AiDrawerProps = {
   /** See `AiChatProps["onEscalate"]`. */
   onEscalate?: AiChatProps["onEscalate"]
 
+  /** See `AiChatProps["messageActions"]`. Prop only, like `escalation`. */
+  messageActions?: AiChatProps["messageActions"]
+
   settings?: AiDrawerSettings
 
   open?: boolean
@@ -388,6 +391,7 @@ const ChatComponent = ({
   onTrackingEvent,
   escalation,
   onEscalate,
+  messageActions,
 }: {
   settings: AiDrawerSettings["chat"]
   transformBody: (messages: AiChatMessage[]) => object
@@ -403,6 +407,7 @@ const ChatComponent = ({
   onTrackingEvent?: TrackingEventHandler
   escalation?: AiChatProps["escalation"]
   onEscalate?: AiChatProps["onEscalate"]
+  messageActions?: AiChatProps["messageActions"]
 }) => {
   if (!settings) return null
   return (
@@ -412,6 +417,7 @@ const ChatComponent = ({
       conversationStarters={conversationStarters}
       escalation={escalation}
       onEscalate={onEscalate}
+      messageActions={messageActions}
       initialMessages={initialMessages}
       scrollElement={scrollElement}
       entryScreenEnabled={entryScreenEnabled}
@@ -488,6 +494,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
   onTrackingEvent,
   escalation,
   onEscalate,
+  messageActions,
   variant = "drawer",
   trapFocus = true,
 }: AiDrawerProps) => {
@@ -684,6 +691,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
           transformBody={transformBody}
           escalation={escalation}
           onEscalate={onEscalate}
+          messageActions={messageActions}
           fetchOpts={fetchOpts}
           scrollElement={scrollElement}
           entryScreenEnabled={chat?.entryScreenEnabled ?? false}
@@ -735,6 +743,7 @@ const AiDrawer: FC<AiDrawerProps> = ({
               transformBody={transformBody}
               escalation={escalation}
               onEscalate={onEscalate}
+              messageActions={messageActions}
               fetchOpts={fetchOpts}
               scrollElement={scrollElement}
               entryScreenEnabled={chat?.entryScreenEnabled ?? true}

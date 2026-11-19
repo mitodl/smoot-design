@@ -294,9 +294,14 @@ const FeedbackButton = styled(ActionButton)(({ theme }) => ({
   },
 }))
 
-const EscalateChip = styled(Starter)(({ theme }) => ({
-  display: "block",
+const ChipRow = styled.div({
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "8px",
   margin: "12px 0 2px",
+})
+
+const EscalateChip = styled(Starter)(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
 }))
 
@@ -379,6 +384,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
   onSubmit,
   escalation,
   onEscalate,
+  messageActions,
   problemSetListUrl,
   problemSetInitialMessages,
   problemSetEmptyMessages,
@@ -610,26 +616,46 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                         offers a person. Hidden while loading: append() won't
                         abort the open request, so a press would run two turns
                         at once. */}
-                        {escalation &&
-                        !isLoading &&
-                        index === lastAssistantIndex ? (
-                          <EscalateChip
-                            type="button"
-                            onClick={() => {
-                              // The chip unmounts on press; keep focus off <body>.
-                              focusComposer()
-                              scrollToBottom()
-                              // Before append() so transformBody sees the flag.
-                              onEscalate?.()
-                              append({
-                                role: "user",
-                                content: escalation.label,
-                              })
-                            }}
-                          >
-                            {escalation.label}
-                          </EscalateChip>
-                        ) : null}
+                        {!isLoading && index === lastAssistantIndex
+                          ? [
+                              messageActions?.(aiChatMessage) ?? [],
+                              escalation
+                                ? [
+                                    {
+                                      label: escalation.label,
+                                      onPress: onEscalate,
+                                    },
+                                  ]
+                                : [],
+                            ]
+                              // A message's own actions replace the offer: they
+                              // are already its next step.
+                              .filter((row) => row.length > 0)
+                              .slice(0, 1)
+                              .map((row) => (
+                                <ChipRow key={row[0].label}>
+                                  {row.map((action) => (
+                                    <EscalateChip
+                                      key={action.label}
+                                      type="button"
+                                      onClick={() => {
+                                        // The chip unmounts on press; keep focus off <body>.
+                                        focusComposer()
+                                        scrollToBottom()
+                                        // Before append() so transformBody sees the flag.
+                                        action.onPress?.()
+                                        append({
+                                          role: "user",
+                                          content: action.label,
+                                        })
+                                      }}
+                                    >
+                                      {action.label}
+                                    </EscalateChip>
+                                  ))}
+                                </ChipRow>
+                              ))
+                          : null}
                       </Message>
                     </MessageRow>
                   )
