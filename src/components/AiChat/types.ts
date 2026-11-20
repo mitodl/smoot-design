@@ -173,8 +173,8 @@ type AiChatDisplayProps = {
   problemSetEmptyMessages?: Omit<AiChatMessage, "id">[]
 
   /**
-   * Shows a button under the newest assistant message (the greeting included)
-   * that sends `label` as the next user message. Hidden while a request is
+   * Shows a button just above the input, once there is an assistant message
+   * (the greeting included), that sends `label` as the next user message. Hidden while a request is
    * open and on the entry screen. Pair with `onEscalate` if the backend must
    * tell a press from typed text.
    */
@@ -190,8 +190,8 @@ type AiChatDisplayProps = {
    * Buttons to show under the newest assistant message, picked from that
    * message (usually its `data`). Each press sends `label` as the next user
    * message, with `onPress` called just before so `transformBody` sees any
-   * flag it sets. Shown in place of the escalation button, under the same
-   * rules.
+   * flag it sets. While they show, the escalation button is hidden. Hidden
+   * while a request is open.
    */
   messageActions?: (
     message: AiChatMessage,

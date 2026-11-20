@@ -51,6 +51,16 @@ const msg = {
 const getMessages = (): HTMLElement[] => {
   return Array.from(document.querySelectorAll(".MitAiChat--message"))
 }
+// Pinned between the transcript and the input, outside every message.
+const expectPinnedAboveInput = (button: HTMLElement | null) => {
+  const bottom = document.querySelector(".MitAiChat--bottomSection")
+  expect(bottom).toContainElement(button)
+  getMessages().forEach((m) => expect(m).not.toContainElement(button))
+  const input = screen.getByRole("textbox")
+  expect(
+    button!.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+}
 const getConversationStarters = (): HTMLElement[] => {
   return Array.from(
     document.querySelectorAll("button.MitAiChat--conversationStarter"),
@@ -471,13 +481,13 @@ describe("AiChat", () => {
     ).not.toBeInTheDocument()
   })
 
-  test("offers escalation under the newest assistant message only", async () => {
-    // Under every reply it repeats the whole way down the transcript; under an
-    // older one it asks the learner to scroll back to reach a person.
+  test("offers escalation once, above the input", async () => {
+    // In the transcript it scrolls away under a long reply; above the input
+    // it stays where the learner is already looking.
     setup({ escalation: { label: "Contact the support team" } })
 
     await user.click(getConversationStarters()[0])
-    const messages = await whenCount(getMessages, 3)
+    await whenCount(getMessages, 3)
     // The message renders before the request closes, and the offer waits for
     // the close, so finding it is a wait rather than a read.
     await screen.findByRole("button", { name: "Contact the support team" })
@@ -486,7 +496,7 @@ describe("AiChat", () => {
       name: "Contact the support team",
     })
     expect(escalate).toHaveLength(1)
-    expect(messages[2]).toContainElement(escalate[0])
+    expectPinnedAboveInput(escalate[0])
   })
 
   test("calls back in time for the send the press causes", async () => {
@@ -519,7 +529,7 @@ describe("AiChat", () => {
     expect(marked).toEqual([false, true])
   })
 
-  test("offers escalation under the greeting before any reply", () => {
+  test("offers escalation from the greeting, before any reply", () => {
     // The offer is visible from the start: the learner can reach a person
     // without first sending the bot something it may not understand.
     setup({ escalation: { label: "Contact the support team" } })
@@ -527,7 +537,7 @@ describe("AiChat", () => {
     const escalate = screen.getByRole("button", {
       name: "Contact the support team",
     })
-    expect(getMessages()[0]).toContainElement(escalate)
+    expectPinnedAboveInput(escalate)
   })
 
   test("offers no escalation when there is nothing to anchor it under", () => {
@@ -543,9 +553,9 @@ describe("AiChat", () => {
     ).not.toBeInTheDocument()
   })
 
-  test("keeps the offer on the greeting when the first send fails", async () => {
+  test("keeps the offer when the first send fails", async () => {
     // A failed first send leaves the learner's own message newest with no
-    // reply ever arrived; the greeting still anchors the way to a person.
+    // reply ever arrived; the way to a person stays.
     server.use(
       http.post(API_URL, () => new HttpResponse(null, { status: 500 })),
     )
@@ -554,7 +564,7 @@ describe("AiChat", () => {
     await user.click(getConversationStarters()[0])
     await screen.findByRole("alert")
 
-    expect(getMessages()[0]).toContainElement(
+    expectPinnedAboveInput(
       screen.queryByRole("button", { name: "Contact the support team" }),
     )
   })

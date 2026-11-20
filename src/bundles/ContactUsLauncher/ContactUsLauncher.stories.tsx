@@ -177,7 +177,7 @@ export const ShowLabel: Story = {
 }
 
 /**
- * The support-team button sits under the newest reply from the start. Ask
+ * The support-team button sits above the input from the start. Ask
  * something ("when do I get my certificate?") or press it right away. A press
  * sends `escalate: true` on that one request (see the network panel); the next
  * turn is ordinary.
