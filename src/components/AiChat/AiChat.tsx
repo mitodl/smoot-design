@@ -301,6 +301,10 @@ const ChipRow = styled.div({
   margin: "12px 0 2px",
 })
 
+const PinnedChipRow = styled(ChipRow)({
+  margin: "0 0 12px",
+})
+
 const EscalateChip = styled(Starter)(({ theme }) => ({
   color: theme.custom.colors.darkGray2,
 }))
@@ -509,6 +513,44 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
 
   const lastMsg = messages[messages.length - 1]
 
+  const lastActions =
+    lastAssistantIndex >= 0
+      ? (messageActions?.(messages[lastAssistantIndex] as AiChatMessage) ?? [])
+      : []
+  // Hidden while loading: append() won't abort the open request, so a press
+  // would run two turns at once. A message's own actions replace the offer:
+  // they are already its next step.
+  const showEscalation =
+    !!escalation &&
+    !isLoading &&
+    lastAssistantIndex >= 0 &&
+    lastActions.length === 0
+
+  const renderActions = (
+    row: { label: string; onPress?: () => void }[],
+    Row: typeof ChipRow = ChipRow,
+  ) =>
+    row.length > 0 ? (
+      <Row>
+        {row.map((action) => (
+          <EscalateChip
+            key={action.label}
+            type="button"
+            onClick={() => {
+              // The chip unmounts on press; keep focus off <body>.
+              focusComposer()
+              scrollToBottom()
+              // Before append() so transformBody sees the flag.
+              action.onPress?.()
+              append({ role: "user", content: action.label })
+            }}
+          >
+            {action.label}
+          </EscalateChip>
+        ))}
+      </Row>
+    ) : null
+
   const externalScroll = !!scrollElement
 
   return (
@@ -612,49 +654,8 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             <FeedbackButtons message={aiChatMessage} />
                           </>
                         )}
-                        {/* Outside the branch above so a failed reply still
-                        offers a person. Hidden while loading: append() won't
-                        abort the open request, so a press would run two turns
-                        at once. */}
                         {!isLoading && index === lastAssistantIndex
-                          ? [
-                              messageActions?.(aiChatMessage) ?? [],
-                              escalation
-                                ? [
-                                    {
-                                      label: escalation.label,
-                                      onPress: onEscalate,
-                                    },
-                                  ]
-                                : [],
-                            ]
-                              // A message's own actions replace the offer: they
-                              // are already its next step.
-                              .filter((row) => row.length > 0)
-                              .slice(0, 1)
-                              .map((row) => (
-                                <ChipRow key={row[0].label}>
-                                  {row.map((action) => (
-                                    <EscalateChip
-                                      key={action.label}
-                                      type="button"
-                                      onClick={() => {
-                                        // The chip unmounts on press; keep focus off <body>.
-                                        focusComposer()
-                                        scrollToBottom()
-                                        // Before append() so transformBody sees the flag.
-                                        action.onPress?.()
-                                        append({
-                                          role: "user",
-                                          content: action.label,
-                                        })
-                                      }}
-                                    >
-                                      {action.label}
-                                    </EscalateChip>
-                                  ))}
-                                </ChipRow>
-                              ))
+                          ? renderActions(lastActions)
                           : null}
                       </Message>
                     </MessageRow>
@@ -703,6 +704,12 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
               externalScroll={externalScroll}
               className={classes.bottomSection}
             >
+              {showEscalation
+                ? renderActions(
+                    [{ label: escalation.label, onPress: onEscalate }],
+                    PinnedChipRow,
+                  )
+                : null}
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
