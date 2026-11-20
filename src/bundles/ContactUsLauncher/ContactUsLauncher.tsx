@@ -55,9 +55,9 @@ const GREETING = [
   {
     role: "assistant" as const,
     content:
-      "**How can we help?**\n\nI'm AskTIM. Ask me about your account, " +
-      "enrollment, or certificates, and I'll find the answer. If I can't, " +
-      "I'll get your request to our support team.",
+      "**How can we help?**\n\nI'm AskTIM, an AI assistant for MIT Learn. " +
+      "I can answer questions, pass on feedback, or send a request to the " +
+      "support team. You can ask for a person at any time.",
   },
 ]
 
