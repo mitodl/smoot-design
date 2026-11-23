@@ -10,6 +10,8 @@ type MessageData = {
   thread_id?: string
   /** learn-ai's support bot is waiting on a send-or-cancel answer. */
   awaiting_send?: boolean
+  /** learn-ai's support bot has filed a ticket for this thread. */
+  filed?: boolean
   error?: {
     message?: string
   }

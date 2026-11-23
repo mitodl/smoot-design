@@ -154,14 +154,12 @@ test("opens on a greeting that says what the card will do", async () => {
   const card = await openCard()
 
   expect(transcript(card)).toHaveTextContent(
-    "I'm AskTIM, an AI assistant for MIT Learn. I can answer questions, " +
-      "pass on feedback, or send a request to the support team. You can " +
-      "ask for a person at any time.",
+    "Tell us what's on your mind: a question, a problem, or feedback. It all goes to our support team.",
   )
 })
 
 test("marks the card as an AI assistant", async () => {
-  // The greeting says AskTIM will pass the request on; the chip says the thing
+  // The greeting says the message goes to support; the chip says the thing
   // answering is a model, which is why the disclaimer underneath applies.
   renderLauncher()
 
@@ -555,7 +553,7 @@ test("lets the host replace the greeting", async () => {
   const card = await openCard()
 
   expect(transcript(card)).toHaveTextContent("¿En qué podemos ayudarte?")
-  expect(transcript(card)).not.toHaveTextContent(/I'm AskTIM/)
+  expect(transcript(card)).not.toHaveTextContent(/Tell us what's on your mind/)
 })
 
 test("offers the support team from the moment the card opens", async () => {
@@ -999,4 +997,35 @@ test("offers neither Send request nor Cancel when the reply carries no flag", as
   expect(
     screen.queryByRole("button", { name: "Cancel" }),
   ).not.toBeInTheDocument()
+})
+
+// What learn-ai ends a reply with once the thread has a ticket.
+const FILED = `Sent. Your reference number is 912.
+
+<!-- {"checkpoint_pk": 2, "thread_id": "t", "awaiting_send": false, "filed": true} -->`
+
+test("the message after a filed ticket starts a new thread", async () => {
+  // learn-ai files one ticket per thread, so a new request on the old one
+  // would only read back the old reference.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  server.use(http.post(TEST_API, () => HttpResponse.text(REPLY)))
+  await sendMessage("my certificate has not arrived")
+  await screen.findAllByText(REPLY)
+  await sendMessage("it was due last week")
+
+  const bodies = mockFetch.mock.calls.map(([, init]) =>
+    JSON.parse(String(init?.body)),
+  )
+  expect(bodies.map((body) => body.clear_history)).toEqual([
+    true,
+    false,
+    true,
+    false,
+  ])
 })

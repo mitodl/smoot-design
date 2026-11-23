@@ -9,6 +9,7 @@ import { Button } from "../../components/Button/Button"
 import { AiDrawer } from "../AiDrawer/AiDrawer"
 import type { AiDrawerSettings } from "../AiDrawer/AiDrawer"
 import type { AiChatMessage } from "../../components/AiChat/types"
+import { extractCommentsData } from "../../components/AiChat/utils"
 
 type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
@@ -55,9 +56,8 @@ const GREETING = [
   {
     role: "assistant" as const,
     content:
-      "**How can we help?**\n\nI'm AskTIM, an AI assistant for MIT Learn. " +
-      "I can answer questions, pass on feedback, or send a request to the " +
-      "support team. You can ask for a person at any time.",
+      "Tell us what's on your mind: a question, a problem, or feedback. " +
+      "It all goes to our support team.",
   },
 ]
 
@@ -213,7 +213,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const transformBody = useCallback(
     (messages: AiChatMessage[]) => {
       conversationStarted.current = true
-      const clearHistory = !historyCleared.current
+      const lastReply = [...messages]
+        .reverse()
+        .find((m) => m.role === "assistant")
+      // A filed thread files nothing more, so the next request needs its own.
+      // Safe to repeat on a retry: nothing files on a thread's first turn.
+      const clearHistory =
+        !historyCleared.current ||
+        Boolean(lastReply && extractCommentsData(lastReply.content)?.filed)
       historyCleared.current = true
       const escalate = escalating.current
       escalating.current = false
