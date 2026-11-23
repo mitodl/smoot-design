@@ -70,14 +70,25 @@ const SUPPORT_AGENT_PATH = /\/http\/support_agent\/$/
 
 const sameText = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
 
+// A pressed chip's label becomes the learner's own message, which renders as
+// Markdown, so only letters, numbers and plain punctuation are let through.
+const PLAIN_LABEL = /^[\p{L}\p{N}][\p{L}\p{N} .,!?'’"()\-:;&/]*$/u
+const NUMBERED_LIST_START = /^\d+[.)]/
+
 /**
  * The admin checks these too, but a row written another way skips that check.
  */
 const withUsableChipLabels = (copy: WidgetCopy): WidgetCopy => {
   const usable = { ...copy }
-  // The composer's submit button is already named "Send".
   for (const key of ["escalate_label", "send_label", "cancel_label"] as const) {
-    if (usable[key] && sameText(usable[key], "Send")) {
+    const label = usable[key]
+    if (
+      label &&
+      // The composer's submit button is already named "Send".
+      (sameText(label, "Send") ||
+        !PLAIN_LABEL.test(label) ||
+        NUMBERED_LIST_START.test(label))
+    ) {
       delete usable[key]
     }
   }

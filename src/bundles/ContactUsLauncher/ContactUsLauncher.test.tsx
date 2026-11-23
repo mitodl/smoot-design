@@ -1362,6 +1362,64 @@ describe("text edited in learn-ai's admin", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
   })
 
+  test.each([
+    "![](https://example.com/p.png)",
+    "[Help](https://example.com)",
+    "# Talk to us",
+    "1. Talk to us",
+    "**Talk to us**",
+  ])(
+    "an escalation label with Markdown in it is ignored: %s",
+    async (label) => {
+      // A pressed chip's label becomes the learner's own message, which renders
+      // as Markdown.
+      serveCopy({ launcher_label: "Need help?", escalate_label: label })
+      renderWithCopy()
+
+      await openWith("Need help?")
+      await sendMessage("my video will not play")
+
+      expect(
+        await screen.findByRole("button", { name: "Contact the support team" }),
+      ).toBeInTheDocument()
+    },
+  )
+
+  test("chip labels that land while the card is open wait for the next open", async () => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.get(COPY_API, async () => {
+        await held
+        return HttpResponse.json({ escalate_label: "Talk to a person" })
+      }),
+      http.post(SUPPORT_API, () => HttpResponse.text(REPLY)),
+    )
+    renderWithCopy()
+
+    await openWith("Contact us")
+    await act(async () => release())
+    await sendMessage("my video will not play")
+
+    expect(
+      await screen.findByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("asks for the copy without the learner's cookies", async () => {
+    const served = serveCopy({ launcher_label: "Need help?" })
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+    await waitFor(() => expect(served()).toBe(true))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      COPY_API,
+      expect.objectContaining({ credentials: "omit" }),
+    )
+  })
+
   test("a host that leaves out chat still gets a launcher", () => {
     // init() callers are plain JavaScript, so the type can't promise chat is set.
     render(
