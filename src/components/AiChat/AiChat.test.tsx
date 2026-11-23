@@ -755,7 +755,8 @@ describe("AiChat", () => {
         })
       }),
     )
-    setup({ messageActions: sendOrCancel })
+    const messageActions = jest.fn(sendOrCancel)
+    setup({ messageActions })
 
     await user.click(getConversationStarters()[0])
     await screen.findByText(/Here's what I'll send/)
@@ -763,6 +764,12 @@ describe("AiChat", () => {
     expect(
       screen.queryByRole("button", { name: "Send request" }),
     ).not.toBeInTheDocument()
+    // The callback must not see the partial reply.
+    expect(
+      messageActions.mock.calls.filter(([m]) =>
+        m.content.includes("Here's what I'll send"),
+      ),
+    ).toHaveLength(0)
 
     endStream()
     expect(

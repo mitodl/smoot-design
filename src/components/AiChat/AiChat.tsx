@@ -513,8 +513,9 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
 
   const lastMsg = messages[messages.length - 1]
 
+  // Not while loading: a streaming reply's data is still partial.
   const lastActions =
-    lastAssistantIndex >= 0
+    !isLoading && lastAssistantIndex >= 0
       ? (messageActions?.(messages[lastAssistantIndex] as AiChatMessage) ?? [])
       : []
   // Hidden while loading: append() won't abort the open request, so a press
@@ -654,7 +655,7 @@ const AiChatDisplay: FC<AiChatDisplayProps> = ({
                             <FeedbackButtons message={aiChatMessage} />
                           </>
                         )}
-                        {!isLoading && index === lastAssistantIndex
+                        {index === lastAssistantIndex
                           ? renderActions(lastActions)
                           : null}
                       </Message>
