@@ -1065,3 +1065,330 @@ test("a throttled send after a filed ticket still leaves the next one on a new t
     true,
   ])
 })
+
+describe("text edited in learn-ai's admin", () => {
+  const SUPPORT_API = "http://localhost:4567/ai/http/support_agent/"
+  const COPY_API = "http://localhost:4567/ai/api/v0/support_widget_copy/"
+  const SUPPORT_SETTINGS = {
+    chat: { apiUrl: SUPPORT_API, requestBody: { page_url: PAGE_URL } },
+  }
+
+  afterEach(() => jest.restoreAllMocks())
+
+  const serveCopy = (copy: Record<string, string>, reply = REPLY) => {
+    let served = false
+    server.use(
+      http.get(COPY_API, () => {
+        served = true
+        return HttpResponse.json(copy)
+      }),
+      http.post(SUPPORT_API, () => HttpResponse.text(reply)),
+    )
+    return () => served
+  }
+
+  const renderWithCopy = (props = {}) =>
+    render(<ContactUsLauncher settings={SUPPORT_SETTINGS} {...props} />, {
+      wrapper: ThemeProvider,
+    })
+
+  // The launcher name changes once the copy lands, so wait for it before opening.
+  const openWith = async (launcherName: string) => {
+    await user.click(await screen.findByRole("button", { name: launcherName }))
+    return screen.findByRole("dialog", { name: "AskTIM" })
+  }
+
+  test("names the launcher with the admin's label", async () => {
+    serveCopy({ launcher_label: "Need help?" })
+    renderWithCopy()
+
+    expect(
+      await screen.findByRole("button", { name: "Need help?" }),
+    ).toBeInTheDocument()
+  })
+
+  test("opens on the admin's greeting, placeholder and badge", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      greeting: "Ask me about your account.",
+      placeholder: "Tell us what happened",
+      badge: "SUPPORT",
+    })
+    renderWithCopy()
+
+    const card = await openWith("Need help?")
+
+    expect(transcript(card)).toHaveTextContent("Ask me about your account.")
+    expect(
+      within(card).getByRole("textbox", { name: "Tell us what happened" }),
+    ).toBeInTheDocument()
+    expect(within(card).getByText("SUPPORT")).toBeInTheDocument()
+  })
+
+  test("a value the host passes wins over the admin's", async () => {
+    const served = serveCopy({
+      launcher_label: "Need help?",
+      greeting: "From the admin.",
+      placeholder: "Admin placeholder",
+      badge: "ADMIN BADGE",
+      escalate_label: "Admin escalate",
+    })
+    renderWithCopy({
+      label: "Host label",
+      escalateLabel: "Host escalate",
+      settings: {
+        badge: "HOST BADGE",
+        chat: {
+          ...SUPPORT_SETTINGS.chat,
+          initialMessages: [{ role: "assistant", content: "From the host." }],
+          placeholder: "Host placeholder",
+        },
+      },
+    })
+    await waitFor(() => expect(served()).toBe(true))
+
+    const launcher = await screen.findByRole("button", { name: "Host label" })
+    await user.click(launcher)
+    const card = await screen.findByRole("dialog", { name: "AskTIM" })
+
+    expect(transcript(card)).toHaveTextContent("From the host.")
+    expect(
+      within(card).getByRole("textbox", { name: "Host placeholder" }),
+    ).toBeInTheDocument()
+    expect(within(card).getByText("HOST BADGE")).toBeInTheDocument()
+    expect(
+      within(card).getByRole("button", { name: "Host escalate" }),
+    ).toBeInTheDocument()
+  })
+
+  test.each([
+    ["a server error", () => new HttpResponse(null, { status: 500 })],
+    ["a page that isn't JSON", () => HttpResponse.text("<html>gateway</html>")],
+    ["a value that isn't text", () => HttpResponse.json({ launcher_label: 5 })],
+    [
+      "a value of only spaces",
+      () => HttpResponse.json({ launcher_label: "  " }),
+    ],
+  ])("keeps the built-in text after %s", async (_case, respond) => {
+    let served = false
+    server.use(
+      http.get(COPY_API, () => {
+        served = true
+        return respond()
+      }),
+    )
+    renderWithCopy()
+    await waitFor(() => expect(served).toBe(true))
+
+    const card = await openWith("Contact us")
+
+    expect(transcript(card)).toHaveTextContent("How can we help?")
+  })
+
+  test("asks for no copy when the endpoint isn't learn-ai's support agent", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderLauncher()
+
+    await openCard()
+
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  test("copy that lands while the card is open waits for the next open", async () => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.get(COPY_API, async () => {
+        await held
+        return HttpResponse.json({ greeting: "From the admin." })
+      }),
+    )
+    renderWithCopy()
+
+    const card = await openWith("Contact us")
+    await act(async () => release())
+
+    expect(transcript(card)).toHaveTextContent("How can we help?")
+
+    await closeCard()
+    const reopened = await openWith("Contact us")
+    await waitFor(() =>
+      expect(transcript(reopened)).toHaveTextContent("From the admin."),
+    )
+  })
+
+  const reachTheReviewWith = async (launcherName: string) => {
+    await openWith(launcherName)
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("my video will not play")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+  }
+
+  test("a renamed Send chip still sends the words learn-ai files on", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "Go ahead" },
+      AWAITING_SEND,
+    )
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+    await user.click(await screen.findByRole("button", { name: "Go ahead" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Send request",
+          clear_history: false,
+          confirm: true,
+        }),
+      }),
+    )
+  })
+
+  test("a renamed Cancel chip still sends the word learn-ai cancels on", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", cancel_label: "Never mind" },
+      AWAITING_SEND,
+    )
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+    await user.click(await screen.findByRole("button", { name: "Never mind" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Cancel",
+          clear_history: false,
+        }),
+      }),
+    )
+
+    // A press that outlived its turn would cancel everything typed after it.
+    server.use(http.post(SUPPORT_API, () => HttpResponse.text(REPLY)))
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Send" })).toBeEnabled(),
+    )
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("it also happens on week 4")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "it also happens on week 4",
+          clear_history: false,
+        }),
+      }),
+    )
+  })
+
+  test("a renamed escalation chip still sends the words learn-ai has always had", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      escalate_label: "Talk to a person",
+    })
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await openWith("Need help?")
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("my video will not play")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+    await user.click(
+      await screen.findByRole("button", { name: "Talk to a person" }),
+    )
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Contact the support team",
+          clear_history: false,
+          escalate: true,
+        }),
+      }),
+    )
+  })
+
+  test('a chip label of "Send" is ignored, since the composer\'s button has that name', async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "send" },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: /^send$/i })).toHaveLength(1)
+  })
+
+  test("Send and Cancel labels that match fall back to the defaults", async () => {
+    serveCopy(
+      {
+        launcher_label: "Need help?",
+        send_label: "Stop",
+        cancel_label: "stop",
+      },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  })
+
+  test("a host that leaves out chat still gets a launcher", () => {
+    // init() callers are plain JavaScript, so the type can't promise chat is set.
+    render(
+      <ContactUsLauncher
+        settings={
+          {} as React.ComponentProps<typeof ContactUsLauncher>["settings"]
+        }
+      />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Contact us" }),
+    ).toBeInTheDocument()
+  })
+
+  test("names the escalation chip with the admin's label", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      escalate_label: "Talk to a person",
+    })
+    renderWithCopy()
+
+    await openWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Talk to a person" }),
+    ).toBeInTheDocument()
+  })
+})

@@ -15,7 +15,8 @@ type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
   settings: Omit<AiDrawerSettings, "title">
   /** The launcher button's accessible name; the button itself is icon-only
-   * unless showLabel is set, in which case it's also the visible text. */
+   * unless showLabel is set, in which case it's also the visible text. Wins
+   * over the label set in learn-ai's admin. */
   label?: string
   /** Shows the label as visible text next to the icon instead of icon-only. */
   showLabel?: boolean
@@ -42,14 +43,93 @@ const KEEP_INTERACTIVE = "data-contact-us-keep-interactive"
 // "Ask a question" invites one the support bot cannot answer.
 const INPUT_PLACEHOLDER = "Describe what you need"
 
-// learn-ai blanks an escalated turn's message, so this never reaches the ticket.
+// A press always sends this, whatever the chip shows. learn-ai blanks an
+// escalated turn's message, so it never reaches the ticket.
 const ESCALATE_LABEL = "Contact the support team"
 
-// Not "Send": the composer's submit button already has that name. learn-ai
-// files on the confirm flag and blanks this label, so the wording is free.
+// Not "Send": the composer's submit button already has that name. A press
+// sends these words whatever the chip shows: learn-ai checks a Send press for a
+// cancellation before it reads the confirm flag.
 const SEND_LABEL = "Send request"
-// One word learn-ai already reads as a cancellation, so no flag is needed.
+// A word learn-ai reads as a cancellation, so no flag is needed.
 const CANCEL_LABEL = "Cancel"
+
+const COPY_KEYS = [
+  "launcher_label",
+  "escalate_label",
+  "send_label",
+  "cancel_label",
+  "placeholder",
+  "badge",
+  "greeting",
+] as const
+
+type WidgetCopy = Partial<Record<(typeof COPY_KEYS)[number], string>>
+
+const SUPPORT_AGENT_PATH = /\/http\/support_agent\/$/
+
+const sameText = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+
+/**
+ * The admin checks these too, but a row written another way skips that check.
+ */
+const withUsableChipLabels = (copy: WidgetCopy): WidgetCopy => {
+  const usable = { ...copy }
+  // The composer's submit button is already named "Send".
+  for (const key of ["escalate_label", "send_label", "cancel_label"] as const) {
+    if (usable[key] && sameText(usable[key], "Send")) {
+      delete usable[key]
+    }
+  }
+  // Chips are keyed by their text, so Send and Cancel can't match.
+  if (
+    sameText(
+      usable.send_label ?? SEND_LABEL,
+      usable.cancel_label ?? CANCEL_LABEL,
+    )
+  ) {
+    delete usable.send_label
+    delete usable.cancel_label
+  }
+  return usable
+}
+
+/**
+ * Text product set in learn-ai's admin, served next to the support agent. Any
+ * failure leaves {} so the built-in text shows: the widget must never be worse
+ * than it is without the admin.
+ */
+const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
+  const [copy, setCopy] = useState<WidgetCopy>({})
+  useEffect(() => {
+    if (!apiUrl || !SUPPORT_AGENT_PATH.test(apiUrl)) {
+      return
+    }
+    const controller = new AbortController()
+    fetch(apiUrl.replace(SUPPORT_AGENT_PATH, "/api/v0/support_widget_copy/"), {
+      credentials: "omit",
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : {}))
+      .then((data: unknown) => {
+        if (!data || typeof data !== "object") {
+          return
+        }
+        const fields = data as Record<string, unknown>
+        const strings: WidgetCopy = {}
+        COPY_KEYS.forEach((key) => {
+          const value = fields[key]
+          if (typeof value === "string" && value.trim()) {
+            strings[key] = value.trim()
+          }
+        })
+        setCopy(withUsableChipLabels(strings))
+      })
+      .catch(() => {})
+    return () => controller.abort()
+  }, [apiUrl])
+  return copy
+}
 
 // Nothing else on the way in says what this card does.
 const GREETING = [
@@ -147,11 +227,16 @@ const CardBody = styled(AiDrawer)({
 
 const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   settings,
-  label = "Contact us",
+  label,
   showLabel = false,
-  escalateLabel = ESCALATE_LABEL,
+  escalateLabel,
   className,
 }) => {
+  const copy = useWidgetCopy(settings.chat?.apiUrl)
+  const launcherLabel = label ?? copy.launcher_label ?? "Contact us"
+  // Taken when the card opens, so copy that lands mid-conversation can't swap
+  // the greeting under the learner or have a screen reader announce it twice.
+  const [cardCopy, setCardCopy] = useState<WidgetCopy>({})
   const [open, setOpen] = useState(false)
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const onClose = useCallback(() => setOpen(false), [])
@@ -168,9 +253,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const onLauncherClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       setOpenedViaKeyboard(event.detail === 0)
+      setCardCopy(copy)
       setOpen(true)
     },
-    [],
+    [copy],
   )
 
   const cardRef = useRef<HTMLDivElement>(null)
@@ -183,6 +269,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const escalating = useRef(false)
   // Same, for Send: a stored press would approve every later turn.
   const confirming = useRef(false)
+  const cancelling = useRef(false)
 
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
@@ -228,11 +315,23 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       escalating.current = false
       const confirm = confirming.current
       confirming.current = false
+      const cancel = cancelling.current
+      cancelling.current = false
+      // learn-ai decides on these words, so a chip press sends them whatever
+      // label the admin gave the chip.
+      let message = messages[messages.length - 1].content
+      if (confirm) {
+        message = SEND_LABEL
+      } else if (cancel) {
+        message = CANCEL_LABEL
+      } else if (escalate) {
+        message = ESCALATE_LABEL
+      }
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
         page_url: hostPageUrl ?? window.location.href,
-        message: messages[messages.length - 1].content,
+        message,
         clear_history: clearHistory,
         // Omitted when false so ordinary turns are unchanged on the wire.
         ...(escalate && { escalate: true }),
@@ -247,16 +346,18 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   // its own (a translated greeting) still wins.
   const cardSettings = React.useMemo(
     () => ({
-      badge: CARD_BADGE,
+      badge: cardCopy.badge ?? CARD_BADGE,
       ...settings,
       title: CARD_TITLE,
       chat: {
-        initialMessages: GREETING,
-        placeholder: INPUT_PLACEHOLDER,
+        initialMessages: cardCopy.greeting
+          ? [{ role: "assistant" as const, content: cardCopy.greeting }]
+          : GREETING,
+        placeholder: cardCopy.placeholder ?? INPUT_PLACEHOLDER,
         ...settings.chat,
       },
     }),
-    [settings],
+    [settings, cardCopy],
   )
 
   const hasDraft = useCallback(() => {
@@ -377,7 +478,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           onClick={onLauncherClick}
           data-open={open ? "" : undefined}
         >
-          {label}
+          {launcherLabel}
         </LauncherLabelButton>
       ) : (
         <LauncherIconButton
@@ -386,7 +487,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           variant="primary"
           edge="circular"
           size="large"
-          aria-label={label}
+          aria-label={launcherLabel}
           onClick={onLauncherClick}
           data-open={open ? "" : undefined}
         >
@@ -412,7 +513,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             onClose={onClose}
             settings={cardSettings}
             transformBody={transformBody}
-            escalation={{ label: escalateLabel }}
+            escalation={{
+              label: escalateLabel ?? cardCopy.escalate_label ?? ESCALATE_LABEL,
+            }}
             onEscalate={() => {
               escalating.current = true
             }}
@@ -420,12 +523,17 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
               message.data?.awaiting_send
                 ? [
                     {
-                      label: SEND_LABEL,
+                      label: cardCopy.send_label ?? SEND_LABEL,
                       onPress: () => {
                         confirming.current = true
                       },
                     },
-                    { label: CANCEL_LABEL },
+                    {
+                      label: cardCopy.cancel_label ?? CANCEL_LABEL,
+                      onPress: () => {
+                        cancelling.current = true
+                      },
+                    },
                   ]
                 : []
             }
