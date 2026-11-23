@@ -1003,6 +1003,10 @@ test("offers neither Send request nor Cancel when the reply carries no flag", as
 const FILED = `Sent. Your reference number is 912.
 
 <!-- {"checkpoint_pk": 2, "thread_id": "t", "awaiting_send": false, "filed": true} -->`
+// A reply on the new thread, which learn-ai marks as not filed.
+const NEW_THREAD_REPLY = `${REPLY}
+
+<!-- {"checkpoint_pk": 3, "thread_id": "u", "awaiting_send": false, "filed": false} -->`
 
 test("the message after a filed ticket starts a new thread", async () => {
   // learn-ai files one ticket per thread, so a new request on the old one
@@ -1014,7 +1018,7 @@ test("the message after a filed ticket starts a new thread", async () => {
   server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
   await sendMessage("send")
   await screen.findAllByText(/Your reference number is 912/)
-  server.use(http.post(TEST_API, () => HttpResponse.text(REPLY)))
+  server.use(http.post(TEST_API, () => HttpResponse.text(NEW_THREAD_REPLY)))
   await sendMessage("my certificate has not arrived")
   await screen.findAllByText(REPLY)
   await sendMessage("it was due last week")
@@ -1027,5 +1031,37 @@ test("the message after a filed ticket starts a new thread", async () => {
     false,
     true,
     false,
+  ])
+})
+
+test("a throttled send after a filed ticket still leaves the next one on a new thread", async () => {
+  // learn-ai throttles before it makes a thread, and its throttle text has no
+  // metadata, so it must not hide the filed reply before it.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  server.use(
+    http.post(TEST_API, () =>
+      HttpResponse.text(
+        "You have reached the maximum number of chat requests.",
+      ),
+    ),
+  )
+  await sendMessage("my certificate has not arrived")
+  await screen.findAllByText(/maximum number of chat requests/)
+  await sendMessage("my certificate has not arrived")
+
+  const bodies = mockFetch.mock.calls.map(([, init]) =>
+    JSON.parse(String(init?.body)),
+  )
+  expect(bodies.map((body) => body.clear_history)).toEqual([
+    true,
+    false,
+    true,
+    true,
   ])
 })

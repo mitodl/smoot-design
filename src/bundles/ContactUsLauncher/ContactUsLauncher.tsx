@@ -191,8 +191,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
    * the card, and the support bot files one ticket per thread, so a returning
    * learner would otherwise be read back the reference from their last visit.
    * Closing and reopening the card is how a learner starts another request on
-   * purpose (see the reset below); within one open card, every send after the
-   * first continues that same thread.
+   * purpose (see the reset below). Within one open card, later sends continue
+   * that thread until a reply says it was filed.
    *
    * The flag flips here, before the request goes out, rather than once a reply
    * comes back: learn-ai sets the thread cookie as soon as it answers, even if
@@ -213,14 +213,16 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const transformBody = useCallback(
     (messages: AiChatMessage[]) => {
       conversationStarted.current = true
-      const lastReply = [...messages]
+      // Skips replies with no metadata: learn-ai's throttle text has none and
+      // never reached a thread.
+      const lastData = [...messages]
         .reverse()
-        .find((m) => m.role === "assistant")
+        .filter((m) => m.role === "assistant")
+        .map((m) => extractCommentsData(m.content))
+        .find((data) => data && Object.keys(data).length > 0)
       // A filed thread files nothing more, so the next request needs its own.
       // Safe to repeat on a retry: nothing files on a thread's first turn.
-      const clearHistory =
-        !historyCleared.current ||
-        Boolean(lastReply && extractCommentsData(lastReply.content)?.filed)
+      const clearHistory = !historyCleared.current || Boolean(lastData?.filed)
       historyCleared.current = true
       const escalate = escalating.current
       escalating.current = false
