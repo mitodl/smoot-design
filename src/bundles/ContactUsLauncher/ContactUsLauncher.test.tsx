@@ -963,7 +963,7 @@ test("a Send request press sends confirm on that request only", async () => {
   )
 })
 
-test("a Cancel press sends the word learn-ai cancels on, without confirm", async () => {
+test("a Cancel press sends cancel and the word learn-ai cancels on, without confirm", async () => {
   const mockFetch = jest.spyOn(window, "fetch")
   renderLauncher()
 
@@ -977,6 +977,7 @@ test("a Cancel press sends the word learn-ai cancels on, without confirm", async
         page_url: PAGE_URL,
         message: "Cancel",
         clear_history: false,
+        cancel: true,
       }),
     }),
   )
@@ -1252,7 +1253,7 @@ describe("text edited in learn-ai's admin", () => {
     )
   })
 
-  test("a renamed Cancel chip still sends the word learn-ai cancels on", async () => {
+  test("a renamed Cancel chip still sends cancel and the word learn-ai cancels on", async () => {
     serveCopy(
       { launcher_label: "Need help?", cancel_label: "Never mind" },
       AWAITING_SEND,
@@ -1270,6 +1271,7 @@ describe("text edited in learn-ai's admin", () => {
           page_url: PAGE_URL,
           message: "Cancel",
           clear_history: false,
+          cancel: true,
         }),
       }),
     )

@@ -51,7 +51,8 @@ const ESCALATE_LABEL = "Contact the support team"
 // sends these words whatever the chip shows: learn-ai checks a Send press for a
 // cancellation before it reads the confirm flag.
 const SEND_LABEL = "Send request"
-// A word learn-ai reads as a cancellation, so no flag is needed.
+// Sent with the cancel flag. learn-ai before the flag existed cancels on this
+// word instead.
 const CANCEL_LABEL = "Cancel"
 
 const COPY_KEYS = [
@@ -347,6 +348,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         // Omitted when false so ordinary turns are unchanged on the wire.
         ...(escalate && { escalate: true }),
         ...(confirm && { confirm: true }),
+        ...(cancel && { cancel: true }),
       }
     },
     [hostPageUrl],
