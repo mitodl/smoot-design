@@ -75,11 +75,14 @@ const sameText = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
 // Markdown, so only letters, numbers and plain punctuation are let through.
 const PLAIN_LABEL = /^[\p{L}\p{N}][\p{L}\p{N} .,!?'’"()\-:;&/]*$/u
 const NUMBERED_LIST_START = /^\d+[.)]/
+// The greeting renders as Markdown on every learner's page, so an image in it
+// would load from any host for every learner. Same rule as learn-ai's admin.
+const MARKDOWN_IMAGE = /!\[/
 
 /**
  * The admin checks these too, but a row written another way skips that check.
  */
-const withUsableChipLabels = (copy: WidgetCopy): WidgetCopy => {
+const withUsableCopy = (copy: WidgetCopy): WidgetCopy => {
   const usable = { ...copy }
   for (const key of ["escalate_label", "send_label", "cancel_label"] as const) {
     const label = usable[key]
@@ -92,6 +95,9 @@ const withUsableChipLabels = (copy: WidgetCopy): WidgetCopy => {
     ) {
       delete usable[key]
     }
+  }
+  if (usable.greeting && MARKDOWN_IMAGE.test(usable.greeting)) {
+    delete usable.greeting
   }
   // Chips are keyed by their text, so Send and Cancel can't match.
   if (
@@ -135,7 +141,7 @@ const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
             strings[key] = value.trim()
           }
         })
-        setCopy(withUsableChipLabels(strings))
+        setCopy(withUsableCopy(strings))
       })
       .catch(() => {})
     return () => controller.abort()

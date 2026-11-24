@@ -1126,6 +1126,20 @@ describe("text edited in learn-ai's admin", () => {
     expect(within(card).getByText("SUPPORT")).toBeInTheDocument()
   })
 
+  test("keeps the built-in greeting when the admin's has an image", async () => {
+    // learn-ai's admin refuses these, but a row written another way skips that.
+    serveCopy({
+      launcher_label: "Need help?",
+      greeting: "Hi ![](https://example.com/pixel.png)",
+    })
+    renderWithCopy()
+
+    const card = await openWith("Need help?")
+
+    expect(within(card).queryByRole("img")).not.toBeInTheDocument()
+    expect(transcript(card)).toHaveTextContent("How can we help?")
+  })
+
   test("a value the host passes wins over the admin's", async () => {
     const served = serveCopy({
       launcher_label: "Need help?",
