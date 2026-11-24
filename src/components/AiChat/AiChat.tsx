@@ -206,6 +206,14 @@ const Message = styled.div(({ theme }) => ({
     color: theme.custom.colors.red,
     fontWeight: "normal",
   },
+  // The support bot sends the request it will file as a blockquote.
+  blockquote: {
+    margin: "0 0 12px",
+    padding: "12px 16px",
+    border: `1px solid ${theme.custom.colors.lightGray2}`,
+    borderRadius: "8px",
+    backgroundColor: theme.custom.colors.lightGray1,
+  },
   borderRadius: "12px",
   [`.${classes.messageRowUser} &`]: {
     padding: "12px 16px",

@@ -19,16 +19,16 @@ const CANCELLED =
 
 const review = (description: string, email: string) =>
   [
-    "Here's what I'll send to the support team:",
+    "> Here's what I'll send:",
+    ">",
+    `> **Your message:** ${description}`,
+    ">",
+    `> **Where you were:** ${PAGE_URL}`,
+    ">",
+    `> **Reply to:** ${email}`,
     "",
-    `**Your message:** ${description}`,
-    "",
-    `**Where you were:** ${PAGE_URL}`,
-    "",
-    `**Reply to:** ${email}`,
-    "",
-    'Anything else to add? Send it and I\'ll include it - otherwise reply "send" ' +
-      "and I'll pass this on.",
+    "Is anything missing? You can add it below before sending. When it looks " +
+      "right, press Send request, or press Cancel to drop it.",
   ].join("\n")
 
 type Intake = {
