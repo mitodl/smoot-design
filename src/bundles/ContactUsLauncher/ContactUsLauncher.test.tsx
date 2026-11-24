@@ -6,6 +6,7 @@ import { http, HttpResponse } from "msw"
 import { ContactUsLauncher, KEEP_INTERACTIVE } from "./ContactUsLauncher"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import { setViewportWidth } from "../../test-utils/viewport"
+import { TranslationProvider } from "../../contexts/TranslationContext"
 
 jest.mock("../../components/AiChat/Markdown", () => ({
   __esModule: true,
@@ -1234,13 +1235,16 @@ describe("text edited in learn-ai's admin", () => {
     )
   })
 
-  const reachTheReviewWith = async (launcherName: string) => {
+  const reachTheReviewWith = async (
+    launcherName: string,
+    sendName = "Send",
+  ) => {
     await openWith(launcherName)
     await user.click(
       screen.getByRole("textbox", { name: "Describe what you need" }),
     )
     await user.paste("my video will not play")
-    await user.click(screen.getByRole("button", { name: "Send" }))
+    await user.click(screen.getByRole("button", { name: sendName }))
   }
 
   test("a renamed Send chip still sends the words learn-ai files on", async () => {
@@ -1376,6 +1380,67 @@ describe("text edited in learn-ai's admin", () => {
       await screen.findByRole("button", { name: "Send request" }),
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  })
+
+  test("Send and Cancel labels that differ only in spacing fall back to the defaults", async () => {
+    serveCopy(
+      {
+        launcher_label: "Need help?",
+        send_label: "Stop  now",
+        cancel_label: "stop now",
+      },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  })
+
+  test("a chip label matching the translated composer button is ignored", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "Envoyer" },
+      AWAITING_SEND,
+    )
+    render(<ContactUsLauncher settings={SUPPORT_SETTINGS} />, {
+      wrapper: ({ children }) => (
+        <ThemeProvider>
+          <TranslationProvider translations={{ "aiChat.send": "Envoyer" }}>
+            {children}
+          </TranslationProvider>
+        </ThemeProvider>
+      ),
+    })
+
+    await reachTheReviewWith("Need help?", "Envoyer")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Envoyer" })).toHaveLength(1)
+  })
+
+  test("a new apiUrl drops the previous endpoint's text", async () => {
+    serveCopy({ launcher_label: "Need help?" })
+    const { rerender } = renderWithCopy()
+    await screen.findByRole("button", { name: "Need help?" })
+
+    // Not a support agent URL, so no text is fetched for it.
+    rerender(
+      <ContactUsLauncher
+        settings={{
+          chat: { apiUrl: "http://localhost:4567/ai/http/other_agent/" },
+        }}
+      />,
+    )
+
+    expect(
+      await screen.findByRole("button", { name: "Contact us" }),
+    ).toBeInTheDocument()
   })
 
   test.each([

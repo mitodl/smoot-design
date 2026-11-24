@@ -10,6 +10,10 @@ import { AiDrawer } from "../AiDrawer/AiDrawer"
 import type { AiDrawerSettings } from "../AiDrawer/AiDrawer"
 import type { AiChatMessage } from "../../components/AiChat/types"
 import { extractCommentsData } from "../../components/AiChat/utils"
+import {
+  useTranslation,
+  TRANSLATION_KEYS,
+} from "../../contexts/TranslationContext"
 
 type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
@@ -20,7 +24,8 @@ type ContactUsLauncherProps = {
   label?: string
   /** Shows the label as visible text next to the icon instead of icon-only. */
   showLabel?: boolean
-  /** Text of the button that hands the chat to the support team. */
+  /** Text of the button that hands the chat to the support team. Wins over
+   * the label set in learn-ai's admin. */
   escalateLabel?: string
   className?: string
 }
@@ -69,7 +74,12 @@ type WidgetCopy = Partial<Record<(typeof COPY_KEYS)[number], string>>
 
 const SUPPORT_AGENT_PATH = /\/http\/support_agent\/$/
 
-const sameText = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+// Accessible names collapse runs of whitespace, so "Send  request" and "Send
+// request" are the same button to a screen reader.
+const normalizeLabel = (text: string) =>
+  text.trim().replace(/\s+/g, " ").toLowerCase()
+const sameText = (a: string, b: string) =>
+  normalizeLabel(a) === normalizeLabel(b)
 
 // A pressed chip's label becomes the learner's own message, which renders as
 // Markdown, so only letters, numbers and plain punctuation are let through.
@@ -82,14 +92,14 @@ const MARKDOWN_IMAGE = /!\[/
 /**
  * The admin checks these too, but a row written another way skips that check.
  */
-const withUsableCopy = (copy: WidgetCopy): WidgetCopy => {
+const withUsableCopy = (copy: WidgetCopy, composerSend: string): WidgetCopy => {
   const usable = { ...copy }
   for (const key of ["escalate_label", "send_label", "cancel_label"] as const) {
     const label = usable[key]
     if (
       label &&
-      // The composer's submit button is already named "Send".
-      (sameText(label, "Send") ||
+      // The composer's submit button already has this name, translated or not.
+      (sameText(label, composerSend) ||
         !PLAIN_LABEL.test(label) ||
         NUMBERED_LIST_START.test(label))
     ) {
@@ -117,8 +127,12 @@ const withUsableCopy = (copy: WidgetCopy): WidgetCopy => {
  * failure leaves {} so the built-in text shows: the widget must never be worse
  * than it is without the admin.
  */
+const NO_COPY: WidgetCopy = {}
+
 const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
-  const [copy, setCopy] = useState<WidgetCopy>({})
+  // Kept with the URL it came from, so a changed apiUrl never shows the
+  // previous endpoint's text.
+  const [fetched, setFetched] = useState<{ url: string; copy: WidgetCopy }>()
   useEffect(() => {
     if (!apiUrl || !SUPPORT_AGENT_PATH.test(apiUrl)) {
       return
@@ -130,7 +144,7 @@ const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
     })
       .then((response) => (response.ok ? response.json() : {}))
       .then((data: unknown) => {
-        if (!data || typeof data !== "object") {
+        if (controller.signal.aborted || !data || typeof data !== "object") {
           return
         }
         const fields = data as Record<string, unknown>
@@ -141,12 +155,12 @@ const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
             strings[key] = value.trim()
           }
         })
-        setCopy(withUsableCopy(strings))
+        setFetched({ url: apiUrl, copy: strings })
       })
       .catch(() => {})
     return () => controller.abort()
   }, [apiUrl])
-  return copy
+  return fetched && fetched.url === apiUrl ? fetched.copy : NO_COPY
 }
 
 // Nothing else on the way in says what this card does.
@@ -250,7 +264,13 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   escalateLabel,
   className,
 }) => {
-  const copy = useWidgetCopy(settings.chat?.apiUrl)
+  const { t } = useTranslation()
+  const composerSend = t(TRANSLATION_KEYS.aiChat.send)
+  const fetchedCopy = useWidgetCopy(settings.chat?.apiUrl)
+  const copy = React.useMemo(
+    () => withUsableCopy(fetchedCopy, composerSend),
+    [fetchedCopy, composerSend],
+  )
   const launcherLabel = label ?? copy.launcher_label ?? "Contact us"
   // Taken when the card opens, so copy that lands mid-conversation can't swap
   // the greeting under the learner or have a screen reader announce it twice.
