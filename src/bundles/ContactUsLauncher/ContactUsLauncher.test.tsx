@@ -1138,7 +1138,7 @@ describe("text edited in learn-ai's admin", () => {
     const card = await openWith("Need help?")
 
     expect(within(card).queryByRole("img")).not.toBeInTheDocument()
-    expect(transcript(card)).toHaveTextContent("How can we help?")
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
   })
 
   test("a value the host passes wins over the admin's", async () => {
@@ -1198,7 +1198,7 @@ describe("text edited in learn-ai's admin", () => {
 
     const card = await openWith("Contact us")
 
-    expect(transcript(card)).toHaveTextContent("How can we help?")
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
   })
 
   test("asks for no copy when the endpoint isn't learn-ai's support agent", async () => {
@@ -1226,7 +1226,7 @@ describe("text edited in learn-ai's admin", () => {
     const card = await openWith("Contact us")
     await act(async () => release())
 
-    expect(transcript(card)).toHaveTextContent("How can we help?")
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
 
     await closeCard()
     const reopened = await openWith("Contact us")
