@@ -124,7 +124,7 @@ const useWidgetCopy = (apiUrl: string | undefined): WidgetCopy => {
       return
     }
     const controller = new AbortController()
-    fetch(apiUrl.replace(SUPPORT_AGENT_PATH, "/api/v0/support_widget_copy/"), {
+    fetch(apiUrl.replace(SUPPORT_AGENT_PATH, "/api/v0/support_widget_text/"), {
       credentials: "omit",
       signal: controller.signal,
     })

@@ -1069,7 +1069,7 @@ test("a throttled send after a filed ticket still leaves the next one on a new t
 
 describe("text edited in learn-ai's admin", () => {
   const SUPPORT_API = "http://localhost:4567/ai/http/support_agent/"
-  const COPY_API = "http://localhost:4567/ai/api/v0/support_widget_copy/"
+  const COPY_API = "http://localhost:4567/ai/api/v0/support_widget_text/"
   const SUPPORT_SETTINGS = {
     chat: { apiUrl: SUPPORT_API, requestBody: { page_url: PAGE_URL } },
   }
