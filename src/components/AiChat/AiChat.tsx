@@ -214,6 +214,10 @@ const Message = styled.div(({ theme }) => ({
     borderRadius: "8px",
     backgroundColor: theme.custom.colors.lightGray1,
   },
+  // p:last-of-type drops the paragraph's bottom margin, so space the quote here.
+  "p + blockquote": {
+    marginTop: "12px",
+  },
   borderRadius: "12px",
   [`.${classes.messageRowUser} &`]: {
     padding: "12px 16px",
