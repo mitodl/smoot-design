@@ -658,6 +658,25 @@ test("Keep chatting dismisses the question and Close anyway closes the card", as
   expect(screen.queryByRole("dialog")).toBeNull()
 })
 
+test("Keep chatting puts focus back where it was, and Tab stays in the question", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  const close = screen.getByRole("button", { name: "Close" })
+  await user.click(close)
+
+  const keep = screen.getByRole("button", { name: "Keep chatting" })
+  expect(keep).toHaveFocus()
+  await user.tab()
+  expect(screen.getByRole("button", { name: "Close anyway" })).toHaveFocus()
+  await user.tab()
+  expect(keep).toHaveFocus()
+
+  await user.keyboard("{Enter}")
+  expect(close).toHaveFocus()
+})
+
 test("closing an empty card does not ask", async () => {
   renderLauncher()
 

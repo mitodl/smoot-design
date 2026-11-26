@@ -207,6 +207,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const [open, setOpen] = useState(false)
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const [confirmingClose, setConfirmingClose] = useState(false)
+  const confirmTextId = React.useId()
 
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
@@ -342,8 +343,27 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   }, [])
 
   const keepChatting = useCallback(() => {
+    // An inert element can't take focus, so lift it before focusing.
+    cardRef.current?.firstElementChild?.removeAttribute("inert")
     setConfirmingClose(false)
     focusBeforeConfirm.current?.focus()
+  }, [])
+
+  // Desktop leaves the page behind interactive, so wrap Tab inside the dialog.
+  const trapConfirmTab = useCallback((event: React.KeyboardEvent) => {
+    if (event.key !== "Tab") {
+      return
+    }
+    const buttons = event.currentTarget.querySelectorAll("button")
+    const first = buttons[0]
+    const last = buttons[buttons.length - 1]
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault()
+      first.focus()
+    }
   }, [])
 
   // The card behind the confirmation must not take Tab or screen reader focus.
@@ -530,8 +550,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           />
           {confirmingClose ? (
             <ConfirmBackdrop>
-              <div role="alertdialog" aria-modal aria-label="Close request?">
-                <p>{CONFIRM_CLOSE_TEXT}</p>
+              <div
+                role="alertdialog"
+                aria-modal
+                aria-label="Close request?"
+                aria-describedby={confirmTextId}
+                onKeyDown={trapConfirmTab}
+              >
+                <p id={confirmTextId}>{CONFIRM_CLOSE_TEXT}</p>
                 <div className="actions">
                   <Button
                     variant="secondary"
