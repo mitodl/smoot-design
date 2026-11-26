@@ -8,16 +8,19 @@ import { ActionButton } from "../../components/Button/ActionButton"
 import { Button } from "../../components/Button/Button"
 import { AiDrawer } from "../AiDrawer/AiDrawer"
 import type { AiDrawerSettings } from "../AiDrawer/AiDrawer"
+import { TrackingEventType } from "../AiDrawer/trackingEvents"
+import type { TrackingEvent } from "../AiDrawer/trackingEvents"
 import type { AiChatMessage } from "../../components/AiChat/types"
 import { extractCommentsData } from "../../components/AiChat/utils"
 
 type ContactUsLauncherProps = {
   /** Drawer configuration, including the support agent's apiUrl. */
   settings: Omit<AiDrawerSettings, "title">
-  /** The launcher button's accessible name; the button itself is icon-only
-   * unless showLabel is set, in which case it's also the visible text. */
+  /** The launcher button's accessible name, and its visible text when
+   * showLabel is on. */
   label?: string
-  /** Shows the label as visible text next to the icon instead of icon-only. */
+  /** Shows the label as text next to the icon on screens wider than the sm
+   * breakpoint. Set false for an icon-only button. */
   showLabel?: boolean
   /** Text of the button that hands the chat to the support team. */
   escalateLabel?: string
@@ -51,6 +54,8 @@ const SEND_LABEL = "Send request"
 // One word learn-ai already reads as a cancellation, so no flag is needed.
 const CANCEL_LABEL = "Cancel"
 
+const CONFIRM_CLOSE_TEXT = "Your request hasn't been sent yet. Close anyway?"
+
 // Nothing else on the way in says what this card does.
 const GREETING = [
   {
@@ -71,15 +76,27 @@ const GREETING = [
 // clearly. The label still names it for anyone not reading it visually.
 const LAUNCHER_DIAMETER = "56px"
 
+// The ring keeps the button visible on red and dark page sections. It lives in
+// the shadow so the hover state below can restate it without a border shift.
+const launcherShadow = (white: string) =>
+  `0 0 0 2px ${white}, 0 6px 20px rgba(0, 0, 0, 0.16)`
+
 // Shared between the icon-only circle and the labelled pill below: both float
 // in the same corner and hide (rather than unmount, so focus can return to
 // them on close) while the card covers them.
-const launcherPositionStyles = (theme: { zIndex: { fab: number } }) => ({
+const launcherPositionStyles = (theme: {
+  zIndex: { fab: number }
+  custom: { colors: { white: string } }
+}) => ({
   position: "fixed" as const,
   bottom: CARD_INSET,
   right: CARD_INSET,
   zIndex: theme.zIndex.fab,
-  boxShadow: "0 6px 20px rgba(0, 0, 0, 0.16)",
+  boxShadow: launcherShadow(theme.custom.colors.white),
+  // Button's own hover style drops the shadow, and the ring with it.
+  "&&:hover": {
+    boxShadow: launcherShadow(theme.custom.colors.white),
+  },
   "&[data-open]": {
     visibility: "hidden" as const,
   },
@@ -96,6 +113,41 @@ const LauncherIconButton = styled(ActionButton)(({ theme }) => ({
 const LauncherLabelButton = styled(Button)(({ theme }) => ({
   ...launcherPositionStyles(theme),
   height: LAUNCHER_DIAMETER,
+  // Below sm the text is hidden, so fall back to the icon-only circle.
+  [theme.breakpoints.down("sm")]: {
+    width: LAUNCHER_DIAMETER,
+    minWidth: 0,
+    padding: 0,
+    justifyContent: "center",
+    "& > :first-of-type": { margin: 0 },
+  },
+}))
+
+const LauncherText = styled.span(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: { display: "none" },
+}))
+
+const ConfirmBackdrop = styled.div(({ theme }) => ({
+  position: "absolute",
+  inset: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "24px",
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  zIndex: 1,
+  boxSizing: "border-box",
+  "& > div": {
+    backgroundColor: theme.custom.colors.white,
+    borderRadius: "8px",
+    padding: "24px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    maxWidth: "320px",
+  },
+  "& p": { margin: 0 },
+  "& .actions": { display: "flex", gap: "8px", justifyContent: "flex-end" },
 }))
 
 const cardEnter = keyframes({
@@ -147,14 +199,14 @@ const CardBody = styled(AiDrawer)({
 
 const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   settings,
-  label = "Contact us",
-  showLabel = false,
+  label = "Help",
+  showLabel = true,
   escalateLabel = ESCALATE_LABEL,
   className,
 }) => {
   const [open, setOpen] = useState(false)
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
-  const onClose = useCallback(() => setOpen(false), [])
+  const [confirmingClose, setConfirmingClose] = useState(false)
 
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"), {
@@ -177,6 +229,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const launcherRef = useRef<HTMLButtonElement>(null)
   const wasOpen = useRef(false)
   const conversationStarted = useRef(false)
+  // Set once a reply reports the ticket was filed; cleared by the next send.
+  const filed = useRef(false)
+  const focusBeforeConfirm = useRef<HTMLElement | null>(null)
   const historyCleared = useRef(false)
   // A ref so transformBody sees the press without waiting for a re-render.
   // Cleared on read: learn-ai blanks every escalated turn's message.
@@ -223,6 +278,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // A filed thread files nothing more, so the next request needs its own.
       // Safe to repeat on a retry: nothing files on a thread's first turn.
       const clearHistory = !historyCleared.current || Boolean(lastData?.filed)
+      filed.current = false
       historyCleared.current = true
       const escalate = escalating.current
       escalating.current = false
@@ -266,6 +322,40 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     return Boolean(field?.value.trim())
   }, [])
 
+  // Close button and Escape: a request that was started but not filed asks
+  // first, since closing wipes it and nothing reaches support.
+  const requestClose = useCallback(() => {
+    if (!filed.current && (conversationStarted.current || hasDraft())) {
+      focusBeforeConfirm.current = document.activeElement as HTMLElement | null
+      setConfirmingClose(true)
+      return
+    }
+    setOpen(false)
+  }, [hasDraft])
+
+  const onTrackingEvent = useCallback((event: TrackingEvent) => {
+    if (event.type === TrackingEventType.Response) {
+      filed.current = Boolean(
+        extractCommentsData(String(event.data?.value ?? ""))?.filed,
+      )
+    }
+  }, [])
+
+  const keepChatting = useCallback(() => {
+    setConfirmingClose(false)
+    focusBeforeConfirm.current?.focus()
+  }, [])
+
+  // The card behind the confirmation must not take Tab or screen reader focus.
+  useEffect(() => {
+    const body = cardRef.current?.firstElementChild
+    if (!confirmingClose || !body) {
+      return
+    }
+    body.setAttribute("inert", "")
+    return () => body.removeAttribute("inert")
+  }, [confirmingClose])
+
   // The desktop card is non-modal, so there is no backdrop to catch these.
   useEffect(() => {
     if (!open) {
@@ -296,6 +386,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // it. Body counts as ours only with nothing to lose: sending disables the
       // Send button that had focus, so focus lands on body with the card still
       // the only thing on screen, but so does a click on the page mid-draft.
+      if (confirmingClose) {
+        keepChatting()
+        return
+      }
       const focused = document.activeElement
       const inCard = Boolean(focused && cardRef.current?.contains(focused))
       const strayButHarmless =
@@ -303,7 +397,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       if (!inCard && !strayButHarmless) {
         return
       }
-      setOpen(false)
+      requestClose()
     }
     document.addEventListener("mousedown", onPointerDown)
     document.addEventListener("keydown", onKeyDown)
@@ -311,7 +405,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       document.removeEventListener("mousedown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open, hasDraft])
+  }, [open, hasDraft, requestClose, confirmingClose, keepChatting])
 
   // The full-screen card covers everything, so the page behind it is inerted
   // rather than left for a screen reader or Tab to wander into. Browsers skip
@@ -360,6 +454,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // continuing the thread (and ticket) from this visit.
       conversationStarted.current = false
       historyCleared.current = false
+      filed.current = false
+      setConfirmingClose(false)
     }
     wasOpen.current = open
   }, [open])
@@ -374,10 +470,11 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
           edge="circular"
           size="large"
           startIcon={<RiChatAiLine />}
+          aria-label={label}
           onClick={onLauncherClick}
           data-open={open ? "" : undefined}
         >
-          {label}
+          <LauncherText>{label}</LauncherText>
         </LauncherLabelButton>
       ) : (
         <LauncherIconButton
@@ -409,7 +506,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
             // either, since the inert page behind already keeps Tab in the card.
             trapFocus={false}
             openedViaKeyboard={openedViaKeyboard}
-            onClose={onClose}
+            onClose={requestClose}
+            onTrackingEvent={onTrackingEvent}
             settings={cardSettings}
             transformBody={transformBody}
             escalation={{ label: escalateLabel }}
@@ -430,6 +528,30 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
                 : []
             }
           />
+          {confirmingClose ? (
+            <ConfirmBackdrop>
+              <div role="alertdialog" aria-modal aria-label="Close request?">
+                <p>{CONFIRM_CLOSE_TEXT}</p>
+                <div className="actions">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setOpen(false)}
+                  >
+                    Close anyway
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="small"
+                    autoFocus
+                    onClick={keepChatting}
+                  >
+                    Keep chatting
+                  </Button>
+                </div>
+              </div>
+            </ConfirmBackdrop>
+          ) : null}
         </PopoverCard>
       ) : null}
     </>
