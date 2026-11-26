@@ -232,6 +232,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const conversationStarted = useRef(false)
   // Set once a reply reports the ticket was filed; cleared by the next send.
   const filed = useRef(false)
+  // True from the Send press until its reply ends: the ticket may be filed by
+  // then even though the reply hasn't said so yet.
+  const filing = useRef(false)
   const focusBeforeConfirm = useRef<HTMLElement | null>(null)
   const historyCleared = useRef(false)
   // A ref so transformBody sees the press without waiting for a re-render.
@@ -285,6 +288,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       escalating.current = false
       const confirm = confirming.current
       confirming.current = false
+      filing.current = confirm
       return {
         // Read at send, not at mount: a host that routes client-side changes the
         // URL under a card that init() only ever renders once.
@@ -326,7 +330,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   // Close button and Escape: a request that was started but not filed asks
   // first, since closing wipes it and nothing reaches support.
   const requestClose = useCallback(() => {
-    if (!filed.current && (conversationStarted.current || hasDraft())) {
+    // A typed draft still counts after filing: it is a new request to lose.
+    const nothingToLose = (filed.current || filing.current) && !hasDraft()
+    if (!nothingToLose && (conversationStarted.current || hasDraft())) {
       focusBeforeConfirm.current = document.activeElement as HTMLElement | null
       setConfirmingClose(true)
       return
@@ -336,6 +342,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
 
   const onTrackingEvent = useCallback((event: TrackingEvent) => {
     if (event.type === TrackingEventType.Response) {
+      filing.current = false
       filed.current = Boolean(
         extractCommentsData(String(event.data?.value ?? ""))?.filed,
       )
@@ -346,7 +353,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     // An inert element can't take focus, so lift it before focusing.
     cardRef.current?.firstElementChild?.removeAttribute("inert")
     setConfirmingClose(false)
-    focusBeforeConfirm.current?.focus()
+    const previous = focusBeforeConfirm.current
+    previous?.focus()
+    // Right after Send the old target is disabled or body, which can't take it.
+    if (!previous || document.activeElement !== previous) {
+      cardRef.current
+        ?.querySelector<HTMLElement>("textarea, input[type='text']")
+        ?.focus()
+    }
   }, [])
 
   // Desktop leaves the page behind interactive, so wrap Tab inside the dialog.
@@ -475,6 +489,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       conversationStarted.current = false
       historyCleared.current = false
       filed.current = false
+      filing.current = false
       setConfirmingClose(false)
     }
     wasOpen.current = open

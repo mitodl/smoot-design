@@ -677,6 +677,52 @@ test("Keep chatting puts focus back where it was, and Tab stays in the question"
   expect(close).toHaveFocus()
 })
 
+test("closing while the Send reply is still streaming does not claim it was not sent", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(
+    http.post(TEST_API, async () => {
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      return HttpResponse.text(FILED)
+    }),
+  )
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await closeCard()
+
+  expect(screen.queryByRole("alertdialog")).toBeNull()
+  expect(screen.queryByRole("dialog")).toBeNull()
+})
+
+test("a new draft typed after filing still asks before closing", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  )
+  await user.paste("another problem")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("Keep chatting falls back to the text field when the old focus target is gone", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await user.keyboard("{Escape}")
+  await user.click(screen.getByRole("button", { name: "Keep chatting" }))
+
+  expect(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  ).toHaveFocus()
+})
+
 test("closing an empty card does not ask", async () => {
   renderLauncher()
 
