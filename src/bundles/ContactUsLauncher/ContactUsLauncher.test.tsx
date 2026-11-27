@@ -6,6 +6,7 @@ import { http, HttpResponse } from "msw"
 import { ContactUsLauncher, KEEP_INTERACTIVE } from "./ContactUsLauncher"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
 import { setViewportWidth } from "../../test-utils/viewport"
+import { TranslationProvider } from "../../contexts/TranslationContext"
 
 jest.mock("../../components/AiChat/Markdown", () => ({
   __esModule: true,
@@ -963,7 +964,7 @@ test("a Send request press sends confirm on that request only", async () => {
   )
 })
 
-test("a Cancel press sends the word learn-ai cancels on, without confirm", async () => {
+test("a Cancel press sends cancel and the word learn-ai cancels on, without confirm", async () => {
   const mockFetch = jest.spyOn(window, "fetch")
   renderLauncher()
 
@@ -977,6 +978,7 @@ test("a Cancel press sends the word learn-ai cancels on, without confirm", async
         page_url: PAGE_URL,
         message: "Cancel",
         clear_history: false,
+        cancel: true,
       }),
     }),
   )
@@ -1064,4 +1066,468 @@ test("a throttled send after a filed ticket still leaves the next one on a new t
     true,
     true,
   ])
+})
+
+describe("text edited in learn-ai's admin", () => {
+  const SUPPORT_API = "http://localhost:4567/ai/http/support_agent/"
+  const COPY_API = "http://localhost:4567/ai/api/v0/support_widget_text/"
+  const SUPPORT_SETTINGS = {
+    chat: { apiUrl: SUPPORT_API, requestBody: { page_url: PAGE_URL } },
+  }
+
+  afterEach(() => jest.restoreAllMocks())
+
+  const serveCopy = (copy: Record<string, string>, reply = REPLY) => {
+    let served = false
+    server.use(
+      http.get(COPY_API, () => {
+        served = true
+        return HttpResponse.json(copy)
+      }),
+      http.post(SUPPORT_API, () => HttpResponse.text(reply)),
+    )
+    return () => served
+  }
+
+  const renderWithCopy = (props = {}) =>
+    render(<ContactUsLauncher settings={SUPPORT_SETTINGS} {...props} />, {
+      wrapper: ThemeProvider,
+    })
+
+  // The launcher name changes once the copy lands, so wait for it before opening.
+  const openWith = async (launcherName: string) => {
+    await user.click(await screen.findByRole("button", { name: launcherName }))
+    return screen.findByRole("dialog", { name: "AskTIM" })
+  }
+
+  test("names the launcher with the admin's label", async () => {
+    serveCopy({ launcher_label: "Need help?" })
+    renderWithCopy()
+
+    expect(
+      await screen.findByRole("button", { name: "Need help?" }),
+    ).toBeInTheDocument()
+  })
+
+  test("opens on the admin's greeting, placeholder and badge", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      greeting: "Ask me about your account.",
+      placeholder: "Tell us what happened",
+      badge: "SUPPORT",
+    })
+    renderWithCopy()
+
+    const card = await openWith("Need help?")
+
+    expect(transcript(card)).toHaveTextContent("Ask me about your account.")
+    expect(
+      within(card).getByRole("textbox", { name: "Tell us what happened" }),
+    ).toBeInTheDocument()
+    expect(within(card).getByText("SUPPORT")).toBeInTheDocument()
+  })
+
+  test("keeps the built-in greeting when the admin's has an image", async () => {
+    // learn-ai's admin refuses these, but a row written another way skips that.
+    serveCopy({
+      launcher_label: "Need help?",
+      greeting: "Hi ![](https://example.com/pixel.png)",
+    })
+    renderWithCopy()
+
+    const card = await openWith("Need help?")
+
+    expect(within(card).queryByRole("img")).not.toBeInTheDocument()
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
+  })
+
+  test("a value the host passes wins over the admin's", async () => {
+    const served = serveCopy({
+      launcher_label: "Need help?",
+      greeting: "From the admin.",
+      placeholder: "Admin placeholder",
+      badge: "ADMIN BADGE",
+      escalate_label: "Admin escalate",
+    })
+    renderWithCopy({
+      label: "Host label",
+      escalateLabel: "Host escalate",
+      settings: {
+        badge: "HOST BADGE",
+        chat: {
+          ...SUPPORT_SETTINGS.chat,
+          initialMessages: [{ role: "assistant", content: "From the host." }],
+          placeholder: "Host placeholder",
+        },
+      },
+    })
+    await waitFor(() => expect(served()).toBe(true))
+
+    const launcher = await screen.findByRole("button", { name: "Host label" })
+    await user.click(launcher)
+    const card = await screen.findByRole("dialog", { name: "AskTIM" })
+
+    expect(transcript(card)).toHaveTextContent("From the host.")
+    expect(
+      within(card).getByRole("textbox", { name: "Host placeholder" }),
+    ).toBeInTheDocument()
+    expect(within(card).getByText("HOST BADGE")).toBeInTheDocument()
+    expect(
+      within(card).getByRole("button", { name: "Host escalate" }),
+    ).toBeInTheDocument()
+  })
+
+  test.each([
+    ["a server error", () => new HttpResponse(null, { status: 500 })],
+    ["a page that isn't JSON", () => HttpResponse.text("<html>gateway</html>")],
+    ["a value that isn't text", () => HttpResponse.json({ launcher_label: 5 })],
+    [
+      "a value of only spaces",
+      () => HttpResponse.json({ launcher_label: "  " }),
+    ],
+  ])("keeps the built-in text after %s", async (_case, respond) => {
+    let served = false
+    server.use(
+      http.get(COPY_API, () => {
+        served = true
+        return respond()
+      }),
+    )
+    renderWithCopy()
+    await waitFor(() => expect(served).toBe(true))
+
+    const card = await openWith("Contact us")
+
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
+  })
+
+  test("asks for no copy when the endpoint isn't learn-ai's support agent", async () => {
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderLauncher()
+
+    await openCard()
+
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  test("copy that lands while the card is open waits for the next open", async () => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.get(COPY_API, async () => {
+        await held
+        return HttpResponse.json({ greeting: "From the admin." })
+      }),
+    )
+    renderWithCopy()
+
+    const card = await openWith("Contact us")
+    await act(async () => release())
+
+    expect(transcript(card)).toHaveTextContent(/Tell us what's on your mind/)
+
+    await closeCard()
+    const reopened = await openWith("Contact us")
+    await waitFor(() =>
+      expect(transcript(reopened)).toHaveTextContent("From the admin."),
+    )
+  })
+
+  const reachTheReviewWith = async (
+    launcherName: string,
+    sendName = "Send",
+  ) => {
+    await openWith(launcherName)
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("my video will not play")
+    await user.click(screen.getByRole("button", { name: sendName }))
+  }
+
+  test("a renamed Send chip still sends the words learn-ai files on", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "Go ahead" },
+      AWAITING_SEND,
+    )
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+    await user.click(await screen.findByRole("button", { name: "Go ahead" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Send request",
+          clear_history: false,
+          confirm: true,
+        }),
+      }),
+    )
+  })
+
+  test("a renamed Cancel chip still sends cancel and the word learn-ai cancels on", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", cancel_label: "Never mind" },
+      AWAITING_SEND,
+    )
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+    await user.click(await screen.findByRole("button", { name: "Never mind" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Cancel",
+          clear_history: false,
+          cancel: true,
+        }),
+      }),
+    )
+
+    // A press that outlived its turn would cancel everything typed after it.
+    server.use(http.post(SUPPORT_API, () => HttpResponse.text(REPLY)))
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Send" })).toBeEnabled(),
+    )
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("it also happens on week 4")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "it also happens on week 4",
+          clear_history: false,
+        }),
+      }),
+    )
+  })
+
+  test("a renamed escalation chip still sends the words learn-ai has always had", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      escalate_label: "Talk to a person",
+    })
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+
+    await openWith("Need help?")
+    await user.click(
+      screen.getByRole("textbox", { name: "Describe what you need" }),
+    )
+    await user.paste("my video will not play")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+    await user.click(
+      await screen.findByRole("button", { name: "Talk to a person" }),
+    )
+
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      SUPPORT_API,
+      expect.objectContaining({
+        body: JSON.stringify({
+          page_url: PAGE_URL,
+          message: "Contact the support team",
+          clear_history: false,
+          escalate: true,
+        }),
+      }),
+    )
+  })
+
+  test('a chip label of "Send" is ignored, since the composer\'s button has that name', async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "send" },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: /^send$/i })).toHaveLength(1)
+  })
+
+  test("Send and Cancel labels that match fall back to the defaults", async () => {
+    serveCopy(
+      {
+        launcher_label: "Need help?",
+        send_label: "Stop",
+        cancel_label: "stop",
+      },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  })
+
+  test("Send and Cancel labels that differ only in spacing fall back to the defaults", async () => {
+    serveCopy(
+      {
+        launcher_label: "Need help?",
+        send_label: "Stop  now",
+        cancel_label: "stop now",
+      },
+      AWAITING_SEND,
+    )
+    renderWithCopy()
+
+    await reachTheReviewWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument()
+  })
+
+  test("a chip label matching the translated composer button is ignored", async () => {
+    serveCopy(
+      { launcher_label: "Need help?", send_label: "Envoyer" },
+      AWAITING_SEND,
+    )
+    render(<ContactUsLauncher settings={SUPPORT_SETTINGS} />, {
+      wrapper: ({ children }) => (
+        <ThemeProvider>
+          <TranslationProvider translations={{ "aiChat.send": "Envoyer" }}>
+            {children}
+          </TranslationProvider>
+        </ThemeProvider>
+      ),
+    })
+
+    await reachTheReviewWith("Need help?", "Envoyer")
+
+    expect(
+      await screen.findByRole("button", { name: "Send request" }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Envoyer" })).toHaveLength(1)
+  })
+
+  test("a new apiUrl drops the previous endpoint's text", async () => {
+    serveCopy({ launcher_label: "Need help?" })
+    const { rerender } = renderWithCopy()
+    await screen.findByRole("button", { name: "Need help?" })
+
+    // Not a support agent URL, so no text is fetched for it.
+    rerender(
+      <ContactUsLauncher
+        settings={{
+          chat: { apiUrl: "http://localhost:4567/ai/http/other_agent/" },
+        }}
+      />,
+    )
+
+    expect(
+      await screen.findByRole("button", { name: "Contact us" }),
+    ).toBeInTheDocument()
+  })
+
+  test.each([
+    "![](https://example.com/p.png)",
+    "[Help](https://example.com)",
+    "# Talk to us",
+    "1. Talk to us",
+    "**Talk to us**",
+  ])(
+    "an escalation label with Markdown in it is ignored: %s",
+    async (label) => {
+      // A pressed chip's label becomes the learner's own message, which renders
+      // as Markdown.
+      serveCopy({ launcher_label: "Need help?", escalate_label: label })
+      renderWithCopy()
+
+      await openWith("Need help?")
+      await sendMessage("my video will not play")
+
+      expect(
+        await screen.findByRole("button", { name: "Contact the support team" }),
+      ).toBeInTheDocument()
+    },
+  )
+
+  test("chip labels that land while the card is open wait for the next open", async () => {
+    let release = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.get(COPY_API, async () => {
+        await held
+        return HttpResponse.json({ escalate_label: "Talk to a person" })
+      }),
+      http.post(SUPPORT_API, () => HttpResponse.text(REPLY)),
+    )
+    renderWithCopy()
+
+    await openWith("Contact us")
+    await act(async () => release())
+    await sendMessage("my video will not play")
+
+    expect(
+      await screen.findByRole("button", { name: "Contact the support team" }),
+    ).toBeInTheDocument()
+  })
+
+  test("asks for the copy without the learner's cookies", async () => {
+    const served = serveCopy({ launcher_label: "Need help?" })
+    const mockFetch = jest.spyOn(window, "fetch")
+    renderWithCopy()
+    await waitFor(() => expect(served()).toBe(true))
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      COPY_API,
+      expect.objectContaining({ credentials: "omit" }),
+    )
+  })
+
+  test("a host that leaves out chat still gets a launcher", () => {
+    // init() callers are plain JavaScript, so the type can't promise chat is set.
+    render(
+      <ContactUsLauncher
+        settings={
+          {} as React.ComponentProps<typeof ContactUsLauncher>["settings"]
+        }
+      />,
+      { wrapper: ThemeProvider },
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Contact us" }),
+    ).toBeInTheDocument()
+  })
+
+  test("names the escalation chip with the admin's label", async () => {
+    serveCopy({
+      launcher_label: "Need help?",
+      escalate_label: "Talk to a person",
+    })
+    renderWithCopy()
+
+    await openWith("Need help?")
+
+    expect(
+      await screen.findByRole("button", { name: "Talk to a person" }),
+    ).toBeInTheDocument()
+  })
 })
