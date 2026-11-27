@@ -108,7 +108,7 @@ test("renders the launcher into the host container", () => {
   const { unmount } = mount(container)
 
   expect(
-    within(container).getByRole("button", { name: "Contact us" }),
+    within(container).getByRole("button", { name: "Help" }),
   ).toBeInTheDocument()
   act(() => unmount())
 })
@@ -118,7 +118,7 @@ test("renders the launcher into the host container", () => {
 test("does not trap the launcher in its own stacking context", () => {
   const container = hostContainer()
   const { unmount } = mount(container)
-  const button = within(container).getByRole("button", { name: "Contact us" })
+  const button = within(container).getByRole("button", { name: "Help" })
   const root = button.closest(`.${ISOLATION_CLASS_NAME}`) as HTMLElement
   const hashed = Array.from(root.classList).filter(
     (name) => name !== ISOLATION_CLASS_NAME,

@@ -63,7 +63,7 @@ const sendMessage = async (text: string) => {
 }
 
 const openCard = async () => {
-  await user.click(screen.getByRole("button", { name: "Contact us" }))
+  await user.click(screen.getByRole("button", { name: "Help" }))
   return screen.findByRole("dialog", { name: "AskTIM" })
 }
 
@@ -114,15 +114,21 @@ const mobileStyle = (element: HTMLElement) => {
 test("renders a labelled launcher button and no card until clicked", () => {
   renderLauncher()
 
-  expect(screen.getByRole("button", { name: "Contact us" })).toBeInTheDocument()
+  expect(screen.getByRole("button", { name: "Help" })).toBeInTheDocument()
   expect(screen.queryByRole("dialog")).toBeNull()
 })
 
 test("the launcher button is icon-only, named by its label rather than visible text", () => {
+  renderLauncher({ showLabel: false })
+
+  const launcher = screen.getByRole("button", { name: "Help" })
+  expect(launcher).not.toHaveTextContent("Help")
+})
+
+test("shows the label next to the icon by default", () => {
   renderLauncher()
 
-  const launcher = screen.getByRole("button", { name: "Contact us" })
-  expect(launcher).not.toHaveTextContent("Contact us")
+  expect(screen.getByRole("button", { name: "Help" })).toHaveTextContent("Help")
 })
 
 test("opens the card when the launcher is clicked", async () => {
@@ -134,7 +140,7 @@ test("opens the card when the launcher is clicked", async () => {
 })
 
 test("brands the card as AskTIM rather than repeating the launcher label", async () => {
-  // The pill outside says "Contact us"; the bot answering inside is AskTIM.
+  // The pill outside says "Help"; the bot answering inside is AskTIM.
   renderLauncher()
 
   const card = await openCard()
@@ -333,7 +339,7 @@ test("returns focus to the launcher when the full-screen card closes", async () 
   await openCard()
   await closeCard()
 
-  expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+  expect(screen.getByRole("button", { name: "Help" })).toHaveFocus()
 })
 
 test("applies the modal semantics when the viewport shrinks past the breakpoint", async () => {
@@ -380,7 +386,7 @@ test("scrolls the card body once the conversation outgrows the card", async () =
 test("hides the launcher while the card covers it", async () => {
   renderLauncher()
 
-  const launcher = screen.getByRole("button", { name: "Contact us" })
+  const launcher = screen.getByRole("button", { name: "Help" })
   await openCard()
 
   expect(getComputedStyle(launcher).visibility).toBe("hidden")
@@ -612,11 +618,189 @@ test("a click outside leaves the card open once a message has been sent", async 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
-test("Escape still closes the card after a message has been sent", async () => {
+test("closing with an unsent draft asks first", async () => {
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  )
+  await user.paste("my video will not play")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("Escape aimed at the page leaves the confirmation and the host's focus alone", async () => {
+  const hostField = document.createElement("input")
+  hostElements.push(document.body.appendChild(hostField))
   renderLauncher()
 
   await openCard()
   await sendMessage("my video will not play")
+  await closeCard()
+  await act(async () => {
+    hostField.focus()
+  })
+  await user.keyboard("{Escape}")
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  expect(hostField).toHaveFocus()
+})
+
+test("closing after a message was sent but not filed asks first", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await closeCard()
+
+  expect(
+    screen.getByText("Your request hasn't been sent yet. Close anyway?"),
+  ).toBeInTheDocument()
+  expect(screen.getByRole("dialog", { name: "AskTIM" })).toBeInTheDocument()
+})
+
+test("Escape asks first too, and Escape again keeps the card", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await user.keyboard("{Escape}")
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+
+  await user.keyboard("{Escape}")
+  expect(screen.queryByRole("alertdialog")).toBeNull()
+  expect(screen.getByRole("dialog", { name: "AskTIM" })).toBeInTheDocument()
+})
+
+test("Keep chatting dismisses the question and Close anyway closes the card", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await closeCard()
+  await user.click(screen.getByRole("button", { name: "Keep chatting" }))
+  expect(screen.queryByRole("alertdialog")).toBeNull()
+
+  await closeCard()
+  await user.click(screen.getByRole("button", { name: "Close anyway" }))
+  expect(screen.queryByRole("dialog")).toBeNull()
+})
+
+test("Keep chatting puts focus back where it was, and Tab stays in the question", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  const close = screen.getByRole("button", { name: "Close" })
+  await user.click(close)
+
+  const keep = screen.getByRole("button", { name: "Keep chatting" })
+  expect(keep).toHaveFocus()
+  await user.tab()
+  expect(screen.getByRole("button", { name: "Close anyway" })).toHaveFocus()
+  await user.tab()
+  expect(keep).toHaveFocus()
+
+  await user.keyboard("{Enter}")
+  expect(close).toHaveFocus()
+})
+
+test("closing while the Send reply is still streaming does not claim it was not sent", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(
+    http.post(TEST_API, async () => {
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      return HttpResponse.text(FILED)
+    }),
+  )
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await closeCard()
+
+  expect(screen.queryByRole("alertdialog")).toBeNull()
+  expect(screen.queryByRole("dialog")).toBeNull()
+})
+
+test("a new draft typed after filing still asks before closing", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  )
+  await user.paste("another problem")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("a Send request that fails still asks before closing", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.error()))
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await screen.findByText("An unexpected error has occurred.")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("a filing reply that lands after the card closed leaves the next card alone", async () => {
+  let releaseFiling = () => {}
+  const filingHeld = new Promise<void>((resolve) => {
+    releaseFiling = resolve
+  })
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(
+    http.post(TEST_API, async ({ request }) => {
+      const body = (await request.json()) as { confirm?: boolean }
+      if (!body.confirm) {
+        return HttpResponse.text(REPLY)
+      }
+      await filingHeld
+      return HttpResponse.text(FILED)
+    }),
+  )
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await closeCard()
+  await openCard()
+  await sendMessage("another problem")
+  await screen.findAllByText(REPLY)
+  await act(async () => {
+    releaseFiling()
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  })
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("Keep chatting falls back to the text field when the old focus target is gone", async () => {
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await user.keyboard("{Escape}")
+  await user.click(screen.getByRole("button", { name: "Keep chatting" }))
+
+  expect(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  ).toHaveFocus()
+})
+
+test("closing an empty card does not ask", async () => {
+  renderLauncher()
+
+  await openCard()
   await user.keyboard("{Escape}")
 
   expect(screen.queryByRole("dialog")).toBeNull()
@@ -637,7 +821,7 @@ test("returns focus to the launcher when the card closes", async () => {
   await openCard()
   await user.click(screen.getByRole("button", { name: "Close" }))
 
-  expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+  expect(screen.getByRole("button", { name: "Help" })).toHaveFocus()
 })
 
 test.each([
@@ -652,7 +836,7 @@ test.each([
     renderLauncher({ showLabel })
 
     await user.tab()
-    expect(screen.getByRole("button", { name: "Contact us" })).toHaveFocus()
+    expect(screen.getByRole("button", { name: "Help" })).toHaveFocus()
     await user.keyboard("{Enter}")
 
     const heading = within(await screen.findByRole("dialog")).getByRole(
@@ -680,17 +864,10 @@ test("accepts a custom label", () => {
   expect(screen.getByRole("button", { name: "Get help" })).toBeInTheDocument()
 })
 
-test("shows the label as visible text when showLabel is enabled", () => {
-  renderLauncher({ showLabel: true })
-
-  const launcher = screen.getByRole("button", { name: "Contact us" })
-  expect(launcher).toHaveTextContent("Contact us")
-})
-
 test("the launcher is fixed-positioned so it floats over page content", () => {
   renderLauncher()
 
-  const button = screen.getByRole("button", { name: "Contact us" })
+  const button = screen.getByRole("button", { name: "Help" })
   expect(getComputedStyle(button).position).toBe("fixed")
 })
 
@@ -753,6 +930,7 @@ test("a reopened card starts a fresh thread", async () => {
   await sendMessage("my video will not play")
   await screen.findAllByText(REPLY)
   await user.click(screen.getByRole("button", { name: "Close" }))
+  await user.click(screen.getByRole("button", { name: "Close anyway" }))
 
   await openCard()
   await sendMessage("my certificate has not arrived")
@@ -1032,6 +1210,18 @@ test("the message after a filed ticket starts a new thread", async () => {
     true,
     false,
   ])
+})
+
+test("closing after the ticket is filed does not ask", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  await closeCard()
+
+  expect(screen.queryByRole("dialog")).toBeNull()
 })
 
 test("a throttled send after a filed ticket still leaves the next one on a new thread", async () => {

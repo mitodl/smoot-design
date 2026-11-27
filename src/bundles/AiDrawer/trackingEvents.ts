@@ -8,6 +8,7 @@ const TrackingEventType = {
   Close: "close",
   Submit: "submit",
   Response: "response",
+  Error: "error",
   TabChange: "tabchange",
 } as const
 type TrackingEventType = keyof typeof TrackingEventType
@@ -31,6 +32,12 @@ interface ResponseEvent extends ITrackingEvent {
     value: string
   }
 }
+interface ErrorEvent extends ITrackingEvent {
+  type: typeof TrackingEventType.Error
+  data: {
+    value: string
+  }
+}
 interface TabChangeEvent extends ITrackingEvent {
   type: typeof TrackingEventType.TabChange
   data: {
@@ -43,6 +50,7 @@ type TrackingEvent =
   | CloseEvent
   | SubmitEvent
   | ResponseEvent
+  | ErrorEvent
   | TabChangeEvent
 
 type TrackingEventHandler = (event: TrackingEvent) => void
@@ -54,6 +62,7 @@ export type {
   CloseEvent,
   SubmitEvent,
   ResponseEvent,
+  ErrorEvent,
   TabChangeEvent,
   TrackingEvent,
 }

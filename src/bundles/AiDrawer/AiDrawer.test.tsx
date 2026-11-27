@@ -4,6 +4,8 @@ import * as React from "react"
 import { AiDrawer } from "./AiDrawer"
 import type { AiDrawerSettings, AiDrawerProps } from "./AiDrawer"
 import { ThemeProvider } from "../../components/ThemeProvider/ThemeProvider"
+import { setupServer } from "msw/node"
+import { http, HttpResponse } from "msw"
 
 jest.mock("../../components/AiChat/Markdown", () => {
   return {
@@ -299,5 +301,28 @@ describe("AiDrawer chat placeholder", () => {
     expect(
       screen.getByRole("textbox", { name: "Describe the problem" }),
     ).toBeInTheDocument()
+  })
+})
+
+describe("AiDrawer request errors", () => {
+  const server = setupServer()
+  beforeAll(() => server.listen())
+  afterEach(() => server.resetHandlers())
+  afterAll(() => server.close())
+
+  test("reports a failed request as an error tracking event", async () => {
+    server.use(http.post(SETTINGS.chat.apiUrl, () => HttpResponse.error()))
+    const onTrackingEvent = jest.fn()
+    renderSlot({ onTrackingEvent })
+
+    await user.click(screen.getByRole("textbox"))
+    await user.paste("hello")
+    await user.click(screen.getByRole("button", { name: "Send" }))
+
+    await waitFor(() =>
+      expect(onTrackingEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" }),
+      ),
+    )
   })
 })
