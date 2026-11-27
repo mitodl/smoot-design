@@ -194,6 +194,9 @@ const CardBody = styled(AiDrawer)({
     minHeight: 0,
     overflowY: "auto",
     padding: "0 16px",
+    // AiDrawer's sticky header has its own z-index; without this it paints
+    // above the close confirmation's backdrop and stays undimmed.
+    isolation: "isolate",
   },
 })
 
