@@ -183,6 +183,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const escalating = useRef(false)
   // Same, for Send: a stored press would approve every later turn.
   const confirming = useRef(false)
+  // The address a filed thread used. A new thread starts with empty state, so
+  // without this a learner with no session is asked for it again. Kept in
+  // memory only, and dropped on close like the thread.
+  const replyToEmail = useRef<string | undefined>(undefined)
 
   /**
    * learn-ai's ChatRequestSerializer takes a single `message`, so the Vercel
@@ -223,6 +227,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // A filed thread files nothing more, so the next request needs its own.
       // Safe to repeat on a retry: nothing files on a thread's first turn.
       const clearHistory = !historyCleared.current || Boolean(lastData?.filed)
+      replyToEmail.current = lastData?.user_email || replyToEmail.current
       historyCleared.current = true
       const escalate = escalating.current
       escalating.current = false
@@ -234,6 +239,8 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
         page_url: hostPageUrl ?? window.location.href,
         message: messages[messages.length - 1].content,
         clear_history: clearHistory,
+        // learn-ai prefers a signed-in session and the thread's own address.
+        ...(replyToEmail.current && { user_email: replyToEmail.current }),
         // Omitted when false so ordinary turns are unchanged on the wire.
         ...(escalate && { escalate: true }),
         ...(confirm && { confirm: true }),
@@ -360,6 +367,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // continuing the thread (and ticket) from this visit.
       conversationStarted.current = false
       historyCleared.current = false
+      replyToEmail.current = undefined
     }
     wasOpen.current = open
   }, [open])
