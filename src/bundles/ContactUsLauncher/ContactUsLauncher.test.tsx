@@ -1034,6 +1034,58 @@ test("the message after a filed ticket starts a new thread", async () => {
   ])
 })
 
+const FILED_WITH_EMAIL = FILED.replace(
+  '"filed": true}',
+  '"filed": true, "user_email": "typed@example.com"}',
+)
+
+test("the new thread after a filed ticket carries the reply-to address", async () => {
+  // A learner with no session typed the address on the filed thread; the new
+  // thread has no state of its own to read it from.
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED_WITH_EMAIL)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  server.use(http.post(TEST_API, () => HttpResponse.text(NEW_THREAD_REPLY)))
+  await sendMessage("my certificate has not arrived")
+  await screen.findAllByText(REPLY)
+  await sendMessage("it was due last week")
+
+  const bodies = mockFetch.mock.calls.map(([, init]) =>
+    JSON.parse(String(init?.body)),
+  )
+  expect(bodies.map((body) => body.user_email)).toEqual([
+    undefined,
+    undefined,
+    "typed@example.com",
+    "typed@example.com",
+  ])
+})
+
+test("closing the card forgets the reply-to address", async () => {
+  const mockFetch = jest.spyOn(window, "fetch")
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.text(FILED_WITH_EMAIL)))
+  await sendMessage("send")
+  await screen.findAllByText(/Your reference number is 912/)
+  server.use(http.post(TEST_API, () => HttpResponse.text(NEW_THREAD_REPLY)))
+  await sendMessage("my certificate has not arrived")
+  await screen.findAllByText(REPLY)
+  await closeCard()
+  await openCard()
+  await sendMessage("another problem")
+
+  const calls = mockFetch.mock.calls
+  const last = JSON.parse(String(calls[calls.length - 1][1]?.body))
+  expect(last.clear_history).toBe(true)
+  expect(last).not.toHaveProperty("user_email")
+})
+
 test("a throttled send after a filed ticket still leaves the next one on a new thread", async () => {
   // learn-ai throttles before it makes a thread, and its throttle text has no
   // metadata, so it must not hide the filed reply before it.

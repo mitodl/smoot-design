@@ -12,6 +12,8 @@ type MessageData = {
   awaiting_send?: boolean
   /** learn-ai's support bot has filed a ticket for this thread. */
   filed?: boolean
+  /** The reply-to address learn-ai filed with, sent once a thread is filed. */
+  user_email?: string
   error?: {
     message?: string
   }
