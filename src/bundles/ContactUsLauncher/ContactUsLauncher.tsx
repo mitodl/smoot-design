@@ -236,6 +236,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   // then even though the reply hasn't said so yet.
   const filing = useRef(false)
   const focusBeforeConfirm = useRef<HTMLElement | null>(null)
+  const confirmRef = useRef<HTMLDivElement>(null)
   const historyCleared = useRef(false)
   // A ref so transformBody sees the press without waiting for a re-render.
   // Cleared on read: learn-ai blanks every escalated turn's message.
@@ -364,11 +365,11 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   }, [])
 
   // Desktop leaves the page behind interactive, so wrap Tab inside the dialog.
-  const trapConfirmTab = useCallback((event: React.KeyboardEvent) => {
-    if (event.key !== "Tab") {
+  const trapConfirmTab = useCallback((event: KeyboardEvent) => {
+    const buttons = confirmRef.current?.querySelectorAll("button")
+    if (!buttons?.length) {
       return
     }
-    const buttons = event.currentTarget.querySelectorAll("button")
     const first = buttons[0]
     const last = buttons[buttons.length - 1]
     if (event.shiftKey && document.activeElement === first) {
@@ -387,6 +388,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       return
     }
     body.setAttribute("inert", "")
+    confirmRef.current
+      ?.querySelector<HTMLElement>("[data-keep-chatting]")
+      ?.focus()
     return () => body.removeAttribute("inert")
   }, [confirmingClose])
 
@@ -413,6 +417,10 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       setOpen(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Tab" && confirmingClose) {
+        trapConfirmTab(event)
+        return
+      }
       if (event.key !== "Escape") {
         return
       }
@@ -439,7 +447,14 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       document.removeEventListener("mousedown", onPointerDown)
       document.removeEventListener("keydown", onKeyDown)
     }
-  }, [open, hasDraft, requestClose, confirmingClose, keepChatting])
+  }, [
+    open,
+    hasDraft,
+    requestClose,
+    confirmingClose,
+    keepChatting,
+    trapConfirmTab,
+  ])
 
   // The full-screen card covers everything, so the page behind it is inerted
   // rather than left for a screen reader or Tab to wander into. Browsers skip
@@ -570,7 +585,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
                 aria-modal
                 aria-label="Close request?"
                 aria-describedby={confirmTextId}
-                onKeyDown={trapConfirmTab}
+                ref={confirmRef}
               >
                 <p id={confirmTextId}>{CONFIRM_CLOSE_TEXT}</p>
                 <div className="actions">
@@ -584,7 +599,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
                   <Button
                     variant="primary"
                     size="small"
-                    autoFocus
+                    data-keep-chatting
                     onClick={keepChatting}
                   >
                     Keep chatting
