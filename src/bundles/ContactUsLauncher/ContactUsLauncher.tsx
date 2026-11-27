@@ -272,10 +272,16 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     [fetchedCopy, composerSend],
   )
   const launcherLabel = label ?? copy.launcher_label ?? "Contact us"
-  // Taken when the card opens, so copy that lands mid-conversation can't swap
-  // the greeting under the learner or have a screen reader announce it twice.
-  const [cardCopy, setCardCopy] = useState<WidgetCopy>({})
   const [open, setOpen] = useState(false)
+  // Follows the fetched copy while the card is closed, so a response that lands
+  // before the click is used. Held while open, so copy that lands mid-conversation
+  // can't swap the greeting under the learner or have a screen reader announce it twice.
+  const [cardCopy, setCardCopy] = useState<WidgetCopy>({})
+  useEffect(() => {
+    if (!open) {
+      setCardCopy(copy)
+    }
+  }, [open, copy])
   const [openedViaKeyboard, setOpenedViaKeyboard] = useState(false)
   const onClose = useCallback(() => setOpen(false), [])
 
@@ -291,10 +297,9 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const onLauncherClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       setOpenedViaKeyboard(event.detail === 0)
-      setCardCopy(copy)
       setOpen(true)
     },
-    [copy],
+    [],
   )
 
   const cardRef = useRef<HTMLDivElement>(null)
