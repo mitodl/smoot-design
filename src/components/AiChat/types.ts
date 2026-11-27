@@ -55,6 +55,10 @@ type RequestOpts = {
   fetchOpts?: RequestInit
   onFinish?: (message: AiChatMessage) => void
   /**
+   * Called when a request fails. `onFinish` is not called in that case.
+   */
+  onError?: (error: Error) => void
+  /**
    * Cookie name from which to read CSRF token.
    */
   csrfCookieName?: string

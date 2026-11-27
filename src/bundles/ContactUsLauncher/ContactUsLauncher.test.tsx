@@ -710,6 +710,50 @@ test("a new draft typed after filing still asks before closing", async () => {
   expect(screen.getByRole("alertdialog")).toBeInTheDocument()
 })
 
+test("a Send request that fails still asks before closing", async () => {
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(http.post(TEST_API, () => HttpResponse.error()))
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await screen.findByText("An unexpected error has occurred.")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("a filing reply that lands after the card closed leaves the next card alone", async () => {
+  let releaseFiling = () => {}
+  const filingHeld = new Promise<void>((resolve) => {
+    releaseFiling = resolve
+  })
+  renderLauncher()
+
+  await reachTheReview()
+  server.use(
+    http.post(TEST_API, async ({ request }) => {
+      const body = (await request.json()) as { confirm?: boolean }
+      if (!body.confirm) {
+        return HttpResponse.text(REPLY)
+      }
+      await filingHeld
+      return HttpResponse.text(FILED)
+    }),
+  )
+  await user.click(screen.getByRole("button", { name: "Send request" }))
+  await closeCard()
+  await openCard()
+  await sendMessage("another problem")
+  await screen.findAllByText(REPLY)
+  await act(async () => {
+    releaseFiling()
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  })
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
 test("Keep chatting falls back to the text field when the old focus target is gone", async () => {
   renderLauncher()
 

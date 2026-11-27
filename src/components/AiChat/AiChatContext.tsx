@@ -103,6 +103,7 @@ const AiChatProvider: React.FC<AiChatContextProps> = ({
         console.info("Unexpected message role.", message)
       }
     },
+    onError: (error) => requestOpts.onError?.(error),
     initialMessages,
     id: chatId,
   })

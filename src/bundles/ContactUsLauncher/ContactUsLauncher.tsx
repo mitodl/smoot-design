@@ -237,6 +237,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
   const filing = useRef(false)
   const focusBeforeConfirm = useRef<HTMLElement | null>(null)
   const confirmRef = useRef<HTMLDivElement>(null)
+  const cardSession = useRef(0)
   const historyCleared = useRef(false)
   // A ref so transformBody sees the press without waiting for a re-render.
   // Cleared on read: learn-ai blanks every escalated turn's message.
@@ -341,14 +342,26 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
     setOpen(false)
   }, [hasDraft])
 
-  const onTrackingEvent = useCallback((event: TrackingEvent) => {
-    if (event.type === TrackingEventType.Response) {
-      filing.current = false
-      filed.current = Boolean(
-        extractCommentsData(String(event.data?.value ?? ""))?.filed,
-      )
+  // Each open gets its own handler: closing doesn't cancel a request, so a
+  // reply can land after the card that sent it is gone and must not touch the
+  // refs the next card relies on.
+  const onTrackingEvent = React.useMemo(() => {
+    const session = open ? cardSession.current : -1
+    return (event: TrackingEvent) => {
+      if (session !== cardSession.current) {
+        return
+      }
+      if (event.type === TrackingEventType.Error) {
+        filing.current = false
+      }
+      if (event.type === TrackingEventType.Response) {
+        filing.current = false
+        filed.current = Boolean(
+          extractCommentsData(String(event.data?.value ?? ""))?.filed,
+        )
+      }
     }
-  }, [])
+  }, [open])
 
   const keepChatting = useCallback(() => {
     // An inert element can't take focus, so lift it before focusing.
@@ -505,6 +518,7 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       historyCleared.current = false
       filed.current = false
       filing.current = false
+      cardSession.current += 1
       setConfirmingClose(false)
     }
     wasOpen.current = open

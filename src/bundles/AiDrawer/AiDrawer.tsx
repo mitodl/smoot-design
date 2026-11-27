@@ -437,6 +437,11 @@ const ChatComponent = ({
               value: message.content,
             },
           }),
+        onError: (error) =>
+          onTrackingEvent?.({
+            type: TrackingEventType.Error,
+            data: { value: error.message },
+          }),
       }}
       hasTabs={hasTabs}
       variant={variant}
