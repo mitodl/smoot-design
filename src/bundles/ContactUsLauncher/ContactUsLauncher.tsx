@@ -71,9 +71,8 @@ const GREETING = [
 // exception is the full-screen mobile card, which is raised to modal level
 // below the sm breakpoint (see PopoverCard).
 //
-// Icon-only: a floating chat bubble reads as "open a chat" the way the FAB
-// pattern common to chat widgets does, which a text pill doesn't signal as
-// clearly. The label still names it for anyone not reading it visually.
+// Labelled by default, per product direction on mitodl/hq#13712. Below sm the
+// text is hidden and it falls back to a round icon, still named by aria-label.
 const LAUNCHER_DIAMETER = "56px"
 
 // The ring keeps the button visible on red and dark page sections. It lives in
@@ -444,12 +443,15 @@ const ContactUsLauncher: React.FC<ContactUsLauncherProps> = ({
       // it. Body counts as ours only with nothing to lose: sending disables the
       // Send button that had focus, so focus lands on body with the card still
       // the only thing on screen, but so does a click on the page mid-draft.
-      if (confirmingClose) {
-        keepChatting()
-        return
-      }
       const focused = document.activeElement
       const inCard = Boolean(focused && cardRef.current?.contains(focused))
+      if (confirmingClose) {
+        // A click on the backdrop leaves focus on body, which is still ours.
+        if (inCard || !focused || focused === document.body) {
+          keepChatting()
+        }
+        return
+      }
       const strayButHarmless =
         (!focused || focused === document.body) && !hasDraft()
       if (!inCard && !strayButHarmless) {

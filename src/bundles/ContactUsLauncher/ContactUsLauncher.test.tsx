@@ -140,7 +140,7 @@ test("opens the card when the launcher is clicked", async () => {
 })
 
 test("brands the card as AskTIM rather than repeating the launcher label", async () => {
-  // The pill outside says "Contact us"; the bot answering inside is AskTIM.
+  // The pill outside says "Help"; the bot answering inside is AskTIM.
   renderLauncher()
 
   const card = await openCard()
@@ -618,6 +618,36 @@ test("a click outside leaves the card open once a message has been sent", async 
   expect(screen.getByRole("dialog")).toBeInTheDocument()
 })
 
+test("closing with an unsent draft asks first", async () => {
+  renderLauncher()
+
+  await openCard()
+  await user.click(
+    screen.getByRole("textbox", { name: "Describe what you need" }),
+  )
+  await user.paste("my video will not play")
+  await closeCard()
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+})
+
+test("Escape aimed at the page leaves the confirmation and the host's focus alone", async () => {
+  const hostField = document.createElement("input")
+  hostElements.push(document.body.appendChild(hostField))
+  renderLauncher()
+
+  await openCard()
+  await sendMessage("my video will not play")
+  await closeCard()
+  await act(async () => {
+    hostField.focus()
+  })
+  await user.keyboard("{Escape}")
+
+  expect(screen.getByRole("alertdialog")).toBeInTheDocument()
+  expect(hostField).toHaveFocus()
+})
+
 test("closing after a message was sent but not filed asks first", async () => {
   renderLauncher()
 
@@ -832,13 +862,6 @@ test("accepts a custom label", () => {
   renderLauncher({ label: "Get help" })
 
   expect(screen.getByRole("button", { name: "Get help" })).toBeInTheDocument()
-})
-
-test("shows the label as visible text when showLabel is enabled", () => {
-  renderLauncher({ showLabel: true })
-
-  const launcher = screen.getByRole("button", { name: "Help" })
-  expect(launcher).toHaveTextContent("Help")
 })
 
 test("the launcher is fixed-positioned so it floats over page content", () => {
